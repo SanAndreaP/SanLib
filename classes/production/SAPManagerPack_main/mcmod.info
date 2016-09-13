@@ -1,0 +1,16 @@
+[
+{
+  "modid": "sapmanpack",
+  "name": "SanAndreasPs Manager Pack",
+  "description": "A manager pack made for and required by all my mods.",
+  "version": "2.6.0",
+  "mcversion": "1.7.10",
+  "url": "",
+  "updateUrl": "",
+  "authors": ["SanAndreasP"],
+  "credits": "diesieben07 for helping me through his code, the Forge and FML guys",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
