@@ -4,7 +4,7 @@
  * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
  *                http://creativecommons.org/licenses/by-nc-sa/4.0/
  *******************************************************************************************************************/
-package de.sanandrew.mods.sapmanpack;
+package de.sanandrew.mods.sapmanpack.sanplayermodel;
 
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;

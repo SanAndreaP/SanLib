@@ -4,8 +4,9 @@
  * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
  *                http://creativecommons.org/licenses/by-nc-sa/4.0/
  *******************************************************************************************************************/
-package de.sanandrew.mods.sapmanpack.client.model;
+package de.sanandrew.mods.sapmanpack.sanplayermodel.client.model;
 
+import de.sanandrew.mods.sapmanpack.lib.client.ModelBoxBuilder;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.entity.Entity;
@@ -52,9 +53,9 @@ public class ModelSanPlayer
         this.bipedRightArm = ModelBoxBuilder.newBuilder(this).setTexture(40, 16, false).setLocation(-4.0F, 2.0F, 0.5F).setRotation(0.0F, 0.0F, 0.09983283F)
                                        .getBox(-3.0F, -2.0F, -2.0F, 3, 12, 3, scaling);
         this.armLeft2 = ModelBoxBuilder.newBuilder(this).setTexture(40, 32, true).setLocation(5.0F, 2.0F, 0.5F).setRotation(-0.00331613F, 0.0F, -0.09983283F)
-                                       .getBox(-1.0F, 5.0F, -2.0F, 3, 5, 3, scaling * 1.1F);
+                                       .getBox(-1.0F, 5.0F, -2.0F, 3, 5, 3, scaling + 0.05F);
         this.armRight2 = ModelBoxBuilder.newBuilder(this).setTexture(40, 32, false).setLocation(-4.0F, 2.0F, 0.5F).setRotation(0.0F, 0.0F, 0.09983283F)
-                                        .getBox(-3.0F, 5.0F, -2.0F, 3, 5, 3, scaling * 1.1F);
+                                        .getBox(-3.0F, 5.0F, -2.0F, 3, 5, 3, scaling + 0.05F);
         this.body = ModelBoxBuilder.newBuilder(this).setTexture(16, 16, false).setLocation(0.0F, 0.0F, 0.0F).setRotation(0.0F, 0.0F, 0.0F)
                                    .getBox(-4.0F, 0.0F, -2.0F, 8, 12, 4, scaling);
         this.breast = ModelBoxBuilder.newBuilder(this).setTexture(0, 54, false).setLocation(0.0F, 3.0F, -3.5F).setRotation(0.87266463F, 0.0F, 0.0F)

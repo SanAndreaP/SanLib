@@ -4,10 +4,10 @@
  * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
  *                http://creativecommons.org/licenses/by-nc-sa/4.0/
  *******************************************************************************************************************/
-package de.sanandrew.mods.sapmanpack.client;
+package de.sanandrew.mods.sapmanpack.sanplayermodel.client;
 
-import de.sanandrew.mods.sapmanpack.CommonProxy;
-import de.sanandrew.mods.sapmanpack.client.event.RenderPlayerEventHandler;
+import de.sanandrew.mods.sapmanpack.sanplayermodel.CommonProxy;
+import de.sanandrew.mods.sapmanpack.sanplayermodel.client.event.RenderPlayerEventHandler;
 import net.minecraftforge.common.MinecraftForge;
 
 public class ClientProxy

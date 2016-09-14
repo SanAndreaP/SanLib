@@ -4,10 +4,11 @@
  * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
  *                http://creativecommons.org/licenses/by-nc-sa/4.0/
  *******************************************************************************************************************/
-package de.sanandrew.mods.sapmanpack.client.event;
+package de.sanandrew.mods.sapmanpack.sanplayermodel.client.event;
 
 import com.mojang.authlib.GameProfile;
-import de.sanandrew.mods.sapmanpack.client.render.RenderSanPlayer;
+import de.sanandrew.mods.sapmanpack.lib.UuidUtils;
+import de.sanandrew.mods.sapmanpack.sanplayermodel.client.render.RenderSanPlayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.Render;
@@ -26,11 +27,6 @@ import java.util.regex.Pattern;
 
 public class RenderPlayerEventHandler
 {
-    private static final Pattern UUID_PTRN = Pattern.compile("[a-f0-9]{8}\\-[a-f0-9]{4}\\-4[a-f0-9]{3}\\-[89ab][a-f0-9]{3}\\-[a-f0-9]{12}", Pattern.CASE_INSENSITIVE);
-
-    private static final String RENDER_HAND_MCP = "renderHand";
-    private static final String RENDER_HAND_SRG = "func_78476_b";
-
     private static final String[] SANPLAYER_NAMES_UUID = new String[] { "SanAndreasP", "044d980d-5c2a-4030-95cf-cbfde69ea3cb" };
 
     private RenderSanPlayer sanPlayerModel = null;
@@ -101,15 +97,11 @@ public class RenderPlayerEventHandler
     public static boolean isPlayerNameOrUuidEqual(EntityPlayer e, String... namesUuids) {
         for( String val : namesUuids ) {
             GameProfile profile = e.getGameProfile();
-            if( (isStringUuid(val) && profile.getId().equals(UUID.fromString(val))) || profile.getName().equals(val) ) {
+            if( (UuidUtils.isStringUuid(val) && profile.getId().equals(UUID.fromString(val))) || profile.getName().equals(val) ) {
                 return true;
             }
         }
 
         return false;
-    }
-
-    public static boolean isStringUuid(String uuid) {
-        return UUID_PTRN.matcher(uuid).matches();
     }
 }

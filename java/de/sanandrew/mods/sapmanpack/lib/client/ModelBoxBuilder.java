@@ -6,7 +6,7 @@
  * http://creativecommons.org/licenses/by-nc-sa/4.0/
  * *****************************************************************************************************************
  */
-package de.sanandrew.mods.sapmanpack.client.model;
+package de.sanandrew.mods.sapmanpack.lib.client;
 
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelRenderer;

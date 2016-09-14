@@ -4,9 +4,9 @@
  * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
  *                http://creativecommons.org/licenses/by-nc-sa/4.0/
  *******************************************************************************************************************/
-package de.sanandrew.mods.sapmanpack.client.render;
+package de.sanandrew.mods.sapmanpack.sanplayermodel.client.render;
 
-import de.sanandrew.mods.sapmanpack.client.model.ModelSanPlayer;
+import de.sanandrew.mods.sapmanpack.sanplayermodel.client.model.ModelSanPlayer;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelPlayer;
@@ -207,79 +207,6 @@ public class RenderSanPlayer
         modelplayer.armLeft2.rotateAngleX = 0.0F;
         modelplayer.armLeft2.render(0.0625F);
         GlStateManager.disableBlend();
-    }
-
-    /** from super class **/
-    private void setModelVisibilities(AbstractClientPlayer clientPlayer)
-    {
-        ModelPlayer modelplayer = this.getMainModel();
-
-        if (clientPlayer.isSpectator())
-        {
-            modelplayer.setInvisible(false);
-            modelplayer.bipedHead.showModel = true;
-            modelplayer.bipedHeadwear.showModel = true;
-        }
-        else
-        {
-            ItemStack itemstack = clientPlayer.getHeldItemMainhand();
-            ItemStack itemstack1 = clientPlayer.getHeldItemOffhand();
-            modelplayer.setInvisible(true);
-            modelplayer.bipedHeadwear.showModel = clientPlayer.isWearing(EnumPlayerModelParts.HAT);
-            modelplayer.bipedBodyWear.showModel = clientPlayer.isWearing(EnumPlayerModelParts.JACKET);
-            modelplayer.bipedLeftLegwear.showModel = clientPlayer.isWearing(EnumPlayerModelParts.LEFT_PANTS_LEG);
-            modelplayer.bipedRightLegwear.showModel = clientPlayer.isWearing(EnumPlayerModelParts.RIGHT_PANTS_LEG);
-            modelplayer.bipedLeftArmwear.showModel = clientPlayer.isWearing(EnumPlayerModelParts.LEFT_SLEEVE);
-            modelplayer.bipedRightArmwear.showModel = clientPlayer.isWearing(EnumPlayerModelParts.RIGHT_SLEEVE);
-            modelplayer.isSneak = clientPlayer.isSneaking();
-            ModelBiped.ArmPose modelbiped$armpose = ModelBiped.ArmPose.EMPTY;
-            ModelBiped.ArmPose modelbiped$armpose1 = ModelBiped.ArmPose.EMPTY;
-
-            if (itemstack != null)
-            {
-                modelbiped$armpose = ModelBiped.ArmPose.ITEM;
-
-                if (clientPlayer.getItemInUseCount() > 0)
-                {
-                    EnumAction enumaction = itemstack.getItemUseAction();
-
-                    if (enumaction == EnumAction.BLOCK)
-                    {
-                        modelbiped$armpose = ModelBiped.ArmPose.BLOCK;
-                    }
-                    else if (enumaction == EnumAction.BOW)
-                    {
-                        modelbiped$armpose = ModelBiped.ArmPose.BOW_AND_ARROW;
-                    }
-                }
-            }
-
-            if (itemstack1 != null)
-            {
-                modelbiped$armpose1 = ModelBiped.ArmPose.ITEM;
-
-                if (clientPlayer.getItemInUseCount() > 0)
-                {
-                    EnumAction enumaction1 = itemstack1.getItemUseAction();
-
-                    if (enumaction1 == EnumAction.BLOCK)
-                    {
-                        modelbiped$armpose1 = ModelBiped.ArmPose.BLOCK;
-                    }
-                }
-            }
-
-            if (clientPlayer.getPrimaryHand() == EnumHandSide.RIGHT)
-            {
-                modelplayer.rightArmPose = modelbiped$armpose;
-                modelplayer.leftArmPose = modelbiped$armpose1;
-            }
-            else
-            {
-                modelplayer.rightArmPose = modelbiped$armpose1;
-                modelplayer.leftArmPose = modelbiped$armpose;
-            }
-        }
     }
 
     //    @Override

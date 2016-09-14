@@ -1,8 +1,11 @@
+/*******************************************************************************************************************
+ * Authors:   SanAndreasP
+ * Copyright: SanAndreasP
+ * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+ *                http://creativecommons.org/licenses/by-nc-sa/4.0/
+ *******************************************************************************************************************/
 package de.sanandrew.mods.sapmanpack.lib.client;
 
-/**
- * Created by SanAndreasP on 11.09.2016.
- */
 public class ColorObj
 {
     private int r;
@@ -79,8 +82,13 @@ public class ColorObj
         this.a = a;
     }
 
-    public boolean equals(ColorObj clr) {
-        return this.equals(clr, false);
+    @Override
+    public boolean equals(Object obj) {
+        if( obj instanceof ColorObj ) {
+            return this.equals((ColorObj) obj, false);
+        } else {
+            return super.equals(obj);
+        }
     }
 
     public boolean equals(ColorObj clr, boolean checkAlpha) {
