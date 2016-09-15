@@ -24,7 +24,6 @@ import net.minecraft.util.ResourceLocation;
 //@SideOnly( Side.CLIENT )
 public class RenderSanPlayer
         extends RenderPlayer
-        implements IResourceManagerReloadListener
 {
     public static final ResourceLocation TEXTURE = new ResourceLocation("sanplayermodel", "textures/entity/player/SanPlayer.png");
     public static final ResourceLocation TEXTURE_SLEEP = new ResourceLocation("sanplayermodel", "textures/entity/player/SanPlayer_sleeping.png");
@@ -174,38 +173,34 @@ public class RenderSanPlayer
     @Override
     public void renderRightArm(AbstractClientPlayer clientPlayer) {
         this.bindTexture(this.getEntityTexture(clientPlayer));
-        float f = 1.0F;
         GlStateManager.color(1.0F, 1.0F, 1.0F);
-        float f1 = 0.0625F;
-        ModelSanPlayer modelplayer = this.myModel;
+        ModelSanPlayer model = this.myModel;
         this.setModelVisibilities(clientPlayer);
         GlStateManager.enableBlend();
-        modelplayer.swingProgress = 0.0F;
-        modelplayer.isSneak = false;
-        modelplayer.setRotationAngles(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F, clientPlayer);
-        modelplayer.bipedRightArm.rotateAngleX = 0.0F;
-        modelplayer.bipedRightArm.render(0.0625F);
-        modelplayer.armRight2.rotateAngleX = 0.0F;
-        modelplayer.armRight2.render(0.0625F);
+        model.swingProgress = 0.0F;
+        model.isSneak = false;
+        model.setRotationAngles(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F, clientPlayer);
+        model.bipedRightArm.rotateAngleX = 0.0F;
+        model.bipedRightArm.render(0.0625F);
+        model.bipedRightArmwear.rotateAngleX = 0.0F;
+        model.bipedRightArmwear.render(0.0625F);
         GlStateManager.disableBlend();
     }
 
     @Override
     public void renderLeftArm(AbstractClientPlayer clientPlayer) {
         this.bindTexture(this.getEntityTexture(clientPlayer));
-        float f = 1.0F;
         GlStateManager.color(1.0F, 1.0F, 1.0F);
-        float f1 = 0.0625F;
-        ModelSanPlayer modelplayer = this.myModel;
+        ModelSanPlayer model = this.myModel;
         this.setModelVisibilities(clientPlayer);
         GlStateManager.enableBlend();
-        modelplayer.isSneak = false;
-        modelplayer.swingProgress = 0.0F;
-        modelplayer.setRotationAngles(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F, clientPlayer);
-        modelplayer.bipedLeftArm.rotateAngleX = 0.0F;
-        modelplayer.bipedLeftArm.render(0.0625F);
-        modelplayer.armLeft2.rotateAngleX = 0.0F;
-        modelplayer.armLeft2.render(0.0625F);
+        model.isSneak = false;
+        model.swingProgress = 0.0F;
+        model.setRotationAngles(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F, clientPlayer);
+        model.bipedLeftArm.rotateAngleX = 0.0F;
+        model.bipedLeftArm.render(0.0625F);
+        model.bipedLeftArmwear.rotateAngleX = 0.0F;
+        model.bipedLeftArmwear.render(0.0625F);
         GlStateManager.disableBlend();
     }
 
@@ -294,7 +289,7 @@ public class RenderSanPlayer
 //        return resLoc;
 //    }
 //
-    @Override
+//    @Override
     public void onResourceManagerReload(IResourceManager resManager) {
 //        this.unknownTextureColorMap.clear();
 //        this.hatRenderList.clear();

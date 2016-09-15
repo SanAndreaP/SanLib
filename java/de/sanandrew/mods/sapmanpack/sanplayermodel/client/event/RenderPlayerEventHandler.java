@@ -37,9 +37,9 @@ public class RenderPlayerEventHandler
         if( this.sanPlayerModel == null ) {
             this.sanPlayerModel = new RenderSanPlayer(Minecraft.getMinecraft().getRenderManager());
 
-            if( Minecraft.getMinecraft().getResourceManager() instanceof SimpleReloadableResourceManager ) {
-                ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(this.sanPlayerModel);
-            }
+//            if( Minecraft.getMinecraft().getResourceManager() instanceof SimpleReloadableResourceManager ) {
+//                ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(this.sanPlayerModel);
+//            }
         }
     }
 

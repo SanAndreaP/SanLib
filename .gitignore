@@ -219,3 +219,4 @@ SAPManagerPack.iml
 eclipse/
 classes/
 *.iml
+run/

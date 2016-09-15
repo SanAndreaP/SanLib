@@ -20,8 +20,6 @@ public class ModelSanPlayer
 {
     public ModelRenderer legLeft;
     public ModelRenderer legRight;
-    public ModelRenderer armLeft2;
-    public ModelRenderer armRight2;
     public ModelRenderer body;
     public ModelRenderer breast;
     public ModelRenderer skirt1;
@@ -52,9 +50,9 @@ public class ModelSanPlayer
                                       .getBox(-1.0F, -2.0F, -2.0F, 3, 12, 3, scaling);
         this.bipedRightArm = ModelBoxBuilder.newBuilder(this).setTexture(40, 16, false).setLocation(-4.0F, 2.0F, 0.5F).setRotation(0.0F, 0.0F, 0.09983283F)
                                        .getBox(-3.0F, -2.0F, -2.0F, 3, 12, 3, scaling);
-        this.armLeft2 = ModelBoxBuilder.newBuilder(this).setTexture(40, 32, true).setLocation(5.0F, 2.0F, 0.5F).setRotation(-0.00331613F, 0.0F, -0.09983283F)
+        this.bipedLeftArmwear = ModelBoxBuilder.newBuilder(this).setTexture(40, 32, true).setLocation(5.0F, 2.0F, 0.5F).setRotation(-0.00331613F, 0.0F, -0.09983283F)
                                        .getBox(-1.0F, 5.0F, -2.0F, 3, 5, 3, scaling + 0.05F);
-        this.armRight2 = ModelBoxBuilder.newBuilder(this).setTexture(40, 32, false).setLocation(-4.0F, 2.0F, 0.5F).setRotation(0.0F, 0.0F, 0.09983283F)
+        this.bipedRightArmwear = ModelBoxBuilder.newBuilder(this).setTexture(40, 32, false).setLocation(-4.0F, 2.0F, 0.5F).setRotation(0.0F, 0.0F, 0.09983283F)
                                         .getBox(-3.0F, 5.0F, -2.0F, 3, 5, 3, scaling + 0.05F);
         this.body = ModelBoxBuilder.newBuilder(this).setTexture(16, 16, false).setLocation(0.0F, 0.0F, 0.0F).setRotation(0.0F, 0.0F, 0.0F)
                                    .getBox(-4.0F, 0.0F, -2.0F, 8, 12, 4, scaling);
@@ -116,22 +114,22 @@ public class ModelSanPlayer
         this.skirt1.render(partTicks);
         this.skirt2.render(partTicks);
 
-        GL11.glPushMatrix();
-        GL11.glTranslatef(this.armLeft2.offsetX, this.armLeft2.offsetY, this.armLeft2.offsetZ);
-        GL11.glTranslatef(this.armLeft2.rotationPointX * partTicks + 0.025F, this.armLeft2.rotationPointY * partTicks, this.armLeft2.rotationPointZ * partTicks);
-        GL11.glScaled(1.05D, 1.05D, 1.05D);
-        GL11.glTranslatef(-this.armLeft2.offsetX, -this.armLeft2.offsetY, -this.armLeft2.offsetZ);
-        GL11.glTranslatef(-this.armLeft2.rotationPointX * partTicks - 0.025F, -this.armLeft2.rotationPointY * partTicks, -this.armLeft2.rotationPointZ * partTicks);
-        this.armLeft2.render(partTicks);
-        GL11.glPopMatrix();
-        GL11.glPushMatrix();
-        GL11.glTranslatef(this.armRight2.offsetX, this.armRight2.offsetY, this.armRight2.offsetZ);
-        GL11.glTranslatef(this.armRight2.rotationPointX * partTicks - 0.025F, this.armRight2.rotationPointY * partTicks, this.armRight2.rotationPointZ * partTicks);
-        GL11.glScaled(1.05D, 1.05D, 1.05D);
-        GL11.glTranslatef(-this.armRight2.offsetX, -this.armRight2.offsetY, -this.armRight2.offsetZ);
-        GL11.glTranslatef(-this.armRight2.rotationPointX * partTicks + 0.025F, -this.armRight2.rotationPointY * partTicks, -this.armRight2.rotationPointZ * partTicks);
-        this.armRight2.render(partTicks);
-        GL11.glPopMatrix();
+//        GL11.glPushMatrix();
+//        GL11.glTranslatef(this.bipedLeftArmwear.offsetX, this.bipedLeftArmwear.offsetY, this.bipedLeftArmwear.offsetZ);
+//        GL11.glTranslatef(this.bipedLeftArmwear.rotationPointX * partTicks + 0.025F, this.bipedLeftArmwear.rotationPointY * partTicks, this.bipedLeftArmwear.rotationPointZ * partTicks);
+//        GL11.glScaled(1.05D, 1.05D, 1.05D);
+//        GL11.glTranslatef(-this.bipedLeftArmwear.offsetX, -this.bipedLeftArmwear.offsetY, -this.bipedLeftArmwear.offsetZ);
+//        GL11.glTranslatef(-this.bipedLeftArmwear.rotationPointX * partTicks - 0.025F, -this.bipedLeftArmwear.rotationPointY * partTicks, -this.bipedLeftArmwear.rotationPointZ * partTicks);
+        this.bipedLeftArmwear.render(partTicks);
+//        GL11.glPopMatrix();
+//        GL11.glPushMatrix();
+//        GL11.glTranslatef(this.bipedRightArmwear.offsetX, this.bipedRightArmwear.offsetY, this.bipedRightArmwear.offsetZ);
+//        GL11.glTranslatef(this.bipedRightArmwear.rotationPointX * partTicks - 0.025F, this.bipedRightArmwear.rotationPointY * partTicks, this.bipedRightArmwear.rotationPointZ * partTicks);
+//        GL11.glScaled(1.05D, 1.05D, 1.05D);
+//        GL11.glTranslatef(-this.bipedRightArmwear.offsetX, -this.bipedRightArmwear.offsetY, -this.bipedRightArmwear.offsetZ);
+//        GL11.glTranslatef(-this.bipedRightArmwear.rotationPointX * partTicks + 0.025F, -this.bipedRightArmwear.rotationPointY * partTicks, -this.bipedRightArmwear.rotationPointZ * partTicks);
+        this.bipedRightArmwear.render(partTicks);
+//        GL11.glPopMatrix();
     }
 
     public void setRotationAngles(float limbSwing, float limbSwingAmount, float rotFloat, float rotYaw, float rotPitch, float partTicks, Entity entity) {
@@ -152,8 +150,8 @@ public class ModelSanPlayer
         this.setRotateAngle(this.body, this.bipedBody.rotateAngleX * 0.5F, this.bipedBody.rotateAngleY, this.bipedBody.rotateAngleZ);
         this.setRotateAngle(this.skirt1, this.bipedBody.rotateAngleX * 0.5F, this.bipedBody.rotateAngleY, this.bipedBody.rotateAngleZ);
         this.setRotateAngle(this.skirt2, this.bipedBody.rotateAngleX * 0.5F, this.bipedBody.rotateAngleY, this.bipedBody.rotateAngleZ);
-        this.setRotateAngle(this.armLeft2, this.bipedLeftArm.rotateAngleX, this.bipedLeftArm.rotateAngleY, this.bipedLeftArm.rotateAngleZ);
-        this.setRotateAngle(this.armRight2, this.bipedRightArm.rotateAngleX, this.bipedRightArm.rotateAngleY, this.bipedRightArm.rotateAngleZ);
+        this.setRotateAngle(this.bipedLeftArmwear, this.bipedLeftArm.rotateAngleX, this.bipedLeftArm.rotateAngleY, this.bipedLeftArm.rotateAngleZ);
+        this.setRotateAngle(this.bipedRightArmwear, this.bipedRightArm.rotateAngleX, this.bipedRightArm.rotateAngleY, this.bipedRightArm.rotateAngleZ);
 
         if( this.isRiding ) {
             this.setRotateAngle(this.legLeft, this.bipedLeftLeg.rotateAngleX, this.bipedLeftLeg.rotateAngleY, this.bipedLeftLeg.rotateAngleZ);
@@ -165,8 +163,8 @@ public class ModelSanPlayer
 
         this.bipedLeftArm.rotateAngleZ -= 0.1F;
         this.bipedRightArm.rotateAngleZ += 0.1F;
-        this.armLeft2.rotateAngleZ -= 0.1F;
-        this.armRight2.rotateAngleZ += 0.1F;
+        this.bipedLeftArmwear.rotateAngleZ -= 0.1F;
+        this.bipedRightArmwear.rotateAngleZ += 0.1F;
 
         if( this.isSneak ) {
             this.legLeft.rotationPointZ = 3.0F;
@@ -174,9 +172,9 @@ public class ModelSanPlayer
             this.legLeft.rotateAngleX -= 0.15F;
             this.legRight.rotateAngleX -= 0.15F;
             this.bipedLeftArm.rotateAngleX += 0.2F;
-            this.armLeft2.rotateAngleX += 0.2F;
+            this.bipedLeftArmwear.rotateAngleX += 0.2F;
             this.bipedRightArm.rotateAngleX += 0.2F;
-            this.armRight2.rotateAngleX += 0.2F;
+            this.bipedRightArmwear.rotateAngleX += 0.2F;
         } else {
             this.legLeft.rotationPointZ = 0.0F;
             this.legRight.rotationPointZ = 0.0F;
@@ -184,6 +182,8 @@ public class ModelSanPlayer
 
         setRotationPoint(this.bipedLeftArm, 5.0F, 2.0F, 0.5F);
         setRotationPoint(this.bipedRightArm, -4.0F, 2.0F, 0.5F);
+        setRotationPoint(this.bipedLeftArmwear, 5.0F, 2.0F, 0.5F);
+        setRotationPoint(this.bipedRightArmwear, -4.0F, 2.0F, 0.5F);
     }
 
     /**
