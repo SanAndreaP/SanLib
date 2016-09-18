@@ -6,7 +6,7 @@
  * http://creativecommons.org/licenses/by-nc-sa/4.0/
  * *****************************************************************************************************************
  */
-package de.sanandrew.mods.sapmanpack.sanplayermodel.client.render;
+package de.sanandrew.mods.sapmanpack.lib.client;
 
 import de.sanandrew.mods.sapmanpack.lib.client.ColorObj;
 

@@ -8,12 +8,11 @@ package de.sanandrew.mods.sapmanpack.sanplayermodel.client.event;
 
 import com.mojang.authlib.GameProfile;
 import de.sanandrew.mods.sapmanpack.lib.UuidUtils;
-import de.sanandrew.mods.sapmanpack.sanplayermodel.client.render.RenderSanPlayer;
+import de.sanandrew.mods.sapmanpack.sanplayermodel.client.renderer.entity.RenderSanPlayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderPlayer;
-import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.client.event.RenderHandEvent;
@@ -23,7 +22,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 public class RenderPlayerEventHandler
 {

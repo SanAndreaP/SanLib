@@ -26,7 +26,17 @@ public final class ModelBoxBuilder<T extends ModelRenderer>
      * @return A new instance of the ModelBoxBuilder.
      */
     public static ModelBoxBuilder<ModelRenderer> newBuilder(final ModelBase model) {
-        return newBuilder(model, ModelRenderer.class);
+        return newBuilder(model, null, ModelRenderer.class);
+    }
+
+    /**
+     * Creates a new Model Box Builder with a custom box name.
+     *
+     * @param model The model instance
+     * @return A new instance of the ModelBoxBuilder.
+     */
+    public static ModelBoxBuilder<ModelRenderer> newBuilder(final ModelBase model, String name) {
+        return newBuilder(model, name, ModelRenderer.class);
     }
 
     /**
@@ -38,14 +48,31 @@ public final class ModelBoxBuilder<T extends ModelRenderer>
      * @return A new instance of the ModelBoxBuilder.
      */
     public static <T extends ModelRenderer> ModelBoxBuilder<T> newBuilder(final ModelBase model, Class<T> boxClass) {
-        return new ModelBoxBuilder<>(model, boxClass);
+        return newBuilder(model, null, boxClass);
+    }
+
+    /**
+     * Creates a new Model Box Builder with a custom box class and name.
+     *
+     * @param model    The model instance
+     * @param name     A name for the box
+     * @param boxClass The custom box class. Note: It MUST be a child of the {@link net.minecraft.client.model.ModelRenderer} class and override the
+     *                 {@link net.minecraft.client.model.ModelRenderer#ModelRenderer(net.minecraft.client.model.ModelBase, java.lang.String)} parent constructor!
+     * @return A new instance of the ModelBoxBuilder.
+     */
+    public static <T extends ModelRenderer> ModelBoxBuilder<T> newBuilder(final ModelBase model, String name, Class<T> boxClass) {
+        return new ModelBoxBuilder<>(model, name, boxClass);
     }
 
     private T box;
 
-    private ModelBoxBuilder(ModelBase model, Class<T> boxClass) {
+    private ModelBoxBuilder(ModelBase model, String name, Class<T> boxClass) {
         try {
-            this.box = boxClass.getConstructor(ModelBase.class).newInstance(model);
+            if( name != null ) {
+                this.box = boxClass.getConstructor(ModelBase.class, String.class).newInstance(model, name);
+            } else {
+                this.box = boxClass.getConstructor(ModelBase.class).newInstance(model);
+            }
             this.box.textureWidth = model.textureWidth;
             this.box.textureHeight = model.textureHeight;
         } catch( InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e ) {
