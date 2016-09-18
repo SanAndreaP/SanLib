@@ -81,6 +81,9 @@ public class ModelSanPlayerArmor
                     this.leftArm.rotateAngleX += 0.2F;
                     this.rightArm.rotateAngleX += 0.2F;
                 }
+
+                this.leftArm.rotateAngleZ -= 0.2F;
+                this.rightArm.rotateAngleZ += 0.2F;
                 break;
             case LEGS:
                 this.setRotateAngle(this.body, this.bipedBody.rotateAngleX * 0.5F, this.bipedBody.rotateAngleY, this.bipedBody.rotateAngleZ);

@@ -73,6 +73,9 @@ public class ModelSanPlayerNew
             this.leftLeg.rotationPointZ = 0.0F;
             this.rightLeg.rotationPointZ = 0.0F;
         }
+
+        this.leftArm.rotateAngleZ -= 0.2F;
+        this.rightArm.rotateAngleZ += 0.2F;
     }
 
     @Override
