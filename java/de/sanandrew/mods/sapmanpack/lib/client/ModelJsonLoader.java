@@ -77,59 +77,62 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
             ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).reloadListeners.remove(this);
         }
     }
-    
-    public void load() {
-        this.mainBoxes = new ModelRenderer[0];
-        this.nameToBoxList.clear();
-        this.boxToNameList.clear();
 
-        try( IResource res = Minecraft.getMinecraft().getResourceManager().getResource(this.resLoc);
+    private void loadJson(ResourceLocation resource, boolean useAsInst) throws IOException, JsonIOException, JsonSyntaxException {
+        try( IResource res = Minecraft.getMinecraft().getResourceManager().getResource(resource);
              BufferedReader in = new BufferedReader(new InputStreamReader(res.getInputStream())) )
         {
-            this.jsonInst = new Gson().fromJson(in, this.jsonClass);
+            U json = new Gson().fromJson(in, this.jsonClass);
+            if( json.parent != null && !json.parent.isEmpty() ) {
+                this.loadJson(new ResourceLocation(json.parent), false);
+            }
+
             List<ChildCube> children = new ArrayList<>();
             List<ModelRenderer> mainBoxesList = new ArrayList<>();
             Map<String, Boolean> mandatoryChecklist = new HashMap<>();
             Arrays.asList(this.mandatNames).forEach((name) -> mandatoryChecklist.put(name, false));
 
-            for( Cube cb : this.jsonInst.cubes ) {
-                float baseScale = this.modelBase.getBaseScale();
-                Double scaling;
-                if( cb.scaling != null ) {
-                    scaling = calcFormula(cb.scaling.replace("x", Float.toString(baseScale)));
-                    if( scaling == null ) {
+            if( json.cubes != null ) {
+                for (Cube cb : json.cubes) {
+                    float baseScale = this.modelBase.getBaseScale();
+                    Double scaling;
+                    if (cb.scaling != null) {
+                        scaling = calcFormula(cb.scaling.replace("x", Float.toString(baseScale)));
+                        if (scaling == null) {
+                            scaling = (double) baseScale;
+                        }
+                    } else {
                         scaling = (double) baseScale;
                     }
-                } else {
-                    scaling = (double) baseScale;
+
+                    ModelRenderer box = ModelBoxBuilder.newBuilder(this.modelBase, cb.boxName)
+                            .setTexture(cb.textureX, cb.textureY, cb.mirror, cb.textureWidth, cb.textureHeight)
+                            .setLocation(cb.rotationPointX, cb.rotationPointY, cb.rotationPointZ)
+                            .setRotation(cb.rotateAngleX, cb.rotateAngleY, cb.rotateAngleZ)
+                            .getBox(cb.offsetX, cb.offsetY, cb.offsetZ, cb.sizeX, cb.sizeY, cb.sizeZ, scaling.floatValue());
+                    box.isHidden = cb.isHidden;
+
+                    this.nameToBoxList.put(cb.boxName, box);
+                    this.boxToNameList.put(box, cb.boxName);
+
+                    if (cb.parentBox != null && !cb.parentBox.isEmpty()) {
+                        children.add(new ChildCube(box, cb.parentBox));
+                    } else {
+                        mainBoxesList.add(box);
+                    }
+
+                    mandatoryChecklist.put(cb.boxName, true);
                 }
-
-                ModelRenderer box = ModelBoxBuilder.newBuilder(this.modelBase, cb.boxName)
-                                                   .setTexture(cb.textureX, cb.textureY, cb.mirror, cb.textureWidth, cb.textureHeight)
-                                                   .setLocation(cb.rotationPointX, cb.rotationPointY, cb.rotationPointZ)
-                                                   .setRotation(cb.rotateAngleX, cb.rotateAngleY, cb.rotateAngleZ)
-                                                   .getBox(cb.offsetX, cb.offsetY, cb.offsetZ, cb.sizeX, cb.sizeY, cb.sizeZ, scaling.floatValue());
-                box.isHidden = cb.isHidden;
-
-                this.nameToBoxList.put(cb.boxName, box);
-                this.boxToNameList.put(box, cb.boxName);
-
-                if( cb.parentBox != null && !cb.parentBox.isEmpty() ) {
-                    children.add(new ChildCube(box, cb.parentBox));
-                } else {
-                    mainBoxesList.add(box);
-                }
-
-                mandatoryChecklist.put(cb.boxName, true);
             }
 
-            if( mandatoryChecklist.containsValue(false) ) {
-                SanPlayerModel.LOG.printf(Level.WARN, "Model %s has not all mandatory boxes! Missing %s", this.resLoc.toString(),
-                                          String.join(", ", mandatoryChecklist.keySet().stream().filter((name) -> !mandatoryChecklist.get(name)).collect(Collectors.toList())));
-                this.nameToBoxList.clear();
-                this.boxToNameList.clear();
-                this.mainBoxes = new ModelRenderer[0];
-            }
+//            if( mandatoryChecklist.containsValue(false) ) {
+//                SanPlayerModel.LOG.printf(Level.WARN, "Model %s has not all mandatory boxes! Missing %s", this.resLoc.toString(),
+//                        String.join(", ", mandatoryChecklist.keySet().stream().filter((name) -> !mandatoryChecklist.get(name)).collect(Collectors.toList())));
+//                this.nameToBoxList.clear();
+//                this.boxToNameList.clear();
+//                this.mainBoxes = new ModelRenderer[0];
+//                throw new IOException();
+//            }
 
             children.forEach((child) -> {
                 if( this.nameToBoxList.containsKey(child.parentName) ) {
@@ -139,13 +142,29 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
                 }
             });
 
+            mainBoxesList.addAll(Arrays.asList(this.mainBoxes));
             this.mainBoxes = mainBoxesList.toArray(new ModelRenderer[mainBoxesList.size()]);
 
-            this.modelBase.setTexture(this.jsonInst.texture);
+            if( json.texture != null && !json.texture.isEmpty() ) {
+                this.modelBase.setTexture(json.texture);
+            }
 
-            this.loaded = true;
+            if( useAsInst ) {
+                this.jsonInst = json;
+                this.loaded = true;
+            }
+        }
+    }
+    
+    public void load() {
+        this.mainBoxes = new ModelRenderer[0];
+        this.nameToBoxList.clear();
+        this.boxToNameList.clear();
+
+        try {
+            loadJson(this.resLoc, true);
         } catch( IOException ex) {
-            SanPlayerModel.LOG.log(Level.INFO, "Can't load model location %s!", this.resLoc.toString());
+            SanPlayerModel.LOG.log(Level.INFO, String.format("Can't load model location %s!", this.resLoc.toString()));
             this.nameToBoxList.clear();
             this.boxToNameList.clear();
             this.mainBoxes = new ModelRenderer[0];
@@ -318,7 +337,8 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
     public static class ModelJson
     {
         public String texture;
-        public Cube[] cubes;
+        public String parent;
+        protected Cube[] cubes;
     }
 
     private static class ChildCube

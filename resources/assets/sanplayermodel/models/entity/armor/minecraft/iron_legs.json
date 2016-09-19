@@ -1,0 +1,5 @@
+{
+  "parent": "sanplayermodel:models/entity/sanplayer_noarmor_legs.json",
+  "texture": "sanplayermodel:textures/entity/player/minecraft/iron_legs.png",
+  "armTilt": 0.25
+}

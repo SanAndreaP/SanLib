@@ -7,24 +7,17 @@
 package de.sanandrew.mods.sapmanpack.sanplayermodel.client.renderer.entity;
 
 import de.sanandrew.mods.sapmanpack.sanplayermodel.client.Resources;
-import de.sanandrew.mods.sapmanpack.sanplayermodel.client.model.ModelSanPlayerNew;
+import de.sanandrew.mods.sapmanpack.sanplayermodel.client.model.ModelSanPlayer;
 import de.sanandrew.mods.sapmanpack.sanplayermodel.client.renderer.entity.layers.LayerCustomHeldItem;
 import de.sanandrew.mods.sapmanpack.sanplayermodel.client.renderer.entity.layers.LayerSanArmor;
 import de.sanandrew.mods.sapmanpack.sanplayermodel.client.renderer.entity.layers.LayerSanStandardClothes;
 import net.minecraft.client.entity.AbstractClientPlayer;
-import net.minecraft.client.model.ModelBiped;
-import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.entity.layers.LayerArrow;
-import net.minecraft.client.renderer.entity.layers.LayerBipedArmor;
-import net.minecraft.client.renderer.entity.layers.LayerCape;
 import net.minecraft.client.renderer.entity.layers.LayerCustomHead;
-import net.minecraft.client.renderer.entity.layers.LayerDeadmau5Head;
 import net.minecraft.client.renderer.entity.layers.LayerElytra;
-import net.minecraft.client.renderer.entity.layers.LayerHeldItem;
-import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.util.EnumHandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
@@ -34,7 +27,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class RenderSanPlayer
         extends RenderPlayer
 {
-    private ModelSanPlayerNew myModel = new ModelSanPlayerNew(0.0F);
+    private ModelSanPlayer myModel = new ModelSanPlayer(0.0F);
     private LayerSanArmor layerArmor;
     private LayerSanStandardClothes layerClothes;
 

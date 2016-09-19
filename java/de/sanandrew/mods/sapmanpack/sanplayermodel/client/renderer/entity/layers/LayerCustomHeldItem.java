@@ -46,7 +46,7 @@ public class LayerCustomHeldItem
             GlStateManager.rotate(-90.0F, 1.0F, 0.0F, 0.0F);
             GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
             boolean flag = handSide == EnumHandSide.LEFT;
-            GlStateManager.translate((flag ? -1 : 1) / 16.0F, 0.125F, -0.625F);
+            GlStateManager.translate((flag ? -1 : 1) / 5.0F, 0.125F, -0.625F);
             Minecraft.getMinecraft().getItemRenderer().renderItemSide(player, stack, transformType, flag);
             GlStateManager.popMatrix();
         }
