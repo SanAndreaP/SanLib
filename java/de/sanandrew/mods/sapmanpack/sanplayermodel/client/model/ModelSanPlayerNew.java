@@ -9,23 +9,21 @@ package de.sanandrew.mods.sapmanpack.sanplayermodel.client.model;
 import de.sanandrew.mods.sapmanpack.lib.client.ModelJsonHandler;
 import de.sanandrew.mods.sapmanpack.lib.client.ModelJsonLoader;
 import de.sanandrew.mods.sapmanpack.sanplayermodel.client.Resources;
+import de.sanandrew.mods.sapmanpack.sanplayermodel.client.renderer.entity.RenderSanPlayer;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.EnumHandSide;
 
 import java.util.Arrays;
 
-/**
- * Created using Tabula 4.1.1
- */
 public class ModelSanPlayerNew
         extends ModelPlayer
-        implements ModelJsonHandler<ModelSanPlayerNew>
+        implements ModelJsonHandler<ModelSanPlayerNew, ModelJsonLoader.ModelJson>
 {
     private final float scaling;
-    private final ModelJsonLoader<ModelSanPlayerNew> modelJson;
+    private final ModelJsonLoader<ModelSanPlayerNew, ModelJsonLoader.ModelJson> modelJson;
 
     public ModelRenderer head;
     public ModelRenderer body;
@@ -37,7 +35,7 @@ public class ModelSanPlayerNew
     public ModelSanPlayerNew(float scaling) {
         super(scaling, true);
         this.scaling = scaling;
-        this.modelJson = new ModelJsonLoader<>(this, Resources.MAIN_MODEL, "head", "body", "leftArm", "rightArm", "leftLeg", "rightLeg");
+        this.modelJson = ModelJsonLoader.create(this, Resources.MAIN_MODEL, "head", "body", "leftArm", "rightArm", "leftLeg", "rightLeg");
     }
 
     @Override
@@ -74,8 +72,8 @@ public class ModelSanPlayerNew
             this.rightLeg.rotationPointZ = 0.0F;
         }
 
-        this.leftArm.rotateAngleZ -= 0.2F;
-        this.rightArm.rotateAngleZ += 0.2F;
+        this.leftArm.rotateAngleZ -= RenderSanPlayer.armTilt;
+        this.rightArm.rotateAngleZ += RenderSanPlayer.armTilt;
     }
 
     @Override
@@ -91,14 +89,8 @@ public class ModelSanPlayerNew
         modelRenderer.rotateAngleZ = z;
     }
 
-    public void setRotationPoint(ModelRenderer modelRenderer, float x, float y, float z) {
-        modelRenderer.rotationPointX = x;
-        modelRenderer.rotationPointY = y;
-        modelRenderer.rotationPointZ = z;
-    }
-
     @Override
-    public void onReload(IResourceManager resourceManager, ModelJsonLoader<ModelSanPlayerNew> loader) {
+    public void onReload(IResourceManager resourceManager, ModelJsonLoader<ModelSanPlayerNew, ModelJsonLoader.ModelJson> loader) {
         loader.load();
 
         this.head = loader.getBox("head");
@@ -107,6 +99,11 @@ public class ModelSanPlayerNew
         this.rightArm = loader.getBox("rightArm");
         this.leftLeg = loader.getBox("leftLeg");
         this.rightLeg = loader.getBox("rightLeg");
+    }
+
+    @Override
+    protected ModelRenderer getArmForSide(EnumHandSide side) {
+        return side == EnumHandSide.LEFT ? this.leftArm : this.rightArm;
     }
 
     @Override

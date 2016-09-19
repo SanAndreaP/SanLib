@@ -8,6 +8,7 @@ package de.sanandrew.mods.sapmanpack.sanplayermodel.client.renderer.entity;
 
 import de.sanandrew.mods.sapmanpack.sanplayermodel.client.Resources;
 import de.sanandrew.mods.sapmanpack.sanplayermodel.client.model.ModelSanPlayerNew;
+import de.sanandrew.mods.sapmanpack.sanplayermodel.client.renderer.entity.layers.LayerCustomHeldItem;
 import de.sanandrew.mods.sapmanpack.sanplayermodel.client.renderer.entity.layers.LayerSanArmor;
 import de.sanandrew.mods.sapmanpack.sanplayermodel.client.renderer.entity.layers.LayerSanStandardClothes;
 import net.minecraft.client.entity.AbstractClientPlayer;
@@ -37,17 +38,25 @@ public class RenderSanPlayer
     private LayerSanArmor layerArmor;
     private LayerSanStandardClothes layerClothes;
 
+    public static float armTilt;
+
     public RenderSanPlayer(RenderManager manager) {
         super(manager);
         this.mainModel = this.myModel;
         this.layerRenderers.clear();
 
         this.addLayer(this.layerArmor = new LayerSanArmor(this));
-        this.addLayer(new LayerHeldItem(this));
+        this.addLayer(this.layerClothes = new LayerSanStandardClothes(this));
+        this.addLayer(new LayerCustomHeldItem(this));
         this.addLayer(new LayerArrow(this));
         this.addLayer(new LayerCustomHead(this.myModel.head));
         this.addLayer(new LayerElytra(this));
-        this.addLayer(this.layerClothes = new LayerSanStandardClothes(this));
+    }
+
+    @Override
+    public void doRender(AbstractClientPlayer entity, double x, double y, double z, float entityYaw, float partialTicks) {
+        armTilt = Math.max(this.layerArmor.armTilt, this.layerClothes.armTilt);
+        super.doRender(entity, x, y, z, entityYaw, partialTicks);
     }
 
     @Override

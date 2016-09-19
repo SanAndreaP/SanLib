@@ -34,6 +34,8 @@ public class LayerSanArmor
     private final RenderLivingBase<?> renderer;
     private final Table<String, EntityEquipmentSlot, ModelSanPlayerArmor> armorModels;
 
+    public float armTilt;
+
     public LayerSanArmor(RenderLivingBase<?> renderer) {
         super(renderer);
 
@@ -75,6 +77,12 @@ public class LayerSanArmor
                 }
             }
         }
+    }
+
+    @Override
+    public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+        this.armTilt = 0.0F;
+        super.doRenderLayer(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale);
     }
 
     @Override
@@ -130,6 +138,7 @@ public class LayerSanArmor
     protected ModelBiped getArmorModelHook(EntityLivingBase entity, ItemStack itemStack, EntityEquipmentSlot slot, ModelBiped model) {
         ModelSanPlayerArmor armor = getCustomArmorModel(itemStack, slot);
         if( armor != null ) {
+            this.armTilt = Math.max(this.armTilt, armor.getArmTilt());
             return armor;
         }
 
@@ -162,5 +171,11 @@ public class LayerSanArmor
         }
 
         return String.format("%s:%s", domain, texture);
+    }
+
+    public static final class ModelJsonArmor
+            extends ModelJsonLoader.ModelJson
+    {
+        public float armTilt;
     }
 }

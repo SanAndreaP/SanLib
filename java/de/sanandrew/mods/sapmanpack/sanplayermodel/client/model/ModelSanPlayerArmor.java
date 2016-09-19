@@ -9,6 +9,8 @@ package de.sanandrew.mods.sapmanpack.sanplayermodel.client.model;
 import de.sanandrew.mods.sapmanpack.lib.client.ModelJsonHandler;
 import de.sanandrew.mods.sapmanpack.lib.client.ModelJsonLoader;
 import de.sanandrew.mods.sapmanpack.sanplayermodel.client.Resources;
+import de.sanandrew.mods.sapmanpack.sanplayermodel.client.renderer.entity.RenderSanPlayer;
+import de.sanandrew.mods.sapmanpack.sanplayermodel.client.renderer.entity.layers.LayerSanArmor;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.model.ModelRenderer;
@@ -22,11 +24,11 @@ import java.util.Arrays;
 
 public class ModelSanPlayerArmor
         extends ModelPlayer
-        implements ModelJsonHandler<ModelSanPlayerArmor>
+        implements ModelJsonHandler<ModelSanPlayerArmor, LayerSanArmor.ModelJsonArmor>
 {
     private final float scaling;
     private ResourceLocation texture;
-    private final ModelJsonLoader<ModelSanPlayerArmor> modelJson;
+    private final ModelJsonLoader<ModelSanPlayerArmor, LayerSanArmor.ModelJsonArmor> modelJson;
     private final EntityEquipmentSlot slot;
 
     public ModelRenderer head;
@@ -42,16 +44,16 @@ public class ModelSanPlayerArmor
         this.slot = slot;
         switch( slot ) {
             case HEAD:
-                this.modelJson = new ModelJsonLoader<>(this, resource, "head");
+                this.modelJson = ModelJsonLoader.create(this, LayerSanArmor.ModelJsonArmor.class, resource, "head");
                 break;
             case CHEST:
-                this.modelJson = new ModelJsonLoader<>(this, resource, "body", "leftArm", "rightArm");
+                this.modelJson = ModelJsonLoader.create(this, LayerSanArmor.ModelJsonArmor.class, resource, "body", "leftArm", "rightArm");
                 break;
             case LEGS:
-                this.modelJson = new ModelJsonLoader<>(this, resource, "body", "rightLeg", "leftLeg");
+                this.modelJson = ModelJsonLoader.create(this, LayerSanArmor.ModelJsonArmor.class, resource, "body", "rightLeg", "leftLeg");
                 break;
             case FEET:
-                this.modelJson = new ModelJsonLoader<>(this, resource, "rightLeg", "leftLeg");
+                this.modelJson = ModelJsonLoader.create(this, LayerSanArmor.ModelJsonArmor.class, resource, "rightLeg", "leftLeg");
                 break;
             default:
                 this.modelJson = null;
@@ -64,6 +66,10 @@ public class ModelSanPlayerArmor
         if( this.modelJson != null ) {
             Arrays.asList(this.modelJson.getMainBoxes()).forEach((box) -> box.render(scale));
         }
+    }
+
+    public float getArmTilt() {
+        return (this.modelJson != null && this.modelJson.isLoaded()) ? this.modelJson.getModelJsonInstance().armTilt : 0.0F;
     }
 
     public void setRotationAngles(float limbSwing, float limbSwingAmount, float rotFloat, float rotYaw, float rotPitch, float scale, Entity entity) {
@@ -82,8 +88,8 @@ public class ModelSanPlayerArmor
                     this.rightArm.rotateAngleX += 0.2F;
                 }
 
-                this.leftArm.rotateAngleZ -= 0.2F;
-                this.rightArm.rotateAngleZ += 0.2F;
+                this.leftArm.rotateAngleZ -= RenderSanPlayer.armTilt;
+                this.rightArm.rotateAngleZ += RenderSanPlayer.armTilt;
                 break;
             case LEGS:
                 this.setRotateAngle(this.body, this.bipedBody.rotateAngleX * 0.5F, this.bipedBody.rotateAngleY, this.bipedBody.rotateAngleZ);
@@ -138,7 +144,7 @@ public class ModelSanPlayerArmor
     }
 
     @Override
-    public void onReload(IResourceManager resourceManager, ModelJsonLoader<ModelSanPlayerArmor> loader) {
+    public void onReload(IResourceManager resourceManager, ModelJsonLoader<ModelSanPlayerArmor, LayerSanArmor.ModelJsonArmor> loader) {
         loader.load();
 
         switch( this.slot ) {

@@ -9,6 +9,8 @@
 package de.sanandrew.mods.sapmanpack.lib.client;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 import de.sanandrew.mods.sapmanpack.sanplayermodel.SanPlayerModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBase;
@@ -30,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public final class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T>>
+public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U extends ModelJsonLoader.ModelJson>
         implements IResourceManagerReloadListener
 {
     private T modelBase;
@@ -40,8 +42,22 @@ public final class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T>>
     private ResourceLocation resLoc;
     private String[] mandatNames;
     private boolean loaded;
+    private Class<U> jsonClass;
+    private U jsonInst;
 
-    public ModelJsonLoader(T modelBase, ResourceLocation location, String... mandatoryNames) {
+    public static <T extends ModelBase & ModelJsonHandler<T, ModelJson>> ModelJsonLoader<T, ModelJson>
+            create(T modelBase, ResourceLocation location, String... mandatoryNames)
+    {
+        return new ModelJsonLoader<>(modelBase, ModelJson.class, location, mandatoryNames);
+    }
+
+    public static <T extends ModelBase & ModelJsonHandler<T, U>, U extends ModelJsonLoader.ModelJson> ModelJsonLoader<T, U>
+            create(T modelBase, Class<U> jsonClass, ResourceLocation location, String... mandatoryNames)
+    {
+        return new ModelJsonLoader<>(modelBase, jsonClass, location, mandatoryNames);
+    }
+
+    private ModelJsonLoader(T modelBase, Class<U> jsonClass, ResourceLocation location, String[] mandatoryNames) {
         this.modelBase = modelBase;
         this.mainBoxes = new ModelRenderer[0];
         this.nameToBoxList = new HashMap<>();
@@ -49,6 +65,7 @@ public final class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T>>
         this.mandatNames = mandatoryNames.clone();
         this.resLoc = location;
         this.loaded = false;
+        this.jsonClass = jsonClass;
 
         if( Minecraft.getMinecraft().getResourceManager() instanceof SimpleReloadableResourceManager ) {
             ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(this);
@@ -69,13 +86,13 @@ public final class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T>>
         try( IResource res = Minecraft.getMinecraft().getResourceManager().getResource(this.resLoc);
              BufferedReader in = new BufferedReader(new InputStreamReader(res.getInputStream())) )
         {
-            ModelJson model = new Gson().fromJson(in, ModelJson.class);
+            this.jsonInst = new Gson().fromJson(in, this.jsonClass);
             List<ChildCube> children = new ArrayList<>();
             List<ModelRenderer> mainBoxesList = new ArrayList<>();
             Map<String, Boolean> mandatoryChecklist = new HashMap<>();
             Arrays.asList(this.mandatNames).forEach((name) -> mandatoryChecklist.put(name, false));
 
-            for( Cube cb : model.cubes ) {
+            for( Cube cb : this.jsonInst.cubes ) {
                 float baseScale = this.modelBase.getBaseScale();
                 Double scaling;
                 if( cb.scaling != null ) {
@@ -124,14 +141,22 @@ public final class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T>>
 
             this.mainBoxes = mainBoxesList.toArray(new ModelRenderer[mainBoxesList.size()]);
 
-            this.modelBase.setTexture(model.texture);
+            this.modelBase.setTexture(this.jsonInst.texture);
 
             this.loaded = true;
-        } catch( IOException ex ) {
-            SanPlayerModel.LOG.printf(Level.WARN, "Can't load model location %s!", this.resLoc.toString());
+        } catch( IOException ex) {
+            SanPlayerModel.LOG.log(Level.INFO, "Can't load model location %s!", this.resLoc.toString());
             this.nameToBoxList.clear();
             this.boxToNameList.clear();
             this.mainBoxes = new ModelRenderer[0];
+            this.jsonInst = null;
+            this.loaded = false;
+        } catch( JsonSyntaxException | JsonIOException ex ) {
+            SanPlayerModel.LOG.log(Level.WARN, String.format("Can't load model location %s!", this.resLoc.toString()), ex);
+            this.nameToBoxList.clear();
+            this.boxToNameList.clear();
+            this.mainBoxes = new ModelRenderer[0];
+            this.jsonInst = null;
             this.loaded = false;
         }
     }
@@ -146,6 +171,10 @@ public final class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T>>
 
     public ModelRenderer[] getMainBoxes() {
         return this.mainBoxes;
+    }
+
+    public U getModelJsonInstance() {
+        return this.jsonInst;
     }
 
     @Override
@@ -286,7 +315,7 @@ public final class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T>>
         }.parse();
     }
 
-    private static class ModelJson
+    public static class ModelJson
     {
         public String texture;
         public Cube[] cubes;
