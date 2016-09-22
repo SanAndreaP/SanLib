@@ -6,17 +6,30 @@
    *******************************************************************************************************************/
 package de.sanandrew.mods.sapmanpack.lib;
 
-import java.io.Serializable;
-import java.util.Arrays;
+import de.sanandrew.mods.sapmanpack.SanLib;
+import io.netty.buffer.ByteBufInputStream;
+import io.netty.buffer.ByteBufOutputStream;
+import io.netty.handler.codec.serialization.ObjectDecoderInputStream;
+import io.netty.handler.codec.serialization.ObjectEncoderOutputStream;
+import org.apache.logging.log4j.Level;
 
-public abstract class Tuple
-        implements Serializable
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
+public class Tuple
+        implements Serializable, Comparable<Tuple>, Iterable<Object>
 {
-    private static final long serialVersionUID = 2093701238703979767L;
+    private static final long serialVersionUID = 0L;
 
     private final Data<?>[] values;
 
-    protected Tuple(Object... values) {
+    public Tuple(Object... values) {
         //noinspection Convert2MethodRef
         this.values = Arrays.stream(values).map(Data::new).toArray(size -> new Data<?>[size]);
     }
@@ -38,84 +51,63 @@ public abstract class Tuple
         return (T) this.values[index].value;
     }
 
-    private static class Data<T> {
-//        final Class<V1> cls;
+    public static Tuple readFromStream(InputStream stream) {
+        try( ObjectDecoderInputStream odis = new ObjectDecoderInputStream(stream) ) {
+            return (Tuple) odis.readObject();
+        } catch( IOException | ClassNotFoundException ex ) {
+            SanLib.LOG.log(Level.ERROR, "Cannot deserialize Tuple!", ex);
+        }
+        return null;
+    }
+
+    public static void writeToStream(Tuple tuple, OutputStream stream) {
+        try( ObjectEncoderOutputStream oeos = new ObjectEncoderOutputStream(stream) ) {
+            oeos.writeObject(tuple);
+        } catch( IOException ex ) {
+            SanLib.LOG.log(Level.ERROR, "Cannot serialize Tuple!", ex);
+        }
+    }
+
+    @Override
+    public int compareTo(Tuple o) {
+        final int tLen = this.values.length;
+        final int oLen = o.values.length;
+
+        for( int i = 0; i < tLen && i < oLen; i++ ) {
+            final int comparison = this.values[i].compareTo(o.values[i]);
+
+            if( comparison != 0 ) {
+                return comparison;
+            }
+        }
+
+        return (Integer.valueOf(tLen)).compareTo(oLen);
+    }
+
+    @Override
+    public Iterator<Object> iterator() {
+        return Arrays.stream(this.values).map(data -> (Object)data.value).iterator();
+    }
+
+    private static class Data<T>
+            implements Serializable, Comparable<Data<?>>
+    {
+        private static final long serialVersionUID = 0L;
+
         final T value;
 
         Data(T value) {
-            //noinspection unchecked
-//            this.cls = (Class<V1>) ((ParameterizedType)value.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
             this.value = value;
         }
-    }
 
-    public static final class Nullple
-            extends Tuple
-    {
-        private static final long serialVersionUID = -4573970308065454465L;
-
-        public Nullple() {
-            super();
-        }
-    }
-
-    public static final class Monuple<V1>
-            extends Tuple
-    {
-        private static final long serialVersionUID = -8499722794710952513L;
-        public final V1 val1;
-
-        public Monuple(V1 val1) {
-            super(val1);
-            this.val1 = val1;
-        }
-    }
-
-    public static final class Couple<V1, V2>
-            extends Tuple
-    {
-        private static final long serialVersionUID = -2848182165133644998L;
-        public final V1 val1;
-        public final V2 val2;
-
-        public Couple(V1 val1, V2 val2) {
-            super(val1, val2);
-            this.val1 = val1;
-            this.val2 = val2;
-        }
-    }
-
-    public static final class Triple<V1, V2, V3>
-            extends Tuple
-    {
-        private static final long serialVersionUID = -2490176910031447069L;
-        public final V1 val1;
-        public final V2 val2;
-        public final V3 val3;
-
-        public Triple(V1 val1, V2 val2, V3 val3) {
-            super(val1, val2, val3);
-            this.val1 = val1;
-            this.val2 = val2;
-            this.val3 = val3;
-        }
-    }
-
-    public static final class Quadruple<V1, V2, V3, V4>
-            extends Tuple
-    {
-        private static final long serialVersionUID = 3485494179641670565L;
-        public final V1 val1;
-        public final V2 val2;
-        public final V3 val3;
-        public final V4 val4;
-
-        public Quadruple(V1 val1, V2 val2, V3 val3, V4 val4) {
-            super(val1, val2, val3, val4);
-            this.val1 = val1;
-            this.val2 = val2;
-            this.val3 = val3;
-            this.val4 = val4;
+        @Override
+        @SuppressWarnings("unchecked")
+        public int compareTo(Data<?> o) {
+            if( this.value instanceof Comparable && o.value instanceof Comparable ) {
+                return ((Comparable) this.value).compareTo(o.value);
+            } else {
+                return -1;
+            }
         }
     }
 }
