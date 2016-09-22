@@ -1,9 +1,9 @@
-/*******************************************************************************************************************
- * Authors:   SanAndreasP
- * Copyright: SanAndreasP
- * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
- *                http://creativecommons.org/licenses/by-nc-sa/4.0/
- *******************************************************************************************************************/
+/* ******************************************************************************************************************
+   * Authors:   SanAndreasP
+   * Copyright: SanAndreasP
+   * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+   *                http://creativecommons.org/licenses/by-nc-sa/4.0/
+   *******************************************************************************************************************/
 package de.sanandrew.mods.sapmanpack.sanplayermodel.client.model;
 
 import de.sanandrew.mods.sapmanpack.lib.client.ModelJsonHandler;
@@ -46,17 +46,17 @@ public class ModelSanPlayer
     public void setRotationAngles(float limbSwing, float limbSwingAmount, float rotFloat, float rotYaw, float rotPitch, float partTicks, Entity entity) {
         super.setRotationAngles(limbSwing, limbSwingAmount, rotFloat, rotYaw, rotPitch, partTicks, entity);
 
-        this.setRotateAngle(this.head, this.bipedHead.rotateAngleX, this.bipedHead.rotateAngleY, this.bipedHead.rotateAngleZ);
-        this.setRotateAngle(this.body, this.bipedBody.rotateAngleX * 0.5F, this.bipedBody.rotateAngleY, this.bipedBody.rotateAngleZ);
-        this.setRotateAngle(this.leftArm, this.bipedLeftArm.rotateAngleX, this.bipedLeftArm.rotateAngleY, this.bipedLeftArm.rotateAngleZ);
-        this.setRotateAngle(this.rightArm, this.bipedRightArm.rotateAngleX, this.bipedRightArm.rotateAngleY, this.bipedRightArm.rotateAngleZ);
+        setRotateAngle(this.head, this.bipedHead.rotateAngleX, this.bipedHead.rotateAngleY, this.bipedHead.rotateAngleZ);
+        setRotateAngle(this.body, this.bipedBody.rotateAngleX * 0.5F, this.bipedBody.rotateAngleY, this.bipedBody.rotateAngleZ);
+        setRotateAngle(this.leftArm, this.bipedLeftArm.rotateAngleX, this.bipedLeftArm.rotateAngleY, this.bipedLeftArm.rotateAngleZ);
+        setRotateAngle(this.rightArm, this.bipedRightArm.rotateAngleX, this.bipedRightArm.rotateAngleY, this.bipedRightArm.rotateAngleZ);
 
         if( this.isRiding ) {
-            this.setRotateAngle(this.leftLeg, this.bipedLeftLeg.rotateAngleX * 0.95F, this.bipedLeftLeg.rotateAngleY, this.bipedLeftLeg.rotateAngleZ);
-            this.setRotateAngle(this.rightLeg, this.bipedRightLeg.rotateAngleX * 0.95F, this.bipedRightLeg.rotateAngleY, this.bipedRightLeg.rotateAngleZ);
+            setRotateAngle(this.leftLeg, this.bipedLeftLeg.rotateAngleX * 0.95F, this.bipedLeftLeg.rotateAngleY, this.bipedLeftLeg.rotateAngleZ);
+            setRotateAngle(this.rightLeg, this.bipedRightLeg.rotateAngleX * 0.95F, this.bipedRightLeg.rotateAngleY, this.bipedRightLeg.rotateAngleZ);
         } else {
-            this.setRotateAngle(this.leftLeg, this.bipedLeftLeg.rotateAngleX * 0.5F, this.bipedLeftLeg.rotateAngleY, this.bipedLeftLeg.rotateAngleZ);
-            this.setRotateAngle(this.rightLeg, this.bipedRightLeg.rotateAngleX * 0.5F, this.bipedRightLeg.rotateAngleY, this.bipedRightLeg.rotateAngleZ);
+            setRotateAngle(this.leftLeg, this.bipedLeftLeg.rotateAngleX * 0.5F, this.bipedLeftLeg.rotateAngleY, this.bipedLeftLeg.rotateAngleZ);
+            setRotateAngle(this.rightLeg, this.bipedRightLeg.rotateAngleX * 0.5F, this.bipedRightLeg.rotateAngleY, this.bipedRightLeg.rotateAngleZ);
         }
 
         if( this.isSneak ) {
@@ -82,7 +82,7 @@ public class ModelSanPlayer
         Arrays.asList(this.modelJson.getMainBoxes()).forEach((box) -> box.showModel = visible);
     }
 
-    public void setRotateAngle(ModelRenderer modelRenderer, float x, float y, float z) {
+    private static void setRotateAngle(ModelRenderer modelRenderer, float x, float y, float z) {
         modelRenderer.rotateAngleX = x;
         modelRenderer.rotateAngleY = y;
         modelRenderer.rotateAngleZ = z;

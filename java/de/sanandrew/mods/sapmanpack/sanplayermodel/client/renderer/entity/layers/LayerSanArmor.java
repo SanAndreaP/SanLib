@@ -1,11 +1,9 @@
-/**
- * ****************************************************************************************************************
- * Authors:   SanAndreasP
- * Copyright: SanAndreasP
- * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
- * http://creativecommons.org/licenses/by-nc-sa/4.0/
- * *****************************************************************************************************************
- */
+/* ******************************************************************************************************************
+   * Authors:   SanAndreasP
+   * Copyright: SanAndreasP
+   * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+   *                http://creativecommons.org/licenses/by-nc-sa/4.0/
+   *******************************************************************************************************************/
 package de.sanandrew.mods.sapmanpack.sanplayermodel.client.renderer.entity.layers;
 
 import com.google.common.collect.HashBasedTable;
@@ -144,7 +142,7 @@ public class LayerSanArmor
 
     @Override
     public ResourceLocation getArmorResource(Entity entity, ItemStack stack, EntityEquipmentSlot slot, String type) {
-        if( stack != null && stack.getItem() instanceof ItemArmor ) {
+        if( stack.getItem() instanceof ItemArmor ) {
             String key = this.getKeyForArmor((ItemArmor) stack.getItem());
             if( this.armorModels.contains(key, slot) ) {
                 ModelSanPlayerArmor armor = this.armorModels.get(key, slot);
@@ -154,7 +152,6 @@ public class LayerSanArmor
             }
         }
 
-        assert stack != null;
         return super.getArmorResource(entity, stack, slot, type);
     }
 

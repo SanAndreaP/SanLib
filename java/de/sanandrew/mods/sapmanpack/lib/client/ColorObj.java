@@ -1,12 +1,13 @@
-/*******************************************************************************************************************
- * Authors:   SanAndreasP
- * Copyright: SanAndreasP
- * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
- *                http://creativecommons.org/licenses/by-nc-sa/4.0/
- *******************************************************************************************************************/
+/* ******************************************************************************************************************
+   * Authors:   SanAndreasP
+   * Copyright: SanAndreasP
+   * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+   *                http://creativecommons.org/licenses/by-nc-sa/4.0/
+   *******************************************************************************************************************/
 package de.sanandrew.mods.sapmanpack.lib.client;
 
-public class ColorObj
+@SuppressWarnings("unused")
+public final class ColorObj
 {
     private int r;
     private int g;

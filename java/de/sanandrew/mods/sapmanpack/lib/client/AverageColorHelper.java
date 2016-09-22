@@ -1,24 +1,23 @@
-/**
- * ****************************************************************************************************************
- * Authors:   SanAndreasP
- * Copyright: SanAndreasP
- * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
- * http://creativecommons.org/licenses/by-nc-sa/4.0/
- * *****************************************************************************************************************
- */
+/* ******************************************************************************************************************
+   * Authors:   SanAndreasP
+   * Copyright: SanAndreasP
+   * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+   *                http://creativecommons.org/licenses/by-nc-sa/4.0/
+   *******************************************************************************************************************/
 package de.sanandrew.mods.sapmanpack.lib.client;
-
-import de.sanandrew.mods.sapmanpack.lib.client.ColorObj;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 
+@SuppressWarnings("unused")
 public final class AverageColorHelper
 {
     /**
      * Gets the average color from an image.
+     * The alpha value of each pixel is used for the color weightness, thus the more transparent the pixel is,
+     * the less it is counted towards the average
      *
      * @param is    The image as InputStream
      * @return the average color
@@ -28,6 +27,17 @@ public final class AverageColorHelper
         return getAverageColor(is, null);
     }
 
+    /**
+     * Gets the average color from an image.
+     * The alpha value of each pixel is used for the color weightness, thus the more transparent the pixel is,
+     * the less it is counted towards the average.
+     * The mask color ({@code maskClr}) will determine which pixels will not be counted towards the average.
+     *
+     * @param is      The image as InputStream
+     * @param maskClr The color to be masked / ignored; Can be {@code null} for no mask color
+     * @return the average color
+     * @throws java.io.IOException when the InputStream cannot be read as an image
+     */
     public static ColorObj getAverageColor(InputStream is, ColorObj maskClr) throws IOException {
         // read texture as BufferedImage from InputStream
         BufferedImage bi = ImageIO.read(is);

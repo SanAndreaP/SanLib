@@ -1,16 +1,15 @@
-/**
- * ****************************************************************************************************************
- * Authors:   SanAndreasP
- * Copyright: SanAndreasP
- * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
- * http://creativecommons.org/licenses/by-nc-sa/4.0/
- * *****************************************************************************************************************
- */
+/* ******************************************************************************************************************
+   * Authors:   SanAndreasP
+   * Copyright: SanAndreasP
+   * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+   *                http://creativecommons.org/licenses/by-nc-sa/4.0/
+   *******************************************************************************************************************/
 package de.sanandrew.mods.sapmanpack.lib.client;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
+import de.sanandrew.mods.sapmanpack.lib.MiscUtils;
 import de.sanandrew.mods.sapmanpack.sanplayermodel.SanPlayerModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBase;
@@ -32,6 +31,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * This class loads a JSON file as a model to be used with entities and TESRs.<br>
+ * It loads it from a ResourceLocation, builds the ModelRenderer boxes and adds them to the ModelBase cube list.<br>
+ * If boxes in the JSON have a parent name, it is added to the children list of a box with the same name from either the JSON itself
+ * or from the ModelBase box list.<br>
+ * If the JSON itself references a parent JSON, then the parent JSON is loaded first, and then the current one.<br>
+ * If defined, this will check if all mandatory box names are loaded.
+ * @param <T> The type of the ModelBase class loading and handling the boxes/cubes.
+ * @param <U> The type of a ModelJson.
+ */
 public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U extends ModelJsonLoader.ModelJson>
         implements IResourceManagerReloadListener
 {
@@ -45,12 +54,30 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
     private Class<U> jsonClass;
     private U jsonInst;
 
+    /**
+     * Creates a new instance of the loader. This uses the default {@link ModelJson} class to parse the JSON values.
+     * @param modelBase The base model class
+     * @param location The location of the model
+     * @param mandatoryNames An optional list of names that are required to exist in the model
+     * @param <T> the type of the base model class
+     * @return a new instance of the JSON model loader.
+     */
     public static <T extends ModelBase & ModelJsonHandler<T, ModelJson>> ModelJsonLoader<T, ModelJson>
             create(T modelBase, ResourceLocation location, String... mandatoryNames)
     {
         return new ModelJsonLoader<>(modelBase, ModelJson.class, location, mandatoryNames);
     }
 
+    /**
+     * Creates a new instance of the loader.
+     * @param modelBase The base model class
+     * @param jsonClass A custom class to be used by the loader to parse the JSON
+     * @param location The location of the model
+     * @param mandatoryNames An optional list of names that are required to exist in the model
+     * @param <T> the type of the base model class
+     * @param <U> the type of the custom parsed class
+     * @return a new instance of the JSON model loader.
+     */
     public static <T extends ModelBase & ModelJsonHandler<T, U>, U extends ModelJsonLoader.ModelJson> ModelJsonLoader<T, U>
             create(T modelBase, Class<U> jsonClass, ResourceLocation location, String... mandatoryNames)
     {
@@ -72,32 +99,33 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
         }
     }
 
+    /**
+     * Removes this loader from the Resource Manager reload listener list.
+     */
     public void unregister() {
         if( Minecraft.getMinecraft().getResourceManager() instanceof SimpleReloadableResourceManager ) {
             ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).reloadListeners.remove(this);
         }
     }
 
-    private void loadJson(ResourceLocation resource, boolean useAsInst) throws IOException, JsonIOException, JsonSyntaxException {
+    private void loadJson(ResourceLocation resource, boolean isMain, Map<String, Boolean> mandatoryChecklist) throws IOException, JsonIOException, JsonSyntaxException {
         try( IResource res = Minecraft.getMinecraft().getResourceManager().getResource(resource);
              BufferedReader in = new BufferedReader(new InputStreamReader(res.getInputStream())) )
         {
             U json = new Gson().fromJson(in, this.jsonClass);
             if( json.parent != null && !json.parent.isEmpty() ) {
-                this.loadJson(new ResourceLocation(json.parent), false);
+                this.loadJson(new ResourceLocation(json.parent), false, mandatoryChecklist);
             }
 
             List<ChildCube> children = new ArrayList<>();
             List<ModelRenderer> mainBoxesList = new ArrayList<>();
-            Map<String, Boolean> mandatoryChecklist = new HashMap<>();
-            Arrays.asList(this.mandatNames).forEach((name) -> mandatoryChecklist.put(name, false));
 
             if( json.cubes != null ) {
                 for (Cube cb : json.cubes) {
                     float baseScale = this.modelBase.getBaseScale();
                     Double scaling;
                     if (cb.scaling != null) {
-                        scaling = calcFormula(cb.scaling.replace("x", Float.toString(baseScale)));
+                        scaling = MiscUtils.calcFormula(cb.scaling.replace("x", Float.toString(baseScale)));
                         if (scaling == null) {
                             scaling = (double) baseScale;
                         }
@@ -125,14 +153,14 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
                 }
             }
 
-//            if( mandatoryChecklist.containsValue(false) ) {
-//                SanPlayerModel.LOG.printf(Level.WARN, "Model %s has not all mandatory boxes! Missing %s", this.resLoc.toString(),
-//                        String.join(", ", mandatoryChecklist.keySet().stream().filter((name) -> !mandatoryChecklist.get(name)).collect(Collectors.toList())));
-//                this.nameToBoxList.clear();
-//                this.boxToNameList.clear();
-//                this.mainBoxes = new ModelRenderer[0];
-//                throw new IOException();
-//            }
+            if( isMain && mandatoryChecklist.containsValue(false) ) {
+                SanPlayerModel.LOG.printf(Level.WARN, "Model %s has not all mandatory boxes! Missing %s", this.resLoc.toString(),
+                                          String.join(", ", mandatoryChecklist.keySet().stream().filter((name) -> !mandatoryChecklist.get(name)).collect(Collectors.toList())));
+                this.nameToBoxList.clear();
+                this.boxToNameList.clear();
+                this.mainBoxes = new ModelRenderer[0];
+                throw new IOException();
+            }
 
             children.forEach((child) -> {
                 if( this.nameToBoxList.containsKey(child.parentName) ) {
@@ -149,20 +177,25 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
                 this.modelBase.setTexture(json.texture);
             }
 
-            if( useAsInst ) {
+            if( isMain ) {
                 this.jsonInst = json;
                 this.loaded = true;
             }
         }
     }
-    
+
+    /**
+     * loads and parses the JSON.
+     */
     public void load() {
         this.mainBoxes = new ModelRenderer[0];
         this.nameToBoxList.clear();
         this.boxToNameList.clear();
 
         try {
-            loadJson(this.resLoc, true);
+            Map<String, Boolean> mandatoryChecklist = new HashMap<>();
+            Arrays.asList(this.mandatNames).forEach((name) -> mandatoryChecklist.put(name, false));
+            loadJson(this.resLoc, true, mandatoryChecklist);
         } catch( IOException ex) {
             SanPlayerModel.LOG.log(Level.INFO, String.format("Can't load model location %s!", this.resLoc.toString()));
             this.nameToBoxList.clear();
@@ -180,18 +213,37 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
         }
     }
 
+    /**
+     * gets a box from the loaders box list
+     * @param name the name of a box
+     * @return A box matching the name
+     */
     public ModelRenderer getBox(String name) {
         return this.nameToBoxList.get(name);
     }
 
+    /**
+     * gets the name from the box specified
+     * @param box the box
+     * @return the name of the box
+     */
+    @SuppressWarnings("unused")
     public String getName(ModelRenderer box) {
         return this.boxToNameList.get(box);
     }
 
+    /**
+     * gets all main boxes (boxes with no parent). Useful for rendering the model.
+     * @return An array of all main boxes
+     */
     public ModelRenderer[] getMainBoxes() {
         return this.mainBoxes;
     }
 
+    /**
+     * Gets the parsed instance of the {@link ModelJson} class
+     * @return A parsed {@link ModelJson} instance
+     */
     public U getModelJsonInstance() {
         return this.jsonInst;
     }
@@ -201,139 +253,18 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
         this.modelBase.onReload(resourceManager, this);
     }
 
+    /**
+     * Wether or not this model is loaded
+     * @return true, if model is loaded, false otherwise
+     */
     public boolean isLoaded() {
         return this.loaded;
     }
 
     /**
-     * Code from http://stackoverflow.com/a/26227947
-     * with minor changes
+     * The default class, which holds all values of the parsed JSON model.
+     * Extend this class and use {@link ModelJsonLoader#create(ModelBase, Class, ResourceLocation, String...)} to load custom properties.
      */
-    public static Double calcFormula(final String str) {
-        return new Object() {
-            int pos = -1, ch;
-
-            void nextChar() {
-                this.ch = ++this.pos < str.length() ? str.charAt(this.pos) : -1;
-            }
-
-            boolean eat(int charToEat) {
-                while( ch == ' ' ) {
-                    this.nextChar();
-                }
-
-                if( ch == charToEat ) {
-                    this.nextChar();
-                    return true;
-                }
-
-                return false;
-            }
-
-            Double parse() {
-                this.nextChar();
-                double x = parseExpression();
-
-                if( this.pos < str.length() ) {
-                    return null;
-                }
-
-                return x;
-            }
-
-            double parseExpression() {
-                double x = this.parseTerm();
-                while(true) {
-                    if( eat('+') ) {
-                        x += parseTerm(); // addition
-                    } else if( eat('-') ) {
-                        x -= parseTerm(); // subtraction
-                    } else {
-                        return x;
-                    }
-                }
-            }
-
-            double parseTerm() {
-                Double x = parseFactor();
-                if( x == null ) {
-                    return 0.0D;
-                }
-                while(true) {
-                    if( eat('*') ) {
-                        x *= parseFactor(); // multiplication
-                    } else if( eat('/') ) {
-                        x /= parseFactor(); // division
-                    } else {
-                        return x;
-                    }
-                }
-            }
-
-            Double parseFactor() {
-                double sign = 1.0D;
-                while( true ) {
-                    if( eat('+') ) {
-                        continue;
-                    }
-                    if( eat('-') ) {
-                        sign *= -1.0D;
-                        continue;
-                    }
-
-                    Double x;
-                    int startPos = this.pos;
-                    if( eat('(') ) { // parentheses
-                        x = parseExpression();
-                        eat(')');
-                    } else if( (ch >= '0' && ch <= '9') || ch == '.' ) { // numbers
-                        while( (ch >= '0' && ch <= '9') || ch == '.' ) {
-                            nextChar();
-                        }
-                        x = Double.parseDouble(str.substring(startPos, this.pos));
-                    } else if( ch >= 'a' && ch <= 'z' ) { // functions
-                        while( ch >= 'a' && ch <= 'z' ) {
-                            nextChar();
-                        }
-                        String func = str.substring(startPos, this.pos);
-                        x = parseFactor();
-                        if( x == null ) {
-                            return null;
-                        }
-                        switch( func ) {
-                            case "sqrt":
-                                x = Math.sqrt(x);
-                                break;
-                            case "sin":
-                                x = Math.sin(Math.toRadians(x));
-                                break;
-                            case "cos":
-                                x = Math.cos(Math.toRadians(x));
-                                break;
-                            case "tan":
-                                x = Math.tan(Math.toRadians(x));
-                                break;
-                            default:
-                                return null;
-                        }
-                    } else {
-                        return null;
-                    }
-
-                    if( eat('^') ) {
-                        Double y = parseFactor();
-                        if( y == null ) {
-                            return null;
-                        }
-                        x = Math.pow(x, y); // exponentiation
-                    }
-
-                    return x * sign;
-                }
-            }
-        }.parse();
-    }
-
     public static class ModelJson
     {
         public String texture;
@@ -343,15 +274,16 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
 
     private static class ChildCube
     {
-        public final ModelRenderer box;
-        public final String parentName;
+        private final ModelRenderer box;
+        private final String parentName;
 
-        protected ChildCube(ModelRenderer box, String parentName) {
+        private ChildCube(ModelRenderer box, String parentName) {
             this.box = box;
             this.parentName = parentName;
         }
     }
 
+    @SuppressWarnings("WeakerAccess")
     private static class Cube
     {
         public String boxName;

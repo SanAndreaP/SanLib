@@ -1,9 +1,9 @@
-/*******************************************************************************************************************
- * Authors:   SanAndreasP
- * Copyright: SanAndreasP
- * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
- *                http://creativecommons.org/licenses/by-nc-sa/4.0/
- *******************************************************************************************************************/
+/* ******************************************************************************************************************
+   * Authors:   SanAndreasP
+   * Copyright: SanAndreasP
+   * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+   *                http://creativecommons.org/licenses/by-nc-sa/4.0/
+   *******************************************************************************************************************/
 package de.sanandrew.mods.sapmanpack.sanplayermodel.client.event;
 
 import com.mojang.authlib.GameProfile;
@@ -34,10 +34,6 @@ public class RenderPlayerEventHandler
     private void lazyLoad() {
         if( this.sanPlayerModel == null ) {
             this.sanPlayerModel = new RenderSanPlayer(Minecraft.getMinecraft().getRenderManager());
-
-//            if( Minecraft.getMinecraft().getResourceManager() instanceof SimpleReloadableResourceManager ) {
-//                ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(this.sanPlayerModel);
-//            }
         }
     }
 
@@ -61,7 +57,6 @@ public class RenderPlayerEventHandler
     }
 
     @SubscribeEvent
-    @SuppressWarnings( "unchecked" )
     public void onHandRender(RenderHandEvent event) {
         this.lazyLoad();
 
@@ -72,7 +67,7 @@ public class RenderPlayerEventHandler
         if( mc.gameSettings.thirdPersonView == 0 && !flag && !mc.gameSettings.hideGUI && mc.playerController != null && !mc.playerController.isSpectator() ) {
             if( isPlayerNameOrUuidEqual(mc.thePlayer, SANPLAYER_NAMES_UUID) ) {
                 String skinType = mc.thePlayer.getSkinType();
-                Render<AbstractClientPlayer> rend = mc.getRenderManager().getEntityRenderObject((AbstractClientPlayer) mc.thePlayer);
+                Render<AbstractClientPlayer> rend = mc.getRenderManager().getEntityRenderObject(mc.thePlayer);
                 RenderPlayer skin = mc.getRenderManager().getSkinMap().get(skinType);
 
                 mc.getRenderManager().entityRenderMap.put(mc.thePlayer.getClass(), this.sanPlayerModel);
@@ -92,7 +87,7 @@ public class RenderPlayerEventHandler
         GL11.glPopMatrix();
     }
 
-    public static boolean isPlayerNameOrUuidEqual(EntityPlayer e, String... namesUuids) {
+    private static boolean isPlayerNameOrUuidEqual(EntityPlayer e, String... namesUuids) {
         for( String val : namesUuids ) {
             GameProfile profile = e.getGameProfile();
             if( (UuidUtils.isStringUuid(val) && profile.getId().equals(UUID.fromString(val))) || profile.getName().equals(val) ) {

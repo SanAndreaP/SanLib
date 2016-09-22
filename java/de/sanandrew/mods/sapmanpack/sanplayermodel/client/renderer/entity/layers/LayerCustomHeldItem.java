@@ -1,11 +1,9 @@
-/**
- * ****************************************************************************************************************
- * Authors:   SanAndreasP
- * Copyright: SanAndreasP
- * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
- * http://creativecommons.org/licenses/by-nc-sa/4.0/
- * *****************************************************************************************************************
- */
+/* ******************************************************************************************************************
+   * Authors:   SanAndreasP
+   * Copyright: SanAndreasP
+   * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+   *                http://creativecommons.org/licenses/by-nc-sa/4.0/
+   *******************************************************************************************************************/
 package de.sanandrew.mods.sapmanpack.sanplayermodel.client.renderer.entity.layers;
 
 import de.sanandrew.mods.sapmanpack.sanplayermodel.client.renderer.entity.RenderSanPlayer;
@@ -20,7 +18,7 @@ import net.minecraft.util.EnumHandSide;
 public class LayerCustomHeldItem
         implements LayerRenderer<EntityPlayer>
 {
-    protected final RenderSanPlayer renderer;
+    private final RenderSanPlayer renderer;
 
     public LayerCustomHeldItem(RenderSanPlayer renderer) {
         this.renderer = renderer;

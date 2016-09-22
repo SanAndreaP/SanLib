@@ -1,14 +1,13 @@
-/*******************************************************************************************************************
- * Authors:   SanAndreasP
- * Copyright: SanAndreasP
- * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
- *                http://creativecommons.org/licenses/by-nc-sa/4.0/
- *******************************************************************************************************************/
+/* ******************************************************************************************************************
+   * Authors:   SanAndreasP
+   * Copyright: SanAndreasP
+   * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+   *                http://creativecommons.org/licenses/by-nc-sa/4.0/
+   *******************************************************************************************************************/
 package de.sanandrew.mods.sapmanpack.sanplayermodel.client.model;
 
 import de.sanandrew.mods.sapmanpack.lib.client.ModelJsonHandler;
 import de.sanandrew.mods.sapmanpack.lib.client.ModelJsonLoader;
-import de.sanandrew.mods.sapmanpack.sanplayermodel.client.Resources;
 import de.sanandrew.mods.sapmanpack.sanplayermodel.client.renderer.entity.RenderSanPlayer;
 import de.sanandrew.mods.sapmanpack.sanplayermodel.client.renderer.entity.layers.LayerSanArmor;
 import net.minecraft.client.model.ModelBiped;
@@ -129,18 +128,8 @@ public class ModelSanPlayerArmor
         modelRenderer.rotateAngleZ = z;
     }
 
-    public void setRotationPoint(ModelRenderer modelRenderer, float x, float y, float z) {
-        modelRenderer.rotationPointX = x;
-        modelRenderer.rotationPointY = y;
-        modelRenderer.rotationPointZ = z;
-    }
-
     public boolean isModelLoaded() {
         return this.modelJson.isLoaded();
-    }
-
-    public void unregisterLoader() {
-        this.modelJson.unregister();
     }
 
     @Override
