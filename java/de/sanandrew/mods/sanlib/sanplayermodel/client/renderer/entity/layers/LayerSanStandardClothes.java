@@ -8,6 +8,8 @@ package de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.layers;
 
 import de.sanandrew.mods.sanlib.sanplayermodel.SanPlayerModel;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.model.ModelSanPlayerArmor;
+import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.RenderSanPlayer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderLivingBase;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
@@ -26,12 +28,12 @@ import java.util.function.Supplier;
 public class LayerSanStandardClothes
         implements LayerRenderer<EntityLivingBase>
 {
-    private final RenderLivingBase<?> renderer;
+    private final RenderSanPlayer renderer;
     private final Map<EntityEquipmentSlot, ModelSanPlayerArmor> armorModels;
 
     public float armTilt;
 
-    public LayerSanStandardClothes(RenderLivingBase<?> rendererIn) {
+    public LayerSanStandardClothes(RenderSanPlayer rendererIn) {
         this.renderer = rendererIn;
         this.armorModels = new EnumMap<>(EntityEquipmentSlot.class);
     }
@@ -39,10 +41,16 @@ public class LayerSanStandardClothes
     @Override
     public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
         this.armTilt = 0.0F;
-        this.renderClothLayer(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale, EntityEquipmentSlot.CHEST);
-        this.renderClothLayer(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale, EntityEquipmentSlot.LEGS);
-        this.renderClothLayer(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale, EntityEquipmentSlot.FEET);
-        this.renderClothLayer(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale, EntityEquipmentSlot.HEAD);
+
+        boolean visibleOrOutline = !entitylivingbaseIn.isInvisible() || this.renderer.isOutlineRendering();
+        boolean visibleToPlayer = !visibleOrOutline && !entitylivingbaseIn.isInvisibleToPlayer(Minecraft.getMinecraft().thePlayer);
+
+        if( visibleOrOutline || visibleToPlayer ) {
+            this.renderClothLayer(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale, EntityEquipmentSlot.CHEST);
+            this.renderClothLayer(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale, EntityEquipmentSlot.LEGS);
+            this.renderClothLayer(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale, EntityEquipmentSlot.FEET);
+            this.renderClothLayer(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale, EntityEquipmentSlot.HEAD);
+        }
     }
 
     @Override

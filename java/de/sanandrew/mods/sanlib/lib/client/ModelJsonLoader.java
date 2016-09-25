@@ -29,6 +29,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
 /**
@@ -54,6 +56,8 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
     private boolean loaded;
     private Class<U> jsonClass;
     private U jsonInst;
+
+    public static final Queue<ModelJsonLoader<?, ?>> REGISTERED_JSON_LOADERS = new ConcurrentLinkedQueue<>();
 
     /**
      * Creates a new instance of the loader. This uses the default {@link ModelJson} class to parse the JSON values.
@@ -98,6 +102,8 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
         if( Minecraft.getMinecraft().getResourceManager() instanceof SimpleReloadableResourceManager ) {
             ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(this);
         }
+
+        REGISTERED_JSON_LOADERS.add(this);
     }
 
     /**
@@ -107,19 +113,26 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
         if( Minecraft.getMinecraft().getResourceManager() instanceof SimpleReloadableResourceManager ) {
             ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).reloadListeners.remove(this);
         }
+
+        REGISTERED_JSON_LOADERS.remove(this);
     }
 
-    private void loadJson(ResourceLocation resource, boolean isMain, Map<String, Boolean> mandatoryChecklist) throws IOException, JsonIOException, JsonSyntaxException {
+    private void loadJson(ResourceLocation resource, Map<String, Boolean> mandatoryChecklist)
+            throws IOException, JsonIOException, JsonSyntaxException
+    {
+        this.loadJson(resource, true, mandatoryChecklist, new HashMap<>(), new HashMap<>());
+    }
+
+    private void loadJson(ResourceLocation resource, boolean isMain, Map<String, Boolean> mandatoryChecklist, Map<String, ChildCube> children, Map<String, ModelRenderer> mainBoxesList)
+            throws IOException, JsonIOException, JsonSyntaxException
+    {
         try( IResource res = Minecraft.getMinecraft().getResourceManager().getResource(resource);
              BufferedReader in = new BufferedReader(new InputStreamReader(res.getInputStream())) )
         {
             U json = new Gson().fromJson(in, this.jsonClass);
             if( json.parent != null && !json.parent.isEmpty() ) {
-                this.loadJson(new ResourceLocation(json.parent), false, mandatoryChecklist);
+                this.loadJson(new ResourceLocation(json.parent), false, mandatoryChecklist, children, mainBoxesList);
             }
-
-            List<ChildCube> children = new ArrayList<>();
-            List<ModelRenderer> mainBoxesList = new ArrayList<>();
 
             if( json.cubes != null ) {
                 for (Cube cb : json.cubes) {
@@ -141,44 +154,50 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
                             .getBox(cb.offsetX, cb.offsetY, cb.offsetZ, cb.sizeX, cb.sizeY, cb.sizeZ, scaling.floatValue());
                     box.isHidden = cb.isHidden;
 
-                    this.nameToBoxList.put(cb.boxName, box);
-                    this.boxToNameList.put(box, cb.boxName);
-
                     if (cb.parentBox != null && !cb.parentBox.isEmpty()) {
-                        children.add(new ChildCube(box, cb.parentBox));
+                        children.put(box.boxName, new ChildCube(box, cb.parentBox));
                     } else {
-                        mainBoxesList.add(box);
+                        mainBoxesList.put(box.boxName, box);
                     }
 
                     mandatoryChecklist.put(cb.boxName, true);
                 }
             }
 
-            if( isMain && mandatoryChecklist.containsValue(false) ) {
-                SanPlayerModel.LOG.printf(Level.WARN, "Model %s has not all mandatory boxes! Missing %s", this.resLoc.toString(),
-                                          String.join(", ", mandatoryChecklist.keySet().stream().filter((name) -> !mandatoryChecklist.get(name)).collect(Collectors.toList())));
-                this.nameToBoxList.clear();
-                this.boxToNameList.clear();
-                this.mainBoxes = new ModelRenderer[0];
-                throw new IOException();
-            }
-
-            children.forEach((child) -> {
-                if( this.nameToBoxList.containsKey(child.parentName) ) {
-                    this.nameToBoxList.get(child.parentName).addChild(child.box);
-                } else {
-                    this.modelBase.boxList.stream().filter((box) -> box.boxName != null && box.boxName.equals(child.parentName)).forEach((box) -> box.addChild(child.box));
-                }
-            });
-
-            mainBoxesList.addAll(Arrays.asList(this.mainBoxes));
-            this.mainBoxes = mainBoxesList.toArray(new ModelRenderer[mainBoxesList.size()]);
-
             if( json.texture != null && !json.texture.isEmpty() ) {
                 this.modelBase.setTexture(json.texture);
             }
 
             if( isMain ) {
+                if( mandatoryChecklist.containsValue(false) ) {
+                    SanPlayerModel.LOG.printf(Level.WARN, "Model %s has not all mandatory boxes! Missing %s", this.resLoc.toString(), String
+                            .join(", ", mandatoryChecklist.keySet().stream().filter((name) -> !mandatoryChecklist.get(name)).collect(Collectors.toList())));
+                    this.nameToBoxList.clear();
+                    this.boxToNameList.clear();
+                    this.mainBoxes = new ModelRenderer[0];
+                    throw new IOException();
+                }
+
+                mainBoxesList.forEach((name, box) -> {
+                    this.nameToBoxList.put(name, box);
+                    this.boxToNameList.put(box, name);
+                });
+
+                children.forEach((name, child) -> {
+                    this.nameToBoxList.put(name, child.box);
+                    this.boxToNameList.put(child.box, name);
+                });
+
+                children.forEach((name, child) -> {
+                    if( this.nameToBoxList.containsKey(child.parentName) ) {
+                        this.nameToBoxList.get(child.parentName).addChild(child.box);
+                    } else {
+                        this.modelBase.boxList.stream().filter((box) -> box.boxName != null && box.boxName.equals(child.parentName)).forEach((box) -> box.addChild(child.box));
+                    }
+                });
+
+                this.mainBoxes = mainBoxesList.values().toArray(new ModelRenderer[mainBoxesList.size()]);
+
                 this.jsonInst = json;
                 this.loaded = true;
             }
@@ -196,7 +215,7 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
         try {
             Map<String, Boolean> mandatoryChecklist = new HashMap<>();
             Arrays.asList(this.mandatNames).forEach((name) -> mandatoryChecklist.put(name, false));
-            loadJson(this.resLoc, true, mandatoryChecklist);
+            loadJson(this.resLoc, mandatoryChecklist);
         } catch( IOException ex) {
             SanPlayerModel.LOG.log(Level.INFO, String.format("Can't load model location %s!", this.resLoc.toString()));
             this.nameToBoxList.clear();

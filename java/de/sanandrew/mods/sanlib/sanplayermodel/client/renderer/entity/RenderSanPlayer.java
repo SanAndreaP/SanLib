@@ -88,4 +88,8 @@ public class RenderSanPlayer
         this.layerArmor.renderHand(clientPlayer, 0.0625F, EnumHandSide.LEFT);
         GlStateManager.disableBlend();
     }
+
+    public boolean isOutlineRendering() {
+        return this.renderOutlines;
+    }
 }

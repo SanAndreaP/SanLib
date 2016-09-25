@@ -119,7 +119,7 @@ public class ModelSanPlayerArmor
     public void setInvisible(boolean visible) {
         super.setInvisible(visible);
 
-        Arrays.asList(this.modelJson.getMainBoxes()).forEach((box) -> box.showModel = visible);
+        Arrays.asList(this.modelJson.getMainBoxes()).forEach((box) -> box.showModel = true);
     }
 
     public void setRotateAngle(ModelRenderer modelRenderer, float x, float y, float z) {

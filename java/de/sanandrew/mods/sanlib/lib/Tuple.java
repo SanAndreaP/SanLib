@@ -17,6 +17,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.function.Function;
 
 public class Tuple
         implements Serializable, Comparable<Tuple>, Iterable<Object>
@@ -45,6 +46,10 @@ public class Tuple
         }
 
         return (T) this.values[index].value;
+    }
+
+    public <T> boolean checkValue(int index, Function<T, Boolean> checkMtd) {
+        return checkMtd.apply(getValue(index));
     }
 
     public static Tuple readFromStream(InputStream stream) {

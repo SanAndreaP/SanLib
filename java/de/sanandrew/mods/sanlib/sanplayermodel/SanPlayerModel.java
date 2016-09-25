@@ -23,8 +23,8 @@ public class SanPlayerModel
 
     public static final Logger LOG = LogManager.getLogger(ID);
 
-    public static final String COMMON_PROXY = "de.sanandrew.mods.sapmanpack.sanplayermodel.CommonProxy";
-    public static final String CLIENT_PROXY = "de.sanandrew.mods.sapmanpack.sanplayermodel.client.ClientProxy";
+    public static final String COMMON_PROXY = "de.sanandrew.mods.sanlib.sanplayermodel.CommonProxy";
+    public static final String CLIENT_PROXY = "de.sanandrew.mods.sanlib.sanplayermodel.client.ClientProxy";
 
     @Mod.Instance(ID)
     public static SanPlayerModel instance;

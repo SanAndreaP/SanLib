@@ -1,0 +1,4 @@
+{
+  "parent": "sanplayermodel:models/entity/sanplayer_noarmor_chest.json",
+  "texture": "sanplayermodel:textures/entity/player/minecraft/iron_chest.png"
+}
