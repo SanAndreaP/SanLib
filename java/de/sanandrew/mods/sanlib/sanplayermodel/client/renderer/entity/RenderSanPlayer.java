@@ -67,6 +67,7 @@ public class RenderSanPlayer
         this.myModel.isSneak = false;
         this.myModel.setRotationAngles(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F, clientPlayer);
         this.myModel.rightArm.rotateAngleX = 0.0F;
+        this.myModel.rightArm.rotateAngleZ = this.myModel.bipedRightArm.rotateAngleZ;
         this.myModel.rightArm.render(0.0625F);
         this.layerClothes.renderHand(clientPlayer, 0.0625F, EnumHandSide.RIGHT);
         this.layerArmor.renderHand(clientPlayer, 0.0625F, EnumHandSide.RIGHT);
@@ -83,6 +84,7 @@ public class RenderSanPlayer
         this.myModel.isSneak = false;
         this.myModel.setRotationAngles(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F, clientPlayer);
         this.myModel.leftArm.rotateAngleX = 0.0F;
+        this.myModel.leftArm.rotateAngleZ = this.myModel.bipedLeftArm.rotateAngleZ;
         this.myModel.leftArm.render(0.0625F);
         this.layerClothes.renderHand(clientPlayer, 0.0625F, EnumHandSide.LEFT);
         this.layerArmor.renderHand(clientPlayer, 0.0625F, EnumHandSide.LEFT);

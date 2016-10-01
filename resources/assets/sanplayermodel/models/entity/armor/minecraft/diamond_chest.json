@@ -80,6 +80,51 @@
       "offsetZ": -2.0,
       "scaling": "x + 0.50",
       "parentBox": "rightArm"
+    },
+    {
+      "boxName": "bowC",
+      "sizeX": 1,
+      "sizeY": 1,
+      "sizeZ": 1,
+      "textureX": 24,
+      "textureY": 9,
+      "textureWidth": 64,
+      "textureHeight": 64,
+      "offsetX": -0.5,
+      "offsetY": 6.75,
+      "offsetZ": 2.0,
+      "scaling": "x + 0.25",
+      "parentBox": "body"
+    },
+    {
+      "boxName": "bowL",
+      "sizeX": 2,
+      "sizeY": 2,
+      "sizeZ": 1,
+      "textureX": 24,
+      "textureY": 6,
+      "textureWidth": 64,
+      "textureHeight": 64,
+      "offsetX": 1.0,
+      "offsetY": 6.25,
+      "offsetZ": 2.25,
+      "scaling": "x + 0.25",
+      "parentBox": "body"
+    },
+    {
+      "boxName": "bowR",
+      "sizeX": 2,
+      "sizeY": 2,
+      "sizeZ": 1,
+      "textureX": 24,
+      "textureY": 6,
+      "textureWidth": 64,
+      "textureHeight": 64,
+      "offsetX": -3.0,
+      "offsetY": 6.25,
+      "offsetZ": 2.25,
+      "scaling": "x + 0.25",
+      "parentBox": "body"
     }
   ]
 }

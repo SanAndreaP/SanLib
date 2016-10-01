@@ -1,5 +1,4 @@
 {
-  "parent": "sanplayermodel:models/entity/sanplayer_noarmor_feet.json",
   "texture": "sanplayermodel:textures/entity/player/minecraft/iron_feet.png",
   "cubes": [
     {
