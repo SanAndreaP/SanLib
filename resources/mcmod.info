@@ -1,31 +1,30 @@
 [
-{
-  "modid": "sanlib",
-  "name": "SanAndreasPs Mod Library",
-  "description": "A library made for and required by all my mods.",
-  "version": "1.0.0",
-  "mcversion": "1.10.2",
-  "url": "",
-  "updateUrl": "",
-  "authors": ["SanAndreasP"],
-  "credits": "",
-  "logoFile": "",
-  "screenshots": [],
-  "dependencies": []
-},
-{
-  "modid": "sanplayermodel",
-  "name": "SanAndreasPs Player Model",
-  "description": "A mod that's just adding a custom player model for myself.",
-  "version": "1.0.0",
-  "mcversion": "1.10.2",
-  "url": "",
-  "updateUrl": "",
-  "authors": ["SanAndreasP"],
-  "credits": "",
-  "logoFile": "",
-  "parent":"sanlib",
-  "screenshots": [],
-  "dependencies": []
-}
+  {
+    "modid": "sanlib",
+    "name": "SanAndreasPs Mod Library",
+    "description": "A library made for and required by all my mods.",
+    "version": "1.0.0",
+    "mcversion": "1.10.2",
+    "logoFile": "/assets/sanlib/logo.png",
+    "url": "",
+    "updateUrl": "",
+    "authors": ["SanAndreasP"],
+    "credits": "",
+    "screenshots": [],
+    "dependencies": []
+  },
+  {
+    "modid": "sanplayermodel",
+    "name": "SanAndreasPs Player Model",
+    "description": "A mod that's just adding a custom player model for myself.",
+    "version": "1.0.0",
+    "mcversion": "1.10.2",
+    "url": "",
+    "updateUrl": "",
+    "authors": ["SanAndreasP"],
+    "credits": "",
+    "parent":"sanlib",
+    "screenshots": [],
+    "dependencies": []
+  }
 ]

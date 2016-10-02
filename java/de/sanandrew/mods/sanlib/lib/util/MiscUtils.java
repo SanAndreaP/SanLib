@@ -6,7 +6,7 @@
    *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.lib.util;
 
-import java.util.Random;
+import de.sanandrew.mods.sanlib.lib.XorShiftRandom;
 
 /**
  * Utility class for miscellaneous tasks and methods
@@ -14,7 +14,7 @@ import java.util.Random;
 @SuppressWarnings("unused")
 public final class MiscUtils
 {
-    public static final Random RNG = new Random();
+    public static final XorShiftRandom RNG = new XorShiftRandom();
 
     /** Method to calculate a value based on a formula represented as a {@link java.lang.String}.<br>
      * <i>Code from <a href="http://stackoverflow.com/a/26227947">http://stackoverflow.com/a/26227947</a> with minor changes</i>

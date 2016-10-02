@@ -39,22 +39,34 @@ public class CommandSanLibElem
         java.util.Random rnd = new Random(0xdeadbeef);
         long nt1, nt2;
 
+//        for( int i = 0; i < 100; i++ ) {
+//            System.out.println( rng.randomDouble() );
+//        }
+
+//        int nulls = 0;
+//        for( int i = 0; i < 1_000_000_000; i++ ) {
+//            if( rng.randomInt(100) == 0 ) {
+//                nulls++;
+//            }
+//        }
+//        System.out.println(nulls);
+
         for(int j = 0; j < 200; j++) {
             nt1 = System.nanoTime();
             for( int i = 0; i < 1_000_000_000; i++ ) {
-                rnd.nextDouble();
+                rnd.nextLong();
             }
             nt2 = System.nanoTime();
 
-            SanLib.LOG.log(Level.INFO, String.format("Nanoseconds used for generating with java.util.Random x1Hnd: %,d", nt2 - nt1));
+            SanLib.LOG.log(Level.INFO, String.format("Nanoseconds used for generating with java.util.Random x1Bil: %,d", nt2 - nt1));
 
             nt1 = System.nanoTime();
             for( int i = 0; i < 1_000_000_000; i++ ) {
-                rng.randomDouble();
+                rng.randomLong();
             }
             nt2 = System.nanoTime();
 
-            SanLib.LOG.log(Level.INFO, String.format("Nanoseconds used for generating with XorShiftRandom x1Hnd:   %,d", nt2 - nt1));
+            SanLib.LOG.log(Level.INFO, String.format("Nanoseconds used for generating with XorShiftRandom x1Bil:   %,d", nt2 - nt1));
         }
     }
 }
