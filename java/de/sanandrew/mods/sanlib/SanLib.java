@@ -19,17 +19,18 @@ import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(modid = SanLib.ID, version = SanLib.VERSION, name = "San's Library")
+@Mod(modid = SanLib.ID, version = SanLib.VERSION, name = "San's Library", acceptedMinecraftVersions = SanLib.MCVER)
 public class SanLib
 {
     public static final String ID = "sanlib";
     public static final String VERSION = "1.0.0";
     public static final String CHANNEL = "SanLibNWCH";
+    public static final String MCVER = "[1.10, 1.11)";
 
     public static final Logger LOG = LogManager.getLogger(ID);
 
-    public static final String COMMON_PROXY = "de.sanandrew.mods.sanlib.CommonProxy";
-    public static final String CLIENT_PROXY = "de.sanandrew.mods.sanlib.client.ClientProxy";
+    private static final String COMMON_PROXY = "de.sanandrew.mods.sanlib.CommonProxy";
+    private static final String CLIENT_PROXY = "de.sanandrew.mods.sanlib.client.ClientProxy";
 
     public static SimpleNetworkWrapper network;
 

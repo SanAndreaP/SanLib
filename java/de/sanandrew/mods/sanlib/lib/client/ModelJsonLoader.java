@@ -135,12 +135,12 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
             }
 
             if( json.cubes != null ) {
-                for (Cube cb : json.cubes) {
+                for( Cube cb : json.cubes ) {
                     float baseScale = this.modelBase.getBaseScale();
                     Double scaling;
-                    if (cb.scaling != null) {
+                    if( cb.scaling != null ) {
                         scaling = MiscUtils.calcFormula(cb.scaling.replace("x", Float.toString(baseScale)));
-                        if (scaling == null) {
+                        if( scaling == null ) {
                             scaling = (double) baseScale;
                         }
                     } else {
@@ -154,7 +154,7 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
                             .getBox(cb.offsetX, cb.offsetY, cb.offsetZ, cb.sizeX, cb.sizeY, cb.sizeZ, scaling.floatValue());
                     box.isHidden = cb.isHidden;
 
-                    if (cb.parentBox != null && !cb.parentBox.isEmpty()) {
+                    if( cb.parentBox != null && !cb.parentBox.isEmpty() ) {
                         children.put(box.boxName, new ChildCube(box, cb.parentBox));
                     } else {
                         mainBoxesList.put(box.boxName, box);
@@ -170,8 +170,8 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
 
             if( isMain ) {
                 if( mandatoryChecklist.containsValue(false) ) {
-                    SanPlayerModel.LOG.printf(Level.WARN, "Model %s has not all mandatory boxes! Missing %s", this.resLoc.toString(), String
-                            .join(", ", mandatoryChecklist.keySet().stream().filter((name) -> !mandatoryChecklist.get(name)).collect(Collectors.toList())));
+                    SanPlayerModel.LOG.printf(Level.WARN, "Model %s has not all mandatory boxes! Missing %s", this.resLoc.toString(),
+                            String.join(", ", mandatoryChecklist.keySet().stream().filter((name) -> !mandatoryChecklist.get(name)).collect(Collectors.toList())));
                     this.nameToBoxList.clear();
                     this.boxToNameList.clear();
                     this.mainBoxes = new ModelRenderer[0];

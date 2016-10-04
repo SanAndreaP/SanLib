@@ -7,11 +7,11 @@
 package de.sanandrew.mods.sanlib.client;
 
 import de.sanandrew.mods.sanlib.CommonProxy;
-import de.sanandrew.mods.sanlib.lib.Tuple;
 import de.sanandrew.mods.sanlib.lib.client.ModelJsonLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 
+@SuppressWarnings("unused")
 public class ClientProxy
         extends CommonProxy
 {

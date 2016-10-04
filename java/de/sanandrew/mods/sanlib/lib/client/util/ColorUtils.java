@@ -4,22 +4,26 @@
    * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
    *                http://creativecommons.org/licenses/by-nc-sa/4.0/
    *******************************************************************************************************************/
-package de.sanandrew.mods.sanlib.lib.client;
+package de.sanandrew.mods.sanlib.lib.client.util;
+
+import de.sanandrew.mods.sanlib.lib.client.ColorObj;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * An utility class for colors
+ */
 @SuppressWarnings("unused")
-public final class AverageColorHelper
+public final class ColorUtils
 {
     /**
      * Gets the average color from an image.
      * The alpha value of each pixel is used for the color weightness, thus the more transparent the pixel is,
      * the less it is counted towards the average
-     *
-     * @param is    The image as InputStream
+     * @param is The image as InputStream
      * @return the average color
      * @throws java.io.IOException when the InputStream cannot be read as an image
      */
@@ -57,10 +61,10 @@ public final class AverageColorHelper
                     }
                 }
 
-                red += color.r() * color.fa();              // add RGB from the pixel to the RGB storage variables, increase pixel counter
-                green += color.g() * color.fa();
-                blue += color.b() * color.fa();
-                count += color.fa();
+                red += color.red() * color.fAlpha();              // add RGB from the pixel to the RGB storage variables, increase pixel counter
+                green += color.green() * color.fAlpha();
+                blue += color.blue() * color.fAlpha();
+                count += color.fAlpha();
             }
         }
 
