@@ -1,3 +1,9 @@
+/* ******************************************************************************************************************
+   * Authors:   SanAndreasP
+   * Copyright: SanAndreasP
+   * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+   *                http://creativecommons.org/licenses/by-nc-sa/4.0/
+   *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.lib.util;
 
 import com.google.common.collect.Maps;
@@ -6,6 +12,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+/**
+ * An utility class for Java reflection.
+ */
 @SuppressWarnings("unused")
 public final class ReflectionUtils
 {
@@ -27,11 +36,11 @@ public final class ReflectionUtils
      * @param className: The name of the class you are looking for.
      * @return boolean: Whether or not the specified class exists in the current environment.
      */
-    public static boolean doesClassExist (String className) {
+    public static boolean doesClassExist(String className) {
         try {
             Class.forName(className, false, null);
             return true;
-        } catch( ClassNotFoundException exception ) {
+        } catch( ClassNotFoundException | NoClassDefFoundError exception ) {
             return false;
         }
     }
@@ -40,9 +49,9 @@ public final class ReflectionUtils
      * Retrieves a Class by its name.
      * 
      * @param className: The name of the class you are trying to get.
-     * @return <T> Class<T>: The Class that was retrieved.
+     * @return The Class that was retrieved.
      */
-    public static <T> Class<T> getClass (String className) {
+    public static <T> Class<T> getClass(String className) {
         try {
             return getCasted(Class.forName(className));
         } catch (Exception exception) {
@@ -59,7 +68,7 @@ public final class ReflectionUtils
      * @param srgName: The SRG mapping for the field name.
      * @param value: The new value being set for the Field.
      */
-    public static <T, E> void setCachedFieldValue (Class<? super E> classToAccess, E instance, String mcpName, String srgName, T value) {
+    public static <T, E> void setCachedFieldValue(Class<? super E> classToAccess, E instance, String mcpName, String srgName, T value) {
         Field field = getCachedField(classToAccess, mcpName, srgName);
         
         try {
@@ -76,9 +85,9 @@ public final class ReflectionUtils
      * @param instance: An instance of the Class that contains the Field.
      * @param mcpName: The MCP mapping for the field name.
      * @param srgName: The SRG mapping for the field name.
-     * @return <T, E> T: The value that the Field was set to.
+     * @return The value that the Field was set to.
      */
-    public static <T, E> T getCachedFieldValue (Class<? super E> classToAccess, E instance, String mcpName, String srgName) {
+    public static <T, E> T getCachedFieldValue(Class<? super E> classToAccess, E instance, String mcpName, String srgName) {
         Field field = getCachedField(classToAccess, mcpName, srgName);
         
         try {
@@ -97,9 +106,9 @@ public final class ReflectionUtils
      * @param srgName: The SRG mapping for the method name.
      * @param parameterTypes: The parameters used by this Method.
      * @param parameterValues: The parameter values to pass to the method.
-     * @return <T, E> T: The data returned by the method.
+     * @return The data returned by the method.
      */
-    public static <T, E> T invokeCachedMethod (Class<? super E> classToAccess, E instance, String mcpName, String srgName, Class<?>[] parameterTypes, Object[] parameterValues) {
+    public static <T, E> T invokeCachedMethod(Class<? super E> classToAccess, E instance, String mcpName, String srgName, Class<?>[] parameterTypes, Object[] parameterValues) {
         Method method = getCachedMethod(classToAccess, mcpName, srgName, parameterTypes);
         
         try {
@@ -116,9 +125,9 @@ public final class ReflectionUtils
      * @param classToAccess: The Class that contains the field being accessed.
      * @param mcpName: The MCP mapping for the field name.
      * @param srgName: The SRG mapping for the field name.
-     * @return Field: A Field object which represents the field being accessed.
+     * @return A Field object which represents the field being accessed.
      */
-    public static Field getCachedField (Class<?> classToAccess, String mcpName, String srgName) {
+    public static Field getCachedField(Class<?> classToAccess, String mcpName, String srgName) {
         String key = classToAccess.getCanonicalName() + '_' + srgName;
         
         if( cachedFields.containsKey(key) ) {
@@ -135,9 +144,9 @@ public final class ReflectionUtils
      * @param classToAccess: The Class that contains the field being accessed.
      * @param mcpName: The MCP mapping for the field name.
      * @param srgName: The SRG mapping for the field name.
-     * @return Field: A Field object which represents the field being accessed.
+     * @return A Field object which represents the field being accessed.
      */
-    private static Field cacheAccessedField (Class<?> classToAccess, String mcpName, String srgName) {
+    private static Field cacheAccessedField(Class<?> classToAccess, String mcpName, String srgName) {
         Field method;
         String key = classToAccess.getCanonicalName() + '_' + srgName;
         
@@ -166,9 +175,9 @@ public final class ReflectionUtils
      * @param mcpName: The MCP mapping for the method name.
      * @param srgName: The SRG mapping for the method name.
      * @param parameterTypes: The parameters that are used by the method.
-     * @return Method: A Method object which represents the method being found.
+     * @return A Method object which represents the method being found.
      */
-    public static Method getCachedMethod (Class<?> classToAccess, String mcpName, String srgName, Class<?>... parameterTypes) {
+    public static Method getCachedMethod(Class<?> classToAccess, String mcpName, String srgName, Class<?>... parameterTypes) {
         String key = classToAccess.getCanonicalName() + '_' + srgName;
         
         if( cachedMethods.containsKey(key) ) {
@@ -186,9 +195,9 @@ public final class ReflectionUtils
      * @param mcpName: The MCP mapping for the method name.
      * @param srgName: The SRG mapping for the method name.
      * @param parameterTypes: The parameters that are used by this method.
-     * @return Method: A Method object which represents the newly cached method.
+     * @return A Method object which represents the newly cached method.
      */
-    private static Method cacheAccessedMethod (Class<?> classToAccess, String mcpName, String srgName, Class<?>... parameterTypes) {
+    private static Method cacheAccessedMethod(Class<?> classToAccess, String mcpName, String srgName, Class<?>... parameterTypes) {
         Method method;
         String key = classToAccess.getCanonicalName() + '_' + srgName;
         
@@ -216,7 +225,7 @@ public final class ReflectionUtils
      * @return <T> T: The Object as a generic Type.
      */
     @SuppressWarnings("unchecked")
-    public static <T> T getCasted (Object obj) {
+    public static <T> T getCasted(Object obj) {
         return (T) obj;
     }
     

@@ -15,6 +15,9 @@ import java.util.regex.Pattern;
  */
 public final class UuidUtils
 {
+    /**
+     * An empty UUID for use as a "null" UUID.
+     */
     public static final UUID EMPTY_UUID = new UUID(0, 0);
 
     private static final Pattern UUID_PTRN = Pattern.compile("[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}", Pattern.CASE_INSENSITIVE);
@@ -28,6 +31,21 @@ public final class UuidUtils
         return UUID_PTRN.matcher(uuid).matches();
     }
 
+    /**
+     * Compares two objects if both can be represented as UUIDs and have an equal value.<br>
+     * Before comparison, both Objects will be converted into an UUID instance:
+     * <ul>
+     *     <li>If one of the values is a string and represents a valid UUID, it is converted via {@link UUID#fromString(String)}</li>
+     *     <li>If one of the values is a byte array, it is converted via {@link UUID#nameUUIDFromBytes(byte[])}</li>
+     *     <li>If one of the values is an UUID instance, it is simply casted</li>
+     *     <li>If one of the values cannot be converted, {@code null} will be used instead</li>
+     * </ul>
+     * After conversion, both converted values are compared for their equality with eachother.<br>
+     * They're considered equal if and only if both are not {@code null} and the {@link UUID#equals(Object)} method on one of the instances returns {@code true}
+     * @param uuid1 The first object
+     * @param uuid2 The second object
+     * @return true if both objects are UUIDs and are equal, false otherwise
+     */
     public static boolean areUuidsEqual(Object uuid1, Object uuid2) {
         Function<Object, UUID> getUUID = (obj) -> {
             if( obj instanceof String && isStringUuid(obj.toString()) ) {
@@ -44,6 +62,6 @@ public final class UuidUtils
         UUID uuidInst1 = getUUID.apply(uuid1);
         UUID uuidInst2 = getUUID.apply(uuid2);
 
-        return (uuidInst1 == null && uuidInst2 == null) || (uuidInst1 != null && uuidInst1.equals(uuidInst2));
+        return uuidInst1 != null && uuidInst1.equals(uuidInst2);
     }
 }

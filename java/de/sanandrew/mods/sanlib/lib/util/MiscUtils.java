@@ -14,6 +14,9 @@ import de.sanandrew.mods.sanlib.lib.XorShiftRandom;
 @SuppressWarnings("unused")
 public final class MiscUtils
 {
+    /**
+     * A globally used pseudorandom number generator. It uses the {@link XorShiftRandom} implementation.
+     */
     public static final XorShiftRandom RNG = new XorShiftRandom();
 
     /** Method to calculate a value based on a formula represented as a {@link java.lang.String}.<br>

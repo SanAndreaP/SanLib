@@ -9,7 +9,6 @@ package de.sanandrew.mods.sanlib.lib.util;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -61,14 +60,35 @@ public final class ItemStackUtils
         return isValid(stack) && Block.getBlockFromItem(stack.getItem()) == block;
     }
 
+    /**
+     * Checks wether or not 2 ItemStacks are equal. This does not compare stack sizes! This compares NBTTagCompounds!
+     * @param is1 The first ItemStack
+     * @param is2 The second ItemStack
+     * @return {@code true}, if the stacks are considered equal, {@code false} otherwise
+     */
     public static boolean areEqual(ItemStack is1, ItemStack is2) {
         return areEqual(is1, is2, false, true);
     }
 
+    /**
+     * Checks wether or not 2 ItemStacks are equal. This does not compare stack sizes!
+     * @param is1 The first ItemStack
+     * @param is2 The second ItemStack
+     * @param checkNbt A flag to determine wether or not to compare NBTTagCompounds
+     * @return {@code true}, if the stacks are considered equal, {@code false} otherwise
+     */
     public static boolean areEqual(ItemStack is1, ItemStack is2, boolean checkNbt) {
         return areEqual(is1, is2, false, checkNbt);
     }
 
+    /**
+     * Checks wether or not 2 ItemStacks are equal.
+     * @param is1 The first ItemStack
+     * @param is2 The second ItemStack
+     * @param checkStackSize A flag to determine wether or not to compare stack sizes
+     * @param checkNbt A flag to determine wether or not to compare NBTTagCompounds
+     * @return {@code true}, if the stacks are considered equal, {@code false} otherwise
+     */
     public static boolean areEqual(ItemStack is1, ItemStack is2, boolean checkStackSize, boolean checkNbt) {
         if( is1 == null && is2 == null ) {
             return true;
@@ -82,6 +102,12 @@ public final class ItemStackUtils
         return !(checkStackSize && is1.stackSize != is2.stackSize) && (!checkNbt || Objects.equals(is1.getTagCompound(), is2.getTagCompound()));
     }
 
+    /**
+     * Writes the ItemStack as a new NBTTagCompound to the specified NBTTagCompound with the tagName as key.
+     * @param stack The ItemStack to write.
+     * @param tag The NBTTagCompound to be written.
+     * @param tagName The key for the tag.
+     */
     public static void writeStackToTag(ItemStack stack, NBTTagCompound tag, String tagName) {
         NBTTagCompound stackTag = new NBTTagCompound();
         stack.writeToNBT(stackTag);
