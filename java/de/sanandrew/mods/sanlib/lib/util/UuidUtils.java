@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 /**
  * Utility class for tasks and methods regarding UUIDs
  */
+@SuppressWarnings("unused")
 public final class UuidUtils
 {
     /**
@@ -33,7 +34,7 @@ public final class UuidUtils
 
     /**
      * Compares two objects if both can be represented as UUIDs and have an equal value.<br>
-     * Before comparison, both Objects will be converted into an UUID instance:
+     * Before comparison, both objects will be converted into an UUID instance:
      * <ul>
      *     <li>If one of the values is a string and represents a valid UUID, it is converted via {@link UUID#fromString(String)}</li>
      *     <li>If one of the values is a byte array, it is converted via {@link UUID#nameUUIDFromBytes(byte[])}</li>
@@ -41,10 +42,10 @@ public final class UuidUtils
      *     <li>If one of the values cannot be converted, {@code null} will be used instead</li>
      * </ul>
      * After conversion, both converted values are compared for their equality with eachother.<br>
-     * They're considered equal if and only if both are not {@code null} and the {@link UUID#equals(Object)} method on one of the instances returns {@code true}
+     * They're considered equal if and only if both are {@code null} or the {@link UUID#equals(Object)} method on one of the instances returns {@code true} for the other instance.
      * @param uuid1 The first object
      * @param uuid2 The second object
-     * @return true if both objects are UUIDs and are equal, false otherwise
+     * @return true, if both objects are UUIDs and are equal, or both are null, false otherwise
      */
     public static boolean areUuidsEqual(Object uuid1, Object uuid2) {
         Function<Object, UUID> getUUID = (obj) -> {
@@ -62,6 +63,7 @@ public final class UuidUtils
         UUID uuidInst1 = getUUID.apply(uuid1);
         UUID uuidInst2 = getUUID.apply(uuid2);
 
-        return uuidInst1 != null && uuidInst1.equals(uuidInst2);
+        //noinspection ObjectEquality
+        return uuidInst1 == uuidInst2 || (uuidInst1 != null && uuidInst1.equals(uuidInst2));
     }
 }

@@ -17,11 +17,14 @@ idea {
     module {
         inheritOutputDirs = true
     }
+    project {
+        languageLevel = '1.8' //due to a bug in gradle or IDEA, this doesn't work :(
+    }
 }
 
-version = "1.10.2-3.0.0"
+version = "1.10.2-1.0.0"
 group= "de.sanandrew.mods"
-archivesBaseName = "SAPManPack"
+archivesBaseName = "SanLib"
 
 sourceCompatibility = targetCompatibility = "1.8" // Need this here so eclipse task generates correctly.
 compileJava {
@@ -31,16 +34,14 @@ compileJava {
 minecraft {
     version = "1.10.2-12.18.1.2079"
     runDir = "run"
-    
-    mappings = "snapshot_20160518"
+    mappings = "snapshot_20161005"
 }
 
 dependencies {
 
 }
 
-processResources
-{
+processResources {
     inputs.property "version", project.version
     inputs.property "mcversion", project.minecraft.version
 
@@ -80,4 +81,13 @@ task deobfJar(type: Jar) {
     from sourceSets.main.output
     appendix = 'deobf'
     archiveName = "${baseName}-${version}-${appendix}.jar"
+	manifest {
+		attributes 'FMLAT': 'sanplayermodel_at.cfg'
+	}
+}
+
+artifacts {
+    archives deobfJar
+    archives sourceJar
+    archives jar
 }

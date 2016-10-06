@@ -19,13 +19,14 @@ import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(modid = SanLib.ID, version = SanLib.VERSION, name = "San's Library", acceptedMinecraftVersions = SanLib.MCVER)
+@Mod(modid = SanLib.ID, version = SanLib.VERSION, name = "San's Library", acceptedMinecraftVersions = SanLib.MCVER, dependencies = SanLib.DEPENDENCIES)
 public class SanLib
 {
     public static final String ID = "sanlib";
     public static final String VERSION = "1.0.0";
     public static final String CHANNEL = "SanLibNWCH";
     public static final String MCVER = "[1.10, 1.11)";
+    public static final String DEPENDENCIES = "required-after:Forge@[12.18.1.2079,]";
 
     public static final Logger LOG = LogManager.getLogger(ID);
 
