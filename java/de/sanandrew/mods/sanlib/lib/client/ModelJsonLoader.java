@@ -51,6 +51,7 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
     private ModelRenderer[] mainBoxes;
     private Map<String, ModelRenderer> nameToBoxList;
     private Map<ModelRenderer, String> boxToNameList;
+    private Map<String, Class<? extends ModelRenderer>> cstBoxRenderer;
     private ResourceLocation resLoc;
     private String[] mandatNames;
     private boolean loaded;
@@ -94,6 +95,7 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
         this.mainBoxes = new ModelRenderer[0];
         this.nameToBoxList = new HashMap<>();
         this.boxToNameList = new HashMap<>();
+        this.cstBoxRenderer = new HashMap<>();
         this.mandatNames = mandatoryNames.clone();
         this.resLoc = location;
         this.loaded = false;
@@ -104,6 +106,10 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
         }
 
         REGISTERED_JSON_LOADERS.add(this);
+    }
+
+    public void addCustomModelRenderer(String boxName, Class<? extends ModelRenderer> rendererClass) {
+        this.cstBoxRenderer.put("boxName", rendererClass);
     }
 
     /**
@@ -147,7 +153,8 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
                         scaling = (double) baseScale;
                     }
 
-                    ModelRenderer box = ModelBoxBuilder.newBuilder(this.modelBase, cb.boxName)
+                    Class<? extends ModelRenderer> mrCls = MiscUtils.defIfNull(this.cstBoxRenderer.get(cb.boxName), ModelRenderer.class);
+                    ModelRenderer box = ModelBoxBuilder.newBuilder(this.modelBase, cb.boxName, mrCls)
                             .setTexture(cb.textureX, cb.textureY, cb.mirror, cb.textureWidth, cb.textureHeight)
                             .setLocation(cb.rotationPointX, cb.rotationPointY, cb.rotationPointZ)
                             .setRotation(cb.rotateAngleX, cb.rotateAngleY, cb.rotateAngleZ)

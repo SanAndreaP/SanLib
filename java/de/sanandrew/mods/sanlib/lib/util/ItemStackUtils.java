@@ -10,11 +10,16 @@ import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.oredict.OreDictionary;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 
 /**
  * An utility class for ItemStacks
@@ -141,5 +146,58 @@ public final class ItemStackUtils
         return stack1 == null || stack2 == null
                 || (stack1.isStackable() && areEqual(stack1, stack2, false, true, !stack2.getHasSubtypes())
                     && (!consumeAll || stack1.stackSize + stack2.stackSize <= stack1.getMaxStackSize()));
+    }
+
+    public static NBTTagList writeItemStacksToTag(ItemStack[] items, int maxQuantity) {
+        return writeItemStacksToTag(items, maxQuantity, null);
+    }
+
+    public static NBTTagList writeItemStacksToTag(ItemStack[] items, int maxQuantity, BiConsumer<ItemStack, NBTTagCompound> callbackMethod) {
+        NBTTagList tagList = new NBTTagList();
+
+        for( int i = 0; i < items.length; i++ ) {
+            if( items[i] != null ) {
+                NBTTagCompound tag = new NBTTagCompound();
+                tag.setShort("Slot", (short) i);
+                items[i].writeToNBT(tag);
+
+                if( maxQuantity > Short.MAX_VALUE ) {
+                    tag.setInteger("Quantity", Math.min(items[i].stackSize, maxQuantity));
+                } else if( maxQuantity > Byte.MAX_VALUE ) {
+                    tag.setShort("Quantity", (short) Math.min(items[i].stackSize, maxQuantity));
+                } else {
+                    tag.setByte("Quantity", (byte) Math.min(items[i].stackSize, maxQuantity));
+                }
+
+                if( callbackMethod != null ) {
+                    NBTTagCompound stackNbt = new NBTTagCompound();
+                    callbackMethod.accept(items[i], stackNbt);
+                    tag.setTag("StackNBT", stackNbt);
+                }
+
+                tagList.appendTag(tag);
+            }
+        }
+
+        return tagList;
+    }
+
+    public static void readItemStacksFromTag(ItemStack[] items, NBTTagList tagList) {
+        readItemStacksFromTag(items, tagList, null);
+    }
+
+    public static void readItemStacksFromTag(ItemStack[] items, NBTTagList tagList, BiConsumer<ItemStack, NBTTagCompound> callbackMethod) {
+        for( int i = 0; i < tagList.tagCount(); i++ ) {
+            NBTTagCompound tag = tagList.getCompoundTagAt(i);
+            short slot = tag.getShort("Slot");
+            items[slot] = ItemStack.loadItemStackFromNBT(tag);
+            if( tag.hasKey("Quantity") ) {
+                items[slot].stackSize = ((NBTPrimitive) tag.getTag("Quantity")).getInt();
+            }
+
+            if( callbackMethod != null && tag.hasKey("StackNBT") ) {
+                callbackMethod.accept(items[slot], (NBTTagCompound) tag.getTag("StackNBT"));
+            }
+        }
     }
 }

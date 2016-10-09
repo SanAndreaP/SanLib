@@ -84,11 +84,15 @@ public final class InventoryUtils
     }
 
     public static ItemStack addStackToInventory(ItemStack is, IInventory inv) {
-        return addStackToInventory(is, inv, true);
+        return addStackToInventory(is, inv, true, inv.getInventoryStackLimit(), 0, inv.getSizeInventory() - (inv instanceof InventoryPlayer ? 4 : 0));
     }
 
     public static ItemStack addStackToInventory(ItemStack is, IInventory inv, boolean checkNBT) {
         return addStackToInventory(is, inv, checkNBT, inv.getInventoryStackLimit(), 0, inv.getSizeInventory() - (inv instanceof InventoryPlayer ? 4 : 0));
+    }
+
+    public static ItemStack addStackToInventory(ItemStack is, IInventory inv, boolean checkNBT, int maxStackSize) {
+        return addStackToInventory(is, inv, checkNBT, maxStackSize, 0, inv.getSizeInventory() - (inv instanceof InventoryPlayer ? 4 : 0));
     }
 
     public static ItemStack addStackToInventory(ItemStack is, IInventory inv, boolean checkNBT, int maxStackSize, int begin, int end) {

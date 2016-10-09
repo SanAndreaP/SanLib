@@ -16,8 +16,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unused")
 public final class EntityUtils
 {
+    public static final int ATTR_ADD_VAL_TO_BASE = 0;
+    public static final int ATTR_ADD_PERC_VAL_TO_SUM = 1;
+    public static final int RISE_SUM_WITH_PERC_VAL = 2;
+
     public static Entity getEntityByUUID(World worldObj, UUID uuid) {
         return worldObj.loadedEntityList.stream().filter(entity -> entity.getUniqueID().equals(uuid)).findFirst().orElse(null);
     }
