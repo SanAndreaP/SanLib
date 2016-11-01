@@ -10,6 +10,10 @@ import de.sanandrew.mods.sanlib.lib.Tuple;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -124,6 +128,36 @@ public final class InventoryUtils
                 is.stackSize = maxStackSize;
                 inv.setInventorySlotContents(i, is.copy());
                 is.stackSize = rest;
+            }
+        }
+
+        return is;
+    }
+
+    public static ItemStack addStackToCapability(ItemStack is, ICapabilityProvider provider, EnumFacing facing, boolean simulate) {
+        return addStackToCapability(is, provider, facing, simulate, Integer.MAX_VALUE, 0, Integer.MAX_VALUE);
+    }
+
+    public static ItemStack addStackToCapability(ItemStack is, ICapabilityProvider provider, EnumFacing facing, boolean simulate, int maxStackSize) {
+        return addStackToCapability(is, provider, facing, simulate, maxStackSize, 0, Integer.MAX_VALUE);
+    }
+
+    public static ItemStack addStackToCapability(ItemStack is, ICapabilityProvider provider, EnumFacing facing, boolean simulate, int maxStackSize, int begin, int end) {
+        if( is != null && provider.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing) ) {
+            IItemHandler handler = provider.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing);
+            maxStackSize = Math.min(maxStackSize, is.stackSize);
+            end = Math.min(end, handler.getSlots());
+
+            for( int i = begin; i < end; i++ ) {
+                ItemStack maxStack = is.copy();
+                maxStack.stackSize = maxStackSize;
+                maxStack = handler.insertItem(i, maxStack, simulate);
+                if( maxStack == null ) {
+                    is.stackSize -= maxStackSize;
+                }
+                if( is.stackSize <= 0 ) {
+                    return null;
+                }
             }
         }
 
