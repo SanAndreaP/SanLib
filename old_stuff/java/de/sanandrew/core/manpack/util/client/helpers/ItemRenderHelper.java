@@ -163,7 +163,7 @@ public final class ItemRenderHelper
                 GL11.glTranslatef(0.5F, 0.5F, 0.0F);
                 float blockScale = 0.5F;
                 GL11.glScalef(blockScale, blockScale, blockScale);
-                ForgeHooksClient.renderEquippedItem(ItemRenderType.EQUIPPED, customRenderer, renderBlocksRi, Minecraft.getMinecraft().thePlayer, stack);
+                ForgeHooksClient.renderEquippedItem(ItemRenderType.EQUIPPED, customRenderer, renderBlocksRi, Minecraft.getMinecraft().player, stack);
                 GL11.glPopMatrix();
             } else if( stack.getItemSpriteNumber() == 0 && stack.getItem() instanceof ItemBlock
                     && RenderBlocks.renderItemIn3d(Block.getBlockFromItem(stack.getItem()).getRenderType()) ) {

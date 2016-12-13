@@ -10,14 +10,17 @@ import de.sanandrew.mods.sanlib.CommonProxy;
 import de.sanandrew.mods.sanlib.lib.client.ModelJsonLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SuppressWarnings("unused")
+@SideOnly(Side.CLIENT)
 public class ClientProxy
         extends CommonProxy
 {
     @Override
     public EntityPlayer getClientPlayer() {
-        return Minecraft.getMinecraft().thePlayer;
+        return Minecraft.getMinecraft().player;
     }
 
     @Override

@@ -73,14 +73,14 @@ public class RenderPlayerEventHandler
         GL11.glPushMatrix();
         Minecraft mc = Minecraft.getMinecraft();
 
-        if( SAPUtils.isPlayerNameOrUuidEqual(mc.thePlayer, SANPLAYER_NAMES_UUID) ) {
+        if( SAPUtils.isPlayerNameOrUuidEqual(mc.player, SANPLAYER_NAMES_UUID) ) {
             event.setCanceled(true);
             GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
-            RenderPlayer rend = (RenderPlayer) RenderManager.instance.getEntityRenderObject(mc.thePlayer);
-            RenderManager.instance.entityRenderMap.put(mc.thePlayer.getClass(), this.sanPlayerModel);
+            RenderPlayer rend = (RenderPlayer) RenderManager.instance.getEntityRenderObject(mc.player);
+            RenderManager.instance.entityRenderMap.put(mc.player.getClass(), this.sanPlayerModel);
             SAPReflectionHelper.invokeCachedMethod(EntityRenderer.class, mc.entityRenderer, ReflectionNames.RENDER_HAND.mcpName, ReflectionNames.RENDER_HAND.srgName,
                                                    new Class[] { float.class, int.class }, new Object[] { event.partialTicks, event.renderPass } );
-            RenderManager.instance.entityRenderMap.put(mc.thePlayer.getClass(), rend);
+            RenderManager.instance.entityRenderMap.put(mc.player.getClass(), rend);
         }
 
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);

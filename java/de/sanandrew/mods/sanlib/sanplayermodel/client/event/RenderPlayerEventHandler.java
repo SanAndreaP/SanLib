@@ -19,10 +19,13 @@ import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLivingEvent.Pre;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 
 import java.util.UUID;
 
+@SideOnly(Side.CLIENT)
 public class RenderPlayerEventHandler
 {
     private static final String[] SANPLAYER_NAMES_UUID = new String[] { "SanAndreasP", "044d980d-5c2a-4030-95cf-cbfde69ea3cb" };
@@ -65,12 +68,12 @@ public class RenderPlayerEventHandler
 
         boolean flag = mc.getRenderViewEntity() instanceof EntityLivingBase && ((EntityLivingBase)mc.getRenderViewEntity()).isPlayerSleeping();
         if( mc.gameSettings.thirdPersonView == 0 && !flag && !mc.gameSettings.hideGUI && mc.playerController != null && !mc.playerController.isSpectator() ) {
-            if( isPlayerNameOrUuidEqual(mc.thePlayer, SANPLAYER_NAMES_UUID) ) {
-                String skinType = mc.thePlayer.getSkinType();
-                Render<AbstractClientPlayer> rend = mc.getRenderManager().getEntityRenderObject(mc.thePlayer);
+            if( isPlayerNameOrUuidEqual(mc.player, SANPLAYER_NAMES_UUID) ) {
+                String skinType = mc.player.getSkinType();
+                Render<AbstractClientPlayer> rend = mc.getRenderManager().getEntityRenderObject(mc.player);
                 RenderPlayer skin = mc.getRenderManager().getSkinMap().get(skinType);
 
-                mc.getRenderManager().entityRenderMap.put(mc.thePlayer.getClass(), this.sanPlayerModel);
+                mc.getRenderManager().entityRenderMap.put(mc.player.getClass(), this.sanPlayerModel);
                 mc.getRenderManager().skinMap.put(skinType, this.sanPlayerModel);
 
                 event.setCanceled(true);
@@ -78,7 +81,7 @@ public class RenderPlayerEventHandler
                 mc.entityRenderer.itemRenderer.renderItemInFirstPerson(event.getPartialTicks());
                 mc.entityRenderer.disableLightmap();
 
-                mc.getRenderManager().entityRenderMap.put(mc.thePlayer.getClass(), rend);
+                mc.getRenderManager().entityRenderMap.put(mc.player.getClass(), rend);
                 mc.getRenderManager().skinMap.put(skinType, skin);
             }
         }

@@ -62,7 +62,7 @@ public final class GuiUtils
         byte rShift = keyDownBuffer.get(Keyboard.KEY_RSHIFT);
         keyDownBuffer.put(Keyboard.KEY_LSHIFT, (byte) 0);
         keyDownBuffer.put(Keyboard.KEY_RSHIFT, (byte) 0);
-        List<?> tooltip = stack.getTooltip(Minecraft.getMinecraft().thePlayer, false);
+        List<?> tooltip = stack.getTooltip(Minecraft.getMinecraft().player, false);
         keyDownBuffer.put(Keyboard.KEY_LSHIFT, lShift);
         keyDownBuffer.put(Keyboard.KEY_RSHIFT, rShift);
 

@@ -247,7 +247,7 @@ public class RenderSanPlayer
                 Minecraft.getMinecraft().getResourceManager().getResource(resLoc);
             } catch( IOException ex ) {
                 ManPackLoadingPlugin.MOD_LOG.printf(Level.WARN, "Can't load armor texture for item %s!", unlocName);
-                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(String.format("Can't load armor texture for item %s!", unlocName)));
+                Minecraft.getMinecraft().player.addChatMessage(new ChatComponentText(String.format("Can't load armor texture for item %s!", unlocName)));
                 resLoc = RenderBiped.getArmorResource(player, stack, pass, null);
                 try( InputStream textureStream = Minecraft.getMinecraft().getResourceManager().getResource(resLoc).getInputStream() ) {
                     this.unknownTextureColorMap.put(unlocName, AverageColorHelper.getAverageColor(textureStream));
@@ -284,7 +284,7 @@ public class RenderSanPlayer
                 return new Gson().fromJson(in, CubeLoader.class);
             } catch( IOException ex ) {
                 ManPackLoadingPlugin.MOD_LOG.printf(Level.WARN, "Can't load hat model for item %s!", unlocName);
-                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(String.format("Can't load hat model for item %s!", unlocName)));
+                Minecraft.getMinecraft().player.addChatMessage(new ChatComponentText(String.format("Can't load hat model for item %s!", unlocName)));
                 return new CubeLoader();
             }
         }

@@ -24,10 +24,10 @@ public final class ColorObj
      * @param argb The color value as integer
      */
     public ColorObj(int argb) {
+        this.a = (argb >> 24) & 0xFF;
         this.r = (argb >> 16) & 0xFF;
         this.g = (argb >> 8) & 0xFF;
-        this.b = (argb) & 0xFF;
-        this.a = (argb >> 24) & 0xFF;
+        this.b = argb & 0xFF;
     }
 
     /**
@@ -119,7 +119,7 @@ public final class ColorObj
      * Getter for the alpha component (transparency)
      * @return The alpha value as floating point number
      */
-    public Float fAlpha() {
+    public float fAlpha() {
         return this.a / 255.0F;
     }
 
@@ -153,6 +153,10 @@ public final class ColorObj
      */
     public void setAlpha(int alpha) {
         this.a = alpha < 0 ? 0 : alpha > 255 ? 255 : alpha;
+    }
+
+    public int getColorInt() {
+        return (this.a << 24) | (this.r << 16) | (this.g << 8) | this.b;
     }
 
     @Override
