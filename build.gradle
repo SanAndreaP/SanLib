@@ -37,8 +37,12 @@ minecraft {
     mappings = "snapshot_20161115"
 }
 
-dependencies {
+repositories {
+	maven { url = "http://maven.epoxide.xyz" }
+}
 
+dependencies {
+	compile "net.darkhax.tesla:Tesla:1.10.2-1.2.1.49"
 }
 
 processResources {
