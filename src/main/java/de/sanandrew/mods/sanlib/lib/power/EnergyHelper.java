@@ -12,7 +12,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 
-@SuppressWarnings("ConstantConditions")
+@SuppressWarnings({"ConstantConditions", "unused"})
 public final class EnergyHelper
 {
     public static final boolean COFH_EXISTS = ReflectionUtils.doesClassExist("cofh.api.energy.IEnergyHandler");
@@ -35,9 +35,9 @@ public final class EnergyHelper
         return stg != null && (stg.canExtract() || stg.canReceive());
     }
 
-    public static long receiveEnergy(TileEntity te, EnumFacing facing, int amount, boolean simulate) {
+    public static long receiveEnergy(TileEntity te, EnumFacing facing, long amount, boolean simulate) {
         if( COFH_EXISTS && te instanceof cofh.api.energy.IEnergyReceiver ) {
-            return ((cofh.api.energy.IEnergyReceiver) te).receiveEnergy(facing, amount, simulate);
+            return ((cofh.api.energy.IEnergyReceiver) te).receiveEnergy(facing, (int) amount, simulate);
         }
         if( TESLA_EXISTS ) {
             net.darkhax.tesla.api.ITeslaConsumer consumer = te.getCapability(net.darkhax.tesla.capability.TeslaCapabilities.CAPABILITY_CONSUMER, facing);
@@ -47,15 +47,15 @@ public final class EnergyHelper
         }
         IEnergyStorage stg = te.getCapability(CapabilityEnergy.ENERGY, facing);
         if( stg != null ) {
-            return stg.receiveEnergy(amount, simulate);
+            return stg.receiveEnergy((int) amount, simulate);
         }
 
         return 0;
     }
 
-    public static long extractEnergy(TileEntity te, EnumFacing facing, int amount, boolean simulate) {
+    public static long extractEnergy(TileEntity te, EnumFacing facing, long amount, boolean simulate) {
         if( COFH_EXISTS && te instanceof cofh.api.energy.IEnergyProvider ) {
-            return ((cofh.api.energy.IEnergyProvider) te).extractEnergy(facing, amount, simulate);
+            return ((cofh.api.energy.IEnergyProvider) te).extractEnergy(facing, (int) amount, simulate);
         }
         if( TESLA_EXISTS ) {
             net.darkhax.tesla.api.ITeslaProducer producer = te.getCapability(net.darkhax.tesla.capability.TeslaCapabilities.CAPABILITY_PRODUCER, facing);
@@ -65,7 +65,7 @@ public final class EnergyHelper
         }
         IEnergyStorage stg = te.getCapability(CapabilityEnergy.ENERGY, facing);
         if( stg != null ) {
-            return stg.extractEnergy(amount, simulate);
+            return stg.extractEnergy((int) amount, simulate);
         }
 
         return 0;
