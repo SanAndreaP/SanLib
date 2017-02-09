@@ -5,7 +5,7 @@
     "description": "A library made for and required by all my mods.",
     "version": "1.0.0",
     "mcversion": "1.10.2",
-    "logoFile": "/assets/sanlib/logo.png",
+    "logoFile": "logo.png",
     "url": "",
     "updateUrl": "",
     "authors": ["SanAndreasP"],
