@@ -42,7 +42,7 @@ public final class ItemStackUtils
      */
     public static boolean isValid(ItemStack stack) {
         //noinspection ConstantConditions
-        return stack != null && stack.getItem() != null && Block.getBlockFromItem(stack.getItem()) != Blocks.AIR && stack.stackSize > 0;
+        return stack != null && stack.getItem() != null && Block.getBlockFromItem(stack.getItem()) != Blocks.AIR;
     }
 
     /**
