@@ -43,7 +43,7 @@ public class Tuple
      * @return An Object array containing all values in this Tuple.
      */
     public Object[] toArray() {
-        return values.clone();
+        return Arrays.stream(this.values).map(val -> val.value).toArray(Object[]::new);
     }
 
     /**
