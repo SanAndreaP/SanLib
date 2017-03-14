@@ -14,7 +14,10 @@ import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHandSide;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class LayerCustomHeldItem
         implements LayerRenderer<EntityPlayer>
 {
@@ -29,7 +32,7 @@ public class LayerCustomHeldItem
         ItemStack leftItem = isRight ? player.getHeldItemOffhand() : player.getHeldItemMainhand();
         ItemStack rightItem = isRight ? player.getHeldItemMainhand() : player.getHeldItemOffhand();
 
-        if( leftItem != null || rightItem != null ) {
+        if( leftItem != ItemStack.EMPTY || rightItem != ItemStack.EMPTY ) {
             GlStateManager.pushMatrix();
             this.renderHeldItem(player, rightItem, ItemCameraTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, EnumHandSide.RIGHT);
             this.renderHeldItem(player, leftItem, ItemCameraTransforms.TransformType.THIRD_PERSON_LEFT_HAND, EnumHandSide.LEFT);
@@ -38,7 +41,7 @@ public class LayerCustomHeldItem
     }
 
     private void renderHeldItem(EntityPlayer player, ItemStack stack, ItemCameraTransforms.TransformType transformType, EnumHandSide handSide) {
-        if( stack != null ) {
+        if( stack != ItemStack.EMPTY ) {
             GlStateManager.pushMatrix();
             this.renderer.getMainModel().postRenderArm(0.0625F, handSide);
             GlStateManager.rotate(-90.0F, 1.0F, 0.0F, 0.0F);

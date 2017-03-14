@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * The idea came from dmurphy747, <a href="https://dmurphy747.wordpress.com/2011/03/23/xorshift-vs-random-performance-in-java/">XORShift vs Random performance in Java</a>.
  * Almost everything works like {@link java.util.Random}, although it will return different results.
  */
-@SuppressWarnings({"unused", "WeakerAccess"})
+@SuppressWarnings({"unused"})
 public final class XorShiftRandom
 {
     private long seed;

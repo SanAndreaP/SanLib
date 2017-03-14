@@ -15,9 +15,8 @@ import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import org.lwjgl.opengl.GL11;
 
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 
 /**
  * An utility class for rendering related stuff.
@@ -35,7 +34,7 @@ public final class RenderUtils
      * @param posY The Y coordinate for the position on the GUI.
      * @param scale The scaling factor for the rendering. 1.0F is normal size.
      */
-    public static void renderStackInGui(ItemStack stack, int posX, int posY, double scale) {
+    public static void renderStackInGui(@Nonnull ItemStack stack, int posX, int posY, double scale) {
         renderStackInGui(stack, posX, posY, scale, null, null, false);
     }
 
@@ -48,7 +47,7 @@ public final class RenderUtils
      * @param scale The scaling factor for the rendering. 1.0F is normal size.
      * @param fontRenderer The FontRenderer used to render the stack count.
      */
-    public static void renderStackInGui(ItemStack stack, int posX, int posY, double scale, FontRenderer fontRenderer) {
+    public static void renderStackInGui(@Nonnull ItemStack stack, int posX, int posY, double scale, FontRenderer fontRenderer) {
         renderStackInGui(stack, posX, posY, scale, fontRenderer, null, true);
     }
 
@@ -64,7 +63,7 @@ public final class RenderUtils
      * @param customTxt The custom text to be used instead of the stack count. NULL if you want to use the stack count.
      * @param doOverlay A flag to determine wether or not to draw the overlay (stack count/custom text, durability bar, etc.).
      */
-    public static void renderStackInGui(ItemStack stack, int posX, int posY, double scale, FontRenderer fontRenderer, String customTxt, boolean doOverlay) {
+    public static void renderStackInGui(@Nonnull ItemStack stack, int posX, int posY, double scale, FontRenderer fontRenderer, String customTxt, boolean doOverlay) {
         if( renderItem == null ) {
             renderItem = Minecraft.getMinecraft().getRenderItem();
         }
@@ -81,7 +80,7 @@ public final class RenderUtils
                 renderItem.renderItemOverlayIntoGUI(fontRenderer, stack, 0, 0, customTxt);
                 GlStateManager.disableLighting();
             } else {
-                renderItem.renderItemOverlayIntoGUI(Minecraft.getMinecraft().fontRendererObj, stack, 0, 0, "");
+                renderItem.renderItemOverlayIntoGUI(Minecraft.getMinecraft().fontRenderer, stack, 0, 0, "");
                 GlStateManager.disableLighting();
             }
         }

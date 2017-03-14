@@ -44,10 +44,10 @@ public class LayerSanArmor
         this.modelArmor = new ModelSanPlayerArmor.ModelDefault(0.4F);
     }
 
-    public void renderHand(EntityLivingBase entityLivingBaseIn, float scale, EnumHandSide hand) {
-        ItemStack itemstack = this.getItemStackFromSlot(entityLivingBaseIn, EntityEquipmentSlot.CHEST);
+    public void renderHand(EntityLivingBase entity, float scale, EnumHandSide hand) {
+        ItemStack itemstack = entity.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
 
-        if( itemstack != null && itemstack.getItem() instanceof ItemArmor ) {
+        if( itemstack.getItem() instanceof ItemArmor ) {
             ItemArmor armorItem = (ItemArmor) itemstack.getItem();
             if( armorItem.getEquipmentSlot() == EntityEquipmentSlot.CHEST ) {
                 ModelSanPlayerArmor t = this.getCustomArmorModel(itemstack, EntityEquipmentSlot.CHEST);
@@ -58,7 +58,7 @@ public class LayerSanArmor
 
                 t.swingProgress = 0.0F;
                 t.isSneak = false;
-                t.setRotationAngles(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, scale, entityLivingBaseIn);
+                t.setRotationAngles(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, scale, entity);
 
                 switch( hand ) {
                     case RIGHT:
@@ -111,7 +111,7 @@ public class LayerSanArmor
     }
 
     private ModelSanPlayerArmor getCustomArmorModel(ItemStack itemStack, EntityEquipmentSlot slot) {
-        if( itemStack != null && itemStack.getItem() instanceof ItemArmor ) {
+        if( itemStack != ItemStack.EMPTY && itemStack.getItem() instanceof ItemArmor ) {
             String key = this.getKeyForArmor((ItemArmor) itemStack.getItem());
             if( this.armorModels.contains(key, slot) ) {
                 ModelSanPlayerArmor armor = this.armorModels.get(key, slot);
@@ -157,7 +157,7 @@ public class LayerSanArmor
         return super.getArmorResource(entity, stack, slot, type);
     }
 
-    public String getKeyForArmor(ItemArmor item) {
+    private String getKeyForArmor(ItemArmor item) {
         String texture = item.getArmorMaterial().getName();
         String domain = "minecraft";
         int idx = texture.indexOf(':');

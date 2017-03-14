@@ -11,6 +11,7 @@ import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
+@SuppressWarnings("unused")
 public final class CraftingUtils
 {
     public static int getOreRecipeWidth(ShapedOreRecipe recipe) {

@@ -7,7 +7,6 @@
 package de.sanandrew.mods.sanlib.network;
 
 import de.sanandrew.mods.sanlib.SanLib;
-import de.sanandrew.mods.sanlib.lib.client.ModelJsonLoader;
 import de.sanandrew.mods.sanlib.lib.network.AbstractMessage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;

@@ -21,7 +21,7 @@ public class CommandSanLib
         extends CommandBase
 {
     @Override
-    public String getCommandName() {
+    public String getName() {
         return "sanlib";
     }
 
@@ -31,7 +31,7 @@ public class CommandSanLib
     }
 
     @Override
-    public String getCommandUsage(ICommandSender sender) {
+    public String getUsage(ICommandSender sender) {
         return "commands.sanlib.usage";
     }
 
@@ -49,7 +49,7 @@ public class CommandSanLib
     }
 
     @Override
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
         return args.length == 1 ? getListOfStringsMatchingLastWord(args, CommandSanLibElem.COMMANDS.keySet()) : Collections.emptyList();
     }
 

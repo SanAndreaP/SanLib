@@ -22,6 +22,7 @@ import java.util.function.Function;
 /**
  * A class that resembles a one-class-fits-all approach to tuples for Java using generics.
  */
+@SuppressWarnings("unused")
 public class Tuple
         implements Serializable, Comparable<Tuple>, Iterable<Object>
 {

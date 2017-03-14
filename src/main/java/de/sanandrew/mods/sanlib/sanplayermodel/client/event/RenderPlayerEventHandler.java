@@ -6,8 +6,7 @@
    *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.sanplayermodel.client.event;
 
-import com.mojang.authlib.GameProfile;
-import de.sanandrew.mods.sanlib.lib.util.UuidUtils;
+import de.sanandrew.mods.sanlib.sanplayermodel.SanPlayerModel;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.RenderSanPlayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
@@ -23,15 +22,10 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 
-import java.util.UUID;
-
 @SideOnly(Side.CLIENT)
 public class RenderPlayerEventHandler
 {
-    private static final String[] SANPLAYER_NAMES_UUID = new String[] { "SanAndreasP", "044d980d-5c2a-4030-95cf-cbfde69ea3cb" };
-
     private RenderSanPlayer sanPlayerModel = null;
-
     private float playerPartTicks = 0.0F;
 
     private void lazyLoad() {
@@ -44,7 +38,7 @@ public class RenderPlayerEventHandler
     public void onPlayerRender(RenderPlayerEvent.Pre event) {
         this.lazyLoad();
 
-        if( isPlayerNameOrUuidEqual(event.getEntityPlayer(), SANPLAYER_NAMES_UUID) ) {
+        if( SanPlayerModel.isSanPlayer(event.getEntityPlayer()) ) {
             playerPartTicks = event.getPartialRenderTick();
         }
     }
@@ -53,7 +47,7 @@ public class RenderPlayerEventHandler
     public void onLivingRender(Pre event) {
         this.lazyLoad();
 
-        if( event.getEntity() instanceof EntityPlayer && event.getRenderer() != this.sanPlayerModel && isPlayerNameOrUuidEqual((EntityPlayer) event.getEntity(), SANPLAYER_NAMES_UUID) ) {
+        if( event.getEntity() instanceof EntityPlayer && event.getRenderer() != this.sanPlayerModel && SanPlayerModel.isSanPlayer((EntityPlayer) event.getEntity()) ) {
             this.sanPlayerModel.doRender((AbstractClientPlayer) event.getEntity(), event.getX(), event.getY() + ((EntityPlayer) event.getEntity()).renderOffsetY, event.getZ(), 0.0F, this.playerPartTicks);
             event.setCanceled(true);
         }
@@ -68,7 +62,7 @@ public class RenderPlayerEventHandler
 
         boolean flag = mc.getRenderViewEntity() instanceof EntityLivingBase && ((EntityLivingBase)mc.getRenderViewEntity()).isPlayerSleeping();
         if( mc.gameSettings.thirdPersonView == 0 && !flag && !mc.gameSettings.hideGUI && mc.playerController != null && !mc.playerController.isSpectator() ) {
-            if( isPlayerNameOrUuidEqual(mc.player, SANPLAYER_NAMES_UUID) ) {
+            if( SanPlayerModel.isSanPlayer(mc.player) ) {
                 String skinType = mc.player.getSkinType();
                 Render<AbstractClientPlayer> rend = mc.getRenderManager().getEntityRenderObject(mc.player);
                 RenderPlayer skin = mc.getRenderManager().getSkinMap().get(skinType);
@@ -88,16 +82,5 @@ public class RenderPlayerEventHandler
 
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         GL11.glPopMatrix();
-    }
-
-    private static boolean isPlayerNameOrUuidEqual(EntityPlayer e, String... namesUuids) {
-        for( String val : namesUuids ) {
-            GameProfile profile = e.getGameProfile();
-            if( (UuidUtils.isStringUuid(val) && profile.getId().equals(UUID.fromString(val))) || profile.getName().equals(val) ) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

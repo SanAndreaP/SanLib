@@ -6,7 +6,7 @@
    *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity;
 
-import de.sanandrew.mods.sanlib.sanplayermodel.client.Resources;
+import de.sanandrew.mods.sanlib.sanplayermodel.Resources;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.model.ModelSanPlayer;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.layers.LayerCustomHeldItem;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.layers.LayerSanArmor;
@@ -22,6 +22,8 @@ import net.minecraft.util.EnumHandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import javax.annotation.Nonnull;
 
 @SideOnly( Side.CLIENT )
 public class RenderSanPlayer
@@ -53,6 +55,7 @@ public class RenderSanPlayer
     }
 
     @Override
+    @Nonnull
     protected ResourceLocation getEntityTexture(AbstractClientPlayer clientPlayer) {
         return clientPlayer.isPlayerSleeping() ? Resources.MAIN_MODEL_TEXTURE_SLEEP : Resources.MAIN_MODEL_TEXTURE;
     }

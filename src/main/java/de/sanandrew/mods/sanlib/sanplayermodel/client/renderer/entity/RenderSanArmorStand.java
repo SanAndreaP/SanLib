@@ -1,0 +1,46 @@
+/* ******************************************************************************************************************
+   * Authors:   SanAndreasP
+   * Copyright: SanAndreasP
+   * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+   *                http://creativecommons.org/licenses/by-nc-sa/4.0/
+   *******************************************************************************************************************/
+package de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity;
+
+import de.sanandrew.mods.sanlib.sanplayermodel.client.model.ModelSanArmorStand;
+import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.layers.LayerSanArmor;
+import net.minecraft.client.model.ModelArmorStandArmor;
+import net.minecraft.client.renderer.entity.RenderArmorStand;
+import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.entity.layers.LayerBipedArmor;
+import net.minecraft.client.renderer.entity.layers.LayerCustomHead;
+import net.minecraft.client.renderer.entity.layers.LayerElytra;
+import net.minecraft.client.renderer.entity.layers.LayerHeldItem;
+import net.minecraft.entity.item.EntityArmorStand;
+
+public class RenderSanArmorStand
+        extends RenderArmorStand
+{
+    public RenderSanArmorStand(RenderManager manager) {
+        super(manager);
+        this.layerRenderers.clear();
+
+        this.mainModel = new ModelSanArmorStand();
+        LayerBipedArmor layerbipedarmor = new LayerSanArmor(this)
+        {
+            protected void initArmor()
+            {
+                this.modelLeggings = new ModelArmorStandArmor(0.5F);
+                this.modelArmor = new ModelArmorStandArmor(1.0F);
+            }
+        };
+        this.addLayer(layerbipedarmor);
+        this.addLayer(new LayerHeldItem(this));
+        this.addLayer(new LayerElytra(this));
+        this.addLayer(new LayerCustomHead(this.getMainModel().bipedHead));
+    }
+
+    @Override
+    public void doRender(EntityArmorStand entity, double x, double y, double z, float entityYaw, float partialTicks) {
+        super.doRender(entity, x, y, z, entityYaw, partialTicks);
+    }
+}

@@ -11,7 +11,6 @@ import de.sanandrew.mods.sanlib.sanplayermodel.client.model.ModelSanPlayerArmor;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.RenderSanPlayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.entity.RenderLivingBase;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -19,12 +18,15 @@ import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHandSide;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+@SideOnly(Side.CLIENT)
 public class LayerSanStandardClothes
         implements LayerRenderer<EntityLivingBase>
 {
@@ -61,7 +63,7 @@ public class LayerSanStandardClothes
     public void renderHand(EntityLivingBase entityLivingBaseIn, float scale, EnumHandSide hand) {
         ItemStack itemstack = this.getItemStackFromSlot(entityLivingBaseIn, EntityEquipmentSlot.CHEST);
 
-        if( itemstack == null || !(itemstack.getItem() instanceof ItemArmor) || ((ItemArmor) itemstack.getItem()).getEquipmentSlot() != EntityEquipmentSlot.CHEST ) {
+        if( !(itemstack.getItem() instanceof ItemArmor) || ((ItemArmor) itemstack.getItem()).getEquipmentSlot() != EntityEquipmentSlot.CHEST ) {
 
             ModelSanPlayerArmor t = this.getArmorModelHook(EntityEquipmentSlot.CHEST);
             if( t == null ) {
@@ -91,7 +93,7 @@ public class LayerSanStandardClothes
     public void renderClothLayer(EntityLivingBase entityLivingBaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale, EntityEquipmentSlot slotIn) {
         ItemStack itemstack = this.getItemStackFromSlot(entityLivingBaseIn, slotIn);
 
-        if( itemstack == null || !(itemstack.getItem() instanceof ItemArmor) || ((ItemArmor) itemstack.getItem()).getEquipmentSlot() != slotIn ) {
+        if( !(itemstack.getItem() instanceof ItemArmor) || ((ItemArmor) itemstack.getItem()).getEquipmentSlot() != slotIn ) {
             ModelSanPlayerArmor t = this.getArmorModelHook(slotIn);
             if( t == null ) {
                 return;
@@ -133,7 +135,7 @@ public class LayerSanStandardClothes
         return null;
     }
 
-    @Nullable
+    @Nonnull
     public ItemStack getItemStackFromSlot(EntityLivingBase living, EntityEquipmentSlot slotIn) {
         return living.getItemStackFromSlot(slotIn);
     }

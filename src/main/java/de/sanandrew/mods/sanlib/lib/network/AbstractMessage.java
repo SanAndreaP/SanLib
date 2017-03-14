@@ -33,11 +33,12 @@ public abstract class AbstractMessage<M extends AbstractMessage>
      * @see IMessageHandler#onMessage(IMessage, MessageContext)
      */
     @Override
+    @SuppressWarnings("MethodCallSideOnly")
     public IMessage onMessage(M message, MessageContext ctx) {
         if( ctx.side.isClient() ) {
             Minecraft.getMinecraft().addScheduledTask(() -> handleClientMessage(message, PlayerUtils.getClientPlayer()));
-        } else if( ctx.getServerHandler().playerEntity.getServer() != null ) {
-            ctx.getServerHandler().playerEntity.getServer().addScheduledTask(() -> handleServerMessage(message, ctx.getServerHandler().playerEntity));
+        } else if( ctx.getServerHandler().player.getServer() != null ) {
+            ctx.getServerHandler().player.getServer().addScheduledTask(() -> handleServerMessage(message, ctx.getServerHandler().player));
         }
 
         return null;

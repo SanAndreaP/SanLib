@@ -10,7 +10,6 @@ import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.lib.Tuple;
 import de.sanandrew.mods.sanlib.lib.network.AbstractMessage;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -19,6 +18,7 @@ import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.function.Function;
 
+@SuppressWarnings("unused")
 public class PacketRegistry
 {
     public static void initialize() {
