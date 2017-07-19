@@ -76,8 +76,8 @@ public class ModelSanPlayer
     }
 
     @Override
-    public void setInvisible(boolean visible) {
-        super.setInvisible(visible);
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
 
         Arrays.asList(this.modelJson.getMainBoxes()).forEach((box) -> box.showModel = visible);
     }

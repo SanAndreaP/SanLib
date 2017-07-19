@@ -23,7 +23,7 @@ import java.util.function.BiConsumer;
 /**
  * An utility class for ItemStacks
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "SameParameterValue", "WeakerAccess", "ObjectEquality"})
 public final class ItemStackUtils
 {
     /**
@@ -40,7 +40,7 @@ public final class ItemStackUtils
      * @return {@code true}, if the stack is valid, {@code false} otherwise
      */
     public static boolean isValid(@Nonnull ItemStack stack) {
-        return stack != ItemStack.EMPTY && Block.getBlockFromItem(stack.getItem()) != Blocks.AIR;
+        return !stack.isEmpty();
     }
 
     /**
@@ -101,7 +101,7 @@ public final class ItemStackUtils
     }
 
     public static boolean areEqual(@Nonnull ItemStack is1, @Nonnull ItemStack is2, boolean checkStackSize, boolean checkNbt, boolean checkDmg) {
-        if( is1 == ItemStack.EMPTY && is2 == ItemStack.EMPTY ) {
+        if( is1.isEmpty() && is2.isEmpty() ) {
             return true;
         }
 
@@ -140,7 +140,7 @@ public final class ItemStackUtils
     }
 
     public static boolean canStack(@Nonnull ItemStack stack1, @Nonnull ItemStack stack2, boolean consumeAll) {
-        return stack1 == ItemStack.EMPTY || stack2 == ItemStack.EMPTY
+        return stack1.isEmpty() || stack2.isEmpty()
                 || (stack1.isStackable() && areEqual(stack1, stack2, false, true, !stack2.getHasSubtypes())
                     && (!consumeAll || stack1.getCount() + stack2.getCount() <= stack1.getMaxStackSize()));
     }

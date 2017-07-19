@@ -8,9 +8,10 @@ package de.sanandrew.mods.sanlib.lib.client.util;
 
 import de.sanandrew.mods.sanlib.lib.util.ReflectionUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -63,7 +64,7 @@ public final class GuiUtils
         byte rShift = keyDownBuffer.get(Keyboard.KEY_RSHIFT);
         keyDownBuffer.put(Keyboard.KEY_LSHIFT, (byte) 0);
         keyDownBuffer.put(Keyboard.KEY_RSHIFT, (byte) 0);
-        List<?> tooltip = stack.getTooltip(Minecraft.getMinecraft().player, false);
+        List<?> tooltip = stack.getTooltip(Minecraft.getMinecraft().player, ITooltipFlag.TooltipFlags.NORMAL);
         keyDownBuffer.put(Keyboard.KEY_LSHIFT, lShift);
         keyDownBuffer.put(Keyboard.KEY_RSHIFT, rShift);
 
@@ -98,7 +99,7 @@ public final class GuiUtils
      */
     public static void drawTexturedModalRect(int xPos, int yPos, float z, int u, int v, int width, int height, float resScaleX, float resScaleY) {
         Tessellator tessellator = Tessellator.getInstance();
-        VertexBuffer buffer = tessellator.getBuffer();
+        BufferBuilder buffer = tessellator.getBuffer();
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
         buffer.pos(xPos, yPos + height, z).tex(u * resScaleX, (v + height) * resScaleY).endVertex();
         buffer.pos(xPos + width, yPos + height, z).tex((u + width) * resScaleX, (v + height) * resScaleY).endVertex();

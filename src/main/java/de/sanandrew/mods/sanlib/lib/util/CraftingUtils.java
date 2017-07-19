@@ -23,7 +23,8 @@ public final class CraftingUtils
     }
 
     public static IRecipe findShapedRecipe(final ItemStack result) {
-        return CraftingManager.getInstance().getRecipeList().stream().filter(recipe -> ItemStackUtils.areEqual(recipe.getRecipeOutput(), result, result.hasTagCompound()))
-                              .findFirst().orElse(null);
+        throw new RuntimeException("NYI");
+//        return CraftingManager..getRecipeList().stream().filter(recipe -> ItemStackUtils.areEqual(recipe.getRecipeOutput(), result, result.hasTagCompound()))
+//                              .findFirst().orElse(null);
     }
 }

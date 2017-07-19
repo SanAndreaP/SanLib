@@ -9,6 +9,7 @@ package de.sanandrew.mods.sanlib.lib.util;
 import de.sanandrew.mods.sanlib.lib.Tuple;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -102,7 +103,7 @@ public final class InventoryUtils
 
     @Nonnull
     public static ItemStack addStackToInventory(@Nonnull ItemStack is, IInventory inv, boolean checkNBT, int maxStackSize, int begin, int end) {
-        for( int i = begin; i < end && is != ItemStack.EMPTY; ++i ) {
+        for( int i = begin; i < end && !is.isEmpty(); ++i ) {
             ItemStack invIS = inv.getStackInSlot(i);
             int rest;
             if( ItemStackUtils.areEqual(is, invIS, checkNBT) ) {
@@ -111,7 +112,7 @@ public final class InventoryUtils
                 if( rest <= maxStack ) {
                     invIS.setCount(rest);
                     inv.setInventorySlotContents(i, invIS.copy());
-                    is = ItemStack.EMPTY;
+                    is = ItemStack.EMPTY.copy();
                     break;
                 }
 
@@ -119,10 +120,10 @@ public final class InventoryUtils
                 invIS.setCount(maxStack);
                 inv.setInventorySlotContents(i, invIS.copy());
                 is.setCount(rest1);
-            } else if( invIS == ItemStack.EMPTY && inv.isItemValidForSlot(i, is) ) {
+            } else if( invIS.isEmpty() && inv.isItemValidForSlot(i, is) ) {
                 if( is.getCount() <= maxStackSize ) {
                     inv.setInventorySlotContents(i, is.copy());
-                    is = ItemStack.EMPTY;
+                    is = ItemStack.EMPTY.copy();
                     break;
                 }
 

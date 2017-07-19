@@ -84,7 +84,7 @@ public class LayerSanArmor
 
     @Override
     protected void setModelSlotVisible(ModelBiped model, EntityEquipmentSlot slotIn) {
-        model.setInvisible(false);
+        model.setVisible(false);
 
         if( model instanceof ModelSanPlayerArmor ) {
             ModelSanPlayerArmor modelSan = (ModelSanPlayerArmor) model;
