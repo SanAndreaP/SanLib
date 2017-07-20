@@ -34,7 +34,7 @@ public class ItemClickEvent
     public void onItemUse(PlayerInteractEvent.RightClickBlock event) {
         if( event.getItemStack().getItem() instanceof ItemArmorStand && event.getEntity() instanceof EntityPlayer ) {
             EntityPlayer player = (EntityPlayer) event.getEntity();
-            if( SanPlayerModel.isSanPlayer(player) ) {
+            if( SanPlayerModel.isSanPlayer(player) && !player.isSneaking() ) {
                 EnumFacing facing = event.getFace();
                 if( facing != null && facing != EnumFacing.DOWN ) {
                     World world = event.getEntity().world;

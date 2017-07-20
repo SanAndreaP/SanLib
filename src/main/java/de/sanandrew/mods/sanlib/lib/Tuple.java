@@ -74,6 +74,7 @@ public class Tuple
             throw new IllegalArgumentException(String.format("Cannot get tuple value! Index %d out of range", index));
         }
 
+        //noinspection unchecked
         return (T) this.values[index].value;
     }
 

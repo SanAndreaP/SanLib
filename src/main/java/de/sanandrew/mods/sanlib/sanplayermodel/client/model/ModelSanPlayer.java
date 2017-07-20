@@ -14,9 +14,12 @@ import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.entity.Entity;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Arrays;
 
+@SideOnly(Side.CLIENT)
 public class ModelSanPlayer
         extends ModelPlayer
         implements ModelJsonHandler<ModelSanPlayer, ModelJsonLoader.ModelJson>

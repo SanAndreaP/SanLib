@@ -105,7 +105,7 @@
       "parentBox": "head"
     },
     {
-      "boxName": "quadTail1",
+      "boxName": "noarmorstand_quadTail1",
       "sizeX": 3,
       "sizeY": 10,
       "sizeZ": 3,
@@ -126,7 +126,7 @@
       "parentBox": "head"
     },
     {
-      "boxName": "quadTail2",
+      "boxName": "noarmorstand_quadTail2",
       "sizeX": 3,
       "sizeY": 10,
       "sizeZ": 3,

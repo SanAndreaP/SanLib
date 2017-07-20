@@ -65,7 +65,7 @@ public class SanPlayerModel
     public static boolean isSanPlayer(EntityPlayer e) {
         for( String val : SANPLAYER_NAMES_UUID ) {
             GameProfile profile = e.getGameProfile();
-            if( (UuidUtils.isStringUuid(val) && profile.getId().equals(UUID.fromString(val))) || profile.getName().equals(val) ) {
+            if( (UuidUtils.isStringUuid(val) && UUID.fromString(val).equals(profile.getId())) || profile.getName().equals(val) ) {
                 return true;
             }
         }

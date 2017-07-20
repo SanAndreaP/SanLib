@@ -8,7 +8,10 @@ package de.sanandrew.mods.sanlib.sanplayermodel.client.model;
 
 import net.minecraft.client.model.ModelArmorStand;
 import net.minecraft.client.model.ModelRenderer;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class ModelSanArmorStand
         extends ModelArmorStand
 {

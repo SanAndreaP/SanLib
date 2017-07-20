@@ -20,9 +20,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Arrays;
 
+@SideOnly(Side.CLIENT)
 public class ModelSanPlayerArmor
         extends ModelPlayer
         implements ModelJsonHandler<ModelSanPlayerArmor, LayerSanArmor.ModelJsonArmor>

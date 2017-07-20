@@ -9,9 +9,13 @@ package de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.layers;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import de.sanandrew.mods.sanlib.lib.client.ModelJsonLoader;
+import de.sanandrew.mods.sanlib.lib.util.ItemStackUtils;
+import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import de.sanandrew.mods.sanlib.sanplayermodel.SanPlayerModel;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.model.ModelSanPlayerArmor;
+import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.RenderSanArmorStand;
 import net.minecraft.client.model.ModelBiped;
+import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.entity.RenderLivingBase;
 import net.minecraft.client.renderer.entity.layers.LayerBipedArmor;
 import net.minecraft.entity.Entity;
@@ -22,7 +26,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nonnull;
+import java.util.List;
+
+@SideOnly(Side.CLIENT)
 public class LayerSanArmor
         extends LayerBipedArmor
 {
@@ -91,18 +101,37 @@ public class LayerSanArmor
             switch( slotIn ) {
                 case HEAD:
                     modelSan.head.showModel = true;
+                    if( this.renderer instanceof RenderSanArmorStand ) {
+                        hideArmorStandBoxes(modelSan.head.childModels);
+                    }
                     break;
                 case CHEST:
                     modelSan.body.showModel = true;
+                    modelSan.leftArm.showModel = true;
+                    modelSan.rightArm.showModel = true;
+                    if( this.renderer instanceof RenderSanArmorStand ) {
+                        hideArmorStandBoxes(modelSan.body.childModels);
+                        hideArmorStandBoxes(modelSan.leftArm.childModels);
+                        hideArmorStandBoxes(modelSan.rightArm.childModels);
+                    }
                     break;
                 case LEGS:
                     modelSan.body.showModel = true;
                     modelSan.leftLeg.showModel = true;
                     modelSan.rightLeg.showModel = true;
+                    if( this.renderer instanceof RenderSanArmorStand ) {
+                        hideArmorStandBoxes(modelSan.body.childModels);
+                        hideArmorStandBoxes(modelSan.leftLeg.childModels);
+                        hideArmorStandBoxes(modelSan.rightLeg.childModels);
+                    }
                     break;
                 case FEET:
                     modelSan.leftLeg.showModel = true;
                     modelSan.rightLeg.showModel = true;
+                    if( this.renderer instanceof RenderSanArmorStand ) {
+                        hideArmorStandBoxes(modelSan.leftLeg.childModels);
+                        hideArmorStandBoxes(modelSan.rightLeg.childModels);
+                    }
                     break;
             }
         } else {
@@ -110,8 +139,14 @@ public class LayerSanArmor
         }
     }
 
-    private ModelSanPlayerArmor getCustomArmorModel(ItemStack itemStack, EntityEquipmentSlot slot) {
-        if( itemStack != ItemStack.EMPTY && itemStack.getItem() instanceof ItemArmor ) {
+    private static void hideArmorStandBoxes(List<ModelRenderer> childCubes) {
+        if( childCubes != null ) {
+            childCubes.forEach(cube -> { if( MiscUtils.defIfNull(cube.boxName, "").contains("noarmorstand_") ) cube.isHidden = true; });
+        }
+    }
+
+    private ModelSanPlayerArmor getCustomArmorModel(@Nonnull ItemStack itemStack, EntityEquipmentSlot slot) {
+        if( ItemStackUtils.isValid(itemStack) && itemStack.getItem() instanceof ItemArmor ) {
             String key = this.getKeyForArmor((ItemArmor) itemStack.getItem());
             if( this.armorModels.contains(key, slot) ) {
                 ModelSanPlayerArmor armor = this.armorModels.get(key, slot);

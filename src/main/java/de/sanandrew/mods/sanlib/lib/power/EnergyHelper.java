@@ -15,13 +15,13 @@ import net.minecraftforge.energy.IEnergyStorage;
 @SuppressWarnings({"ConstantConditions", "unused"})
 public final class EnergyHelper
 {
-    public static final boolean COFH_EXISTS = ReflectionUtils.doesClassExist("cofh.api.energy.IEnergyHandler");
+    public static final boolean COFH_EXISTS = ReflectionUtils.doesClassExist("cofh.redstobeflux.api.IEnergyHandler");
     public static final boolean TESLA_EXISTS = ReflectionUtils.doesClassExist("net.darkhax.tesla.capability.TeslaCapabilities");
 
     public static boolean canConnectEnergy(TileEntity te, EnumFacing facing) {
         //noinspection SimplifiableIfStatement
-        if( COFH_EXISTS && te instanceof cofh.api.energy.IEnergyHandler ) {
-            return ((cofh.api.energy.IEnergyHandler) te).canConnectEnergy(facing);
+        if( COFH_EXISTS && te instanceof cofh.redstoneflux.api.IEnergyHandler ) {
+            return ((cofh.redstoneflux.api.IEnergyHandler) te).canConnectEnergy(facing);
         }
         if( TESLA_EXISTS ) {
             if( te.getCapability(net.darkhax.tesla.capability.TeslaCapabilities.CAPABILITY_CONSUMER, facing) != null ) {
@@ -36,8 +36,8 @@ public final class EnergyHelper
     }
 
     public static long receiveEnergy(TileEntity te, EnumFacing facing, long amount, boolean simulate) {
-        if( COFH_EXISTS && te instanceof cofh.api.energy.IEnergyReceiver ) {
-            return ((cofh.api.energy.IEnergyReceiver) te).receiveEnergy(facing, (int) amount, simulate);
+        if( COFH_EXISTS && te instanceof cofh.redstoneflux.api.IEnergyReceiver ) {
+            return ((cofh.redstoneflux.api.IEnergyReceiver) te).receiveEnergy(facing, (int) amount, simulate);
         }
         if( TESLA_EXISTS ) {
             net.darkhax.tesla.api.ITeslaConsumer consumer = te.getCapability(net.darkhax.tesla.capability.TeslaCapabilities.CAPABILITY_CONSUMER, facing);
@@ -54,8 +54,8 @@ public final class EnergyHelper
     }
 
     public static long extractEnergy(TileEntity te, EnumFacing facing, long amount, boolean simulate) {
-        if( COFH_EXISTS && te instanceof cofh.api.energy.IEnergyProvider ) {
-            return ((cofh.api.energy.IEnergyProvider) te).extractEnergy(facing, (int) amount, simulate);
+        if( COFH_EXISTS && te instanceof cofh.redstoneflux.api.IEnergyProvider ) {
+            return ((cofh.redstoneflux.api.IEnergyProvider) te).extractEnergy(facing, (int) amount, simulate);
         }
         if( TESLA_EXISTS ) {
             net.darkhax.tesla.api.ITeslaProducer producer = te.getCapability(net.darkhax.tesla.capability.TeslaCapabilities.CAPABILITY_PRODUCER, facing);
