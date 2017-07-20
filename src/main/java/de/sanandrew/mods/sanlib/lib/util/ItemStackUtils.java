@@ -211,4 +211,23 @@ public final class ItemStackUtils
             }
         }
     }
+
+    public static void readItemStacksFromTag(List<ItemStack> items, NBTTagList tagList) {
+        readItemStacksFromTag(items, tagList, null);
+    }
+
+    public static void readItemStacksFromTag(List<ItemStack> items, NBTTagList tagList, BiConsumer<ItemStack, NBTTagCompound> callbackMethod) {
+        for( int i = 0; i < tagList.tagCount(); i++ ) {
+            NBTTagCompound tag = tagList.getCompoundTagAt(i);
+            short slot = tag.getShort("Slot");
+            items.set(i, new ItemStack(tag));
+            if( tag.hasKey("Quantity") ) {
+                items.get(i).setCount(((NBTPrimitive) tag.getTag("Quantity")).getInt());
+            }
+
+            if( callbackMethod != null && tag.hasKey("StackNBT") ) {
+                callbackMethod.accept(items.get(i), (NBTTagCompound) tag.getTag("StackNBT"));
+            }
+        }
+    }
 }
