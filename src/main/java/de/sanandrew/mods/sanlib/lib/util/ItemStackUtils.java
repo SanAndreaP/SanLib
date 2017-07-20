@@ -17,6 +17,7 @@ import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 
@@ -135,8 +136,12 @@ public final class ItemStackUtils
      * @param stacks The ItemStack array which should be checked.
      * @return true, if the ItemStack can be found, false otherwise.
      */
-    public static boolean isStackInArray(@Nonnull ItemStack stack, ItemStack... stacks) {
-        return Arrays.stream(stacks).anyMatch(currStack -> ItemStackUtils.areEqual(stack, currStack));
+    public static boolean isStackInArray(@Nonnull final ItemStack stack, ItemStack... stacks) {
+        return Arrays.stream(stacks).anyMatch(currStack -> areEqual(stack, currStack));
+    }
+
+    public static boolean isStackInList(@Nonnull final ItemStack stack, List<ItemStack> stacks) {
+        return stacks.stream().anyMatch(currStack -> areEqual(stack, currStack));
     }
 
     public static boolean canStack(@Nonnull ItemStack stack1, @Nonnull ItemStack stack2, boolean consumeAll) {
@@ -146,29 +151,38 @@ public final class ItemStackUtils
     }
 
     public static NBTTagList writeItemStacksToTag(ItemStack[] items, int maxQuantity) {
-        return writeItemStacksToTag(items, maxQuantity, null);
+        return writeItemStacksToTag(Arrays.asList(items), maxQuantity, null);
     }
 
     public static NBTTagList writeItemStacksToTag(ItemStack[] items, int maxQuantity, BiConsumer<ItemStack, NBTTagCompound> callbackMethod) {
+        return writeItemStacksToTag(Arrays.asList(items), maxQuantity, callbackMethod);
+    }
+
+    public static NBTTagList writeItemStacksToTag(List<ItemStack> items, int maxQuantity) {
+        return writeItemStacksToTag(items, maxQuantity, null);
+    }
+
+    public static NBTTagList writeItemStacksToTag(List<ItemStack> items, int maxQuantity, BiConsumer<ItemStack, NBTTagCompound> callbackMethod) {
         NBTTagList tagList = new NBTTagList();
 
-        for( int i = 0; i < items.length; i++ ) {
-            if( items[i] != ItemStack.EMPTY ) {
+        for( int i = 0, max = items.size(); i < max; i++ ) {
+            ItemStack stack = items.get(i);
+            if( isValid(stack) ) {
                 NBTTagCompound tag = new NBTTagCompound();
                 tag.setShort("Slot", (short) i);
-                items[i].writeToNBT(tag);
+                stack.writeToNBT(tag);
 
                 if( maxQuantity > Short.MAX_VALUE ) {
-                    tag.setInteger("Quantity", Math.min(items[i].getCount(), maxQuantity));
+                    tag.setInteger("Quantity", Math.min(stack.getCount(), maxQuantity));
                 } else if( maxQuantity > Byte.MAX_VALUE ) {
-                    tag.setShort("Quantity", (short) Math.min(items[i].getCount(), maxQuantity));
+                    tag.setShort("Quantity", (short) Math.min(stack.getCount(), maxQuantity));
                 } else {
-                    tag.setByte("Quantity", (byte) Math.min(items[i].getCount(), maxQuantity));
+                    tag.setByte("Quantity", (byte) Math.min(stack.getCount(), maxQuantity));
                 }
 
                 if( callbackMethod != null ) {
                     NBTTagCompound stackNbt = new NBTTagCompound();
-                    callbackMethod.accept(items[i], stackNbt);
+                    callbackMethod.accept(stack, stackNbt);
                     tag.setTag("StackNBT", stackNbt);
                 }
 
