@@ -220,13 +220,13 @@ public final class ItemStackUtils
         for( int i = 0; i < tagList.tagCount(); i++ ) {
             NBTTagCompound tag = tagList.getCompoundTagAt(i);
             short slot = tag.getShort("Slot");
-            items.set(i, new ItemStack(tag));
+            items.set(slot, new ItemStack(tag));
             if( tag.hasKey("Quantity") ) {
-                items.get(i).setCount(((NBTPrimitive) tag.getTag("Quantity")).getInt());
+                items.get(slot).setCount(((NBTPrimitive) tag.getTag("Quantity")).getInt());
             }
 
             if( callbackMethod != null && tag.hasKey("StackNBT") ) {
-                callbackMethod.accept(items.get(i), (NBTTagCompound) tag.getTag("StackNBT"));
+                callbackMethod.accept(items.get(slot), (NBTTagCompound) tag.getTag("StackNBT"));
             }
         }
     }
