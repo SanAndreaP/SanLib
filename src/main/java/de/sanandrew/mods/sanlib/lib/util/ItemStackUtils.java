@@ -13,6 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nonnull;
@@ -73,7 +74,7 @@ public final class ItemStackUtils
      * @return {@code true}, if the stacks are considered equal, {@code false} otherwise
      */
     public static boolean areEqual(@Nonnull ItemStack is1, @Nonnull ItemStack is2) {
-        return areEqual(is1, is2, false, true);
+        return areEqual(is1, is2, false, true, true);
     }
 
     /**
@@ -84,7 +85,7 @@ public final class ItemStackUtils
      * @return {@code true}, if the stacks are considered equal, {@code false} otherwise
      */
     public static boolean areEqual(@Nonnull ItemStack is1, @Nonnull ItemStack is2, boolean checkNbt) {
-        return areEqual(is1, is2, false, checkNbt);
+        return areEqual(is1, is2, false, checkNbt, true);
     }
 
     /**
@@ -102,6 +103,16 @@ public final class ItemStackUtils
     }
 
     public static boolean areEqual(@Nonnull ItemStack is1, @Nonnull ItemStack is2, boolean checkStackSize, boolean checkNbt, boolean checkDmg) {
+        return areEqualBase(is1, is2, checkStackSize, checkDmg) && (!checkNbt || Objects.equals(is1.getTagCompound(), is2.getTagCompound()));
+    }
+
+    public static boolean areEqualNbtFit(@Nonnull ItemStack mainIS, @Nonnull ItemStack otherIS, boolean checkStackSize, boolean checkDmg) {
+        return areEqualBase(mainIS, otherIS, checkStackSize, checkDmg)
+                    && ( !otherIS.hasTagCompound() || (mainIS.hasTagCompound() && MiscUtils.doesNbtContainOther(mainIS.getTagCompound(), otherIS.getTagCompound())) );
+
+    }
+
+    private static boolean areEqualBase(@Nonnull ItemStack is1, @Nonnull ItemStack is2, boolean checkStackSize, boolean checkDmg) {
         if( is1.isEmpty() && is2.isEmpty() ) {
             return true;
         }
@@ -115,7 +126,7 @@ public final class ItemStackUtils
             return false;
         }
 
-        return !(checkStackSize && is1.getCount() != is2.getCount()) && (!checkNbt || Objects.equals(is1.getTagCompound(), is2.getTagCompound()));
+        return !(checkStackSize && is1.getCount() != is2.getCount());
     }
 
     /**

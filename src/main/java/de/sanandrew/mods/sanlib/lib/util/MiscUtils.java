@@ -6,7 +6,22 @@
    *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.lib.util;
 
+import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.lib.XorShiftRandom;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fml.common.ModContainer;
+import org.apache.logging.log4j.Level;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * Utility class for miscellaneous tasks and methods
@@ -198,5 +213,66 @@ public final class MiscUtils
      */
     public static <T> T defIfNull(T val, T def) {
         return val != null ? val : def;
+    }
+
+    /**
+     * Looks inside a directory (outside and inside of classpath) and calls the processor for each file found
+     * @param mod The mod container to be looked in (Use {@link net.minecraftforge.fml.common.Loader} to get one)
+     * @param base The path of the directory to be scanned
+     * @param preprocessor A functional reference that gets called before the files are scanned. Its parameter is the path to the directory.
+     *                     It should return true if successful, false otherwise (which also cancels further operations)
+     * @param processor A functional reference that gets called on each file found. Its parameters are the path to the directory the file is in and the path of the file itself.
+     *                  It should return true if the processing was successful, false otherwise (which also cancels further operations)
+     * @return true if both the preprocessor (for the directory) and the processor (for each file) return true, false otherwise.
+     */
+    public static boolean findFiles(ModContainer mod, String base, Function<Path, Boolean> preprocessor, BiFunction<Path, Path, Boolean> processor) {
+        File source = mod.getSource();
+
+        if( source.isFile() ) {
+            try( FileSystem fs = FileSystems.newFileSystem(source.toPath(), null) ) {
+                return findFilesIntrn(fs.getPath('/' + base), mod, preprocessor, processor);
+            } catch( IOException e ) {
+                SanLib.LOG.log(Level.ERROR, "Error loading FileSystem from jar: ", e);
+                return false;
+            }
+        } else if( source.isDirectory() ) {
+            return findFilesIntrn(source.toPath().resolve(base), mod, preprocessor, processor);
+        }
+
+        return false;
+    }
+
+    private static boolean findFilesIntrn(Path root, ModContainer mod, Function<Path, Boolean> preprocessor, BiFunction<Path, Path, Boolean> processor) {
+        if( root == null || !Files.exists(root) ) {
+            return false;
+        }
+
+        if( preprocessor != null && !MiscUtils.defIfNull(preprocessor.apply(root), false) ) {
+            return false;
+        }
+
+        if( processor != null ) {
+            Iterator<Path> itr;
+            try {
+                itr = Files.walk(root).iterator();
+            } catch( IOException e ) {
+                SanLib.LOG.log(Level.ERROR, String.format("Error iterating filesystem for: %s", mod.getModId()), e);
+                return false;
+            }
+
+            while( itr.hasNext() ) {
+                if( !MiscUtils.defIfNull(processor.apply(root, itr.next()), false) ) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public static boolean doesNbtContainOther(NBTTagCompound mainNBT, NBTTagCompound otherNBT) {
+        return otherNBT.getKeySet().stream().allMatch(key -> mainNBT.hasKey(key)
+                                                                && mainNBT.getTagId(key) == otherNBT.getTagId(key)
+                                                                && mainNBT.getTag(key).equals(otherNBT.getTag(key)));
     }
 }
