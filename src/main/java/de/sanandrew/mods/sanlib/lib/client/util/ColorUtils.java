@@ -6,7 +6,7 @@
    *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.lib.client.util;
 
-import de.sanandrew.mods.sanlib.lib.client.ColorObj;
+import de.sanandrew.mods.sanlib.lib.ColorObj;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;

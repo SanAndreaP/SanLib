@@ -4,7 +4,9 @@
    * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
    *                http://creativecommons.org/licenses/by-nc-sa/4.0/
    *******************************************************************************************************************/
-package de.sanandrew.mods.sanlib.lib.client;
+package de.sanandrew.mods.sanlib.lib;
+
+import net.minecraft.util.math.MathHelper;
 
 /**
  * A class that contains color values
@@ -16,6 +18,24 @@ public final class ColorObj
     private int g;
     private int b;
     private int a;
+
+
+    /**
+     * Creates a new color object from the passed HSLA values.
+     * @param hue The hue value, from {@code 0.0F} - {@code 360.0F}
+     * @param saturation The saturation value, from {@code 0.0F} - {@code 1.0F}
+     * @param luminance The luminance value, from {@code 0.0F} - {@code 1.0F}
+     * @param alpha The alpha value, from  {@code 0.0F} - {@code 1.0F}
+     */
+    public static ColorObj fromHSLA(float hue, float saturation, float luminance, float alpha) {
+        ColorObj obj = new ColorObj();
+        obj.calcAndSetRgbFromHsl(hue, saturation, luminance);
+        obj.a = (int) (alpha < 0.0F ? 0.0F : alpha > 1.0F ? 255.0F : alpha * 255.0F);
+
+        return obj;
+    }
+
+    private ColorObj() { }
 
     /**
      * Creates a new instance with an integer as its color value.<br>
@@ -58,6 +78,18 @@ public final class ColorObj
         this.g = (int) (green < 0.0F ? 0.0F : green > 1.0F ? 255.0F : green * 255.0F);
         this.b = (int) (blue < 0.0F ? 0.0F : blue > 1.0F ? 255.0F : blue * 255.0F);
         this.a = (int) (alpha < 0.0F ? 0.0F : alpha > 1.0F ? 255.0F : alpha * 255.0F);
+    }
+
+    /**
+     * Creates a new instance with all color components from the passed color object.<br>
+     * This will basically be an independent copy of the original.
+     * @param orig the color object to be copied
+     */
+    public ColorObj(ColorObj orig) {
+        this.r = orig.r;
+        this.g = orig.g;
+        this.b = orig.b;
+        this.a = orig.a;
     }
 
     /**
@@ -155,8 +187,82 @@ public final class ColorObj
         this.a = alpha < 0 ? 0 : alpha > 255 ? 255 : alpha;
     }
 
+    /**
+     * Returns the color object as an integer. As a hexadecimal number, it looks like {@code 0xAARRGGBB}, where as A is alpha, R is red, G is green and B is blue.
+     * @return this color object as integer
+     */
     public int getColorInt() {
         return (this.a << 24) | (this.r << 16) | (this.g << 8) | this.b;
+    }
+
+    /**
+     * Converts this color object into the HSL colorspace.
+     * @return a floating point array containing the hue, saturation and luminance values, in this order.
+     */
+    public float[] calcHSL() {
+        float[] hsl = new float[3];
+        int min = Math.min(this.r, Math.min(this.g, this.b));
+        int max = Math.max(this.r, Math.max(this.g, this.b));
+
+        hsl[2] = (min + max) / 510.0F;
+
+        if( min == max ) {
+            hsl[0] = 0.0F;
+            hsl[1] = 0.0F;
+        } else {
+            if( hsl[2] < 0.5F ) {
+                hsl[1] = (max - min) / (float) (max + min);
+            } else {
+                hsl[1] = (max - min) / (510.0F - max - min);
+            }
+
+            if( max == this.r ) {
+                hsl[0] = ((this.g - this.b) / (float) (max - min)) * 60.0F;
+            } else if( max == this.g ) {
+                hsl[0] = (2.0F + (this.b - this.r) / (float) (max - min)) * 60.0F;
+            } else {
+                hsl[0] = (4.0F + (this.r - this.g) / (float) (max - min)) * 60.0F;
+            }
+
+            if( hsl[0] < 0.0F ) {
+                hsl[0] += 360.0F;
+            }
+        }
+
+        return hsl;
+    }
+
+    /**
+     * Calculates the RGB values from the passed HSL values. This overrides the RGB components from this color object with the new colors.
+     * @param hue The new hue value, from {@code 0.0F} - {@code 360.0F}
+     * @param saturation The new saturation value, from {@code 0.0F} - {@code 1.0F}
+     * @param luminance The new luminance value, from {@code 0.0F} - {@code 1.0F}
+     */
+    public void calcAndSetRgbFromHsl(float hue, float saturation, float luminance) {
+        float c = (1.0F - Math.abs(2.0F * luminance - 1.0F)) * saturation;
+        float x = c * (1.0F - Math.abs((hue / 60.0F) % 2.0F - 1.0F));
+        float m = luminance - c / 2.0F;
+
+        float[] rgb = new float[] { 0, 0, 0 };
+        if( hue < 60.0F ) {
+            rgb = new float[] { c, x, 0 };
+        } else if( hue < 120.0F ) {
+            rgb = new float[] { x, c, 0 };
+        } else if( hue < 180.0F ) {
+            rgb = new float[] { 0, c, x };
+        } else if( hue < 240.0F ) {
+            rgb = new float[] { 0, x, c };
+        } else if( hue < 300.0F ) {
+            rgb = new float[] { x, 0, c };
+        } else if( hue < 360.0F ) {
+            rgb = new float[] { c, 0, x };
+        }
+
+        rgb = new float[] { (rgb[0] + m) * 255.0F, ( rgb[1] + m ) *255.0F,( rgb[2] + m ) * 255.0F };
+
+        this.r = Math.round(rgb[0]);
+        this.g = Math.round(rgb[1]);
+        this.b = Math.round(rgb[2]);
     }
 
     @Override
