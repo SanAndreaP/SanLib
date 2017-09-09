@@ -64,7 +64,7 @@ processResources {
 
 jar {
 	manifest {
-		attributes 'FMLAT': 'sanplayermodel_at.cfg'
+		attributes 'FMLAT': 'sanlib_at.cfg'
 	}
 }
 
@@ -79,7 +79,7 @@ task deobfJar(type: Jar) {
     appendix = 'deobf'
     archiveName = "${baseName}-${version}-${appendix}.jar"
 	manifest {
-		attributes 'FMLAT': 'sanplayermodel_at.cfg'
+		attributes 'FMLAT': 'sanlib_at.cfg'
 	}
 }
 

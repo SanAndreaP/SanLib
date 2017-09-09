@@ -15,10 +15,13 @@ import com.google.gson.JsonSyntaxException;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.oredict.OreDictionary;
 
@@ -156,7 +159,7 @@ public final class JsonUtils
         ItemStack stack;
         if( jsonObj.has("nbt") ) {
             try {
-                NBTTagCompound nbt = JsonToNBT.getTagFromJson(GSON.toJson(jsonObj.get("nbt")));
+                NBTTagCompound nbt = JsonToNbtFixed.__readSingleStruct(GSON.toJson(jsonObj.get("nbt")));
                 NBTTagCompound tmp = new NBTTagCompound();
                 if( nbt.hasKey("ForgeCaps") ) {
                     tmp.setTag("ForgeCaps", nbt.getTag("ForgeCaps"));
@@ -212,5 +215,28 @@ public final class JsonUtils
         }
 
         return items;
+    }
+
+    public static class JsonToNbtFixed
+            extends JsonToNBT
+    {
+        @SuppressWarnings("StaticMethodNamingConvention")
+        public static NBTTagCompound __readSingleStruct(String jsonString) throws NBTException {
+            return new JsonToNbtFixed(jsonString).readSingleStruct();
+        }
+
+        JsonToNbtFixed(String stringIn) {
+            super(stringIn);
+        }
+
+        @Override
+        protected NBTBase readTypedValue() throws NBTException {
+            NBTBase ret = super.readTypedValue();
+            if( ret.getId() == Constants.NBT.TAG_STRING ) {
+                return type(((NBTTagString) ret).getString());
+            }
+
+            return ret;
+        }
     }
 }
