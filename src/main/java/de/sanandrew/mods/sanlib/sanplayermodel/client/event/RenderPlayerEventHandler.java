@@ -17,6 +17,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLivingEvent.Pre;
 import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -34,7 +35,7 @@ public class RenderPlayerEventHandler
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onPlayerRender(RenderPlayerEvent.Pre event) {
         this.lazyLoad();
 
@@ -43,17 +44,17 @@ public class RenderPlayerEventHandler
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onLivingRender(Pre event) {
         this.lazyLoad();
 
-        if( event.getEntity() instanceof EntityPlayer && event.getRenderer() != this.sanPlayerModel && SanPlayerModel.isSanPlayer((EntityPlayer) event.getEntity()) ) {
+        if( event.getEntity() instanceof EntityPlayer /*&& event.getRenderer() != this.sanPlayerModel*/ && SanPlayerModel.isSanPlayer((EntityPlayer) event.getEntity()) ) {
             this.sanPlayerModel.doRender((AbstractClientPlayer) event.getEntity(), event.getX(), event.getY() + ((EntityPlayer) event.getEntity()).renderOffsetY, event.getZ(), 0.0F, this.playerPartTicks);
             event.setCanceled(true);
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onHandRender(RenderHandEvent event) {
         this.lazyLoad();
 

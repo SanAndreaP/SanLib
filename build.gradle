@@ -22,7 +22,7 @@ idea {
     }
 }
 
-version = "1.12-1.2.0"
+version = "1.12-1.2.1"
 group= "de.sanandrew.mods"
 archivesBaseName = "SanLib"
 
