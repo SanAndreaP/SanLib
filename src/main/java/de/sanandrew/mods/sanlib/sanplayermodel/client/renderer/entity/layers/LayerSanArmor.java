@@ -40,6 +40,7 @@ public class LayerSanArmor
     private final Table<String, EntityEquipmentSlot, ModelSanPlayerArmor> armorModels;
 
     public float armTilt;
+    public boolean hasCstChest;
 
     public LayerSanArmor(RenderLivingBase<?> renderer) {
         super(renderer);
@@ -89,6 +90,7 @@ public class LayerSanArmor
     @Override
     public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
         this.armTilt = 0.0F;
+        this.hasCstChest = false;
         super.doRenderLayer(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale);
     }
 
@@ -114,6 +116,7 @@ public class LayerSanArmor
                         hideArmorStandBoxes(modelSan.leftArm.childModels);
                         hideArmorStandBoxes(modelSan.rightArm.childModels);
                     }
+                    this.hasCstChest = true;
                     break;
                 case LEGS:
                     modelSan.body.showModel = true;
@@ -135,6 +138,9 @@ public class LayerSanArmor
                     break;
             }
         } else {
+            if( slotIn == EntityEquipmentSlot.CHEST ) {
+                this.hasCstChest = false;
+            }
             super.setModelSlotVisible(model, slotIn);
         }
     }

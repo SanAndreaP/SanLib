@@ -34,6 +34,7 @@ public class LayerSanStandardClothes
     private final Map<EntityEquipmentSlot, ModelSanPlayerArmor> armorModels;
 
     public float armTilt;
+    public boolean hasCstChest;
 
     public LayerSanStandardClothes(RenderSanPlayer rendererIn) {
         this.renderer = rendererIn;
@@ -43,6 +44,7 @@ public class LayerSanStandardClothes
     @Override
     public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
         this.armTilt = 0.0F;
+        this.hasCstChest = false;
 
         boolean visibleOrOutline = !entitylivingbaseIn.isInvisible() || this.renderer.isOutlineRendering();
         boolean visibleToPlayer = !visibleOrOutline && !entitylivingbaseIn.isInvisibleToPlayer(Minecraft.getMinecraft().player);
@@ -116,6 +118,10 @@ public class LayerSanStandardClothes
             return armor;
         };
 
+        if( slot == EntityEquipmentSlot.CHEST ) {
+            this.hasCstChest = true;
+        }
+
         if( this.armorModels.containsKey(slot) ) {
             ModelSanPlayerArmor armor = this.armorModels.get(slot);
             if( armor == null ) {
@@ -131,6 +137,8 @@ public class LayerSanStandardClothes
                 return armor;
             }
         }
+
+        this.hasCstChest = false;
 
         return null;
     }

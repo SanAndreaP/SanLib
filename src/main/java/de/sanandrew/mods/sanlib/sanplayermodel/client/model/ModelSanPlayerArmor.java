@@ -131,14 +131,15 @@ public class ModelSanPlayerArmor
 
                     this.leftArm.rotateAngleZ -= RenderSanPlayer.armTilt;
                     this.rightArm.rotateAngleZ += RenderSanPlayer.armTilt;
+
                     break;
                 case LEGS:
                     this.setRotateAngle(this.body, this.bipedBody.rotateAngleX * 0.5F, this.bipedBody.rotateAngleY, this.bipedBody.rotateAngleZ);
                     //FALL-THROUGH
                 case FEET:
                     if (this.isRiding) {
-                        this.setRotateAngle(this.leftLeg, this.bipedLeftLeg.rotateAngleX, this.bipedLeftLeg.rotateAngleY, this.bipedLeftLeg.rotateAngleZ);
-                        this.setRotateAngle(this.rightLeg, this.bipedRightLeg.rotateAngleX, this.bipedRightLeg.rotateAngleY, this.bipedRightLeg.rotateAngleZ);
+                        this.setRotateAngle(this.leftLeg, this.bipedLeftLeg.rotateAngleX * 0.95F, this.bipedLeftLeg.rotateAngleY, this.bipedLeftLeg.rotateAngleZ);
+                        this.setRotateAngle(this.rightLeg, this.bipedRightLeg.rotateAngleX * 0.95F, this.bipedRightLeg.rotateAngleY, this.bipedRightLeg.rotateAngleZ);
                     } else {
                         this.setRotateAngle(this.leftLeg, this.bipedLeftLeg.rotateAngleX * 0.5F, this.bipedLeftLeg.rotateAngleY, this.bipedLeftLeg.rotateAngleZ);
                         this.setRotateAngle(this.rightLeg, this.bipedRightLeg.rotateAngleX * 0.5F, this.bipedRightLeg.rotateAngleY, this.bipedRightLeg.rotateAngleZ);
@@ -147,11 +148,15 @@ public class ModelSanPlayerArmor
                     if (this.isSneak) {
                         this.leftLeg.rotationPointZ = 3.0F;
                         this.rightLeg.rotationPointZ = 3.0F;
-                        this.leftLeg.rotateAngleX -= 0.15F;
-                        this.rightLeg.rotateAngleX -= 0.15F;
+                        this.leftLeg.rotationPointY = 10.0F;
+                        this.rightLeg.rotationPointY = 10.0F;
+                        this.leftLeg.rotateAngleX -= 0.05F;
+                        this.rightLeg.rotateAngleX -= 0.05F;
                     } else {
                         this.leftLeg.rotationPointZ = 0.0F;
                         this.rightLeg.rotationPointZ = 0.0F;
+                        this.leftLeg.rotationPointY = 11.0F;
+                        this.rightLeg.rotationPointY = 11.0F;
                     }
                     break;
             }

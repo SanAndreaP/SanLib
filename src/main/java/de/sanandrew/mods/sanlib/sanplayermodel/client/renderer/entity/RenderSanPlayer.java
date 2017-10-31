@@ -6,6 +6,7 @@
    *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity;
 
+import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.sanplayermodel.Resources;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.model.ModelSanPlayer;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.layers.LayerCustomHeldItem;
@@ -20,12 +21,12 @@ import net.minecraft.client.renderer.entity.layers.LayerArrow;
 import net.minecraft.client.renderer.entity.layers.LayerCustomHead;
 import net.minecraft.client.renderer.entity.layers.LayerElytra;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumHandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.apache.logging.log4j.Level;
 
 import javax.annotation.Nonnull;
 
@@ -38,6 +39,7 @@ public class RenderSanPlayer
     private LayerSanStandardClothes layerClothes;
 
     public static float armTilt;
+    public static boolean hasCstChest;
 
     public RenderSanPlayer(RenderManager manager) {
         super(manager);
@@ -56,6 +58,7 @@ public class RenderSanPlayer
     @Override
     public void doRender(AbstractClientPlayer player, double x, double y, double z, float entityYaw, float partialTicks) {
         armTilt = Math.max(this.layerArmor.armTilt, this.layerClothes.armTilt);
+        hasCstChest = this.layerArmor.hasCstChest || this.layerClothes.hasCstChest;
         if( !player.isUser() || this.renderManager.renderViewEntity == player ) {
             double yShifted = y;
 
@@ -168,8 +171,8 @@ public class RenderSanPlayer
             }
 
             GlStateManager.disableRescaleNormal();
-        } catch( Exception exception ) {
-            //            LOGGER.error("Couldn't render entity", (Throwable)exception);
+        } catch( Exception ex ) {
+            SanLib.LOG.log(Level.ERROR, "Couldn't render SanAndreasP", ex);
         }
 
         GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);

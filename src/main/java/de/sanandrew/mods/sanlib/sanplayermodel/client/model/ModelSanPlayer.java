@@ -65,17 +65,23 @@ public class ModelSanPlayer
         if( this.isSneak ) {
             this.leftLeg.rotationPointZ = 3.0F;
             this.rightLeg.rotationPointZ = 3.0F;
-            this.leftLeg.rotateAngleX -= 0.15F;
-            this.rightLeg.rotateAngleX -= 0.15F;
+            this.leftLeg.rotationPointY = 10.0F;
+            this.rightLeg.rotationPointY = 10.0F;
+            this.leftLeg.rotateAngleX -= 0.05F;
+            this.rightLeg.rotateAngleX -= 0.05F;
             this.leftArm.rotateAngleX += 0.2F;
             this.rightArm.rotateAngleX += 0.2F;
         } else {
             this.leftLeg.rotationPointZ = 0.0F;
             this.rightLeg.rotationPointZ = 0.0F;
+            this.leftLeg.rotationPointY = 11.0F;
+            this.rightLeg.rotationPointY = 11.0F;
         }
 
-        this.leftArm.rotateAngleZ -= RenderSanPlayer.armTilt;
-        this.rightArm.rotateAngleZ += RenderSanPlayer.armTilt;
+        if( RenderSanPlayer.hasCstChest ) {
+            this.leftArm.rotateAngleZ -= RenderSanPlayer.armTilt;
+            this.rightArm.rotateAngleZ += RenderSanPlayer.armTilt;
+        }
     }
 
     @Override
