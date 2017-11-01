@@ -7,7 +7,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
     }
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
@@ -22,7 +22,7 @@ idea {
     }
 }
 
-version = "1.12-1.2.2"
+version = "1.11-1.2.2"
 group= "de.sanandrew.mods"
 archivesBaseName = "SanLib"
 
@@ -32,7 +32,7 @@ compileJava {
 }
 
 minecraft {
-    version = "1.12-14.21.1.2387"
+    version = "1.11.2-13.20.1.2516"
     runDir = "run"
     mappings = "snapshot_20170716"
 }
@@ -42,7 +42,7 @@ repositories {
 }
 
 dependencies {
-	compile "net.darkhax.tesla:Tesla-1.12:1.0.60"
+	compile "net.darkhax.tesla:Tesla:1.11-1.3.0.52"
 }
 
 processResources {
