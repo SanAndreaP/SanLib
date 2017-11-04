@@ -75,7 +75,7 @@ public final class InventoryUtils
                 } else {
                     stack.setCount(stackCnt - fit);
                 }
-            } else if( invIS == ItemStack.EMPTY && inv.isItemValidForSlot(i, stack) ) {
+            } else if( !ItemStackUtils.isValid(invIS) && inv.isItemValidForSlot(i, stack) ) {
                 int max = Math.min(stack.getMaxStackSize(), maxStackSize);
                 int stackCnt = stack.getCount();
                 if( stackCnt - max <= 0 ) {
@@ -103,7 +103,7 @@ public final class InventoryUtils
 
     @Nonnull
     public static ItemStack addStackToInventory(@Nonnull ItemStack is, IInventory inv, boolean checkNBT, int maxStackSize, int begin, int end) {
-        for( int i = begin; i < end && !is.isEmpty(); ++i ) {
+        for( int i = begin; i < end && ItemStackUtils.isValid(is); ++i ) {
             ItemStack invIS = inv.getStackInSlot(i);
             int rest;
             if( ItemStackUtils.areEqual(is, invIS, checkNBT) ) {
@@ -112,7 +112,7 @@ public final class InventoryUtils
                 if( rest <= maxStack ) {
                     invIS.setCount(rest);
                     inv.setInventorySlotContents(i, invIS.copy());
-                    is = ItemStack.EMPTY.copy();
+                    is = ItemStackUtils.getEmpty();
                     break;
                 }
 
@@ -120,10 +120,10 @@ public final class InventoryUtils
                 invIS.setCount(maxStack);
                 inv.setInventorySlotContents(i, invIS.copy());
                 is.setCount(rest1);
-            } else if( invIS.isEmpty() && inv.isItemValidForSlot(i, is) ) {
+            } else if( !ItemStackUtils.isValid(invIS) && inv.isItemValidForSlot(i, is) ) {
                 if( is.getCount() <= maxStackSize ) {
                     inv.setInventorySlotContents(i, is.copy());
-                    is = ItemStack.EMPTY.copy();
+                    is = ItemStackUtils.getEmpty();
                     break;
                 }
 
@@ -149,7 +149,7 @@ public final class InventoryUtils
 
     @Nonnull
     public static ItemStack addStackToCapability(@Nonnull ItemStack is, ICapabilityProvider provider, EnumFacing facing, boolean simulate, int maxStackSize, int begin, int end) {
-        if( is != ItemStack.EMPTY && provider.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing) ) {
+        if( ItemStackUtils.isValid(is) && provider.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing) ) {
             IItemHandler handler = provider.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing);
             assert handler != null;
 
@@ -160,11 +160,11 @@ public final class InventoryUtils
                 ItemStack maxStack = is.copy();
                 maxStack.setCount(maxStackSize);
                 maxStack = handler.insertItem(i, maxStack, simulate);
-                if( maxStack == ItemStack.EMPTY ) {
+                if( !ItemStackUtils.isValid(maxStack) ) {
                     is.setCount(is.getCount() - maxStackSize);
                 }
                 if( is.getCount() <= 0 ) {
-                    return ItemStack.EMPTY;
+                    return ItemStackUtils.getEmpty();
                 }
             }
         }

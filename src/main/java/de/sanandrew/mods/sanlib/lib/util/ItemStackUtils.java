@@ -13,7 +13,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTUtil;
 import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nonnull;
@@ -43,6 +42,11 @@ public final class ItemStackUtils
      */
     public static boolean isValid(@Nonnull ItemStack stack) {
         return !stack.isEmpty();
+    }
+
+    @Nonnull
+    public static ItemStack getEmpty() {
+        return ItemStack.EMPTY;
     }
 
     /**
@@ -109,11 +113,10 @@ public final class ItemStackUtils
     public static boolean areEqualNbtFit(@Nonnull ItemStack mainIS, @Nonnull ItemStack otherIS, boolean checkStackSize, boolean checkDmg) {
         return areEqualBase(mainIS, otherIS, checkStackSize, checkDmg)
                     && ( !otherIS.hasTagCompound() || (mainIS.hasTagCompound() && MiscUtils.doesNbtContainOther(mainIS.getTagCompound(), otherIS.getTagCompound())) );
-
     }
 
     private static boolean areEqualBase(@Nonnull ItemStack is1, @Nonnull ItemStack is2, boolean checkStackSize, boolean checkDmg) {
-        if( is1.isEmpty() && is2.isEmpty() ) {
+        if( !isValid(is1) && !isValid(is2) ) {
             return true;
         }
 
@@ -122,7 +125,7 @@ public final class ItemStackUtils
         }
 
         //noinspection SimplifiableIfStatement
-        if( checkDmg && (is1.getItemDamage() != OreDictionary.WILDCARD_VALUE || is2.getItemDamage() != OreDictionary.WILDCARD_VALUE) && is1.getItemDamage() != is2.getItemDamage() ) {
+        if( checkDmg && is1.getItemDamage() != OreDictionary.WILDCARD_VALUE && is2.getItemDamage() != OreDictionary.WILDCARD_VALUE && is1.getItemDamage() != is2.getItemDamage() ) {
             return false;
         }
 
@@ -156,7 +159,7 @@ public final class ItemStackUtils
     }
 
     public static boolean canStack(@Nonnull ItemStack stack1, @Nonnull ItemStack stack2, boolean consumeAll) {
-        return stack1.isEmpty() || stack2.isEmpty()
+        return !isValid(stack1) || !isValid(stack2)
                 || (stack1.isStackable() && areEqual(stack1, stack2, false, true, !stack2.getHasSubtypes())
                     && (!consumeAll || stack1.getCount() + stack2.getCount() <= stack1.getMaxStackSize()));
     }
