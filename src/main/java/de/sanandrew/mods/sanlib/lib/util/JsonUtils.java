@@ -12,20 +12,17 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.JsonReader;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.io.Reader;
 import java.util.stream.Collectors;
 
@@ -35,7 +32,12 @@ public final class JsonUtils
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     public static <T> T fromJson(Reader reader, Class<T> clazz) {
-        return net.minecraft.util.JsonUtils.fromJson(GSON, reader, clazz);
+        JsonReader jsonReader = new JsonReader(reader);
+        try {
+            return GSON.getAdapter(clazz).read(jsonReader);
+        } catch( IOException e ) {
+            throw new JsonParseException(e);
+        }
     }
 
     public static float getFloatVal(JsonElement json) {
@@ -158,23 +160,19 @@ public final class JsonUtils
 
         ItemStack stack;
         if( jsonObj.has("nbt") ) {
-            try {
-                NBTTagCompound nbt = JsonToNbtFixed.__readSingleStruct(GSON.toJson(jsonObj.get("nbt")));
-                NBTTagCompound tmp = new NBTTagCompound();
-                if( nbt.hasKey("ForgeCaps") ) {
-                    tmp.setTag("ForgeCaps", nbt.getTag("ForgeCaps"));
-                    nbt.removeTag("ForgeCaps");
-                }
-
-                tmp.setTag("tag", nbt);
-                tmp.setString("id", itemName);
-                tmp.setInteger("Count", net.minecraft.util.JsonUtils.getInt(jsonObj, "count", 1));
-                tmp.setInteger("Damage", net.minecraft.util.JsonUtils.getInt(jsonObj, "data", 0));
-
-                stack = new ItemStack(tmp);
-            } catch( NBTException e ) {
-                throw new JsonParseException("Invalid NBT Entry: " + e.toString());
+            NBTTagCompound nbt = JsonNbtReader.getTagFromJson(jsonObj.get("nbt"));
+            NBTTagCompound tmp = new NBTTagCompound();
+            if( nbt.hasKey("ForgeCaps") ) {
+                tmp.setTag("ForgeCaps", nbt.getTag("ForgeCaps"));
+                nbt.removeTag("ForgeCaps");
             }
+
+            tmp.setTag("tag", nbt);
+            tmp.setString("id", itemName);
+            tmp.setInteger("Count", net.minecraft.util.JsonUtils.getInt(jsonObj, "count", 1));
+            tmp.setInteger("Damage", net.minecraft.util.JsonUtils.getInt(jsonObj, "data", 0));
+
+            stack = new ItemStack(tmp);
         } else {
             stack = new ItemStack(item, net.minecraft.util.JsonUtils.getInt(jsonObj, "count", 1), net.minecraft.util.JsonUtils.getInt(jsonObj, "data", 0));
         }
@@ -215,28 +213,5 @@ public final class JsonUtils
         }
 
         return items;
-    }
-
-    public static class JsonToNbtFixed
-            extends JsonToNBT
-    {
-        @SuppressWarnings("StaticMethodNamingConvention")
-        public static NBTTagCompound __readSingleStruct(String jsonString) throws NBTException {
-            return new JsonToNbtFixed(jsonString).readSingleStruct();
-        }
-
-        JsonToNbtFixed(String stringIn) {
-            super(stringIn);
-        }
-
-        @Override
-        protected NBTBase readTypedValue() throws NBTException {
-            NBTBase ret = super.readTypedValue();
-            if( ret.getId() == Constants.NBT.TAG_STRING ) {
-                return type(((NBTTagString) ret).getString());
-            }
-
-            return ret;
-        }
     }
 }
