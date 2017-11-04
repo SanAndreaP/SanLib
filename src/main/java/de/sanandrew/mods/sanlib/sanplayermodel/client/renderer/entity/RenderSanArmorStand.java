@@ -38,7 +38,7 @@ public class RenderSanArmorStand
         };
         this.addLayer(layerbipedarmor);
         this.addLayer(new LayerHeldItem(this));
-        this.addLayer(new LayerElytra(this));
+//        this.addLayer(new LayerElytra(this));
         this.addLayer(new LayerCustomHead(this.getMainModel().bipedHead));
     }
 

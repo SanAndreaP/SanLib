@@ -6,6 +6,7 @@
    *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.sanplayermodel.event;
 
+import de.sanandrew.mods.sanlib.lib.util.ItemStackUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import de.sanandrew.mods.sanlib.sanplayermodel.SanPlayerModel;
 import de.sanandrew.mods.sanlib.sanplayermodel.entity.EntitySanArmorStand;
@@ -32,7 +33,7 @@ public class ItemClickEvent
 {
     @SubscribeEvent
     public void onItemUse(PlayerInteractEvent.RightClickBlock event) {
-        if( event.getItemStack().getItem() instanceof ItemArmorStand && event.getEntity() instanceof EntityPlayer ) {
+        if( ItemStackUtils.isValid(event.getItemStack()) && event.getItemStack().getItem() instanceof ItemArmorStand && event.getEntity() instanceof EntityPlayer ) {
             EntityPlayer player = (EntityPlayer) event.getEntity();
             if( SanPlayerModel.isSanPlayer(player) && !player.isSneaking() ) {
                 EnumFacing facing = event.getFace();
@@ -42,7 +43,7 @@ public class ItemClickEvent
                     BlockPos pos1 = replaceable ? event.getPos() : event.getPos().offset(facing);
                     ItemStack heldItem = player.getHeldItem(event.getHand());
 
-                    if( player.canPlayerEdit(pos1, facing, heldItem) ) {
+                    if( ItemStackUtils.isValid(heldItem) && player.canPlayerEdit(pos1, facing, heldItem) ) {
                         BlockPos pos2 = pos1.up();
                         boolean isOccupied = !world.isAirBlock(pos1) && !world.getBlockState(pos1).getBlock().isReplaceable(world, pos1);
                         isOccupied = isOccupied | (!world.isAirBlock(pos2) && !world.getBlockState(pos2).getBlock().isReplaceable(world, pos2));
@@ -66,7 +67,7 @@ public class ItemClickEvent
                                     world.playSound(null, stand.posX, stand.posY, stand.posZ, SoundEvents.ENTITY_ARMORSTAND_PLACE, SoundCategory.BLOCKS, 0.75F, 0.8F);
                                 }
 
-                                heldItem.shrink(1);
+                                heldItem.stackSize -= (1);
 
                                 event.setCanceled(true);
                             }

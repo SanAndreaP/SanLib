@@ -58,7 +58,7 @@ public class LayerSanArmor
     public void renderHand(EntityLivingBase entity, float scale, EnumHandSide hand) {
         ItemStack itemstack = entity.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
 
-        if( itemstack.getItem() instanceof ItemArmor ) {
+        if( ItemStackUtils.isValid(itemstack) && itemstack.getItem() instanceof ItemArmor ) {
             ItemArmor armorItem = (ItemArmor) itemstack.getItem();
             if( armorItem.getEquipmentSlot() == EntityEquipmentSlot.CHEST ) {
                 ModelSanPlayerArmor t = this.getCustomArmorModel(itemstack, EntityEquipmentSlot.CHEST);
@@ -151,7 +151,7 @@ public class LayerSanArmor
         }
     }
 
-    private ModelSanPlayerArmor getCustomArmorModel(@Nonnull ItemStack itemStack, EntityEquipmentSlot slot) {
+    private ModelSanPlayerArmor getCustomArmorModel(ItemStack itemStack, EntityEquipmentSlot slot) {
         if( ItemStackUtils.isValid(itemStack) && itemStack.getItem() instanceof ItemArmor ) {
             String key = this.getKeyForArmor((ItemArmor) itemStack.getItem());
             if( this.armorModels.contains(key, slot) ) {

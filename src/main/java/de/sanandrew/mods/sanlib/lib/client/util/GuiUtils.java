@@ -57,7 +57,7 @@ public final class GuiUtils
      * @param stack The ItemStack.
      * @return The tooltip of the ItemStack.
      */
-    public static List<?> getTooltipWithoutShift(@Nonnull ItemStack stack) {
+    public static List<?> getTooltipWithoutShift(ItemStack stack) {
         ByteBuffer keyDownBuffer = ReflectionUtils.getCachedFieldValue(Keyboard.class, null, "keyDownBuffer", "keyDownBuffer");
         byte lShift = keyDownBuffer.get(Keyboard.KEY_LSHIFT);
         byte rShift = keyDownBuffer.get(Keyboard.KEY_RSHIFT);

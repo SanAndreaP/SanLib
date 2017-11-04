@@ -45,7 +45,7 @@ public class SanPlayerModel
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
-        EntityRegistry.registerModEntity(new ResourceLocation(ID, "sanArmorStand"), EntitySanArmorStand.class, "sanArmorStand", 0, this, 64, 1, true);
+        EntityRegistry.registerModEntity(/*new ResourceLocation(ID, "sanArmorStand"),*/ EntitySanArmorStand.class, "sanArmorStand", 0, this, 64, 1, true);
 
         MinecraftForge.EVENT_BUS.register(new ItemClickEvent());
 

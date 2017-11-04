@@ -6,6 +6,7 @@
    *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.layers;
 
+import de.sanandrew.mods.sanlib.lib.util.ItemStackUtils;
 import de.sanandrew.mods.sanlib.sanplayermodel.SanPlayerModel;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.model.ModelSanPlayerArmor;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.RenderSanPlayer;
@@ -65,7 +66,7 @@ public class LayerSanStandardClothes
     public void renderHand(EntityLivingBase entityLivingBaseIn, float scale, EnumHandSide hand) {
         ItemStack itemstack = this.getItemStackFromSlot(entityLivingBaseIn, EntityEquipmentSlot.CHEST);
 
-        if( !(itemstack.getItem() instanceof ItemArmor) || ((ItemArmor) itemstack.getItem()).getEquipmentSlot() != EntityEquipmentSlot.CHEST ) {
+        if( !ItemStackUtils.isValid(itemstack) || !(itemstack.getItem() instanceof ItemArmor) || ((ItemArmor) itemstack.getItem()).getEquipmentSlot() != EntityEquipmentSlot.CHEST ) {
 
             ModelSanPlayerArmor t = this.getArmorModelHook(EntityEquipmentSlot.CHEST);
             if( t == null ) {
@@ -95,7 +96,7 @@ public class LayerSanStandardClothes
     public void renderClothLayer(EntityLivingBase entityLivingBaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale, EntityEquipmentSlot slotIn) {
         ItemStack itemstack = this.getItemStackFromSlot(entityLivingBaseIn, slotIn);
 
-        if( !(itemstack.getItem() instanceof ItemArmor) || ((ItemArmor) itemstack.getItem()).getEquipmentSlot() != slotIn ) {
+        if( !ItemStackUtils.isValid(itemstack) || !(itemstack.getItem() instanceof ItemArmor) || ((ItemArmor) itemstack.getItem()).getEquipmentSlot() != slotIn ) {
             ModelSanPlayerArmor t = this.getArmorModelHook(slotIn);
             if( t == null ) {
                 return;
@@ -143,8 +144,7 @@ public class LayerSanStandardClothes
         return null;
     }
 
-    @Nonnull
-    public ItemStack getItemStackFromSlot(EntityLivingBase living, EntityEquipmentSlot slotIn) {
+        public ItemStack getItemStackFromSlot(EntityLivingBase living, EntityEquipmentSlot slotIn) {
         return living.getItemStackFromSlot(slotIn);
     }
 }

@@ -40,13 +40,13 @@ public final class ItemStackUtils
      * @param stack The ItemStack to be checked.
      * @return {@code true}, if the stack is valid, {@code false} otherwise
      */
-    public static boolean isValid(@Nonnull ItemStack stack) {
-        return !stack.isEmpty();
+    public static boolean isValid(ItemStack stack) {
+        //noinspection ConstantConditions
+        return stack != null && stack.getItem() != null && stack.getItem() != Item.getItemFromBlock(Blocks.AIR);
     }
 
-    @Nonnull
     public static ItemStack getEmpty() {
-        return ItemStack.EMPTY;
+        return null;
     }
 
     /**
@@ -56,7 +56,7 @@ public final class ItemStackUtils
      * @return {@code true}, if the stack is valid and contains the specified item, {@code false} otherwise
      * @see #isValid(ItemStack)
      */
-    public static boolean isItem(@Nonnull ItemStack stack, Item item) {
+    public static boolean isItem(ItemStack stack, Item item) {
         return isValid(stack) && stack.getItem() == item;
     }
 
@@ -67,7 +67,7 @@ public final class ItemStackUtils
      * @return {@code true}, if the stack is valid and contains the specified block, {@code false} otherwise
      * @see #isValid(ItemStack)
      */
-    public static boolean isBlock(@Nonnull ItemStack stack, Block block) {
+    public static boolean isBlock(ItemStack stack, Block block) {
         return isValid(stack) && Block.getBlockFromItem(stack.getItem()) == block;
     }
 
@@ -77,7 +77,7 @@ public final class ItemStackUtils
      * @param is2 The second ItemStack
      * @return {@code true}, if the stacks are considered equal, {@code false} otherwise
      */
-    public static boolean areEqual(@Nonnull ItemStack is1, @Nonnull ItemStack is2) {
+    public static boolean areEqual(ItemStack is1, ItemStack is2) {
         return areEqual(is1, is2, false, true, true);
     }
 
@@ -88,7 +88,7 @@ public final class ItemStackUtils
      * @param checkNbt A flag to determine wether or not to compare NBTTagCompounds
      * @return {@code true}, if the stacks are considered equal, {@code false} otherwise
      */
-    public static boolean areEqual(@Nonnull ItemStack is1, @Nonnull ItemStack is2, boolean checkNbt) {
+    public static boolean areEqual(ItemStack is1, ItemStack is2, boolean checkNbt) {
         return areEqual(is1, is2, false, checkNbt, true);
     }
 
@@ -102,20 +102,20 @@ public final class ItemStackUtils
      * @param checkNbt A flag to determine wether or not to compare NBTTagCompounds
      * @return {@code true}, if the stacks are considered equal, {@code false} otherwise
      */
-    public static boolean areEqual(@Nonnull ItemStack is1, @Nonnull ItemStack is2, boolean checkStackSize, boolean checkNbt) {
+    public static boolean areEqual(ItemStack is1, ItemStack is2, boolean checkStackSize, boolean checkNbt) {
         return areEqual(is1, is2, checkStackSize, checkNbt, true);
     }
 
-    public static boolean areEqual(@Nonnull ItemStack is1, @Nonnull ItemStack is2, boolean checkStackSize, boolean checkNbt, boolean checkDmg) {
+    public static boolean areEqual(ItemStack is1, ItemStack is2, boolean checkStackSize, boolean checkNbt, boolean checkDmg) {
         return areEqualBase(is1, is2, checkStackSize, checkDmg) && (!checkNbt || Objects.equals(is1.getTagCompound(), is2.getTagCompound()));
     }
 
-    public static boolean areEqualNbtFit(@Nonnull ItemStack mainIS, @Nonnull ItemStack otherIS, boolean checkStackSize, boolean checkDmg) {
+    public static boolean areEqualNbtFit(ItemStack mainIS, ItemStack otherIS, boolean checkStackSize, boolean checkDmg) {
         return areEqualBase(mainIS, otherIS, checkStackSize, checkDmg)
                     && ( !otherIS.hasTagCompound() || (mainIS.hasTagCompound() && MiscUtils.doesNbtContainOther(mainIS.getTagCompound(), otherIS.getTagCompound())) );
     }
 
-    private static boolean areEqualBase(@Nonnull ItemStack is1, @Nonnull ItemStack is2, boolean checkStackSize, boolean checkDmg) {
+    private static boolean areEqualBase(ItemStack is1, ItemStack is2, boolean checkStackSize, boolean checkDmg) {
         if( !isValid(is1) && !isValid(is2) ) {
             return true;
         }
@@ -129,7 +129,7 @@ public final class ItemStackUtils
             return false;
         }
 
-        return !(checkStackSize && is1.getCount() != is2.getCount());
+        return !(checkStackSize && is1.stackSize != is2.stackSize);
     }
 
     /**
@@ -138,7 +138,7 @@ public final class ItemStackUtils
      * @param tag The NBTTagCompound to be written.
      * @param tagName The key for the tag.
      */
-    public static void writeStackToTag(@Nonnull ItemStack stack, NBTTagCompound tag, String tagName) {
+    public static void writeStackToTag(ItemStack stack, NBTTagCompound tag, String tagName) {
         NBTTagCompound stackTag = new NBTTagCompound();
         stack.writeToNBT(stackTag);
         tag.setTag(tagName, stackTag);
@@ -150,18 +150,18 @@ public final class ItemStackUtils
      * @param stacks The ItemStack array which should be checked.
      * @return true, if the ItemStack can be found, false otherwise.
      */
-    public static boolean isStackInArray(@Nonnull final ItemStack stack, ItemStack... stacks) {
+    public static boolean isStackInArray(final ItemStack stack, ItemStack... stacks) {
         return Arrays.stream(stacks).anyMatch(currStack -> areEqual(stack, currStack));
     }
 
-    public static boolean isStackInList(@Nonnull final ItemStack stack, List<ItemStack> stacks) {
+    public static boolean isStackInList(final ItemStack stack, List<ItemStack> stacks) {
         return stacks.stream().anyMatch(currStack -> areEqual(stack, currStack));
     }
 
-    public static boolean canStack(@Nonnull ItemStack stack1, @Nonnull ItemStack stack2, boolean consumeAll) {
+    public static boolean canStack(ItemStack stack1, ItemStack stack2, boolean consumeAll) {
         return !isValid(stack1) || !isValid(stack2)
                 || (stack1.isStackable() && areEqual(stack1, stack2, false, true, !stack2.getHasSubtypes())
-                    && (!consumeAll || stack1.getCount() + stack2.getCount() <= stack1.getMaxStackSize()));
+                    && (!consumeAll || stack1.stackSize + stack2.stackSize <= stack1.getMaxStackSize()));
     }
 
     public static NBTTagList writeItemStacksToTag(ItemStack[] items, int maxQuantity) {
@@ -187,11 +187,11 @@ public final class ItemStackUtils
                 stack.writeToNBT(tag);
 
                 if( maxQuantity > Short.MAX_VALUE ) {
-                    tag.setInteger("Quantity", Math.min(stack.getCount(), maxQuantity));
+                    tag.setInteger("Quantity", Math.min(stack.stackSize, maxQuantity));
                 } else if( maxQuantity > Byte.MAX_VALUE ) {
-                    tag.setShort("Quantity", (short) Math.min(stack.getCount(), maxQuantity));
+                    tag.setShort("Quantity", (short) Math.min(stack.stackSize, maxQuantity));
                 } else {
-                    tag.setByte("Quantity", (byte) Math.min(stack.getCount(), maxQuantity));
+                    tag.setByte("Quantity", (byte) Math.min(stack.stackSize, maxQuantity));
                 }
 
                 if( callbackMethod != null ) {
@@ -215,9 +215,9 @@ public final class ItemStackUtils
         for( int i = 0; i < tagList.tagCount(); i++ ) {
             NBTTagCompound tag = tagList.getCompoundTagAt(i);
             short slot = tag.getShort("Slot");
-            items[slot] = new ItemStack(tag);
+            items[slot] = ItemStack.func_77949_a(tag);
             if( tag.hasKey("Quantity") ) {
-                items[slot].setCount(((NBTPrimitive) tag.getTag("Quantity")).getInt());
+                items[slot].stackSize = (((NBTPrimitive) tag.getTag("Quantity")).getInt());
             }
 
             if( callbackMethod != null && tag.hasKey("StackNBT") ) {
@@ -234,9 +234,9 @@ public final class ItemStackUtils
         for( int i = 0; i < tagList.tagCount(); i++ ) {
             NBTTagCompound tag = tagList.getCompoundTagAt(i);
             short slot = tag.getShort("Slot");
-            items.set(slot, new ItemStack(tag));
+            items.set(slot, ItemStack.func_77949_a(tag));
             if( tag.hasKey("Quantity") ) {
-                items.get(slot).setCount(((NBTPrimitive) tag.getTag("Quantity")).getInt());
+                items.get(slot).stackSize = (((NBTPrimitive) tag.getTag("Quantity")).getInt());
             }
 
             if( callbackMethod != null && tag.hasKey("StackNBT") ) {

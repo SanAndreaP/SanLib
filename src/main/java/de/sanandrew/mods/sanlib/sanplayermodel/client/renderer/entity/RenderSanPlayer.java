@@ -183,8 +183,7 @@ public class RenderSanPlayer
     }
 
     @Override
-    @Nonnull
-    public ResourceLocation getEntityTexture(AbstractClientPlayer clientPlayer) {
+        public ResourceLocation getEntityTexture(AbstractClientPlayer clientPlayer) {
         return clientPlayer.isPlayerSleeping() ? Resources.MAIN_MODEL_TEXTURE_SLEEP : Resources.MAIN_MODEL_TEXTURE;
     }
 

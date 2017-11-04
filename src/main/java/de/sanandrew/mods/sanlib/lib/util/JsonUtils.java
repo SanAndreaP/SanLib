@@ -16,7 +16,6 @@ import com.google.gson.stream.JsonReader;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.oredict.OreDictionary;
@@ -24,6 +23,8 @@ import net.minecraftforge.oredict.OreDictionary;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
@@ -120,7 +121,6 @@ public final class JsonUtils
         return json.getAsBoolean();
     }
 
-    @Nonnull
     public static ItemStack getItemStack(JsonElement json) {
         if( json == null || json.isJsonNull() ) {
             throw new JsonSyntaxException("Json cannot be null");
@@ -137,8 +137,7 @@ public final class JsonUtils
         return getStack((JsonObject) json);
     }
 
-    @Nonnull
-    public static NonNullList<ItemStack> getItemStacks(JsonElement json) {
+        public static List<ItemStack> getItemStacks(JsonElement json) {
         if( json == null || json.isJsonNull() ) {
             throw new JsonSyntaxException("Json cannot be null");
         }
@@ -172,7 +171,7 @@ public final class JsonUtils
             tmp.setInteger("Count", net.minecraft.util.JsonUtils.getInt(jsonObj, "count", 1));
             tmp.setInteger("Damage", net.minecraft.util.JsonUtils.getInt(jsonObj, "data", 0));
 
-            stack = new ItemStack(tmp);
+            stack = ItemStack.func_77949_a(tmp);
         } else {
             stack = new ItemStack(item, net.minecraft.util.JsonUtils.getInt(jsonObj, "count", 1), net.minecraft.util.JsonUtils.getInt(jsonObj, "data", 0));
         }
@@ -184,8 +183,8 @@ public final class JsonUtils
         return stack;
     }
 
-    private static NonNullList<ItemStack> getStacks(JsonElement json) {
-        NonNullList<ItemStack> items = NonNullList.create();
+    private static List<ItemStack> getStacks(JsonElement json) {
+        List<ItemStack> items = new ArrayList<>();
 
         if( json == null || json.isJsonNull() ) {
             throw new JsonSyntaxException("Json cannot be null");
