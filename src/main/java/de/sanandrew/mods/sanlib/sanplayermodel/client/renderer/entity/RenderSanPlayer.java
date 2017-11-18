@@ -57,6 +57,9 @@ public class RenderSanPlayer
 
     @Override
     public void doRender(AbstractClientPlayer player, double x, double y, double z, float entityYaw, float partialTicks) {
+        if( !this.renderOutlines ) {
+            this.renderName(player, x, y, z);
+        }
         armTilt = Math.max(this.layerArmor.armTilt, this.layerClothes.armTilt);
         hasCstChest = this.layerArmor.hasCstChest || this.layerClothes.hasCstChest;
         if( !player.isUser() || this.renderManager.renderViewEntity == player ) {

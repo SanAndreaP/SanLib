@@ -25,11 +25,11 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.UUID;
 
-@Mod(modid = SanPlayerModel.ID, version = SanPlayerModel.VERSION, name = "San's Player Model", dependencies = "after:" + SanLib.ID)
+@Mod(modid = SanPlayerModel.ID, version = SanPlayerModel.VERSION, name = "San's Player Model", dependencies = "after:" + SanLib.ID, acceptableRemoteVersions = "[1.0.2,1.0.3]")
 public class SanPlayerModel
 {
     public static final String ID = "sanplayermodel";
-    public static final String VERSION = "1.0.2";
+    public static final String VERSION = "1.0.3";
 
     public static final Logger LOG = LogManager.getLogger(ID);
 
