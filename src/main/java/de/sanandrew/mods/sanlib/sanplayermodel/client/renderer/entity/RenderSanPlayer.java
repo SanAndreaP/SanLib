@@ -51,7 +51,7 @@ public class RenderSanPlayer
         this.addLayer(this.layerClothes);
         this.addLayer(new LayerCustomHeldItem(this));
         this.addLayer(new LayerArrow(this));
-        this.addLayer(new LayerCustomHead(this.myModel.head));
+        this.addLayer(new LayerCustomHead(this.myModel.bipedHead));
         this.addLayer(new LayerElytra(this));
     }
 
@@ -71,12 +71,12 @@ public class RenderSanPlayer
 
             this.setModelVisibilities(player);
             GlStateManager.enableBlendProfile(GlStateManager.Profile.PLAYER_SKIN);
-            doRenderLivingBase(player, x, yShifted, z, entityYaw, partialTicks);
+            doRenderLivingBase(player, x, yShifted, z, partialTicks);
             GlStateManager.disableBlendProfile(GlStateManager.Profile.PLAYER_SKIN);
         }
     }
 
-    private void doRenderLivingBase(AbstractClientPlayer player, double x, double y, double z, float entityYaw, float partialTicks) {
+    private void doRenderLivingBase(AbstractClientPlayer player, double x, double y, double z, float partialTicks) {
         GlStateManager.pushMatrix();
         GlStateManager.disableCull();
         this.myModel.swingProgress = this.getSwingProgress(player, partialTicks);
@@ -200,9 +200,8 @@ public class RenderSanPlayer
         this.myModel.swingProgress = 0.0F;
         this.myModel.isSneak = false;
         this.myModel.setRotationAngles(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F, clientPlayer);
-        this.myModel.rightArm.rotateAngleX = 0.0F;
-        this.myModel.rightArm.rotateAngleZ = this.myModel.bipedRightArm.rotateAngleZ;
-        this.myModel.rightArm.render(0.0625F);
+        this.myModel.bipedRightArm.rotateAngleX = 0.0F;
+        this.myModel.bipedRightArm.render(0.0625F);
         this.layerClothes.renderHand(clientPlayer, 0.0625F, EnumHandSide.RIGHT);
         this.layerArmor.renderHand(clientPlayer, 0.0625F, EnumHandSide.RIGHT);
         GlStateManager.disableBlend();
@@ -217,9 +216,8 @@ public class RenderSanPlayer
         this.myModel.swingProgress = 0.0F;
         this.myModel.isSneak = false;
         this.myModel.setRotationAngles(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F, clientPlayer);
-        this.myModel.leftArm.rotateAngleX = 0.0F;
-        this.myModel.leftArm.rotateAngleZ = this.myModel.bipedLeftArm.rotateAngleZ;
-        this.myModel.leftArm.render(0.0625F);
+        this.myModel.bipedLeftArm.rotateAngleX = 0.0F;
+        this.myModel.bipedLeftArm.render(0.0625F);
         this.layerClothes.renderHand(clientPlayer, 0.0625F, EnumHandSide.LEFT);
         this.layerArmor.renderHand(clientPlayer, 0.0625F, EnumHandSide.LEFT);
         GlStateManager.disableBlend();

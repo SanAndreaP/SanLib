@@ -10,6 +10,8 @@ import de.sanandrew.mods.sanlib.CommonProxy;
 import de.sanandrew.mods.sanlib.lib.client.ModelJsonLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -26,5 +28,10 @@ public class ClientProxy
     @Override
     public void reloadModels() {
         ModelJsonLoader.REGISTERED_JSON_LOADERS.forEach(loader -> loader.onResourceManagerReload(Minecraft.getMinecraft().getResourceManager()));
+    }
+
+    @Override
+    public void preInit(FMLPreInitializationEvent event) {
+        MinecraftForge.EVENT_BUS.register(new ClientTickHandler());
     }
 }

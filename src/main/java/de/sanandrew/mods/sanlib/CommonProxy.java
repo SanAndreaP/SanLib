@@ -7,6 +7,7 @@
 package de.sanandrew.mods.sanlib;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 public class CommonProxy
 {
@@ -15,6 +16,10 @@ public class CommonProxy
     }
 
     public void reloadModels() {
+
+    }
+
+    public void preInit(FMLPreInitializationEvent event) {
 
     }
 }

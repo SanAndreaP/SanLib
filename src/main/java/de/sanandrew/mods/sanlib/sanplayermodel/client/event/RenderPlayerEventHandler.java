@@ -6,6 +6,7 @@
    *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.sanplayermodel.client.event;
 
+import de.sanandrew.mods.sanlib.SLibConfiguration;
 import de.sanandrew.mods.sanlib.sanplayermodel.SanPlayerModel;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.RenderSanPlayer;
 import net.minecraft.client.Minecraft;
@@ -30,40 +31,48 @@ public class RenderPlayerEventHandler
     private float playerPartTicks = 0.0F;
 
     private void lazyLoad() {
-        if( this.sanPlayerModel == null ) {
-            this.sanPlayerModel = new RenderSanPlayer(Minecraft.getMinecraft().getRenderManager());
+        Minecraft mc = Minecraft.getMinecraft();
+        if( this.sanPlayerModel == null && mc.player != null ) {
+            this.sanPlayerModel = new RenderSanPlayer(mc.getRenderManager());
+            mc.getRenderManager().getSkinMap().get("slim").layerRenderers.forEach(layer -> {
+                if( !layer.getClass().getName().startsWith("net.minecraft.") ) {
+                    this.sanPlayerModel.addLayer(layer);
+                }
+            });
         }
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onPlayerRender(RenderPlayerEvent.Pre event) {
-        this.lazyLoad();
+        if( SLibConfiguration.allowCustomSanModel && SanPlayerModel.isSanPlayer(event.getEntityPlayer()) ) {
+            this.lazyLoad();
 
-        if( SanPlayerModel.isSanPlayer(event.getEntityPlayer()) ) {
-            playerPartTicks = event.getPartialRenderTick();
+            this.playerPartTicks = event.getPartialRenderTick();
         }
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onLivingRender(Pre event) {
-        this.lazyLoad();
+        if( SLibConfiguration.allowCustomSanModel && event.getEntity() instanceof EntityPlayer && SanPlayerModel.isSanPlayer((EntityPlayer) event.getEntity())  ) {
+            this.lazyLoad();
 
-        if( event.getEntity() instanceof EntityPlayer /*&& event.getRenderer() != this.sanPlayerModel*/ && SanPlayerModel.isSanPlayer((EntityPlayer) event.getEntity()) ) {
-            this.sanPlayerModel.doRender((AbstractClientPlayer) event.getEntity(), event.getX(), event.getY() + ((EntityPlayer) event.getEntity()).renderOffsetY, event.getZ(), 0.0F, this.playerPartTicks);
-            event.setCanceled(true);
+            if( this.sanPlayerModel != null ) {
+                this.sanPlayerModel.doRender((AbstractClientPlayer) event.getEntity(), event.getX(), event.getY() + ((EntityPlayer) event.getEntity()).renderOffsetY, event.getZ(), 0.0F, this.playerPartTicks);
+                event.setCanceled(true);
+            }
         }
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onHandRender(RenderHandEvent event) {
-        this.lazyLoad();
-
-        GL11.glPushMatrix();
         Minecraft mc = Minecraft.getMinecraft();
+        if( SLibConfiguration.allowCustomSanModel && SanPlayerModel.isSanPlayer(mc.player) ) {
+            this.lazyLoad();
 
-        boolean flag = mc.getRenderViewEntity() instanceof EntityLivingBase && ((EntityLivingBase)mc.getRenderViewEntity()).isPlayerSleeping();
-        if( mc.gameSettings.thirdPersonView == 0 && !flag && !mc.gameSettings.hideGUI && mc.playerController != null && !mc.playerController.isSpectator() ) {
-            if( SanPlayerModel.isSanPlayer(mc.player) ) {
+            GL11.glPushMatrix();
+
+            boolean flag = mc.getRenderViewEntity() instanceof EntityLivingBase && ((EntityLivingBase) mc.getRenderViewEntity()).isPlayerSleeping();
+            if( mc.gameSettings.thirdPersonView == 0 && this.sanPlayerModel != null && !flag && !mc.gameSettings.hideGUI && mc.playerController != null && !mc.playerController.isSpectator() ) {
                 String skinType = mc.player.getSkinType();
                 Render<AbstractClientPlayer> rend = mc.getRenderManager().getEntityRenderObject(mc.player);
                 RenderPlayer skin = mc.getRenderManager().getSkinMap().get(skinType);
@@ -79,9 +88,9 @@ public class RenderPlayerEventHandler
                 mc.getRenderManager().entityRenderMap.put(mc.player.getClass(), rend);
                 mc.getRenderManager().skinMap.put(skinType, skin);
             }
-        }
 
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GL11.glPopMatrix();
+            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+            GL11.glPopMatrix();
+        }
     }
 }

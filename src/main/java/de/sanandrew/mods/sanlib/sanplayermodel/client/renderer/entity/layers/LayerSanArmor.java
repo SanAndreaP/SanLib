@@ -73,14 +73,12 @@ public class LayerSanArmor
 
                 switch( hand ) {
                     case RIGHT:
-                        t.rightArm.rotateAngleX = 0.0F;
-                        t.rightArm.rotateAngleZ = t.bipedRightArm.rotateAngleZ;
-                        t.rightArm.render(scale);
+                        t.bipedRightArm.rotateAngleX = 0.0F;
+                        t.bipedRightArm.render(scale);
                         break;
                     case LEFT:
-                        t.leftArm.rotateAngleX = 0.0F;
-                        t.leftArm.rotateAngleZ = t.bipedLeftArm.rotateAngleZ;
-                        t.leftArm.render(scale);
+                        t.bipedLeftArm.rotateAngleX = 0.0F;
+                        t.bipedLeftArm.render(scale);
                         break;
                 }
             }
@@ -102,38 +100,30 @@ public class LayerSanArmor
             ModelSanPlayerArmor modelSan = (ModelSanPlayerArmor) model;
             switch( slotIn ) {
                 case HEAD:
-                    modelSan.head.showModel = true;
+                    modelSan.bipedHead.showModel = true;
                     if( this.renderer instanceof RenderSanArmorStand ) {
-                        hideArmorStandBoxes(modelSan.head.childModels);
+                        hideArmorStandBoxes(modelSan.bipedHead.childModels);
                     }
                     break;
                 case CHEST:
-                    modelSan.body.showModel = true;
-                    modelSan.leftArm.showModel = true;
-                    modelSan.rightArm.showModel = true;
-                    if( this.renderer instanceof RenderSanArmorStand ) {
-                        hideArmorStandBoxes(modelSan.body.childModels);
-                        hideArmorStandBoxes(modelSan.leftArm.childModels);
-                        hideArmorStandBoxes(modelSan.rightArm.childModels);
-                    }
                     this.hasCstChest = true;
-                    break;
+                    //FALL-THROUGH
                 case LEGS:
-                    modelSan.body.showModel = true;
-                    modelSan.leftLeg.showModel = true;
-                    modelSan.rightLeg.showModel = true;
+                    modelSan.bipedBody.showModel = true;
+                    modelSan.bipedLeftArm.showModel = true;
+                    modelSan.bipedRightArm.showModel = true;
                     if( this.renderer instanceof RenderSanArmorStand ) {
-                        hideArmorStandBoxes(modelSan.body.childModels);
-                        hideArmorStandBoxes(modelSan.leftLeg.childModels);
-                        hideArmorStandBoxes(modelSan.rightLeg.childModels);
+                        hideArmorStandBoxes(modelSan.bipedBody.childModels);
+                        hideArmorStandBoxes(modelSan.bipedLeftArm.childModels);
+                        hideArmorStandBoxes(modelSan.bipedRightArm.childModels);
                     }
                     break;
                 case FEET:
-                    modelSan.leftLeg.showModel = true;
-                    modelSan.rightLeg.showModel = true;
+                    modelSan.bipedLeftLeg.showModel = true;
+                    modelSan.bipedRightLeg.showModel = true;
                     if( this.renderer instanceof RenderSanArmorStand ) {
-                        hideArmorStandBoxes(modelSan.leftLeg.childModels);
-                        hideArmorStandBoxes(modelSan.rightLeg.childModels);
+                        hideArmorStandBoxes(modelSan.bipedLeftLeg.childModels);
+                        hideArmorStandBoxes(modelSan.bipedRightLeg.childModels);
                     }
                     break;
             }

@@ -13,7 +13,6 @@ import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.layers.Lay
 import de.sanandrew.mods.sanlib.sanplayermodel.entity.EntitySanArmorStand;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelPlayer;
-import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.entity.Entity;
@@ -34,13 +33,6 @@ public class ModelSanPlayerArmor
     private ResourceLocation texture;
     private final ModelJsonLoader<ModelSanPlayerArmor, LayerSanArmor.ModelJsonArmor> modelJson;
     private final EntityEquipmentSlot slot;
-
-    public ModelRenderer head;
-    public ModelRenderer body;
-    public ModelRenderer leftArm;
-    public ModelRenderer rightArm;
-    public ModelRenderer leftLeg;
-    public ModelRenderer rightLeg;
 
     public ModelSanPlayerArmor(float scaling, ResourceLocation resource, EntityEquipmentSlot slot) {
         super(scaling, true);
@@ -83,80 +75,76 @@ public class ModelSanPlayerArmor
             EntityArmorStand armorstand = (EntitySanArmorStand)entity;
             switch (this.slot) {
                 case HEAD:
-                    this.head.rotateAngleX = 0.017453292F * armorstand.getHeadRotation().getX();
-                    this.head.rotateAngleY = 0.017453292F * armorstand.getHeadRotation().getY();
-                    this.head.rotateAngleZ = 0.017453292F * armorstand.getHeadRotation().getZ();
-                    this.head.setRotationPoint(0.0F, 0.0F, 0.0F);
+                    this.bipedHead.rotateAngleX = 0.017453292F * armorstand.getHeadRotation().getX();
+                    this.bipedHead.rotateAngleY = 0.017453292F * armorstand.getHeadRotation().getY();
+                    this.bipedHead.rotateAngleZ = 0.017453292F * armorstand.getHeadRotation().getZ();
+                    this.bipedHead.setRotationPoint(0.0F, 0.0F, 0.0F);
                     break;
                 case CHEST:
-                    this.body.rotateAngleX = 0.017453292F * armorstand.getBodyRotation().getX();
-                    this.body.rotateAngleY = 0.017453292F * armorstand.getBodyRotation().getY();
-                    this.body.rotateAngleZ = 0.017453292F * armorstand.getBodyRotation().getZ();
-                    this.leftArm.rotateAngleX = 0.017453292F * armorstand.getLeftArmRotation().getX();
-                    this.leftArm.rotateAngleY = 0.017453292F * armorstand.getLeftArmRotation().getY();
-                    this.leftArm.rotateAngleZ = 0.017453292F * armorstand.getLeftArmRotation().getZ();
-                    this.rightArm.rotateAngleX = 0.017453292F * armorstand.getRightArmRotation().getX();
-                    this.rightArm.rotateAngleY = 0.017453292F * armorstand.getRightArmRotation().getY();
-                    this.rightArm.rotateAngleZ = 0.017453292F * armorstand.getRightArmRotation().getZ();
+                    this.bipedBody.rotateAngleX = 0.017453292F * armorstand.getBodyRotation().getX();
+                    this.bipedBody.rotateAngleY = 0.017453292F * armorstand.getBodyRotation().getY();
+                    this.bipedBody.rotateAngleZ = 0.017453292F * armorstand.getBodyRotation().getZ();
+                    this.bipedLeftArm.rotateAngleX = 0.017453292F * armorstand.getLeftArmRotation().getX();
+                    this.bipedLeftArm.rotateAngleY = 0.017453292F * armorstand.getLeftArmRotation().getY();
+                    this.bipedLeftArm.rotateAngleZ = 0.017453292F * armorstand.getLeftArmRotation().getZ();
+                    this.bipedRightArm.rotateAngleX = 0.017453292F * armorstand.getRightArmRotation().getX();
+                    this.bipedRightArm.rotateAngleY = 0.017453292F * armorstand.getRightArmRotation().getY();
+                    this.bipedRightArm.rotateAngleZ = 0.017453292F * armorstand.getRightArmRotation().getZ();
                     break;
                 case LEGS:
-                    this.body.rotateAngleX = 0.017453292F * armorstand.getBodyRotation().getX();
-                    this.body.rotateAngleY = 0.017453292F * armorstand.getBodyRotation().getY();
-                    this.body.rotateAngleZ = 0.017453292F * armorstand.getBodyRotation().getZ();
+                    this.bipedBody.rotateAngleX = 0.017453292F * armorstand.getBodyRotation().getX();
+                    this.bipedBody.rotateAngleY = 0.017453292F * armorstand.getBodyRotation().getY();
+                    this.bipedBody.rotateAngleZ = 0.017453292F * armorstand.getBodyRotation().getZ();
                     //FALL-THROUGH
                 case FEET:
-                    this.leftLeg.rotateAngleX = 0.017453292F * armorstand.getLeftLegRotation().getX();
-                    this.leftLeg.rotateAngleY = 0.017453292F * armorstand.getLeftLegRotation().getY();
-                    this.leftLeg.rotateAngleZ = 0.017453292F * armorstand.getLeftLegRotation().getZ();
-                    this.leftLeg.setRotationPoint(1.9F, 11.0F, 0.0F);
-                    this.rightLeg.rotateAngleX = 0.017453292F * armorstand.getRightLegRotation().getX();
-                    this.rightLeg.rotateAngleY = 0.017453292F * armorstand.getRightLegRotation().getY();
-                    this.rightLeg.rotateAngleZ = 0.017453292F * armorstand.getRightLegRotation().getZ();
-                    this.rightLeg.setRotationPoint(-1.9F, 11.0F, 0.0F);
+                    this.bipedLeftLeg.rotateAngleX = 0.017453292F * armorstand.getLeftLegRotation().getX();
+                    this.bipedLeftLeg.rotateAngleY = 0.017453292F * armorstand.getLeftLegRotation().getY();
+                    this.bipedLeftLeg.rotateAngleZ = 0.017453292F * armorstand.getLeftLegRotation().getZ();
+                    this.bipedLeftLeg.setRotationPoint(1.9F, 11.0F, 0.0F);
+                    this.bipedRightLeg.rotateAngleX = 0.017453292F * armorstand.getRightLegRotation().getX();
+                    this.bipedRightLeg.rotateAngleY = 0.017453292F * armorstand.getRightLegRotation().getY();
+                    this.bipedRightLeg.rotateAngleZ = 0.017453292F * armorstand.getRightLegRotation().getZ();
+                    this.bipedRightLeg.setRotationPoint(-1.9F, 11.0F, 0.0F);
                     break;
             }
         } else {
             switch (this.slot) {
-                case HEAD:
-                    this.setRotateAngle(this.head, this.bipedHead.rotateAngleX, this.bipedHead.rotateAngleY, this.bipedHead.rotateAngleZ);
-                    break;
                 case CHEST:
-                    this.setRotateAngle(this.body, this.bipedBody.rotateAngleX * 0.5F, this.bipedBody.rotateAngleY, this.bipedBody.rotateAngleZ);
-                    this.setRotateAngle(this.leftArm, this.bipedLeftArm.rotateAngleX, this.bipedLeftArm.rotateAngleY, this.bipedLeftArm.rotateAngleZ);
-                    this.setRotateAngle(this.rightArm, this.bipedRightArm.rotateAngleX, this.bipedRightArm.rotateAngleY, this.bipedRightArm.rotateAngleZ);
+                    this.bipedBody.rotateAngleX *= 0.5F;
+
                     if (this.isSneak) {
-                        this.leftArm.rotateAngleX += 0.2F;
-                        this.rightArm.rotateAngleX += 0.2F;
+                        this.bipedLeftArm.rotateAngleX += 0.2F;
+                        this.bipedRightArm.rotateAngleX += 0.2F;
                     }
 
-                    this.leftArm.rotateAngleZ -= RenderSanPlayer.armTilt;
-                    this.rightArm.rotateAngleZ += RenderSanPlayer.armTilt;
+                    this.bipedLeftArm.rotateAngleZ -= RenderSanPlayer.armTilt;
+                    this.bipedRightArm.rotateAngleZ += RenderSanPlayer.armTilt;
 
                     break;
                 case LEGS:
-                    this.setRotateAngle(this.body, this.bipedBody.rotateAngleX * 0.5F, this.bipedBody.rotateAngleY, this.bipedBody.rotateAngleZ);
+                    this.bipedBody.rotateAngleX *= 0.5F;
                     //FALL-THROUGH
                 case FEET:
                     if (this.isRiding) {
-                        this.setRotateAngle(this.leftLeg, this.bipedLeftLeg.rotateAngleX * 0.95F, this.bipedLeftLeg.rotateAngleY, this.bipedLeftLeg.rotateAngleZ);
-                        this.setRotateAngle(this.rightLeg, this.bipedRightLeg.rotateAngleX * 0.95F, this.bipedRightLeg.rotateAngleY, this.bipedRightLeg.rotateAngleZ);
+                        this.bipedLeftLeg.rotateAngleX *= 0.95F;
+                        this.bipedRightLeg.rotateAngleX *= 0.95F;
                     } else {
-                        this.setRotateAngle(this.leftLeg, this.bipedLeftLeg.rotateAngleX * 0.5F, this.bipedLeftLeg.rotateAngleY, this.bipedLeftLeg.rotateAngleZ);
-                        this.setRotateAngle(this.rightLeg, this.bipedRightLeg.rotateAngleX * 0.5F, this.bipedRightLeg.rotateAngleY, this.bipedRightLeg.rotateAngleZ);
+                        this.bipedLeftLeg.rotateAngleX *= 0.5F;
+                        this.bipedRightLeg.rotateAngleX *= 0.5F;
                     }
 
                     if (this.isSneak) {
-                        this.leftLeg.rotationPointZ = 3.0F;
-                        this.rightLeg.rotationPointZ = 3.0F;
-                        this.leftLeg.rotationPointY = 10.0F;
-                        this.rightLeg.rotationPointY = 10.0F;
-                        this.leftLeg.rotateAngleX -= 0.05F;
-                        this.rightLeg.rotateAngleX -= 0.05F;
+                        this.bipedLeftLeg.rotationPointZ = 3.0F;
+                        this.bipedRightLeg.rotationPointZ = 3.0F;
+                        this.bipedLeftLeg.rotationPointY = 10.0F;
+                        this.bipedRightLeg.rotationPointY = 10.0F;
+                        this.bipedLeftLeg.rotateAngleX -= 0.05F;
+                        this.bipedRightLeg.rotateAngleX -= 0.05F;
                     } else {
-                        this.leftLeg.rotationPointZ = 0.0F;
-                        this.rightLeg.rotationPointZ = 0.0F;
-                        this.leftLeg.rotationPointY = 11.0F;
-                        this.rightLeg.rotationPointY = 11.0F;
+                        this.bipedLeftLeg.rotationPointZ = 0.0F;
+                        this.bipedRightLeg.rotationPointZ = 0.0F;
+                        this.bipedLeftLeg.rotationPointY = 11.0F;
+                        this.bipedRightLeg.rotationPointY = 11.0F;
                     }
                     break;
             }
@@ -170,12 +158,6 @@ public class ModelSanPlayerArmor
         Arrays.asList(this.modelJson.getMainBoxes()).forEach((box) -> box.showModel = true);
     }
 
-    public void setRotateAngle(ModelRenderer modelRenderer, float x, float y, float z) {
-        modelRenderer.rotateAngleX = x;
-        modelRenderer.rotateAngleY = y;
-        modelRenderer.rotateAngleZ = z;
-    }
-
     public boolean isModelLoaded() {
         return this.modelJson.isLoaded();
     }
@@ -186,19 +168,19 @@ public class ModelSanPlayerArmor
 
         switch( this.slot ) {
             case HEAD:
-                this.head = loader.getBox("head");
+                this.bipedHead = loader.getBox("head");
                 break;
             case CHEST:
-                this.body = loader.getBox("body");
-                this.leftArm = loader.getBox("leftArm");
-                this.rightArm = loader.getBox("rightArm");
+                this.bipedBody = loader.getBox("body");
+                this.bipedLeftArm = loader.getBox("leftArm");
+                this.bipedRightArm = loader.getBox("rightArm");
                 break;
             case LEGS:
-                this.body = loader.getBox("body");
+                this.bipedBody = loader.getBox("body");
                 //FALL-THROUGH
             case FEET:
-                this.leftLeg = loader.getBox("leftLeg");
-                this.rightLeg = loader.getBox("rightLeg");
+                this.bipedLeftLeg = loader.getBox("leftLeg");
+                this.bipedRightLeg = loader.getBox("rightLeg");
                 break;
         }
     }

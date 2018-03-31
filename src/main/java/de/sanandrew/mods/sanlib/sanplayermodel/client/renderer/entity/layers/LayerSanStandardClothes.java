@@ -79,14 +79,12 @@ public class LayerSanStandardClothes
 
             switch( hand ) {
                 case RIGHT:
-                    t.rightArm.rotateAngleX = 0.0F;
-                    t.rightArm.rotateAngleZ = t.bipedRightArm.rotateAngleZ;
-                    t.rightArm.render(scale);
+                    t.bipedRightArm.rotateAngleX = 0.0F;
+                    t.bipedRightArm.render(scale);
                     break;
                 case LEFT:
-                    t.leftArm.rotateAngleX = 0.0F;
-                    t.leftArm.rotateAngleZ = t.bipedLeftArm.rotateAngleZ;
-                    t.leftArm.render(scale);
+                    t.bipedLeftArm.rotateAngleX = 0.0F;
+                    t.bipedLeftArm.render(scale);
                     break;
             }
         }
