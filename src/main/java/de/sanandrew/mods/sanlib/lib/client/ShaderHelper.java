@@ -64,7 +64,7 @@ public final class ShaderHelper
 
     // Most of the code taken from the LWJGL wiki
     // http://lwjgl.org/wiki/index.php?title=GLSL_Shaders_with_LWJGL
-    private static int createProgram(ResourceLocation vert, ResourceLocation frag) {
+    public static int createProgram(ResourceLocation vert, ResourceLocation frag) {
         int vertId = 0;
         int fragId = 0;
         int program;
