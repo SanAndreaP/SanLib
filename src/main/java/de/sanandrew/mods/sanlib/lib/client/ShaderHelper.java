@@ -62,6 +62,10 @@ public final class ShaderHelper
         return OpenGlHelper.shadersSupported && SLibConfiguration.useShaders;
     }
 
+    public static int getSecondaryTextureUnit() {
+        return SLibConfiguration.glSecondaryTextureUnit;
+    }
+
     // Most of the code taken from the LWJGL wiki
     // http://lwjgl.org/wiki/index.php?title=GLSL_Shaders_with_LWJGL
     public static int createProgram(ResourceLocation vert, ResourceLocation frag) {
