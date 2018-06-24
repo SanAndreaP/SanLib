@@ -74,10 +74,12 @@ public class LayerSanArmor
                 switch( hand ) {
                     case RIGHT:
                         t.bipedRightArm.rotateAngleX = 0.0F;
+                        t.bipedRightArm.rotateAngleZ = 0.1F;
                         t.bipedRightArm.render(scale);
                         break;
                     case LEFT:
                         t.bipedLeftArm.rotateAngleX = 0.0F;
+                        t.bipedRightArm.rotateAngleZ = 0.1F;
                         t.bipedLeftArm.render(scale);
                         break;
                 }

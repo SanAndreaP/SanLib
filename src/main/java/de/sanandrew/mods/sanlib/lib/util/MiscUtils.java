@@ -8,7 +8,12 @@ package de.sanandrew.mods.sanlib.lib.util;
 
 import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.lib.XorShiftRandom;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagDouble;
+import net.minecraft.nbt.NBTTagFloat;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.fml.common.ModContainer;
 import org.apache.logging.log4j.Level;
 
@@ -271,8 +276,60 @@ public final class MiscUtils
     }
 
     public static boolean doesNbtContainOther(NBTTagCompound mainNBT, NBTTagCompound otherNBT) {
-        return otherNBT.getKeySet().stream().allMatch(key -> mainNBT.hasKey(key)
-                                                                && mainNBT.getTagId(key) == otherNBT.getTagId(key)
-                                                                && mainNBT.getTag(key).equals(otherNBT.getTag(key)));
+        return doesNbtContainOther(mainNBT, otherNBT, true);
+    }
+
+    public static boolean doesNbtContainOther(final NBTTagCompound mainNBT, final NBTTagCompound otherNBT, boolean strict) {
+        return otherNBT == null
+               || (mainNBT != null && otherNBT.getKeySet().stream().allMatch(key -> {
+                        if( mainNBT.hasKey(key) ) {
+                            if( strict ) {
+                                return mainNBT.getTagId(key) == otherNBT.getTagId(key) && mainNBT.getTag(key).equals(otherNBT.getTag(key));
+                            } else {
+                                return compareNBTBase(mainNBT.getTag(key), otherNBT.getTag(key));
+                            }
+                        }
+
+                        return false;
+                    })
+               );
+    }
+
+    private static boolean compareNBTBase(NBTBase main, NBTBase other) {
+        if( main instanceof NBTPrimitive && other instanceof NBTPrimitive ) {
+            NBTPrimitive mainBase = ((NBTPrimitive) main);
+            NBTPrimitive otherBase = ((NBTPrimitive) other);
+
+            long mainNb = isNbtDouble(mainBase) ? Double.doubleToLongBits(mainBase.getDouble()) : mainBase.getLong();
+            long otherNb = isNbtDouble(otherBase) ? Double.doubleToLongBits(otherBase.getDouble()) : otherBase.getLong();
+
+            return mainNb == otherNb;
+        } else if( main instanceof NBTTagList && other instanceof NBTTagList ) {
+            NBTTagList mainList = (NBTTagList) main;
+            NBTTagList otherList = (NBTTagList) other.copy();
+
+            if( mainList.getTagType() == otherList.getTagType() ) {
+                for( int i = mainList.tagCount() - 1; i >= 0 && otherList.tagCount() > 0; i-- ) {
+                    for( int j = otherList.tagCount() - 1; j >= 0; j-- ) {
+                        if( compareNBTBase(mainList.get(i), otherList.get(j)) ) {
+                            otherList.removeTag(j);
+                            break;
+                        }
+                    }
+                }
+
+                return otherList.tagCount() == 0;
+            }
+
+            return false;
+        } else if( main instanceof NBTTagCompound && other instanceof NBTTagCompound ) {
+            return doesNbtContainOther((NBTTagCompound) main, (NBTTagCompound) other, false);
+        } else {
+            return main.equals(other);
+        }
+    }
+
+    private static boolean isNbtDouble(NBTBase base) {
+        return base instanceof NBTTagDouble || base instanceof NBTTagFloat;
     }
 }
