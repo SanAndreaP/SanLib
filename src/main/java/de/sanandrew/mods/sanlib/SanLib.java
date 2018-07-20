@@ -6,11 +6,14 @@
    *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib;
 
+import de.sanandrew.mods.sanlib.api.client.lexicon.ILexicon;
+import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconRegistry;
 import de.sanandrew.mods.sanlib.command.CommandSanLib;
 import de.sanandrew.mods.sanlib.network.PacketRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLInterModComms;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
@@ -51,17 +54,26 @@ public class SanLib
     }
 
     @Mod.EventHandler
-    public void init(FMLInitializationEvent evt) {
+    public void init(FMLInitializationEvent event) {
 
     }
 
     @Mod.EventHandler
-    public void postInit(FMLPostInitializationEvent evt) {
+    public void postInit(FMLPostInitializationEvent event) {
 
     }
 
     @Mod.EventHandler
-    public void onServerLoad(FMLServerStartingEvent evt) {
-        evt.registerServerCommand(new CommandSanLib());
+    public void onServerLoad(FMLServerStartingEvent event) {
+        event.registerServerCommand(new CommandSanLib());
+    }
+
+    @Mod.EventHandler
+    public void onIMCReceive(FMLInterModComms.IMCEvent event) {
+        event.getMessages().forEach(msg -> {
+            if( msg.key.equals("registerLexicon") && msg.isFunctionMessage() ) {
+                msg.getFunctionValue(ILexiconRegistry.class, ILexicon.class);
+            }
+        });
     }
 }
