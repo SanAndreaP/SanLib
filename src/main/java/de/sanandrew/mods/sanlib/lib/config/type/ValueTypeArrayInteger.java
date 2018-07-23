@@ -7,6 +7,7 @@
 package de.sanandrew.mods.sanlib.lib.config.type;
 
 import de.sanandrew.mods.sanlib.lib.config.Range;
+import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 
@@ -62,19 +63,28 @@ public class ValueTypeArrayInteger
     }
 
     @Override
-    public void setValue(Class<?> type, Field f, Object instance, Property p, Object defaultVal) throws IllegalAccessException, IllegalArgumentException {
+    public void setValue(Class<?> type, Field f, Object instance, Property p, Object defaultVal, Range propRange) throws IllegalAccessException, IllegalArgumentException {
         int[] list = p.getIntList();
-        validateArrayLengths(((int[]) defaultVal).length, list.length, p.getMaxListLength(), p.isListLengthFixed());
+
+        validateArrayLengths(p.getName(), ((int[]) defaultVal).length, list.length, p.getMaxListLength(), p.isListLengthFixed());
+        int minP = propRange.minI();
+        int maxP = propRange.maxI();
+        for( int i = 0, max = list.length; i < max; i++ ) {
+            if( list[i] < minP || i > maxP ) {
+                throw new IllegalArgumentException(String.format("The %s element of array %s does not fall within range!", MiscUtils.getListNrWithSuffix(i), p.getName()));
+            }
+        }
+
         f.set(instance, list);
     }
 
-    static void validateArrayLengths(int defaultLength, int currLength, int maxLength, boolean fixed) throws IllegalArgumentException {
+    static void validateArrayLengths(String qName, int defaultLength, int currLength, int maxLength, boolean fixed) throws IllegalArgumentException {
         if( fixed ) {
             if( currLength != (maxLength >= 0 ? maxLength : defaultLength) ) {
-                throw new IllegalArgumentException("Current length of array in config does not match fixed length!");
+                throw new IllegalArgumentException(String.format("Current length of array %s in config does not match fixed length!", qName));
             }
         } else if( maxLength >= 0 && currLength > maxLength ) {
-            throw new IllegalArgumentException("Current length of array in config is bigger than maximum length!");
+            throw new IllegalArgumentException(String.format("Current length of array %s in config is bigger than maximum length!", qName));
         }
     }
 }

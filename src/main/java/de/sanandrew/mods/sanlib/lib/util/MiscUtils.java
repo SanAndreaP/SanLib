@@ -210,6 +210,25 @@ public final class MiscUtils
     }
 
     /**
+     * Adds the suffix for a list number and appends that to the number, resulting in a string, like "1" becomes "1st"
+     * @param nr the number to be suffixed
+     * @return the suffixed number as string
+     */
+    public static String getListNrWithSuffix(int nr) {
+        String nrStr = Integer.toString(nr);
+        if( nrStr.endsWith("11") || nrStr.endsWith("12") || nrStr.endsWith("13") ) {
+            return "th";
+        }
+        Character lastNum = nrStr.charAt(nrStr.length() - 1);
+        switch( lastNum ) {
+            case '1': return "st";
+            case '2': return "nd";
+            case '3': return "rd";
+            default: return "th";
+        }
+    }
+
+    /**
      * Checks if val is {@code null} and returns {@code def} if so, otherwise {@code val} is returned
      * @param val The value to be checked for null and eventually returned
      * @param def The default value when {@code val} is null

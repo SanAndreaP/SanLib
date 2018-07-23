@@ -155,7 +155,7 @@ public class ConfigUtils
                             Property p = type.getProperty(config, category, name, def, val.comment(), val.range());
                             p.setRequiresMcRestart(val.reqMcRestart());
                             p.setRequiresWorldRestart(val.reqWorldRestart());
-                            type.setValue(cv, f, inst, p, def);
+                            type.setValue(cv, f, inst, p, def, val.range());
 
                             parsed = true;
                             break;

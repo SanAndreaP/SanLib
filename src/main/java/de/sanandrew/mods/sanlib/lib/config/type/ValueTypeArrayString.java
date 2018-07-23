@@ -8,6 +8,7 @@ package de.sanandrew.mods.sanlib.lib.config.type;
 
 import de.sanandrew.mods.sanlib.lib.config.Pattern;
 import de.sanandrew.mods.sanlib.lib.config.Range;
+import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 
@@ -55,9 +56,19 @@ public class ValueTypeArrayString
     }
 
     @Override
-    public void setValue(Class<?> type, Field f, Object instance, Property p, Object defaultVal) throws IllegalAccessException, IllegalArgumentException {
+    public void setValue(Class<?> type, Field f, Object instance, Property p, Object defaultVal, Range propRange) throws IllegalAccessException, IllegalArgumentException {
         String[] list = p.getStringList();
-        ValueTypeArrayInteger.validateArrayLengths(((String[]) defaultVal).length, list.length, p.getMaxListLength(), p.isListLengthFixed());
+        ValueTypeArrayInteger.validateArrayLengths(p.getName(), ((String[]) defaultVal).length, list.length, p.getMaxListLength(), p.isListLengthFixed());
+
+        java.util.regex.Pattern ptrn = p.getValidationPattern();
+        if( ptrn != null ) {
+            for( int i = 0, max = list.length; i < max; i++ ) {
+                if( ptrn.matcher(list[i]).matches() ) {
+                    throw new IllegalArgumentException(String.format("The %s element of array %s does not match pattern!", MiscUtils.getListNrWithSuffix(i), p.getName()));
+                }
+            }
+        }
+
         f.set(instance, list);
     }
 }

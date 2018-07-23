@@ -14,5 +14,5 @@ public interface IValueType
 
     Property getProperty(Configuration config, String category, String name, Object defaultVal, String propComment, Range propRange);
 
-    void setValue(Class<?> type, Field f, Object instance, Property p, Object defaultVal) throws IllegalAccessException, IllegalArgumentException;
+    void setValue(Class<?> type, Field f, Object instance, Property p, Object defaultVal, Range propRange) throws IllegalAccessException, IllegalArgumentException;
 }
