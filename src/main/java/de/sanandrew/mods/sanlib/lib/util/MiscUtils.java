@@ -217,14 +217,14 @@ public final class MiscUtils
     public static String getListNrWithSuffix(int nr) {
         String nrStr = Integer.toString(nr);
         if( nrStr.endsWith("11") || nrStr.endsWith("12") || nrStr.endsWith("13") ) {
-            return "th";
+            return nrStr + "th";
         }
         Character lastNum = nrStr.charAt(nrStr.length() - 1);
         switch( lastNum ) {
-            case '1': return "st";
-            case '2': return "nd";
-            case '3': return "rd";
-            default: return "th";
+            case '1': return nrStr + "st";
+            case '2': return nrStr + "nd";
+            case '3': return nrStr + "rd";
+            default: return nrStr + "th";
         }
     }
 
