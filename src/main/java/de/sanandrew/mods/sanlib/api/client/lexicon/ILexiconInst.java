@@ -27,4 +27,10 @@ public interface ILexiconInst
     ILexiconPageRender getPageRender(String id);
 
     ILexiconPageRender removePageRender(String id);
+
+    ILexicon getLexicon();
+
+    String getCraftingRenderID();
+    
+    String getStandardRenderID();
 }

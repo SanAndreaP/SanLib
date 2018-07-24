@@ -6,8 +6,6 @@ public interface ILexicon
 {
     String getModId();
 
-    String getCraftingRenderID();
-    String getStandardRenderID();
     int getGuiSizeX();
     int getGuiSizeY();
     int getEntryPosX();
@@ -18,6 +16,13 @@ public interface ILexicon
     int getTitleColor();
     int getTextColor();
     int getLinkColor();
+    int getLinkVisitedColor();
+
+    int getGroupStencilId();
+    ResourceLocation getGroupStencilTexture();
+    boolean forceUnicode();
 
     ResourceLocation getBackgroundTexture();
+
+    void initialize(ILexiconInst registry);
 }

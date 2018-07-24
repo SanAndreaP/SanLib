@@ -38,6 +38,8 @@ public interface ILexiconGuiHelper
 
     int getEntryY();
 
+    ILexicon getLexicon();
+
     void setScroll(float scroll);
 
     void drawItemGrid(int x, int y, int mouseX, int mouseY, int scrollY, @Nonnull ItemStack stack, float scale, boolean drawTooltip);
@@ -62,4 +64,10 @@ public interface ILexiconGuiHelper
     void drawCraftingGrid(CraftingGrid grid, boolean isShapeless, int x, int y, int mouseX, int mouseY, int scrollY);
 
     boolean tryDrawPicture(ResourceLocation location, int x, int y, int width, int height);
+
+    void drawTitleCenter(int y, ILexiconEntry entry);
+
+    void drawTitle(int x, int y, ILexiconEntry entry);
+
+    int drawContentString(int x, int y, ILexiconEntry entry, List<GuiButton> entryButtons);
 }

@@ -8,10 +8,13 @@ package de.sanandrew.mods.sanlib;
 
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexicon;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconRegistry;
+import de.sanandrew.mods.sanlib.api.client.lexicon.Lexicon;
+import de.sanandrew.mods.sanlib.client.lexicon.LexiconRegistry;
 import de.sanandrew.mods.sanlib.command.CommandSanLib;
 import de.sanandrew.mods.sanlib.network.PacketRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.discovery.ASMDataTable;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLInterModComms;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -19,8 +22,12 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.Set;
 
 @Mod(modid = SanLib.ID, version = SanLib.VERSION, name = "San's Library", acceptedMinecraftVersions = SanLib.MCVER, dependencies = SanLib.DEPENDENCIES,
      acceptableRemoteVersions = SanLib.ACCEPTED_REMOTE_VER)
@@ -50,6 +57,9 @@ public class SanLib
         SLibConfiguration.initConfiguration(event);
         network = NetworkRegistry.INSTANCE.newSimpleChannel(CHANNEL);
         PacketRegistry.initialize();
+
+        proxy.loadModLexica(event.getAsmData());
+
         proxy.preInit(event);
     }
 
@@ -60,20 +70,11 @@ public class SanLib
 
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) {
-
+        proxy.postInit(event);
     }
 
     @Mod.EventHandler
     public void onServerLoad(FMLServerStartingEvent event) {
         event.registerServerCommand(new CommandSanLib());
-    }
-
-    @Mod.EventHandler
-    public void onIMCReceive(FMLInterModComms.IMCEvent event) {
-        event.getMessages().forEach(msg -> {
-            if( msg.key.equals("registerLexicon") && msg.isFunctionMessage() ) {
-                msg.getFunctionValue(ILexiconRegistry.class, ILexicon.class);
-            }
-        });
     }
 }
