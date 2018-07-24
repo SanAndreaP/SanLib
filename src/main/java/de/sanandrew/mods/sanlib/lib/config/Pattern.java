@@ -15,6 +15,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.ANNOTATION_TYPE)
 public @interface Pattern
 {
-    String regex() default "";
+    String value() default "";
     int flags() default 0;
 }

@@ -31,7 +31,7 @@ public class ValueTypeBoolean
     }
 
     @Override
-    public void setValue(Class<?> type, Field f, Object instance, Property p, Object defaultVal) throws IllegalAccessException, IllegalArgumentException {
+    public void setValue(Class<?> type, Field f, Object instance, Property p, Object defaultVal, Range propRange) throws IllegalAccessException, IllegalArgumentException {
         f.setBoolean(instance, p.getBoolean());
     }
 }

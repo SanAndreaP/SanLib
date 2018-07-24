@@ -85,14 +85,23 @@ public class Test
         @Category(value = "config_nrm", comment = "a test 1", reqMcRestart = true)
         public static final class Config1
         {
-            @Value(value = "string_1", comment = "meh")
-            public static String streng = "meh";
+            @Value(value = "string_nrm", comment = "meh")
+            public static String str_nrm = "meh";
+
+            @Value(value = "string_pattern", comment = "meh", range = @Range(validationPattern = @Pattern("^#[\\da-fA-F]{6}$")))
+            public static String str_pattern = "#808080";
+
+            @Value(value = "double_def")
+            public static double double_def = 4.0;
 
             @Value(value = "double_rng", range = @Range(minD = -5, maxD = 14))
             public static double double_rng = 3.0;
 
-            @Value(value = "double_def")
-            public static double double_def = 4.0;
+            @Value(value = "int_def")
+            public static int int_def = 3;
+
+            @Value(value = "int_rng", range = @Range(minI = -5, maxI = 14))
+            public static int int_rng = 2;
 
             @Value(value = "int_array")
             public static int[] int_array = new int[] {5, 4, 3, 2, 1, 0};
@@ -100,8 +109,14 @@ public class Test
             @Value(value = "int_array_fixed", range = @Range(listFixed = true))
             public static int[] int_array_fixed = new int[] {5, 4, 3, 2, 1, 0};
 
-            @Value(value = "string_array_patterned", range = @Range(validationPattern = @Pattern(regex = "[\\d|\\w]+")))
-            public static String[] string_array_pattern = new String[] {"1", "2", "3", "4"};
+            @Value(value = "int_array_ranged", range = @Range(minI = 0, maxI = 10))
+            public static int[] int_array_ranged = new int[] {5, 4, 3, 2, 1, 0};
+
+            @Value(value = "int_array_ranged_fixed", range = @Range(listFixed = true, minI = 0, maxI = 10))
+            public static int[] int_array_ranged_fixed = new int[] {5, 4, 3, 2, 1, 0};
+
+            @Value(value = "string_array_patterned", range = @Range(validationPattern = @Pattern("^[\\d|\\w]+$")))
+            public static String[] string_array_pattern = new String[] {"1d", "2", "a", "4"};
 
             private static void init() {
                 System.out.println("init called!");
@@ -119,7 +134,7 @@ public class Test
 
             @Value(value = "int_1", comment = "rofl", range = @Range(minI = -82, maxI = 69))
             public int ente;
-            @Value(value = "float_1", range = @Range(minD = 1, maxD = 5))
+            @Value(value = "float_1", range = @Range(minD = 0, maxD = 5))
             public float carnival;
         }
     }

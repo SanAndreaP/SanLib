@@ -67,7 +67,7 @@ public class ValueTypeArrayDouble
     public void setValue(Class<?> type, Field f, Object instance, Property p, Object defaultVal, Range propRange) throws IllegalAccessException, IllegalArgumentException {
         double[] list = p.getDoubleList();
 
-        ValueTypeArrayInteger.validateArrayLengths(p.getName(), ((double[]) defaultVal).length, list.length, p.getMaxListLength(), p.isListLengthFixed());
+        IValueType.validateArrayLengths(p.getName(), ((double[]) defaultVal).length, list.length, p.getMaxListLength(), p.isListLengthFixed());
         double minP = propRange.minD();
         double maxP = propRange.maxD();
         for( int i = 0, max = list.length; i < max; i++ ) {

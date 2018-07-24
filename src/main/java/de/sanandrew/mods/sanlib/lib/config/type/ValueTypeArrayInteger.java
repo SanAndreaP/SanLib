@@ -66,7 +66,7 @@ public class ValueTypeArrayInteger
     public void setValue(Class<?> type, Field f, Object instance, Property p, Object defaultVal, Range propRange) throws IllegalAccessException, IllegalArgumentException {
         int[] list = p.getIntList();
 
-        validateArrayLengths(p.getName(), ((int[]) defaultVal).length, list.length, p.getMaxListLength(), p.isListLengthFixed());
+        IValueType.validateArrayLengths(p.getName(), ((int[]) defaultVal).length, list.length, p.getMaxListLength(), p.isListLengthFixed());
         int minP = propRange.minI();
         int maxP = propRange.maxI();
         for( int i = 0, max = list.length; i < max; i++ ) {
@@ -78,13 +78,4 @@ public class ValueTypeArrayInteger
         f.set(instance, list);
     }
 
-    static void validateArrayLengths(String qName, int defaultLength, int currLength, int maxLength, boolean fixed) throws IllegalArgumentException {
-        if( fixed ) {
-            if( currLength != (maxLength >= 0 ? maxLength : defaultLength) ) {
-                throw new IllegalArgumentException(String.format("Current length of array %s in config does not match fixed length!", qName));
-            }
-        } else if( maxLength >= 0 && currLength > maxLength ) {
-            throw new IllegalArgumentException(String.format("Current length of array %s in config is bigger than maximum length!", qName));
-        }
-    }
 }

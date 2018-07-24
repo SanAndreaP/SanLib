@@ -41,29 +41,29 @@ public class ValueTypeArrayString
             cm.append("maximum list length: ").append(maxListLength);
         }
 
-        if( !validationPattern.regex().isEmpty() ) {
+        if( !validationPattern.value().isEmpty() ) {
             if( cm.length() > 0 ) {
                 cm.append(", ");
             }
-            cm.append("element string must match: ").append(validationPattern.regex());
+            cm.append("element string must match: ").append(validationPattern.value());
         }
 
         if( cm.length() > 0 ) {
             propComment += " [" + (cm) + ']';
         }
 
-        return config.get(category, name, def, propComment.trim(), fixedList, maxListLength, ValueTypeString.getPattern(validationPattern.regex(), validationPattern.flags()));
+        return config.get(category, name, def, propComment.trim(), fixedList, maxListLength, ValueTypeString.getPattern(validationPattern.value(), validationPattern.flags()));
     }
 
     @Override
     public void setValue(Class<?> type, Field f, Object instance, Property p, Object defaultVal, Range propRange) throws IllegalAccessException, IllegalArgumentException {
         String[] list = p.getStringList();
-        ValueTypeArrayInteger.validateArrayLengths(p.getName(), ((String[]) defaultVal).length, list.length, p.getMaxListLength(), p.isListLengthFixed());
+        IValueType.validateArrayLengths(p.getName(), ((String[]) defaultVal).length, list.length, p.getMaxListLength(), p.isListLengthFixed());
 
         java.util.regex.Pattern ptrn = p.getValidationPattern();
         if( ptrn != null ) {
             for( int i = 0, max = list.length; i < max; i++ ) {
-                if( ptrn.matcher(list[i]).matches() ) {
+                if( !ptrn.matcher(list[i]).matches() ) {
                     throw new IllegalArgumentException(String.format("The %s element of array %s does not match pattern!", MiscUtils.getListNrWithSuffix(i), p.getName()));
                 }
             }

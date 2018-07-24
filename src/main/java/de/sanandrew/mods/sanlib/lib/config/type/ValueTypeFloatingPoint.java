@@ -7,6 +7,7 @@
 package de.sanandrew.mods.sanlib.lib.config.type;
 
 import de.sanandrew.mods.sanlib.lib.config.Range;
+import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 
@@ -48,11 +49,16 @@ public class ValueTypeFloatingPoint
     }
 
     @Override
-    public void setValue(Class<?> type, Field f, Object instance, Property p, Object defaultVal) throws IllegalAccessException, IllegalArgumentException {
+    public void setValue(Class<?> type, Field f, Object instance, Property p, Object defaultVal, Range propRange) throws IllegalAccessException, IllegalArgumentException {
+        double d = p.getDouble();
+        if( d < propRange.minD() || d > propRange.maxD() ) {
+            throw new IllegalArgumentException(String.format("The property %s does not fall within range!", p.getName()));
+        }
+
         if( type == float.class ) {
-            f.setFloat(instance, (float) p.getDouble());
+            f.setFloat(instance, (float) d);
         } else {
-            f.setDouble(instance, p.getDouble());
+            f.setDouble(instance, d);
         }
     }
 }

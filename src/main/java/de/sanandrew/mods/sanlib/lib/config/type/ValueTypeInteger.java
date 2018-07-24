@@ -47,13 +47,18 @@ public class ValueTypeInteger
     }
 
     @Override
-    public void setValue(Class<?> type, Field f, Object instance, Property p, Object defaultVal) throws IllegalAccessException, IllegalArgumentException {
+    public void setValue(Class<?> type, Field f, Object instance, Property p, Object defaultVal, Range propRange) throws IllegalAccessException, IllegalArgumentException {
+        int i = p.getInt();
+        if( i < propRange.minI() || i > propRange.maxI() ) {
+            throw new IllegalArgumentException(String.format("The property %s does not fall within range!", p.getName()));
+        }
+
         if( type == long.class || type == int.class ) {
-            f.setInt(instance, p.getInt());
+            f.setInt(instance, i);
         } else if( type == short.class ) {
-            f.setShort(instance, (short) p.getInt());
+            f.setShort(instance, (short) i);
         } else if( type == byte.class ) {
-            f.setByte(instance, (byte) p.getInt());
+            f.setByte(instance, (byte) i);
         }
     }
 }

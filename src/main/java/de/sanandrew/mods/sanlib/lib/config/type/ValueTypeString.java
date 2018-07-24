@@ -8,6 +8,7 @@ package de.sanandrew.mods.sanlib.lib.config.type;
 
 import de.sanandrew.mods.sanlib.lib.config.Pattern;
 import de.sanandrew.mods.sanlib.lib.config.Range;
+import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 
@@ -36,23 +37,30 @@ public class ValueTypeString
             cm.append("default: ").append(defaultVal);
         }
 
-        if( !validationPattern.regex().isEmpty() ) {
+        if( !validationPattern.value().isEmpty() ) {
             if( cm.length() > 0 ) {
                 cm.append(", ");
             }
-            cm.append("string must match: ").append(validationPattern.regex());
+            cm.append("string must match: ").append(validationPattern.value());
         }
 
         if( cm.length() > 0 ) {
             propComment += " [" + (cm) + ']';
         }
 
-        return config.get(category, name, defaultVal.toString(), propComment.trim(), getPattern(validationPattern.regex(), validationPattern.flags()));
+        return config.get(category, name, defaultVal.toString(), propComment.trim(), getPattern(validationPattern.value(), validationPattern.flags()));
     }
 
     @Override
-    public void setValue(Class<?> type, Field f, Object instance, Property p, Object defaultVal) throws IllegalAccessException, IllegalArgumentException {
-        f.set(instance, p.getString());
+    @SuppressWarnings("MagicConstant")
+    public void setValue(Class<?> type, Field f, Object instance, Property p, Object defaultVal, Range propRange) throws IllegalAccessException, IllegalArgumentException {
+        String s = p.getString();
+        java.util.regex.Pattern ptrn = p.getValidationPattern();
+        if( ptrn != null && !ptrn.matcher(s).matches() ) {
+            throw new IllegalArgumentException(String.format("The property %s does not match pattern!", p.getName()));
+        }
+
+        f.set(instance, s);
     }
 
     static java.util.regex.Pattern getPattern(String pattern, int flags) {

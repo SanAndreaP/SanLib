@@ -49,7 +49,7 @@ public class ValueTypeArrayBoolean
     @Override
     public void setValue(Class<?> type, Field f, Object instance, Property p, Object defaultVal, Range propRange) throws IllegalAccessException, IllegalArgumentException {
         boolean[] list = p.getBooleanList();
-        ValueTypeArrayInteger.validateArrayLengths(p.getName(), ((boolean[]) defaultVal).length, list.length, p.getMaxListLength(), p.isListLengthFixed());
+        IValueType.validateArrayLengths(p.getName(), ((boolean[]) defaultVal).length, list.length, p.getMaxListLength(), p.isListLengthFixed());
         f.set(instance, list);
     }
 }

@@ -168,7 +168,7 @@ public class ConfigUtils
                     }
                 }
             } catch( IllegalAccessException | IllegalArgumentException ex ) {
-                SanLib.LOG.log(Level.ERROR, String.format("Could not load config value for field %s in class %s", f.getName(), f.getDeclaringClass().getName()), ex);
+                throw new RuntimeException(String.format("Could not load config value for field %s in class %s", f.getName(), f.getDeclaringClass().getName()), ex);
             }
         }
     }
