@@ -4,19 +4,18 @@
  * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
  *                http://creativecommons.org/licenses/by-nc-sa/4.0/
  *******************************************************************************************************************/
-package de.sanandrew.mods.sanlib.lib.config;
+package de.sanandrew.mods.sanlib.lib.util.config;
 
 import de.sanandrew.mods.sanlib.SanLib;
-import de.sanandrew.mods.sanlib.lib.Tuple;
-import de.sanandrew.mods.sanlib.lib.config.type.IValueType;
-import de.sanandrew.mods.sanlib.lib.config.type.ValueTypeArrayBoolean;
-import de.sanandrew.mods.sanlib.lib.config.type.ValueTypeArrayDouble;
-import de.sanandrew.mods.sanlib.lib.config.type.ValueTypeArrayInteger;
-import de.sanandrew.mods.sanlib.lib.config.type.ValueTypeArrayString;
-import de.sanandrew.mods.sanlib.lib.config.type.ValueTypeBoolean;
-import de.sanandrew.mods.sanlib.lib.config.type.ValueTypeFloatingPoint;
-import de.sanandrew.mods.sanlib.lib.config.type.ValueTypeInteger;
-import de.sanandrew.mods.sanlib.lib.config.type.ValueTypeString;
+import de.sanandrew.mods.sanlib.lib.util.config.type.IValueType;
+import de.sanandrew.mods.sanlib.lib.util.config.type.ValueTypeArrayBoolean;
+import de.sanandrew.mods.sanlib.lib.util.config.type.ValueTypeArrayDouble;
+import de.sanandrew.mods.sanlib.lib.util.config.type.ValueTypeArrayInteger;
+import de.sanandrew.mods.sanlib.lib.util.config.type.ValueTypeArrayString;
+import de.sanandrew.mods.sanlib.lib.util.config.type.ValueTypeBoolean;
+import de.sanandrew.mods.sanlib.lib.util.config.type.ValueTypeFloatingPoint;
+import de.sanandrew.mods.sanlib.lib.util.config.type.ValueTypeInteger;
+import de.sanandrew.mods.sanlib.lib.util.config.type.ValueTypeString;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
@@ -78,7 +77,7 @@ public class ConfigUtils
         }
     }
 
-    private static void loadCategory(Configuration config, Class<?> c, String prefix) {
+    public static void loadCategory(Configuration config, Class<?> c, String prefix) {
         Category cat = c.getAnnotation(Category.class);
         loadCategory(config, c, prefix, cat, null);
     }

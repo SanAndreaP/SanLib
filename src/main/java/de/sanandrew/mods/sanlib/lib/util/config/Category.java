@@ -4,7 +4,7 @@
  * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
  *                http://creativecommons.org/licenses/by-nc-sa/4.0/
  *******************************************************************************************************************/
-package de.sanandrew.mods.sanlib.lib.config;
+package de.sanandrew.mods.sanlib.lib.util.config;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -12,20 +12,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.ANNOTATION_TYPE)
-public @interface Range
+@Target(ElementType.TYPE)
+public @interface Category
 {
-    int minI() default Integer.MIN_VALUE;
-
-    int maxI() default Integer.MAX_VALUE;
-
-    double minD() default -Double.MAX_VALUE;
-
-    double maxD() default Double.MAX_VALUE;
-
-    boolean listFixed() default false;
-
-    int maxListLength() default -1;
-
-    Pattern validationPattern() default @Pattern;
+    String value();
+    String comment() default "";
+    boolean reqMcRestart() default false;
+    boolean reqWorldRestart() default false;
+    boolean inherit() default false;
 }

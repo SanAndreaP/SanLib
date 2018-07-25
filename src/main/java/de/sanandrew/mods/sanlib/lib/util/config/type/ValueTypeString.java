@@ -4,11 +4,10 @@
  * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
  *                http://creativecommons.org/licenses/by-nc-sa/4.0/
  *******************************************************************************************************************/
-package de.sanandrew.mods.sanlib.lib.config.type;
+package de.sanandrew.mods.sanlib.lib.util.config.type;
 
-import de.sanandrew.mods.sanlib.lib.config.Pattern;
-import de.sanandrew.mods.sanlib.lib.config.Range;
-import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
+import de.sanandrew.mods.sanlib.lib.util.config.Pattern;
+import de.sanandrew.mods.sanlib.lib.util.config.Range;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 
