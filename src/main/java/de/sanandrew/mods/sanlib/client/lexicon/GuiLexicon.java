@@ -329,7 +329,7 @@ public class GuiLexicon
                 List<ILexiconEntry> entries = grpButton.group.getEntries();
                 this.changePage(grpButton.group, entries.size() == 1 ? entries.get(0) : null, 0.0F, true);
             } else if( button instanceof GuiButtonEntry ) {
-                this.changePage(group, ((GuiButtonEntry) button).entry, 0.0F, true);
+                this.changePage(group, ((GuiButtonEntry) button).getEntry(), 0.0F, true);
             } else if( button instanceof GuiButtonLink ) {
                 try {
                     GuiButtonLink btnLink = (GuiButtonLink) button;

@@ -8,6 +8,7 @@
  */
 package de.sanandrew.mods.sanlib.client.lexicon.button;
 
+import de.sanandrew.mods.sanlib.api.client.lexicon.IGuiButtonEntry;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconEntry;
 import de.sanandrew.mods.sanlib.client.ClientTickHandler;
 import de.sanandrew.mods.sanlib.client.lexicon.GuiLexicon;
@@ -26,9 +27,10 @@ import javax.annotation.Nonnull;
 @SideOnly(Side.CLIENT)
 public class GuiButtonEntry
         extends GuiButton
+        implements IGuiButtonEntry
 {
     private static final float TIME = 1.0F;
-    public final ILexiconEntry entry;
+    private final ILexiconEntry entry;
 
     @Nonnull
     private final ItemStack icon;
@@ -80,5 +82,15 @@ public class GuiButtonEntry
 
             GlStateManager.popMatrix();
         }
+    }
+
+    @Override
+    public ILexiconEntry getEntry() {
+        return this.entry;
+    }
+
+    @Override
+    public GuiButton get() {
+        return this;
     }
 }

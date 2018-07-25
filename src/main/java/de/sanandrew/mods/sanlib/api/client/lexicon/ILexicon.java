@@ -20,6 +20,7 @@ public interface ILexicon
 
     int getGroupStencilId();
     ResourceLocation getGroupStencilTexture();
+    ResourceLocation getGroupSearchIcon();
     boolean forceUnicode();
 
     ResourceLocation getBackgroundTexture();

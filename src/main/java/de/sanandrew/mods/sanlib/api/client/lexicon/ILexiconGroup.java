@@ -25,7 +25,7 @@ public interface ILexiconGroup
 
     ILexiconEntry getEntry(String id);
 
-    boolean addEntry(ILexiconEntry entry);
+    boolean addEntry(ILexiconEntry entry) throws IllegalArgumentException;
 
     ILexiconEntry removeEntry(String id);
 }

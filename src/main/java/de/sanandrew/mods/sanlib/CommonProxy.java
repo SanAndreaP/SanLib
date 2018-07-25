@@ -18,15 +18,12 @@ public class CommonProxy
     }
 
     public void reloadModels() {
-
     }
 
     public void preInit(FMLPreInitializationEvent event) {
-
     }
 
     public void postInit(FMLPostInitializationEvent event) {
-
     }
 
     public void loadModLexica(ASMDataTable dataTable) {

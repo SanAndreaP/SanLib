@@ -9,6 +9,7 @@ package de.sanandrew.mods.sanlib.client.lexicon;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexicon;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconInst;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconRegistry;
+import de.sanandrew.mods.sanlib.client.lexicon.search.LexiconGroupSearch;
 import net.minecraft.client.gui.Gui;
 import org.apache.logging.log4j.util.Strings;
 
@@ -44,7 +45,10 @@ public class LexiconRegistry
     }
 
     public void initialize() {
-        this.lexicons.forEach((id, i) -> i.getLexicon().initialize(i));
+        this.lexicons.forEach((id, i) -> {
+            i.getLexicon().initialize(i);
+            LexiconGroupSearch.register(i);
+        });
     }
 
     @Override

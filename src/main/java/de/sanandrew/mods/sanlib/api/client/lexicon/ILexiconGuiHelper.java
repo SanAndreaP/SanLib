@@ -70,4 +70,6 @@ public interface ILexiconGuiHelper
     void drawTitle(int x, int y, ILexiconEntry entry);
 
     int drawContentString(int x, int y, ILexiconEntry entry, List<GuiButton> entryButtons);
+
+    IGuiButtonEntry getNewEntryButton(int id, int x, int y, ILexiconEntry entry, FontRenderer fontRenderer);
 }

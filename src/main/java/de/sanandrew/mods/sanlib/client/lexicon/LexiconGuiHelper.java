@@ -7,10 +7,12 @@
 package de.sanandrew.mods.sanlib.client.lexicon;
 
 import de.sanandrew.mods.sanlib.api.client.lexicon.CraftingGrid;
+import de.sanandrew.mods.sanlib.api.client.lexicon.IGuiButtonEntry;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexicon;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconEntry;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconGroup;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconGuiHelper;
+import de.sanandrew.mods.sanlib.client.lexicon.button.GuiButtonEntry;
 import de.sanandrew.mods.sanlib.client.lexicon.button.GuiButtonLink;
 import de.sanandrew.mods.sanlib.lib.client.util.GuiUtils;
 import de.sanandrew.mods.sanlib.lib.client.util.LangUtils;
@@ -425,6 +427,11 @@ public class LexiconGuiHelper
         this.getFontRenderer().drawString(this.getTitle(entry), x, y, this.getLexicon().getTitleColor());
     }
 
+    private String getTitle(ILexiconEntry entry) {
+        return TextFormatting.ITALIC.toString() + TextFormatting.BOLD
+                       + LangUtils.translate(LangUtils.LEXICON_ENTRY_NAME.get(this.getLexicon().getModId(), entry.getGroupId(), entry.getId()));
+    }
+
     @Override
     public int drawContentString(int x, int y, ILexiconEntry entry, List<GuiButton> entryButtons) {
         int entryWidth = this.getLexicon().getEntryWidth();
@@ -434,8 +441,8 @@ public class LexiconGuiHelper
         return this.getWordWrappedHeight(s, entryWidth - 2) + 3;
     }
 
-    private String getTitle(ILexiconEntry entry) {
-        return TextFormatting.ITALIC.toString() + TextFormatting.BOLD
-               + LangUtils.translate(LangUtils.LEXICON_ENTRY_NAME.get(this.getLexicon().getModId(), entry.getGroupId(), entry.getId()));
+    @Override
+    public IGuiButtonEntry getNewEntryButton(int id, int x, int y, ILexiconEntry entry, FontRenderer fontRenderer) {
+        return new GuiButtonEntry(this.gui, id, x, y, entry, fontRenderer);
     }
 }
