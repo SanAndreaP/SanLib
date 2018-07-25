@@ -19,7 +19,7 @@ import de.sanandrew.mods.sanlib.client.lexicon.button.GuiButtonEntry;
 import de.sanandrew.mods.sanlib.client.lexicon.button.GuiButtonEntryDivider;
 import de.sanandrew.mods.sanlib.client.lexicon.button.GuiButtonGroup;
 import de.sanandrew.mods.sanlib.client.lexicon.button.GuiButtonLink;
-import de.sanandrew.mods.sanlib.lib.client.util.LangUtils;
+import de.sanandrew.mods.sanlib.lib.util.LangUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
@@ -333,9 +333,9 @@ public class GuiLexicon
             } else if( button instanceof GuiButtonLink ) {
                 try {
                     GuiButtonLink btnLink = (GuiButtonLink) button;
-                    this.clickedURI = new URI(btnLink.link);
+                    this.clickedURI = new URI(btnLink.getLink());
                     if( this.mc.gameSettings.chatLinksPrompt ) {
-                        this.mc.displayGuiScreen(new GuiConfirmOpenLink(this, this.clickedURI.toString(), 0, btnLink.trusted));
+                        this.mc.displayGuiScreen(new GuiConfirmOpenLink(this, this.clickedURI.toString(), 0, btnLink.isTrusted()));
                     } else {
                         openLink(this.clickedURI);
                     }

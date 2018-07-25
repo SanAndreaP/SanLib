@@ -15,7 +15,7 @@ import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconGroup;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconGuiHelper;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconPageRender;
 import de.sanandrew.mods.sanlib.client.lexicon.LexiconRegistry;
-import de.sanandrew.mods.sanlib.lib.client.util.LangUtils;
+import de.sanandrew.mods.sanlib.lib.util.LangUtils;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.nbt.NBTTagCompound;

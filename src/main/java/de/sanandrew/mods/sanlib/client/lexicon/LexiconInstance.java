@@ -8,10 +8,13 @@ package de.sanandrew.mods.sanlib.client.lexicon;
 
 import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexicon;
+import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconEntry;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconGroup;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconInst;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconPageRender;
+import de.sanandrew.mods.sanlib.lib.util.LangUtils;
 import joptsimple.internal.Strings;
+import net.minecraft.client.gui.Gui;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.Level;
@@ -42,6 +45,7 @@ public final class LexiconInstance
         this.idToPageRenderMap = new HashMap<>();
         this.lexiconDef = lexiconDef;
 
+        this.registerPageRender(new LexiconRenderStandard());
         this.registerPageRender(new LexiconRenderCraftingGrid());
     }
 
@@ -133,5 +137,20 @@ public final class LexiconInstance
     @Override
     public String getStandardRenderID() {
         return RENDER_ID_STANDARD;
+    }
+
+    @Override
+    public String getTranslatedTitle(ILexiconEntry entry) {
+        return LangUtils.translate(LangUtils.LEXICON_ENTRY_NAME.get(this.lexiconDef.getModId(), entry.getGroupId(), entry.getId()));
+    }
+
+    @Override
+    public String getTranslatedText(ILexiconEntry entry) {
+        return LangUtils.translate(LangUtils.LEXICON_ENTRY_TEXT.get(this.lexiconDef.getModId(), entry.getGroupId(), entry.getId()));
+    }
+
+    @Override
+    public Gui getGui() {
+        return LexiconRegistry.INSTANCE.getGuiInst(this.lexiconDef.getModId());
     }
 }

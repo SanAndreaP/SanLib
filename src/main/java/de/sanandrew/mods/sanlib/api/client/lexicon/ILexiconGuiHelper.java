@@ -10,6 +10,8 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3i;
 
@@ -59,6 +61,8 @@ public interface ILexiconGuiHelper
 
     boolean linkActionPerformed(GuiButton button);
 
+    void initCraftings(@Nonnull NonNullList<IRecipe> recipes, List<CraftingGrid> grids);
+
     Vec3i getCraftingGridSize(CraftingGrid grid);
 
     void drawCraftingGrid(CraftingGrid grid, boolean isShapeless, int x, int y, int mouseX, int mouseY, int scrollY);
@@ -72,4 +76,8 @@ public interface ILexiconGuiHelper
     int drawContentString(int x, int y, ILexiconEntry entry, List<GuiButton> entryButtons);
 
     IGuiButtonEntry getNewEntryButton(int id, int x, int y, ILexiconEntry entry, FontRenderer fontRenderer);
+
+    IGuiButtonLink getNewLinkButton(int id, int x, int y, String text, String link, FontRenderer fontRenderer);
+
+    IGuiButtonLink getNewLinkButton(int id, int x, int y, String text, String link, FontRenderer fontRenderer, boolean trusted);
 }

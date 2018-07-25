@@ -8,6 +8,7 @@ package de.sanandrew.mods.sanlib.client.lexicon;
 
 import de.sanandrew.mods.sanlib.api.client.lexicon.CraftingGrid;
 import de.sanandrew.mods.sanlib.api.client.lexicon.IGuiButtonEntry;
+import de.sanandrew.mods.sanlib.api.client.lexicon.IGuiButtonLink;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexicon;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconEntry;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconGroup;
@@ -15,7 +16,7 @@ import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconGuiHelper;
 import de.sanandrew.mods.sanlib.client.lexicon.button.GuiButtonEntry;
 import de.sanandrew.mods.sanlib.client.lexicon.button.GuiButtonLink;
 import de.sanandrew.mods.sanlib.lib.client.util.GuiUtils;
-import de.sanandrew.mods.sanlib.lib.client.util.LangUtils;
+import de.sanandrew.mods.sanlib.lib.util.LangUtils;
 import de.sanandrew.mods.sanlib.lib.client.util.RenderUtils;
 import de.sanandrew.mods.sanlib.lib.util.ItemStackUtils;
 import net.minecraft.client.gui.FontRenderer;
@@ -329,12 +330,12 @@ public class LexiconGuiHelper
     public boolean linkActionPerformed(GuiButton button) {
         if( button instanceof GuiButtonLink ) {
             GuiButtonLink btnLink = (GuiButtonLink) button;
-            if( btnLink.link.startsWith("http://") || btnLink.link.startsWith("https://") ) {
+            if( btnLink.getLink().startsWith("http://") || btnLink.getLink().startsWith("https://") ) {
                 return false;
             } else {
-                int groupCharId = btnLink.link.indexOf(':');
-                String groupId = btnLink.link.substring(0, groupCharId);
-                String entryId = btnLink.link.substring(groupCharId + 1);
+                int groupCharId = btnLink.getLink().indexOf(':');
+                String groupId = btnLink.getLink().substring(0, groupCharId);
+                String entryId = btnLink.getLink().substring(groupCharId + 1);
 
                 ILexiconGroup group = LexiconRegistry.INSTANCE.getInstance(this.gui.lexicon.getModId()).getGroup(groupId);
                 if( group != null ) {
@@ -348,7 +349,8 @@ public class LexiconGuiHelper
         return false;
     }
 
-    public static void initCraftings(@Nonnull NonNullList<IRecipe> recipes, List<CraftingGrid> grids) {
+    @Override
+    public void initCraftings(@Nonnull NonNullList<IRecipe> recipes, List<CraftingGrid> grids) {
         int w = 0, h = 0;
         List<IRecipe> allRecipes = new ArrayList<>();
         for( IRecipe recipe : recipes ) {
@@ -435,7 +437,7 @@ public class LexiconGuiHelper
     @Override
     public int drawContentString(int x, int y, ILexiconEntry entry, List<GuiButton> entryButtons) {
         int entryWidth = this.getLexicon().getEntryWidth();
-        String s = LangUtils.translate(LangUtils.LEXICON_ENTRY_TEXT.get(entry.getGroupId(), entry.getId())).replace("\\n", "\n");
+        String s = LangUtils.translate(LangUtils.LEXICON_ENTRY_TEXT.get(this.getLexicon().getModId(), entry.getGroupId(), entry.getId())).replace("\\n", "\n");
 
         this.drawContentString(s, x, y, entryWidth - x * 2, this.getLexicon().getTextColor(), entryButtons);
         return this.getWordWrappedHeight(s, entryWidth - 2) + 3;
@@ -444,5 +446,15 @@ public class LexiconGuiHelper
     @Override
     public IGuiButtonEntry getNewEntryButton(int id, int x, int y, ILexiconEntry entry, FontRenderer fontRenderer) {
         return new GuiButtonEntry(this.gui, id, x, y, entry, fontRenderer);
+    }
+
+    @Override
+    public IGuiButtonLink getNewLinkButton(int id, int x, int y, String text, String link, FontRenderer fontRenderer) {
+        return new GuiButtonLink(this.gui, id, x, y, text, link, fontRenderer);
+    }
+
+    @Override
+    public IGuiButtonLink getNewLinkButton(int id, int x, int y, String text, String link, FontRenderer fontRenderer, boolean trusted) {
+        return new GuiButtonLink(this.gui, id, x, y, text, link, fontRenderer, trusted);
     }
 }

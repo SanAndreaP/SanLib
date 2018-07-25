@@ -4,7 +4,7 @@
  * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
  *                http://creativecommons.org/licenses/by-nc-sa/4.0/
  *******************************************************************************************************************/
-package de.sanandrew.mods.sanlib.lib.client.util;
+package de.sanandrew.mods.sanlib.lib.util;
 
 import de.sanandrew.mods.sanlib.SanLib;
 import net.minecraft.entity.Entity;

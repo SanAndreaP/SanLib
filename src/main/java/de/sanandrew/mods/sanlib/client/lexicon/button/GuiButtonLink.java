@@ -6,6 +6,7 @@
  *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.client.lexicon.button;
 
+import de.sanandrew.mods.sanlib.api.client.lexicon.IGuiButtonLink;
 import de.sanandrew.mods.sanlib.client.lexicon.GuiLexicon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -14,10 +15,11 @@ import net.minecraft.util.text.TextFormatting;
 
 public class GuiButtonLink
         extends GuiButton
+        implements IGuiButtonLink
 {
-    public final String link;
+    private final String link;
+    private final boolean trusted;
     public final FontRenderer fontRenderer;
-    public final boolean trusted;
 
     private int linkColorActive;
     private int linkColorVisited;
@@ -41,5 +43,20 @@ public class GuiButtonLink
         if( this.visible ) {
             fontRenderer.drawString(this.displayString, this.x, this.y, this.enabled ? this.linkColorActive : this.linkColorVisited, false);
         }
+    }
+
+    @Override
+    public GuiButton get() {
+        return this;
+    }
+
+    @Override
+    public String getLink() {
+        return this.link;
+    }
+
+    @Override
+    public boolean isTrusted() {
+        return this.trusted;
     }
 }

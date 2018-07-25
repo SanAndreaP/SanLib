@@ -58,7 +58,7 @@ public class LexiconRenderCraftingGrid
 
         if( !recipes.isEmpty() ) {
             this.crfGrids = new ArrayList<>();
-            LexiconGuiHelper.initCraftings(recipes, this.crfGrids);
+            helper.initCraftings(recipes, this.crfGrids);
         } else {
             this.crfGrids = null;
         }
