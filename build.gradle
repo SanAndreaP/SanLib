@@ -17,9 +17,6 @@ idea {
     module {
         inheritOutputDirs = true
     }
-    project {
-        languageLevel = '1.8' //due to a bug in gradle or IDEA, this doesn't work :(
-    }
 }
 
 version = "1.12.2-1.5.0"
