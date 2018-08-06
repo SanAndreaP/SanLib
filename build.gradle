@@ -35,11 +35,11 @@ minecraft {
 }
 
 repositories {
-	maven { url = "http://maven.epoxide.xyz" }
+	maven { url = "http://maven.mcmoddev.com" }
 }
 
 dependencies {
-	compile "net.darkhax.tesla:Tesla-1.12:1.0.60"
+	compile "net.darkhax.tesla:Tesla-1.12.2:1.0.63"
 }
 
 processResources {
