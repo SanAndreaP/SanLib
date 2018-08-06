@@ -17,9 +17,6 @@ public class CommonProxy
         return null;
     }
 
-    public void reloadModels() {
-    }
-
     public void preInit(FMLPreInitializationEvent event) {
     }
 

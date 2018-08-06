@@ -11,9 +11,11 @@ import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexicon;
 import de.sanandrew.mods.sanlib.api.client.lexicon.Lexicon;
 import de.sanandrew.mods.sanlib.client.lexicon.LexiconRegistry;
+import de.sanandrew.mods.sanlib.client.command.CommandSanLibClient;
 import de.sanandrew.mods.sanlib.lib.client.ModelJsonLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -36,11 +38,6 @@ public class ClientProxy
     }
 
     @Override
-    public void reloadModels() {
-        ModelJsonLoader.REGISTERED_JSON_LOADERS.forEach(loader -> loader.onResourceManagerReload(Minecraft.getMinecraft().getResourceManager()));
-    }
-
-    @Override
     public void preInit(FMLPreInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new ClientTickHandler());
     }
@@ -48,6 +45,7 @@ public class ClientProxy
     @Override
     public void postInit(FMLPostInitializationEvent event) {
         LexiconRegistry.INSTANCE.initialize();
+        ClientCommandHandler.instance.registerCommand(new CommandSanLibClient());
     }
 
     @Override

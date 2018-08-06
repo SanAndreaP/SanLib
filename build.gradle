@@ -19,7 +19,7 @@ idea {
     }
 }
 
-version = "1.12.2-1.5.0"
+version = "1.12.2-1.5.1"
 group= "de.sanandrew.mods"
 archivesBaseName = "SanLib"
 
@@ -29,19 +29,25 @@ compileJava {
 }
 
 minecraft {
-    version = "1.12.2-14.23.2.2611"
+    version = "1.12.2-14.23.4.2747"
     runDir = "run"
-    mappings = "snapshot_20180301"
+    mappings = "snapshot_20180806"
 }
 
 repositories {
-	maven { url = "http://maven.mcmoddev.com" }
+    maven {
+        name = "CoFH Maven"
+        url = "http://maven.covers1624.net"
+    }
+	maven {
+        name = "MC Moddev Maven"
+        url = "http://maven.mcmoddev.com"
+    }
 }
 
 dependencies {
-	compile("net.darkhax.tesla:Tesla-1.12.2:1.0.63") {
-        transitive = false
-    }
+    deobfCompile "cofh:RedstoneFlux:1.12-2.0.2.3:universal"
+    deobfCompile "net.darkhax.tesla:Tesla-1.12.2:1.0.63"
 }
 
 processResources {
@@ -67,23 +73,6 @@ jar {
 	}
 }
 
-sourceJar {
-    from sourceSets.main.java
-    appendix = 'src'
-    archiveName = "${baseName}-${version}-${appendix}.jar"
-}
-
-task deobfJar(type: Jar) {
-    from sourceSets.main.output
-    appendix = 'deobf'
-    archiveName = "${baseName}-${version}-${appendix}.jar"
-	manifest {
-		attributes 'FMLAT': 'sanlib_at.cfg'
-	}
-}
-
 artifacts {
-    archives deobfJar
-    archives sourceJar
     archives jar
 }
