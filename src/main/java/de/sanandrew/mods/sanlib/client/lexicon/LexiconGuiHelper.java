@@ -164,18 +164,18 @@ public class LexiconGuiHelper
     }
 
     @Override
-    public void drawContentString(String str, int x, int y, int wrapWidth, int textColor, @Nonnull List<GuiButton> newButtons) {
+    public void drawContentString(String str, int x, int y, int wrapWidth, int textColor, List<GuiButton> links) {
         FontRenderer fontRenderer = this.getFontRenderer();
-        Map<Integer, String> links = new HashMap<>();
-        str = replaceLinkedText(str, links);
+        Map<Integer, String> foundLinks = new HashMap<>();
+        str = replaceLinkedText(str, foundLinks);
 
         int drawnCharacters = 0;
         List<String> lines = getSplitString(str, wrapWidth);
         for( String line : lines ) {
             final int currLength = str.indexOf(line, drawnCharacters);
             final int newLength = currLength + line.length();
-            List<Map.Entry<Integer, String>> entries = links.entrySet().stream().filter(entry -> entry.getKey() >= currLength && entry.getKey() < newLength)
-                                                            .sorted(Comparator.comparingInt(Map.Entry::getKey)).collect(Collectors.toCollection(ArrayList::new));
+            List<Map.Entry<Integer, String>> entries = foundLinks.entrySet().stream().filter(entry -> entry.getKey() >= currLength && entry.getKey() < newLength)
+                                                                 .sorted(Comparator.comparingInt(Map.Entry::getKey)).collect(Collectors.toCollection(ArrayList::new));
             if( entries.size() > 0 ) {
                 int lastUsedId = 0;
                 int lineX = x;
@@ -188,13 +188,17 @@ public class LexiconGuiHelper
                     int entrySplitId = entry.getValue().indexOf('|');
                     String t = entry.getValue().substring(0, entrySplitId);
                     int tl = fontRenderer.getStringWidth(t);
-                    GuiButton lnk = newButtons.stream().filter(button -> button.id == entry.getKey()).findFirst().orElse(null);
-                    if( lnk == null ) {
-                        lnk = new GuiButtonLink(this.gui, entry.getKey(), lineX, y, t, entry.getValue().substring(entrySplitId + 1), this.getFontRenderer());
-                        newButtons.add(lnk);
+                    if( links != null ) {
+                        GuiButton lnk = links.stream().filter(button -> button.id == entry.getKey()).findFirst().orElse(null);
+                        if( lnk == null ) {
+                            lnk = new GuiButtonLink(this.gui, entry.getKey(), lineX, y, t, entry.getValue().substring(entrySplitId + 1), this.getFontRenderer());
+                            links.add(lnk);
+                        } else {
+                            lnk.x = lineX;
+                            lnk.y = y;
+                        }
                     } else {
-                        lnk.x = lineX;
-                        lnk.y = y;
+                        fontRenderer.drawString(t, lineX, y, textColor, false);
                     }
                     lineX += tl;
 
@@ -435,11 +439,11 @@ public class LexiconGuiHelper
     }
 
     @Override
-    public int drawContentString(int x, int y, ILexiconEntry entry, List<GuiButton> entryButtons) {
+    public int drawContentString(int x, int y, ILexiconEntry entry, List<GuiButton> links) {
         int entryWidth = this.getLexicon().getEntryWidth();
         String s = LangUtils.translate(LangUtils.LEXICON_ENTRY_TEXT.get(this.getLexicon().getModId(), entry.getGroupId(), entry.getId())).replace("\\n", "\n");
 
-        this.drawContentString(s, x, y, entryWidth - x * 2, this.getLexicon().getTextColor(), entryButtons);
+        this.drawContentString(s, x, y, entryWidth - x * 2, this.getLexicon().getTextColor(), links);
         return this.getWordWrappedHeight(s, entryWidth - 2) + 3;
     }
 
@@ -456,5 +460,15 @@ public class LexiconGuiHelper
     @Override
     public IGuiButtonLink getNewLinkButton(int id, int x, int y, String text, String link, FontRenderer fontRenderer, boolean trusted) {
         return new GuiButtonLink(this.gui, id, x, y, text, link, fontRenderer, trusted);
+    }
+
+    @Override
+    public List<GuiButton> getEntryButtonList() {
+        return this.gui.entryButtons;
+    }
+
+    @Override
+    public List<GuiButton> getGuiButtonList() {
+        return this.gui.getButtonList();
     }
 }

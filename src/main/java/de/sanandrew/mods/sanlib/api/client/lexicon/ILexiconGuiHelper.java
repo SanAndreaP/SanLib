@@ -46,7 +46,19 @@ public interface ILexiconGuiHelper
 
     void drawItemGrid(int x, int y, int mouseX, int mouseY, int scrollY, @Nonnull ItemStack stack, float scale, boolean drawTooltip);
 
-    void drawContentString(String str, int x, int y, int wrapWidth, int textColor, @Nonnull List<GuiButton> newButtons);
+    /**
+     * Draws the given text wrapped to the given wrap width.
+     * This also converts newlines ({@code \n} to line breaks.<br>
+     * Any links inside the text (using the syntax {@code {link:SHOWN_TEXT|TO_GROUP_ID:TO_ENTRY_ID_IN_GROUP}} or {@code {link:SHOWN_TEXT|HTTP(S)_LINK}} will be
+     * converted to actual, clickable link buttons, saved inside the {@param entryButtons} parameter.
+     * @param str the text that should be rendered.
+     * @param x the x-position of the text block. Note that the distance from the right side of the entry area will be the same as this position.
+     * @param y the y-position of the text block.
+     * @param wrapWidth the width the text should be wrapped in.
+     * @param textColor the color of the text.
+     * @param links an instance of a list which is used to save the links detected; can be null, but no buttons will be created in that case.
+     */
+    void drawContentString(String str, int x, int y, int wrapWidth, int textColor, List<GuiButton> links);
 
     int getWordWrappedHeight(String str, int wrapWidth);
 
@@ -73,11 +85,26 @@ public interface ILexiconGuiHelper
 
     void drawTitle(int x, int y, ILexiconEntry entry);
 
-    int drawContentString(int x, int y, ILexiconEntry entry, List<GuiButton> entryButtons);
+    /**
+     * Draws the text for this entry translated by the key {@code sanlib.lexicon.MY_MOD_ID.MY_GROUP_ID.MY_ENTRY_ID.text} that wraps around the entry area.
+     * This also converts newlines ({@code \n} to line breaks.<br>
+     * Any links inside the text (using the syntax {@code {link:SHOWN_TEXT|TO_GROUP_ID:TO_ENTRY_ID_IN_GROUP}} or {@code {link:SHOWN_TEXT|HTTP(S)_LINK}} will be
+     * converted to actual, clickable link buttons, saved inside the {@param entryButtons} parameter.
+     * @param x the x-position of the text block. Note that the distance from the right side of the entry area will be the same as this position.
+     * @param y the y-position of the text block.
+     * @param entry the entry whose text should be rendered
+     * @param links an instance of a list which is used to save the links detected; can be null, but no buttons will be created in that case.
+     * @return the total height of the text rendered
+     */
+    int drawContentString(int x, int y, ILexiconEntry entry, List<GuiButton> links);
 
     IGuiButtonEntry getNewEntryButton(int id, int x, int y, ILexiconEntry entry, FontRenderer fontRenderer);
 
     IGuiButtonLink getNewLinkButton(int id, int x, int y, String text, String link, FontRenderer fontRenderer);
 
     IGuiButtonLink getNewLinkButton(int id, int x, int y, String text, String link, FontRenderer fontRenderer, boolean trusted);
+
+    List<GuiButton> getEntryButtonList();
+
+    List<GuiButton> getGuiButtonList();
 }

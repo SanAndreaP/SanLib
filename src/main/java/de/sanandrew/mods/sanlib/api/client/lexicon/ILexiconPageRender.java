@@ -7,7 +7,9 @@
 package de.sanandrew.mods.sanlib.api.client.lexicon;
 
 import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -17,10 +19,25 @@ import java.util.List;
 @SideOnly(Side.CLIENT)
 public interface ILexiconPageRender
 {
+    /**
+     * The ID for this render. Must be unique, recommended is your mod ID appended by a custom name.
+     * @return an ID
+     */
     String getId();
 
-    void initPage(ILexiconEntry entry, ILexiconGuiHelper helper, List<GuiButton> globalButtons, List<GuiButton> entryButtons);
+    /**
+     * Initializes the renderer for the opened page. Called on {@link GuiScreen#initGui()}
+     * @param entry the entry being opened
+     * @param helper the lexicon helper
+     * @param globalButtons Deprecated. Use {@link ILexiconGuiHelper#getGuiButtonList()}
+     * @param entryButtons Deprecated. Use {@link ILexiconGuiHelper#getEntryButtonList()}
+     */
+    void initPage(ILexiconEntry entry, ILexiconGuiHelper helper, @Deprecated List<GuiButton> globalButtons, @Deprecated List<GuiButton> entryButtons);
 
+    /**
+     * Called on {@link GuiScreen#updateScreen()},
+     * @param helper the lexicon helper
+     */
     default void updateScreen(ILexiconGuiHelper helper) { }
 
     default void renderPageOverlay(ILexiconEntry entry, ILexiconGuiHelper helper, int mouseX, int mouseY, float partTicks) { }

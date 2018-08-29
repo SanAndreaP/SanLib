@@ -70,7 +70,7 @@ public class GuiLexicon
     private URI clickedURI;
     private boolean updateGUI;
 
-    private final List<GuiButton> entryButtons;
+    final List<GuiButton> entryButtons;
     private final ILexiconGuiHelper renderHelper;
 
     private final Deque<History> navHistory = new ArrayDeque<>();
@@ -453,5 +453,9 @@ public class GuiLexicon
         @Override public void initPage(ILexiconEntry entry, ILexiconGuiHelper helper, List<GuiButton> globalButtons, List<GuiButton> entryButtons) { }
         @Override public void renderPageEntry(ILexiconEntry entry, ILexiconGuiHelper helper, int mouseX, int mouseY, int scrollY, float partTicks) { }
         @Override public int getEntryHeight(ILexiconEntry entry, ILexiconGuiHelper helper) { return 0; }
+    }
+
+    List<GuiButton> getButtonList() {
+        return this.buttonList;
     }
 }

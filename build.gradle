@@ -1,3 +1,5 @@
+import org.codehaus.groovy.runtime.GStringImpl
+
 buildscript {
     repositories {
         jcenter()
@@ -19,7 +21,7 @@ idea {
     }
 }
 
-version = "1.12.2-1.5.1"
+version = "1.12.2-1.5.2"
 group= "de.sanandrew.mods"
 archivesBaseName = "SanLib"
 
@@ -49,6 +51,19 @@ dependencies {
     deobfCompile "cofh:RedstoneFlux:1.12-2.0.2.3:universal"
     deobfCompile "net.darkhax.tesla:Tesla-1.12.2:1.0.63"
 }
+
+apply plugin: 'maven'
+project.ext {
+    releaseRepoUrl = "file://${project(':').projectDir}/maven/" as GStringImpl
+}
+uploadArchives {
+    repositories.mavenDeployer {
+        pom.artifactId = project.name
+        pom.version = project.version
+        repository(url: project.releaseRepoUrl)
+    }
+}
+build.finalizedBy uploadArchives
 
 processResources {
     inputs.property "version", project.version
