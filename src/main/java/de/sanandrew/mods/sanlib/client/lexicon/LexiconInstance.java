@@ -141,7 +141,7 @@ public final class LexiconInstance
 
     @Override
     public String getTranslatedTitle(ILexiconEntry entry) {
-        return LangUtils.translate(LangUtils.LEXICON_ENTRY_NAME.get(this.lexiconDef.getModId(), entry.getGroupId(), entry.getId()));
+        return LangUtils.translate(entry.getTitleLangKey(this.lexiconDef.getModId()));
     }
 
     @Override

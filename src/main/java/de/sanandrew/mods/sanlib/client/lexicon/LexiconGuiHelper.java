@@ -158,7 +158,7 @@ public class LexiconGuiHelper
         if( mouseOver ) {
             GlStateManager.pushMatrix();
             GlStateManager.translate(0.0F, 0.0F, 64.0F);
-            Gui.drawRect(x, y, x + (int)(16 * scale), y + (int)(16 * scale), 0x80FFFFFF);
+            Gui.drawRect(x, y, x + (int)(16.0F * scale), y + (int)(16.0F * scale), 0x80FFFFFF);
             GlStateManager.popMatrix();
         }
     }
@@ -434,8 +434,7 @@ public class LexiconGuiHelper
     }
 
     private String getTitle(ILexiconEntry entry) {
-        return TextFormatting.ITALIC.toString() + TextFormatting.BOLD
-                       + LangUtils.translate(LangUtils.LEXICON_ENTRY_NAME.get(this.getLexicon().getModId(), entry.getGroupId(), entry.getId()));
+        return TextFormatting.ITALIC.toString() + TextFormatting.BOLD + LangUtils.translate(entry.getTitleLangKey(this.getLexicon().getModId()));
     }
 
     @Override

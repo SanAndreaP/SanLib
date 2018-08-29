@@ -40,7 +40,7 @@ public class GuiButtonEntry
     private final FontRenderer fontRenderer;
 
     public GuiButtonEntry(GuiLexicon gui, int id, int x, int y, ILexiconEntry entry, FontRenderer fontRenderer) {
-        super(id, x, y, gui.lexicon.getEntryWidth() - 4, 14, LangUtils.translate(LangUtils.LEXICON_ENTRY_NAME.get(gui.lexicon.getModId(), entry.getGroupId(), entry.getId())));
+        super(id, x, y, gui.lexicon.getEntryWidth() - 4, 14, LangUtils.translate(entry.getTitleLangKey(gui.lexicon.getModId())));
         this.entry = entry;
         this.icon = entry.getEntryIcon();
         this.fontRenderer = fontRenderer;
