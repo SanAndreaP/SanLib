@@ -104,9 +104,10 @@ public class GuiLexicon
         this.buttonList.clear();
         this.entryButtons.clear();
 
-        this.buttonList.add(new GuiButtonNav(this.buttonList.size(), this.guiLeft + 30, this.guiTop + 190, 0, !navHistory.isEmpty()));
-        this.buttonList.add(new GuiButtonNav(this.buttonList.size(), this.guiLeft + (guiSizeX - 10) / 2, this.guiTop + 190, 1, true));
-        this.buttonList.add(new GuiButtonNav(this.buttonList.size(), this.guiLeft + guiSizeX - 48, this.guiTop + 190, 2, !navFuture.isEmpty()));
+        int navOffsetY = this.lexicon.getNavButtonOffsetY();
+        this.buttonList.add(new GuiButtonNav(this.buttonList.size(), this.guiLeft + 30, this.guiTop + navOffsetY, 0, !navHistory.isEmpty()));
+        this.buttonList.add(new GuiButtonNav(this.buttonList.size(), this.guiLeft + (guiSizeX - 10) / 2, this.guiTop + navOffsetY, 1, true));
+        this.buttonList.add(new GuiButtonNav(this.buttonList.size(), this.guiLeft + guiSizeX - 48, this.guiTop + navOffsetY, 2, !navFuture.isEmpty()));
 
         if( group == null ) {
             int posX = 0;

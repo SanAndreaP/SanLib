@@ -12,6 +12,9 @@ public interface ILexicon
     int getEntryPosY();
     int getEntryWidth();
     int getEntryHeight();
+    default int getNavButtonOffsetY() {
+        return 190;
+    }
 
     int getTitleColor();
     int getTextColor();

@@ -132,7 +132,7 @@ public class LexiconGuiHelper
         float fx = x + (1.0F * scale);
         float fy = y + (1.0F * scale);
 
-        boolean mouseOver = mouseY >= 0 && mouseY < this.gui.entryHeight && mouseX >= fx && mouseX < fy + 16 * scale && mouseY >= fy - scrollY && mouseY < fy + 16 * scale - scrollY;
+        boolean mouseOver = mouseY >= 0 && mouseY < this.gui.entryHeight && mouseX >= fx && mouseX < fx + 16 * scale && mouseY >= fy - scrollY && mouseY < fy + 16 * scale - scrollY;
         if( mouseOver && ItemStackUtils.isValid(stack) ) {
             this.gui.drawFrameLast = () -> {
                 GlStateManager.pushMatrix();
