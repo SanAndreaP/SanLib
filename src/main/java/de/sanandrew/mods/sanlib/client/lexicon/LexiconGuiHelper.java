@@ -129,10 +129,10 @@ public class LexiconGuiHelper
         this.drawTextureRect(0, 0, 238, 0, 18, 18);
         GlStateManager.popMatrix();
 
-        x += (1.0F * scale);
-        y += (1.0F * scale);
+        float fx = x + (1.0F * scale);
+        float fy = y + (1.0F * scale);
 
-        boolean mouseOver = mouseY >= 0 && mouseY < this.gui.entryHeight && mouseX >= x && mouseX < x + 16 * scale && mouseY >= y - scrollY && mouseY < y + 16 * scale - scrollY;
+        boolean mouseOver = mouseY >= 0 && mouseY < this.gui.entryHeight && mouseX >= fx && mouseX < fy + 16 * scale && mouseY >= fy - scrollY && mouseY < fy + 16 * scale - scrollY;
         if( mouseOver && ItemStackUtils.isValid(stack) ) {
             this.gui.drawFrameLast = () -> {
                 GlStateManager.pushMatrix();
@@ -151,16 +151,18 @@ public class LexiconGuiHelper
             };
         }
 
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(fx, fy, 0.0F);
         if( ItemStackUtils.isValid(stack) ) {
-            RenderUtils.renderStackInGui(stack, x, y, scale, this.getFontRenderer());
+            RenderUtils.renderStackInGui(stack, 0, 0, scale, this.getFontRenderer());
         }
 
         if( mouseOver ) {
-            GlStateManager.pushMatrix();
             GlStateManager.translate(0.0F, 0.0F, 64.0F);
-            Gui.drawRect(x, y, x + (int)(16.0F * scale), y + (int)(16.0F * scale), 0x80FFFFFF);
-            GlStateManager.popMatrix();
+            GlStateManager.scale(scale, scale, 1.0F);
+            Gui.drawRect(0, 0, 16, 16, 0x80FFFFFF);
         }
+        GlStateManager.popMatrix();
     }
 
     @Override

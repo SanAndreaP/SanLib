@@ -3,7 +3,7 @@
     "modid": "sanlib",
     "name": "SanAndreasPs Mod Library",
     "description": "A library made for and required by all my mods.",
-    "version": "1.5.2",
+    "version": "1.5.1",
     "mcversion": "1.12",
     "logoFile": "logo.png",
     "url": "",
