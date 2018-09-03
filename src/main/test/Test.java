@@ -32,12 +32,23 @@ public class Test
 
     @Mod.EventHandler
     public void onPreInit(FMLPreInitializationEvent event) {
-        testConfig(event.getSuggestedConfigurationFile());
+//        testConfig(event.getSuggestedConfigurationFile());
+        testTickFormat();
+
     }
 
     @Mod.EventHandler
     public void onPostInit(FMLPostInitializationEvent event) {
 //        testNbtMethods();
+    }
+
+    private static void testTickFormat() {
+        System.out.println(MiscUtils.getTimeFromTicks(5, 0));
+        System.out.println(MiscUtils.getTimeFromTicks(5, 1));
+        System.out.println(MiscUtils.getTimeFromTicks(5, 2));
+        System.out.println(MiscUtils.getTimeFromTicks(1, 0));
+        System.out.println(MiscUtils.getTimeFromTicks(1, 1));
+        System.out.println(MiscUtils.getTimeFromTicks(1, 2));
     }
 
     private static void testConfig(File path) {

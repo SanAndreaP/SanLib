@@ -23,6 +23,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -185,6 +186,10 @@ public final class MiscUtils
      * @return The formatted time
      */
     public static String getTimeFromTicks(int ticks) {
+        return getTimeFromTicks(ticks, 2);
+    }
+
+    public static String getTimeFromTicks(int ticks, int secondsPrecision) {
         int hours = ticks / 72_000;
         int minutes = (ticks - hours * 72_000) / 1_200;
         float seconds = (ticks - hours * 72_000 - minutes * 1_200) / 20.0F;
@@ -203,7 +208,9 @@ public final class MiscUtils
             if( sb.length() > 0 ) {
                 sb.append(' ');
             }
-            sb.append(String.format("%.1fs", seconds));
+            DecimalFormat df = new DecimalFormat("#.#");
+            df.setMaximumFractionDigits(secondsPrecision);
+            sb.append(String.format("%ss", df.format(seconds)));
         }
 
         return sb.toString();

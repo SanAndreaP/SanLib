@@ -16,9 +16,10 @@ import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
-import net.minecraft.client.resources.IResourceManagerReloadListener;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.resource.IResourceType;
+import net.minecraftforge.client.resource.ISelectiveResourceReloadListener;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.Level;
@@ -31,7 +32,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static net.minecraftforge.client.resource.VanillaResourceType.TEXTURES;
 
 /**
  * This class loads a JSON file as a model to be used with entities and TESRs.<br>
@@ -46,7 +50,7 @@ import java.util.stream.Collectors;
 @SideOnly(Side.CLIENT)
 @SuppressWarnings("unused")
 public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U extends ModelJsonLoader.ModelJson>
-        implements IResourceManagerReloadListener
+        implements ISelectiveResourceReloadListener, IResourceType
 {
     private T modelBase;
     private ModelRenderer[] mainBoxes;
@@ -278,7 +282,13 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
 
     @Override
     public void onResourceManagerReload(IResourceManager resourceManager) {
-        this.modelBase.onReload(resourceManager, this);
+    }
+
+    @Override
+    public void onResourceManagerReload(IResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) {
+        if( resourcePredicate.test(this) || resourcePredicate.test(TEXTURES) ) {
+            this.modelBase.onReload(resourceManager, this);
+        }
     }
 
     /**

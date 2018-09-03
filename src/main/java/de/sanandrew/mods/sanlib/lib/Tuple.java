@@ -136,7 +136,7 @@ public class Tuple
             }
         }
 
-        return (Integer.valueOf(tLen)).compareTo(oLen);
+        return Integer.compare(tLen, oLen);
     }
 
     /**
