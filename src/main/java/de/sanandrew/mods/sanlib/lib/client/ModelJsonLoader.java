@@ -281,10 +281,6 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
     }
 
     @Override
-    public void onResourceManagerReload(IResourceManager resourceManager) {
-    }
-
-    @Override
     public void onResourceManagerReload(IResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) {
         if( resourcePredicate.test(this) || resourcePredicate.test(TEXTURES) ) {
             this.modelBase.onReload(resourceManager, this);
