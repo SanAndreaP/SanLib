@@ -119,6 +119,7 @@ public class GuiLexicon
                     posY += 32;
                 }
             }
+            this.render = EmptyRenderer.INSTANCE;
         } else if( entry == null ) {
             int posY = 0;
             int btnX = 2;
@@ -131,6 +132,7 @@ public class GuiLexicon
                     posY += 5;
                 }
             }
+            this.render = EmptyRenderer.INSTANCE;
         } else {
             this.render = inst.getPageRender(entry.getPageRenderId());
             if( this.render != null ) {
