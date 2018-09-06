@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Utility class for miscellaneous tasks and methods
@@ -244,6 +245,17 @@ public final class MiscUtils
      */
     public static <T> T defIfNull(T val, T def) {
         return val != null ? val : def;
+    }
+
+    /**
+     * Checks if val is {@code null} and returns the return value from {@code def} if so, otherwise {@code val} is returned
+     * @param val The value to be checked for null and eventually returned
+     * @param def The supplier function called when {@code val} is null
+     * @param <T> The type of the value
+     * @return val, if it's not null, return value from def otherwise
+     */
+    public static <T> T defIfNull(T val, Supplier<T> def) {
+        return val != null ? val : def.get();
     }
 
     /**
