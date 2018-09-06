@@ -14,11 +14,12 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(modid = SanLib.ID, version = SanLib.VERSION, name = "San's Library", acceptedMinecraftVersions = SanLib.MCVER, dependencies = SanLib.DEPENDENCIES,
+@Mod(modid = SanLib.ID, version = SanLib.VERSION, name = SanLib.NAME, acceptedMinecraftVersions = SanLib.MCVER, dependencies = SanLib.DEPENDENCIES,
      acceptableRemoteVersions = SanLib.ACCEPTED_REMOTE_VER)
 public class SanLib
 {
     public static final String ID = "sanlib";
+    public static final String NAME = "San's Library";
     static final String VERSION = "1.5.1";
     static final String ACCEPTED_REMOTE_VER = "[1.5.1,)";
     static final String MCVER = "[1.12.2, 1.13)";
@@ -36,7 +37,7 @@ public class SanLib
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
-        SLibConfiguration.initConfiguration(event);
+        SLibConfig.initConfiguration(event);
 
         proxy.loadModLexica(event.getAsmData());
 

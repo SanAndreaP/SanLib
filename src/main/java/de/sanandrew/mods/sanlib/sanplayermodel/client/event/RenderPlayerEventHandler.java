@@ -6,7 +6,7 @@
    *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.sanplayermodel.client.event;
 
-import de.sanandrew.mods.sanlib.SLibConfiguration;
+import de.sanandrew.mods.sanlib.SLibConfig;
 import de.sanandrew.mods.sanlib.sanplayermodel.SanPlayerModel;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.RenderSanPlayer;
 import net.minecraft.client.Minecraft;
@@ -44,7 +44,7 @@ public class RenderPlayerEventHandler
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onPlayerRender(RenderPlayerEvent.Pre event) {
-        if( SLibConfiguration.allowCustomSanModel && SanPlayerModel.isSanPlayer(event.getEntityPlayer()) ) {
+        if( SLibConfig.Client.allowCustomSanModel && SanPlayerModel.isSanPlayer(event.getEntityPlayer()) ) {
             this.lazyLoad();
 
             this.playerPartTicks = event.getPartialRenderTick();
@@ -53,7 +53,7 @@ public class RenderPlayerEventHandler
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onLivingRender(Pre event) {
-        if( SLibConfiguration.allowCustomSanModel && event.getEntity() instanceof EntityPlayer && SanPlayerModel.isSanPlayer((EntityPlayer) event.getEntity())  ) {
+        if( SLibConfig.Client.allowCustomSanModel && event.getEntity() instanceof EntityPlayer && SanPlayerModel.isSanPlayer((EntityPlayer) event.getEntity())  ) {
             this.lazyLoad();
 
             if( this.sanPlayerModel != null ) {
@@ -66,7 +66,7 @@ public class RenderPlayerEventHandler
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onHandRender(RenderHandEvent event) {
         Minecraft mc = Minecraft.getMinecraft();
-        if( SLibConfiguration.allowCustomSanModel && SanPlayerModel.isSanPlayer(mc.player) ) {
+        if( SLibConfig.Client.allowCustomSanModel && SanPlayerModel.isSanPlayer(mc.player) ) {
             this.lazyLoad();
 
             GL11.glPushMatrix();

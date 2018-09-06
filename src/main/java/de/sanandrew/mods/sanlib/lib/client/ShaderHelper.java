@@ -8,7 +8,7 @@
  */
 package de.sanandrew.mods.sanlib.lib.client;
 
-import de.sanandrew.mods.sanlib.SLibConfiguration;
+import de.sanandrew.mods.sanlib.SLibConfig;
 import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.client.ClientTickHandler;
 import net.minecraft.client.Minecraft;
@@ -59,11 +59,11 @@ public final class ShaderHelper
     }
 
     public static boolean areShadersEnabled() {
-        return OpenGlHelper.shadersSupported && SLibConfiguration.useShaders;
+        return OpenGlHelper.shadersSupported && SLibConfig.Client.useShaders;
     }
 
     public static int getSecondaryTextureUnit() {
-        return SLibConfiguration.glSecondaryTextureUnit;
+        return SLibConfig.Client.glSecondaryTextureUnit;
     }
 
     // Most of the code taken from the LWJGL wiki
