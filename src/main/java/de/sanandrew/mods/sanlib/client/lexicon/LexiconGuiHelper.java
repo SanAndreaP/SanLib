@@ -445,7 +445,7 @@ public class LexiconGuiHelper
         String s = LangUtils.translate(LangUtils.LEXICON_ENTRY_TEXT.get(this.getLexicon().getModId(), entry.getGroupId(), entry.getId())).replace("\\n", "\n");
 
         this.drawContentString(s, x, y, entryWidth - x * 2, this.getLexicon().getTextColor(), links);
-        return this.getWordWrappedHeight(s, entryWidth - 2) + 3;
+        return this.getWordWrappedHeight(s, entryWidth - x * 2) + 3;
     }
 
     @Override
