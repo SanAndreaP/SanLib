@@ -29,6 +29,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -75,6 +76,16 @@ public class ConfigUtils
         for( Class<?> c : base.getDeclaredClasses() ) {
             loadCategory(config, c, prefix);
         }
+
+        if( !base.isEnum() ) {
+            try {
+                Method init = Arrays.stream(base.getDeclaredMethods()).filter(m -> m.getDeclaredAnnotation(Init.class) != null)
+                                    .findFirst().orElse(base.getDeclaredMethod("init"));
+                if( init != null ) {
+                    init.invoke(null);
+                }
+            } catch( NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored ) { }
+        }
     }
 
     public static void loadCategory(Configuration config, Class<?> c, String prefix) {
@@ -119,11 +130,6 @@ public class ConfigUtils
             } else {
                 loadCategories(config, c, qualifiedName);
                 loadValues(config, qualifiedName, c);
-
-                try {
-                    Method init = c.getDeclaredMethod("init");
-                    init.invoke(null);
-                } catch( NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored ) { }
             }
         }
     }
