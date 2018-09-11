@@ -79,12 +79,13 @@ public class ConfigUtils
 
         if( !base.isEnum() ) {
             try {
-                Method init = Arrays.stream(base.getDeclaredMethods()).filter(m -> m.getDeclaredAnnotation(Init.class) != null)
-                                    .findFirst().orElse(base.getDeclaredMethod("init"));
+                Method init = Arrays.stream(base.getMethods()).filter(m -> m.getAnnotation(Init.class) != null).findFirst().orElse(base.getMethod("init"));
                 if( init != null ) {
                     init.invoke(null);
                 }
-            } catch( NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored ) { }
+            } catch( IllegalAccessException | InvocationTargetException ex ) {
+                SanLib.LOG.log(Level.WARN, String.format("Could not call initializer in class %s", base.getName()), ex);
+            } catch( NoSuchMethodException ignored ) { }
         }
     }
 
