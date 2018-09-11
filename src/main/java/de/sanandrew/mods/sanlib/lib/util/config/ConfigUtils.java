@@ -79,14 +79,23 @@ public class ConfigUtils
 
         if( !base.isEnum() ) {
             try {
-                Method init = Arrays.stream(base.getMethods()).filter(m -> m.getAnnotation(Init.class) != null).findFirst().orElse(base.getMethod("init"));
+                Method init = Arrays.stream(base.getMethods()).filter(m -> m.getAnnotation(Init.class) != null).findFirst().orElseGet(() -> getOldInit(base));
                 if( init != null ) {
                     init.invoke(null);
                 }
             } catch( IllegalAccessException | InvocationTargetException ex ) {
                 SanLib.LOG.log(Level.WARN, String.format("Could not call initializer in class %s", base.getName()), ex);
-            } catch( NoSuchMethodException ignored ) { }
+            }
         }
+    }
+
+    @Deprecated
+    private static Method getOldInit(Class<?> c) {
+        try {
+            return c.getMethod("init");
+        } catch( NoSuchMethodException ignored ) { }
+
+        return null;
     }
 
     public static void loadCategory(Configuration config, Class<?> c, String prefix) {
