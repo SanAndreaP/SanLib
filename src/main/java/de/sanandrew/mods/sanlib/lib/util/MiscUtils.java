@@ -25,15 +25,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
  * Utility class for miscellaneous tasks and methods
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "WeakerAccess"})
 public final class MiscUtils
 {
     /**
@@ -227,7 +227,7 @@ public final class MiscUtils
         if( nrStr.endsWith("11") || nrStr.endsWith("12") || nrStr.endsWith("13") ) {
             return nrStr + "th";
         }
-        Character lastNum = nrStr.charAt(nrStr.length() - 1);
+        char lastNum = nrStr.charAt(nrStr.length() - 1);
         switch( lastNum ) {
             case '1': return nrStr + "st";
             case '2': return nrStr + "nd";
@@ -237,10 +237,26 @@ public final class MiscUtils
     }
 
     /**
-     * Checks if val is {@code null} and returns {@code def} if so, otherwise {@code val} is returned
+     * <p>This checks if <tt>val</tt> is between <tt>lo</tt> and <tt>hi</tt> (inclusive). If <tt>lo</tt> is greater than <tt>hi</tt>, both values switch around internally.</p>
+     * <p>It acts like (<tt>lo <= val <= hi</tt>) or more verbose (<tt>lo <= val && val <= hi</tt>)</p>
+     *
+     * @param lo the lower value of the range
+     * @param val the value that should be between <tt>lo</tt> and <tt>hi</tt>
+     * @param hi the higher value of the range
+     *
+     * @return <tt>true</tt>, if <tt>val</tt> is between <tt>lo</tt> and <tt>hi</tt>, <tt>false</tt> otherwise
+     */
+    public static boolean between(float lo, float val, float hi) {
+        return hi < lo ? hi <= val && val <= lo : lo <= val && val <= hi;
+    }
+
+    /**
+     * <p>Checks if val is <tt>null</tt> and returns <tt>def</tt> if so, otherwise <tt>val</tt> is returned</p>
+     *
      * @param val The value to be checked for null and eventually returned
      * @param def The default value when {@code val} is null
      * @param <T> The type of the value
+     *
      * @return value, if it's not null, def otherwise
      */
     public static <T> T defIfNull(T val, T def) {
@@ -248,14 +264,42 @@ public final class MiscUtils
     }
 
     /**
-     * Checks if val is {@code null} and returns the return value from {@code def} if so, otherwise {@code val} is returned
+     * Checks if val is <tt>null</tt> and returns the return value from <tt>def</tt> if so, otherwise <tt>val</tt> is returned.
+     *
      * @param val The value to be checked for null and eventually returned
      * @param def The supplier function called when {@code val} is null
      * @param <T> The type of the value
+     *
      * @return val, if it's not null, return value from def otherwise
      */
     public static <T> T defIfNull(T val, Supplier<T> def) {
         return val != null ? val : def.get();
+    }
+
+    /**
+     * Calls the function defined in <tt>onNonNull</tt> if and only if <tt>obj</tt> is not <tt>null</tt>.
+     *
+     * @param obj The object the function <tt>onNonNull</tt> is called with as parameter
+     * @param onNonNull The function called if <tt>obj</tt> is not <tt>null</tt>
+     * @param <T> The type of <tt>obj</tt>
+     */
+    public static <T> void call(T obj, Consumer<T> onNonNull) {
+        if( obj != null ) {
+            onNonNull.accept(obj);
+        }
+    }
+
+    /**
+     * Calls the function defined in <tt>onNonNull</tt> if and only if <tt>obj</tt> is not <tt>null</tt> and
+     * returns the value returned by the function, <tt>null</tt> otherwise.
+     *
+     * @param obj The object the function <tt>onNonNull</tt> is called with as parameter
+     * @param onNonNull The function called if <tt>obj</tt> is not <tt>null</tt>
+     * @param <T> The type of <tt>obj</tt>
+     * @param <R> The type of the return value
+     */
+    public static <T, R> R call(T obj, Function<T, R> onNonNull) {
+        return obj != null ? onNonNull.apply(obj) : null;
     }
 
     /**

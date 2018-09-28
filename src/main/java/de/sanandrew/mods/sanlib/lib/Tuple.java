@@ -125,6 +125,10 @@ public class Tuple
      */
     @Override
     public int compareTo(Tuple o) {
+        if( o == this ) {
+            return 0;
+        }
+
         final int tLen = this.values.length;
         final int oLen = o.values.length;
 
@@ -163,6 +167,9 @@ public class Tuple
         @Override
         @SuppressWarnings("unchecked")
         public int compareTo(Data<?> o) {
+            if( o == this ) {
+                return 0;
+            }
             if( this.value instanceof Comparable && o.value instanceof Comparable ) {
                 return ((Comparable) this.value).compareTo(o.value);
             } else {
