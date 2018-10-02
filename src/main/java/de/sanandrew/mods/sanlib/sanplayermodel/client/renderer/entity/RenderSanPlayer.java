@@ -218,7 +218,7 @@ public class RenderSanPlayer
         this.myModel.isSneak = false;
         this.myModel.setRotationAngles(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F, clientPlayer);
         this.myModel.bipedLeftArm.rotateAngleX = 0.0F;
-        this.myModel.bipedLeftArm.rotateAngleZ = 0.1F;
+        this.myModel.bipedLeftArm.rotateAngleZ = -0.1F;
         this.myModel.bipedLeftArm.render(0.0625F);
         this.layerClothes.renderHand(clientPlayer, 0.0625F, EnumHandSide.LEFT);
         this.layerArmor.renderHand(clientPlayer, 0.0625F, EnumHandSide.LEFT);

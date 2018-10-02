@@ -115,6 +115,10 @@ public class ModelSanPlayerArmor
                     if (this.isSneak) {
                         this.bipedLeftArm.rotateAngleX += 0.2F;
                         this.bipedRightArm.rotateAngleX += 0.2F;
+                        this.bipedLeftArm.rotationPointZ = 1.5F;
+                        this.bipedRightArm.rotationPointZ = 1.5F;
+                        this.bipedLeftArm.rotateAngleZ -= 0.05D;
+                        this.bipedRightArm.rotateAngleZ += 0.05D;
                     }
 
                     this.bipedLeftArm.rotateAngleZ -= RenderSanPlayer.armTilt;
@@ -125,12 +129,9 @@ public class ModelSanPlayerArmor
                     this.bipedBody.rotateAngleX *= 0.5F;
                     //FALL-THROUGH
                 case FEET:
-                    if (this.isRiding) {
-                        this.bipedLeftLeg.rotateAngleX *= 0.95F;
-                        this.bipedRightLeg.rotateAngleX *= 0.95F;
-                    } else {
-                        this.bipedLeftLeg.rotateAngleX *= 0.5F;
-                        this.bipedRightLeg.rotateAngleX *= 0.5F;
+                    if( !this.isRiding ) {
+                        this.bipedLeftLeg.rotateAngleX *= 0.45F;
+                        this.bipedRightLeg.rotateAngleX *= 0.45F;
                     }
 
                     if (this.isSneak) {
@@ -141,10 +142,9 @@ public class ModelSanPlayerArmor
                         this.bipedLeftLeg.rotateAngleX -= 0.05F;
                         this.bipedRightLeg.rotateAngleX -= 0.05F;
                     } else {
+                        ModelSanPlayer.setLegRotationPointY(this);
                         this.bipedLeftLeg.rotationPointZ = 0.0F;
                         this.bipedRightLeg.rotationPointZ = 0.0F;
-                        this.bipedLeftLeg.rotationPointY = 11.0F;
-                        this.bipedRightLeg.rotationPointY = 11.0F;
                     }
                     break;
             }

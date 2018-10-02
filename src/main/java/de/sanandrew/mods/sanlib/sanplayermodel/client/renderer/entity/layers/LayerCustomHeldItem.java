@@ -47,9 +47,9 @@ public class LayerCustomHeldItem
             this.renderer.getMainModel().postRenderArm(0.0625F, handSide);
             GlStateManager.rotate(-90.0F, 1.0F, 0.0F, 0.0F);
             GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
-            boolean flag = handSide == EnumHandSide.LEFT;
-            GlStateManager.translate((flag ? -1 : 1) / 5.0F, 0.125F, -0.625F);
-            Minecraft.getMinecraft().getItemRenderer().renderItemSide(player, stack, transformType, flag);
+            boolean isLeft = handSide == EnumHandSide.LEFT;
+            GlStateManager.translate(isLeft ? -0.05 : 0.05, 0.125F, -0.625F);
+            Minecraft.getMinecraft().getItemRenderer().renderItemSide(player, stack, transformType, isLeft);
             GlStateManager.popMatrix();
         }
     }

@@ -30,7 +30,7 @@
       "rotationPointZ": 0.5,
       "offsetX": -1.0,
       "offsetY": -2.0,
-      "offsetZ": -2.0,
+      "offsetZ": -1.5,
       "scaling": "x + 0.15"
     },
     {
@@ -45,9 +45,9 @@
       "rotationPointX": -4.0,
       "rotationPointY": 2.5,
       "rotationPointZ": 0.5,
-      "offsetX": -3.0,
+      "offsetX": -2.0,
       "offsetY": -2.0,
-      "offsetZ": -2.0,
+      "offsetZ": -1.5,
       "scaling": "x + 0.15"
     },
     {
@@ -62,7 +62,7 @@
       "mirror": true,
       "offsetX": -1.0,
       "offsetY": -2.0,
-      "offsetZ": -2.0,
+      "offsetZ": -1.5,
       "scaling": "x + 0.50",
       "parentBox": "leftArm"
     },
@@ -75,9 +75,9 @@
       "textureY": 0,
       "textureWidth": 64,
       "textureHeight": 64,
-      "offsetX": -3.0,
+      "offsetX": -2.0,
       "offsetY": -2.0,
-      "offsetZ": -2.0,
+      "offsetZ": -1.5,
       "scaling": "x + 0.50",
       "parentBox": "rightArm"
     },

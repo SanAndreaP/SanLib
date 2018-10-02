@@ -66,29 +66,32 @@ public class LayerSanStandardClothes
         ItemStack itemstack = this.getItemStackFromSlot(entityLivingBaseIn, EntityEquipmentSlot.CHEST);
 
         if( !(itemstack.getItem() instanceof ItemArmor) || ((ItemArmor) itemstack.getItem()).getEquipmentSlot() != EntityEquipmentSlot.CHEST ) {
-
             ModelSanPlayerArmor t = this.getArmorModelHook(EntityEquipmentSlot.CHEST);
             if( t == null ) {
                 return;
             }
             this.renderer.bindTexture(t.getTexture());
 
-            t.swingProgress = 0.0F;
-            t.isSneak = false;
-            t.setRotationAngles(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, scale, entityLivingBaseIn);
+            setFPHandRotation(entityLivingBaseIn, t, scale, hand);
+        }
+    }
 
-            switch( hand ) {
-                case RIGHT:
-                    t.bipedRightArm.rotateAngleX = 0.0F;
-                    t.bipedRightArm.rotateAngleZ = 0.1F;
-                    t.bipedRightArm.render(scale);
-                    break;
-                case LEFT:
-                    t.bipedLeftArm.rotateAngleX = 0.0F;
-                    t.bipedLeftArm.rotateAngleZ = 0.1F;
-                    t.bipedLeftArm.render(scale);
-                    break;
-            }
+    public static void setFPHandRotation(EntityLivingBase entity, ModelSanPlayerArmor t, float scale, EnumHandSide hand) {
+        t.swingProgress = 0.0F;
+        t.isSneak = false;
+        t.setRotationAngles(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, scale, entity);
+
+        switch( hand ) {
+            case RIGHT:
+                t.bipedRightArm.rotateAngleX = 0.0F;
+                t.bipedRightArm.rotateAngleZ = 0.1F;
+                t.bipedRightArm.render(scale);
+                break;
+            case LEFT:
+                t.bipedLeftArm.rotateAngleX = 0.0F;
+                t.bipedLeftArm.rotateAngleZ = -0.1F;
+                t.bipedLeftArm.render(scale);
+                break;
         }
     }
 
@@ -138,7 +141,9 @@ public class LayerSanStandardClothes
             }
         }
 
-        this.hasCstChest = false;
+        if( slot == EntityEquipmentSlot.CHEST ) {
+            this.hasCstChest = false;
+        }
 
         return null;
     }
