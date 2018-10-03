@@ -113,10 +113,10 @@ public class GuiLexicon
             int posX = 0;
             int posY = 0;
             for( ILexiconGroup group : inst.getGroups() ) {
-                this.buttonList.add(new GuiButtonGroup(this, this.buttonList.size(), this.guiLeft + 12 + posX, this.guiTop + 24 + posY, group, this::groupBtnMouseOver));
-                if( (posX += 32) > this.lexicon.getEntryWidth() - 12 ) {
+                this.buttonList.add(new GuiButtonGroup(this, this.buttonList.size(), this.entryX + 2 + posX, this.entryY + 2 + posY, group, this::groupBtnMouseOver));
+                if( (posX += 34) > this.lexicon.getEntryWidth() - 12 ) {
                     posX = 0;
-                    posY += 32;
+                    posY += 34;
                 }
             }
             this.render = EmptyRenderer.INSTANCE;
