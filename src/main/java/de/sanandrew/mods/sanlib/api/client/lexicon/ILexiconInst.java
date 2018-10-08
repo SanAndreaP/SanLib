@@ -31,6 +31,7 @@ public interface ILexiconInst
 
     ILexicon getLexicon();
 
+    @Deprecated
     String getCraftingRenderID();
     
     String getStandardRenderID();

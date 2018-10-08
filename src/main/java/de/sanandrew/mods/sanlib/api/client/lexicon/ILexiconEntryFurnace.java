@@ -12,9 +12,11 @@ import net.minecraft.item.crafting.Ingredient;
 import java.util.Collections;
 import java.util.Map;
 
+@Deprecated
 public interface ILexiconEntryFurnace
         extends ILexiconEntry
 {
+    @Deprecated
     default Map<Ingredient, ItemStack> getRecipes() {
         return Collections.emptyMap();
     }

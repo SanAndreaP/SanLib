@@ -29,6 +29,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.util.NonNullList;
@@ -50,6 +51,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class LexiconGuiHelper
         implements ILexiconGuiHelper
@@ -471,5 +473,15 @@ public class LexiconGuiHelper
     @Override
     public List<GuiButton> getGuiButtonList() {
         return this.gui.getButtonList();
+    }
+
+    @Override
+    public NonNullList<IRecipe> getMatchingRecipes(ItemStack output) {
+        NonNullList<IRecipe> recipes = NonNullList.create();
+        StreamSupport.stream(CraftingManager.REGISTRY.spliterator(), false)
+                     .filter(r -> !r.isDynamic() && ItemStackUtils.areEqualNbtFit(output, r.getRecipeOutput(), false, true, false) && r.canFit(3, 3))
+                     .findFirst().ifPresent(recipes::add);
+
+        return recipes;
     }
 }

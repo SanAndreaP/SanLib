@@ -12,15 +12,18 @@ import net.minecraft.util.NonNullList;
 
 import javax.annotation.Nonnull;
 
+@Deprecated
 public interface ILexiconEntryCraftingGrid
         extends ILexiconEntry
 {
     @Nonnull
+    @Deprecated
     default NonNullList<IRecipe> getRecipes() {
         return NonNullList.create();
     }
 
     @Nonnull
+    @Deprecated
     default NonNullList<ItemStack> getRecipeResults() {
         return NonNullList.create();
     }

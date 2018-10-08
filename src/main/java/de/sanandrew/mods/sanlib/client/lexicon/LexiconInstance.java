@@ -35,6 +35,7 @@ public final class LexiconInstance
     private final Map<String, ILexiconPageRender> idToPageRenderMap;
     private final ILexicon lexiconDef;
 
+    @Deprecated
     public static final String RENDER_ID_CRAFTING = SanLib.ID + ".crafting";
     public static final String RENDER_ID_STANDARD = SanLib.ID + ".standard";
 
@@ -130,6 +131,7 @@ public final class LexiconInstance
     }
 
     @Override
+    @Deprecated
     public String getCraftingRenderID() {
         return RENDER_ID_CRAFTING;
     }

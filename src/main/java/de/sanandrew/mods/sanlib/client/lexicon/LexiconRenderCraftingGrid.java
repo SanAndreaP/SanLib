@@ -11,10 +11,8 @@ import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconEntry;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconEntryCraftingGrid;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconGuiHelper;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconPageRender;
-import de.sanandrew.mods.sanlib.lib.util.ItemStackUtils;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.Vec3i;
@@ -23,9 +21,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.StreamSupport;
 
 @SideOnly(Side.CLIENT)
+@Deprecated
 public class LexiconRenderCraftingGrid
         implements ILexiconPageRender
 {
@@ -50,9 +48,7 @@ public class LexiconRenderCraftingGrid
 
         if( recipes.isEmpty() ) {
             for( ItemStack result : ((ILexiconEntryCraftingGrid) entry).getRecipeResults() ) {
-                StreamSupport.stream(CraftingManager.REGISTRY.spliterator(), false)
-                             .filter(r -> !r.isDynamic() && ItemStackUtils.areEqualNbtFit(result, r.getRecipeOutput(), false, true, false) && r.canFit(3, 3))
-                             .findFirst().ifPresent(recipes::add);
+                recipes.addAll(helper.getMatchingRecipes(result));
             }
         }
 
@@ -93,10 +89,5 @@ public class LexiconRenderCraftingGrid
     @Override
     public int getEntryHeight(ILexiconEntry entry, ILexiconGuiHelper helper) {
         return this.drawHeight;
-    }
-
-    @Override
-    public boolean actionPerformed(GuiButton button, ILexiconGuiHelper helper) {
-        return helper.linkActionPerformed(button);
     }
 }

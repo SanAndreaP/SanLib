@@ -107,4 +107,6 @@ public interface ILexiconGuiHelper
     List<GuiButton> getEntryButtonList();
 
     List<GuiButton> getGuiButtonList();
+
+    NonNullList<IRecipe> getMatchingRecipes(ItemStack output);
 }
