@@ -40,7 +40,7 @@ public class LexiconRenderStandard
 
         helper.drawTitleCenter(0, entry);
 
-        this.drawHeight += 55;
+        this.drawHeight = 55;
         this.drawHeight += helper.drawContentString(2, this.drawHeight, entry, this.entryButtons);
 
         int height = entryWidth / 2;
