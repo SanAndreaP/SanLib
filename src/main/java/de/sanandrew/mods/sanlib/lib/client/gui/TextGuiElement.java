@@ -9,8 +9,10 @@ package de.sanandrew.mods.sanlib.lib.client.gui;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import de.sanandrew.mods.sanlib.lib.util.LangUtils;
+import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ResourceLocation;
@@ -34,6 +36,8 @@ public class TextGuiElement
     @Override
     public void render(GuiScreen gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
         String txt = LangUtils.translate(data.get("languageKey").getAsString());
+        int color = MiscUtils.hexToInt(MiscUtils.defIfNull(data.get("color"), () -> new JsonPrimitive("")).getAsString());
+        boolean shadow = MiscUtils.defIfNull(data.get("shadow"), () -> new JsonPrimitive(false)).getAsBoolean();
         Font font = FONTS.get(this);
         if( font == null ) {
             JsonElement cstFont = data.get("font");
@@ -45,7 +49,7 @@ public class TextGuiElement
             FONTS.put(this, font);
         }
 
-//        font.get(gui).drawString(txt, x, y, )
+        font.get(gui).drawString(txt, x, y, color, shadow);
     }
 
     private static final class Font
@@ -56,6 +60,7 @@ public class TextGuiElement
 
         private WeakReference<FontRenderer> frInst;
 
+        @SuppressWarnings("unused")
         public Font() { }
 
         Font(String tx) {
