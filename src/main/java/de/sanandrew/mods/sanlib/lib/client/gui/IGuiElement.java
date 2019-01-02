@@ -8,5 +8,5 @@ public interface IGuiElement
 {
     ResourceLocation getId();
 
-    void render(GuiScreen gui, float partTicks, int x, int y, JsonObject data);
+    void render(GuiScreen gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data);
 }

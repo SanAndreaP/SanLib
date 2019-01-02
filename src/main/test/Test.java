@@ -6,6 +6,7 @@
  *******************************************************************************************************************/
 
 import de.sanandrew.mods.sanlib.SanLib;
+import de.sanandrew.mods.sanlib.lib.client.gui.GuiDefinition;
 import de.sanandrew.mods.sanlib.lib.util.config.Category;
 import de.sanandrew.mods.sanlib.lib.util.config.ConfigUtils;
 import de.sanandrew.mods.sanlib.lib.util.config.EnumExclude;
@@ -15,6 +16,7 @@ import de.sanandrew.mods.sanlib.lib.util.config.Value;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -22,6 +24,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.logging.log4j.Level;
 
 import java.io.File;
+import java.io.IOException;
 
 @SuppressWarnings("all")
 @Mod(modid = "santest", dependencies = "required-after:" + SanLib.ID)
@@ -33,13 +36,19 @@ public class Test
     @Mod.EventHandler
     public void onPreInit(FMLPreInitializationEvent event) {
 //        testConfig(event.getSuggestedConfigurationFile());
-        testTickFormat();
+//        testTickFormat();
 
     }
 
     @Mod.EventHandler
     public void onPostInit(FMLPostInitializationEvent event) {
 //        testNbtMethods();
+        try {
+            GuiDefinition gdef = GuiDefinition.getNewDefinition(new ResourceLocation(SanLib.ID, "test.json"));
+            System.out.println(gdef);
+        } catch( IOException e ) {
+            e.printStackTrace();
+        }
     }
 
     private static void testTickFormat() {

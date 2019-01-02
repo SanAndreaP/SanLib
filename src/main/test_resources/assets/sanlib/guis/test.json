@@ -1,0 +1,36 @@
+{
+  "width": 150,
+  "height": 120,
+  "backgroundElements": [
+    {
+      "type": "texture",
+      "x": 0,
+      "y": 0,
+      "data": {
+        "width": 150,
+        "height": 120,
+        "texture": "sanlib:textures/test"
+      }
+    }
+  ],
+  "foregroundElements": [
+    {
+      "type": "text",
+      "x": 3,
+      "y": 5,
+      "data": {
+        "fontColor": "0xFFFFFFFF",
+        "shadowColor": "0xFF808080",
+        "languageKey": "sanlib.test.text"
+      }
+    }
+  ],
+  "buttons": {
+    "0": {
+      "x": 10,
+      "y": 14,
+      "width": 120,
+      "height": 20
+    }
+  }
+}

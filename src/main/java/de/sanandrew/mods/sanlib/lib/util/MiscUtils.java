@@ -33,7 +33,7 @@ import java.util.function.Supplier;
 /**
  * Utility class for miscellaneous tasks and methods
  */
-@SuppressWarnings({"unused", "WeakerAccess"})
+@SuppressWarnings({"unused"})
 public final class MiscUtils
 {
     /**
@@ -188,6 +188,21 @@ public final class MiscUtils
      */
     public static String getTimeFromTicks(int ticks) {
         return getTimeFromTicks(ticks, 2);
+    }
+
+    public static int hexToInt(String hex) {
+        if( hex.startsWith("0x") ) {
+            hex = hex.substring(2);
+        } else if( hex.startsWith("#") ) {
+            hex = hex.substring(1);
+        }
+
+        try {
+            return (int) Long.parseLong(hex, 16);
+        } catch( NumberFormatException ex ) {
+            SanLib.LOG.log(Level.ERROR, String.format("cannot parse hexadecimal number string %s", hex), ex);
+            return 0;
+        }
     }
 
     public static String getTimeFromTicks(int ticks, int secondsPrecision) {
