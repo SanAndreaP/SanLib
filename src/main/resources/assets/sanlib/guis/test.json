@@ -1,0 +1,41 @@
+{
+  "width": 176,
+  "height": 166,
+  "backgroundElements": [
+    {
+      "type": "texture",
+      "x": 0,
+      "y": 0,
+      "data": {
+        "width": 176,
+        "height": 166,
+        "u": 0,
+        "v": 0,
+        "location": "textures/gui/container/inventory.png"
+      }
+    }
+  ],
+  "foregroundElements": [
+    {
+      "type": "text",
+      "x": 3,
+      "y": 5,
+      "data": {
+        "color": "0xFFFF0000",
+        "text": "sanlib.test.text"
+      }
+    },
+    {
+      "type": "rectangle",
+      "x": 14,
+      "y": 0,
+      "data": {
+        "width": 64,
+        "height": 64,
+        "colorStart": "0x80FF00FF",
+        "colorEnd": "0x8000FFFF",
+        "horizontal": false
+      }
+    }
+  ]
+}

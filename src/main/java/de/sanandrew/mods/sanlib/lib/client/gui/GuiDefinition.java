@@ -4,9 +4,14 @@ import com.google.gson.JsonObject;
 import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.resources.IReloadableResourceManager;
+import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.resource.IResourceType;
+import net.minecraftforge.client.resource.ISelectiveResourceReloadListener;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -21,9 +26,12 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+@SuppressWarnings({"unused", "WeakerAccess", "MismatchedQueryAndUpdateOfCollection"})
 public class GuiDefinition
+        implements ISelectiveResourceReloadListener
 {
     public int width;
     public int height;
@@ -34,6 +42,11 @@ public class GuiDefinition
     private Map<Integer, Button> buttons;
 
     private static final Map<ResourceLocation, Supplier<IGuiElement>> TYPES = new HashMap<>();
+    static {
+        TYPES.put(TextGuiElement.ID, TextGuiElement::new);
+        TYPES.put(TextureGuiElement.ID, TextureGuiElement::new);
+        TYPES.put(RectangleGuiElement.ID, RectangleGuiElement::new);
+    }
 
     public static GuiDefinition getNewDefinition(ResourceLocation buildData) throws IOException {
         File src = Loader.instance().getIndexedModList().get(buildData.getNamespace()).getSource();
@@ -53,7 +66,9 @@ public class GuiDefinition
         }
 
         try( BufferedReader br = Files.newBufferedReader(defFile.toPath()) ) {
-            return JsonUtils.fromJson(br, GuiDefinition.class);
+            GuiDefinition def = JsonUtils.fromJson(br, GuiDefinition.class);
+            ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(def);
+            return def;
         }
     }
 
@@ -66,7 +81,7 @@ public class GuiDefinition
     }
 
     public GuiButton injectData(GuiButton button) {
-        Button btn = this.buttons.get(button.id);
+        Button btn = this.buttons == null ? null : this.buttons.get(button.id);
 
         if( btn != null ) {
             button.x = btn.x;
@@ -76,6 +91,12 @@ public class GuiDefinition
         }
 
         return button;
+    }
+
+    @Override
+    public void onResourceManagerReload(IResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) {
+        Arrays.stream(this.foregroundElements).forEach(e -> e.get().onResourceManagerReload(resourceManager, resourcePredicate));
+        Arrays.stream(this.backgroundElements).forEach(e -> e.get().onResourceManagerReload(resourceManager, resourcePredicate));
     }
 
     static final class GuiElement

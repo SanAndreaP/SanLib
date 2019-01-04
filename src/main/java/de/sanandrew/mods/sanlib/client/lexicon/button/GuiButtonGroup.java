@@ -15,6 +15,7 @@ import de.sanandrew.mods.sanlib.client.lexicon.GuiLexicon;
 import de.sanandrew.mods.sanlib.lib.client.ShaderHelper;
 import de.sanandrew.mods.sanlib.lib.client.util.GuiUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -92,7 +93,6 @@ public class GuiButtonGroup
             this.ticksHovered = Math.max(-0.1F, this.ticksHovered - timeDelta);
         }
 
-        float s = 1.0F / 32.0F;
         GlStateManager.pushMatrix();
         GlStateManager.enableBlend();
         GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
@@ -109,7 +109,10 @@ public class GuiButtonGroup
             ShaderHelper.useShader(this.lexicon.getGroupStencilId(), this::doBtnShader);
         }
 
-        GuiUtils.drawTexturedModalRect(this.x, this.y, this.zLevel * 2, 0, 0, 32, 32, s, s);
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(0, 0, this.zLevel * 2);
+        Gui.drawModalRectWithCustomSizedTexture(this.x, this.y, 0, 0, 32, 32, 32, 32);
+        GlStateManager.popMatrix();
 
         if( shaders ) {
             ShaderHelper.releaseShader();
