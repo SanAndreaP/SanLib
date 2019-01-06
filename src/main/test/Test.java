@@ -43,12 +43,6 @@ public class Test
     @Mod.EventHandler
     public void onPostInit(FMLPostInitializationEvent event) {
 //        testNbtMethods();
-        try {
-            GuiDefinition gdef = GuiDefinition.getNewDefinition(new ResourceLocation(SanLib.ID, "test.json"));
-            System.out.println(gdef);
-        } catch( IOException e ) {
-            e.printStackTrace();
-        }
     }
 
     private static void testTickFormat() {

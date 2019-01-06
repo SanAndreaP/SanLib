@@ -8,19 +8,15 @@ package de.sanandrew.mods.sanlib.lib.client.gui;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import de.sanandrew.mods.sanlib.lib.util.LangUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.resource.IResourceType;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
-import java.util.function.Predicate;
 
 
 /**
@@ -55,10 +51,10 @@ public class TextGuiElement
     public void render(GuiScreen gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
         if( this.data == null ) {
             this.data = new BakedData();
-            this.data.text = LangUtils.translate(data.get("text").getAsString());
-            this.data.color = MiscUtils.hexToInt(MiscUtils.defIfNull(data.get("color"), () -> new JsonPrimitive("0xFF000000")).getAsString());
-            this.data.shadow = MiscUtils.defIfNull(data.get("shadow"), () -> new JsonPrimitive(false)).getAsBoolean();
-            this.data.wrapWidth = MiscUtils.defIfNull(data.get("wrapWidth"), () -> new JsonPrimitive(0)).getAsInt();
+            this.data.text = LangUtils.translate(JsonUtils.getStringVal(data.get("text")));
+            this.data.color = MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("color"), "0xFF000000"));
+            this.data.shadow = JsonUtils.getBoolVal(data.get("shadow"), false);
+            this.data.wrapWidth = JsonUtils.getIntVal(data.get("wrapWidth"), 0);
 
             JsonElement cstFont = data.get("font");
             if( cstFont == null ) {

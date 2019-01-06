@@ -6,12 +6,7 @@
    *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.lib.util;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -20,6 +15,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.oredict.OreDictionary;
+import org.apache.commons.lang3.Range;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -31,6 +27,8 @@ public final class JsonUtils
 {
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
+    private static final Range<Integer> FULL_ARRAY_RANGE = Range.between(0, Integer.MAX_VALUE);
+
     public static <T> T fromJson(Reader reader, Class<T> clazz) {
         JsonReader jsonReader = new JsonReader(reader);
         try {
@@ -41,13 +39,7 @@ public final class JsonUtils
     }
 
     public static float getFloatVal(JsonElement json) {
-        if( json == null || json.isJsonNull() ) {
-            throw new JsonSyntaxException("Json cannot be null");
-        }
-
-        if( !json.isJsonPrimitive() ) {
-            throw new JsonSyntaxException("Expected value to be a primitive");
-        }
+        requirePrimitive(json);
 
         return json.getAsFloat();
     }
@@ -58,6 +50,20 @@ public final class JsonUtils
         }
 
         return json.getAsFloat();
+    }
+
+    public static double getDoubleVal(JsonElement json) {
+        requirePrimitive(json);
+
+        return json.getAsDouble();
+    }
+
+    public static double getDoubleVal(JsonElement json, double defVal) {
+        if( json == null || !json.isJsonPrimitive() ) {
+            return defVal;
+        }
+
+        return json.getAsDouble();
     }
 
     public static String getStringVal(JsonElement json) {
@@ -81,13 +87,7 @@ public final class JsonUtils
     }
 
     public static int getIntVal(JsonElement json) {
-        if( json == null || json.isJsonNull() ) {
-            throw new JsonSyntaxException("Json cannot be null");
-        }
-
-        if( !json.isJsonPrimitive() ) {
-            throw new JsonSyntaxException("Expected value to be a primitive");
-        }
+        requirePrimitive(json);
 
         return json.getAsInt();
     }
@@ -101,13 +101,7 @@ public final class JsonUtils
     }
 
     public static boolean getBoolVal(JsonElement json) {
-        if( json == null || json.isJsonNull() ) {
-            throw new JsonSyntaxException("Json cannot be null");
-        }
-
-        if( !json.isJsonPrimitive() ) {
-            throw new JsonSyntaxException("Expected value to be a primitive");
-        }
+        requirePrimitive(json);
 
         return json.getAsBoolean();
     }
@@ -118,6 +112,90 @@ public final class JsonUtils
         }
 
         return json.getAsBoolean();
+    }
+
+    private static void requirePrimitive(JsonElement json) {
+        if( json == null || json.isJsonNull() ) {
+            throw new JsonSyntaxException("Json cannot be null");
+        }
+
+        if( !json.isJsonPrimitive() ) {
+            throw new JsonSyntaxException("Expected value to needs be a primitive");
+        }
+    }
+
+    public static int[] getIntArray(JsonElement json) {
+        return getIntArray(json, FULL_ARRAY_RANGE);
+    }
+
+    public static int[] getIntArray(JsonElement json, Range<Integer> requiredSize) {
+        requirePrimitiveArray(json, requiredSize);
+
+        return GSON.fromJson(json, int[].class);
+    }
+
+    public static int[] getIntArray(JsonElement json, int[] defVal) {
+        return getIntArray(json, defVal, FULL_ARRAY_RANGE);
+    }
+
+    public static int[] getIntArray(JsonElement json, int[] defVal, Range<Integer> requiredSize) {
+        if( !isPrimitiveArray(json, requiredSize) ) {
+            return defVal;
+        }
+
+        return GSON.fromJson(json, int[].class);
+    }
+
+    public static double[] getDoubleArray(JsonElement json) {
+        return getDoubleArray(json, FULL_ARRAY_RANGE);
+    }
+
+    public static double[] getDoubleArray(JsonElement json, Range<Integer> requiredSize) {
+        requirePrimitiveArray(json, requiredSize);
+
+        return GSON.fromJson(json, double[].class);
+    }
+
+    public static double[] getDoubleArray(JsonElement json, double[] defVal) {
+        return getDoubleArray(json, defVal, FULL_ARRAY_RANGE);
+    }
+
+    public static double[] getDoubleArray(JsonElement json, double[] defVal, Range<Integer> requiredSize) {
+        if( !isPrimitiveArray(json, requiredSize) ) {
+            return defVal;
+        }
+
+        return GSON.fromJson(json, double[].class);
+    }
+
+    private static boolean isPrimitiveArray(JsonElement json, Range<Integer> requiredSize) {
+        if( json == null || !json.isJsonArray() ) {
+            return false;
+        }
+
+        JsonArray arr = json.getAsJsonArray();
+        return requiredSize.contains(arr.size()) && (arr.size() <= 0 || arr.get(0).isJsonPrimitive());
+    }
+
+    private static void requirePrimitiveArray(JsonElement json, Range<Integer> requiredSize) {
+        if( json == null || json.isJsonNull() ) {
+            throw new JsonSyntaxException("Json cannot be null");
+        }
+
+        if( !json.isJsonArray() ) {
+            throw new JsonSyntaxException("Expected value needs to be an array");
+        }
+
+        JsonArray arr = json.getAsJsonArray();
+        if( !requiredSize.contains(arr.size()) ) {
+            int min = requiredSize.getMinimum();
+            int max = requiredSize.getMaximum();
+            throw new JsonSyntaxException("Expected array's size needs to be " + (min == max ? Integer.toString(min) : String.format("between %d and %d", min, max)) + "elements big");
+        }
+
+        if( arr.size() > 0 && !arr.get(0).isJsonPrimitive() ) {
+            throw new JsonSyntaxException("Expected array needs to contain primitive values");
+        }
     }
 
     @Nonnull

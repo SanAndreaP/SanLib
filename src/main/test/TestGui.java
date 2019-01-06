@@ -23,7 +23,7 @@ public class TestGui
 
     public TestGui() {
         try {
-            this.guiDef = GuiDefinition.getNewDefinition(new ResourceLocation(SanLib.ID, "test.json"));
+            this.guiDef = GuiDefinition.getNewDefinition(new ResourceLocation("test", "guis/test.json"));
         } catch( IOException e ) {
             SanLib.LOG.log(Level.ERROR, e);
         }
@@ -35,6 +35,7 @@ public class TestGui
 
         if( guiDef == null ) {
             this.mc.displayGuiScreen(null);
+            return;
         }
 
         this.posX = (this.width - this.guiDef.width) / 2;

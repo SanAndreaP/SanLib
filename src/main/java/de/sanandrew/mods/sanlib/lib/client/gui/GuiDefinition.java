@@ -1,28 +1,24 @@
 package de.sanandrew.mods.sanlib.lib.client.gui;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import de.sanandrew.mods.sanlib.SanLib;
-import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.IReloadableResourceManager;
+import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.resource.IResourceType;
 import net.minecraftforge.client.resource.ISelectiveResourceReloadListener;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.Level;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +29,13 @@ import java.util.function.Supplier;
 public class GuiDefinition
         implements ISelectiveResourceReloadListener
 {
+    private static final Map<ResourceLocation, Supplier<IGuiElement>> TYPES = new HashMap<>();
+    static {
+        TYPES.put(TextGuiElement.ID, TextGuiElement::new);
+        TYPES.put(TextureGuiElement.ID, TextureGuiElement::new);
+        TYPES.put(RectangleGuiElement.ID, RectangleGuiElement::new);
+    }
+
     public int width;
     public int height;
 
@@ -41,34 +44,33 @@ public class GuiDefinition
 
     private Map<Integer, Button> buttons;
 
-    private static final Map<ResourceLocation, Supplier<IGuiElement>> TYPES = new HashMap<>();
-    static {
-        TYPES.put(TextGuiElement.ID, TextGuiElement::new);
-        TYPES.put(TextureGuiElement.ID, TextureGuiElement::new);
-        TYPES.put(RectangleGuiElement.ID, RectangleGuiElement::new);
+    private final ResourceLocation data;
+
+    private GuiDefinition(ResourceLocation data) throws IOException {
+        this.data = data;
+        ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(this);
+        this.reloadDefinition();
     }
 
-    public static GuiDefinition getNewDefinition(ResourceLocation buildData) throws IOException {
-        File src = Loader.instance().getIndexedModList().get(buildData.getNamespace()).getSource();
-        File defFile;
-        if( src.isFile() ) {
-            try( FileSystem fs = FileSystems.newFileSystem(src.toPath(), null) ) {
-                defFile = fs.getPath("/assets/" + buildData.getNamespace() + "/guis/" + buildData.getPath()).toFile();
+    public static GuiDefinition getNewDefinition(ResourceLocation data) throws IOException {
+        return new GuiDefinition(data);
+    }
+
+    private void reloadDefinition() throws IOException {
+        try( IResource r = Minecraft.getMinecraft().getResourceManager().getResource(this.data);
+             InputStreamReader reader = new InputStreamReader(r.getInputStream(), StandardCharsets.UTF_8) )
+        {
+            JsonElement json = new JsonParser().parse(reader);
+            if( !json.isJsonObject() ) {
+                throw new IOException(String.format("Cannot read JSON of data-driven GUI %s as it isn't an object", this.data));
             }
-        } else if( src.isDirectory() ) {
-            defFile = src.toPath().resolve("assets/" + buildData.getNamespace() + "/guis/" + buildData.getPath()).toFile();
-        } else {
-            throw new IOException("Cannot instanciate a data-driven GUI with an arbitrary mod directory!");
-        }
+            JsonObject jObj = json.getAsJsonObject();
 
-        if( !defFile.isFile() ) {
-            throw new IOException("Path to data-driven GUI definition is not a file!");
-        }
+            this.width = JsonUtils.getIntVal(jObj.get("width"));
+            this.height = JsonUtils.getIntVal(jObj.get("height"));
 
-        try( BufferedReader br = Files.newBufferedReader(defFile.toPath()) ) {
-            GuiDefinition def = JsonUtils.fromJson(br, GuiDefinition.class);
-            ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(def);
-            return def;
+            this.backgroundElements = JsonUtils.GSON.fromJson(jObj.get("backgroundElements"), GuiElement[].class);
+            this.foregroundElements = JsonUtils.GSON.fromJson(jObj.get("foregroundElements"), GuiElement[].class);
         }
     }
 
@@ -95,8 +97,11 @@ public class GuiDefinition
 
     @Override
     public void onResourceManagerReload(IResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) {
-        Arrays.stream(this.foregroundElements).forEach(e -> e.get().onResourceManagerReload(resourceManager, resourcePredicate));
-        Arrays.stream(this.backgroundElements).forEach(e -> e.get().onResourceManagerReload(resourceManager, resourcePredicate));
+        try {
+            this.reloadDefinition();
+        } catch( IOException ex ) {
+            SanLib.LOG.log(Level.ERROR, "Error whilst reloading GUI definition", ex);
+        }
     }
 
     static final class GuiElement

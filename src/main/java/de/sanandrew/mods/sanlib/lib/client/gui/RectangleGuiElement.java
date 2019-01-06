@@ -9,6 +9,7 @@ package de.sanandrew.mods.sanlib.lib.client.gui;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import de.sanandrew.mods.sanlib.lib.client.util.GuiUtils;
+import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
@@ -30,11 +31,12 @@ public class RectangleGuiElement
     public void render(GuiScreen gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
         if( this.data == null ) {
             this.data = new BakedData();
-            this.data.width = data.get("width").getAsInt();
-            this.data.height = data.get("height").getAsInt();
-            this.data.colorStart = MiscUtils.hexToInt(MiscUtils.defIfNull(data.get("colorStart"), () -> new JsonPrimitive("0xFFFFFFFF")).getAsString());
-            this.data.colorEnd = MiscUtils.hexToInt(MiscUtils.defIfNull(data.get("colorEnd"), () -> new JsonPrimitive(this.data.colorStart)).getAsString());
-            this.data.horizontal = MiscUtils.defIfNull(data.get("horizontal"), () -> new JsonPrimitive(false)).getAsBoolean();
+            this.data.width = JsonUtils.getIntVal(data.get("width"));
+            this.data.height = JsonUtils.getIntVal(data.get("height"));
+            String colorStart = JsonUtils.getStringVal(data.get("colorStart"), "0xFFFFFFFF");
+            this.data.colorStart = MiscUtils.hexToInt(colorStart);
+            this.data.colorEnd = MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("colorEnd"), colorStart));
+            this.data.horizontal = JsonUtils.getBoolVal(data.get("horizontal"), false);
         }
 
         GlStateManager.translate(x, y, gui.zLevel);

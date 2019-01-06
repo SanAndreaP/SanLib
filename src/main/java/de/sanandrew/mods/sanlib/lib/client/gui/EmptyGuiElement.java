@@ -21,5 +21,7 @@ public class EmptyGuiElement
     public void render(GuiScreen gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) { }
 
     @Override
-    public void onResourceManagerReload(IResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) { }
+    public int getHeight() {
+        return 0;
+    }
 }

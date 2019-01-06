@@ -7,13 +7,14 @@
 package de.sanandrew.mods.sanlib.lib.client.gui;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import de.sanandrew.mods.sanlib.lib.ColorObj;
+import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
+import org.apache.commons.lang3.Range;
 
 /**
  * JSON format:
@@ -50,16 +51,12 @@ public class TextureGuiElement
         if( this.data == null ) {
             this.data = new BakedData();
             this.data.location = new ResourceLocation(data.get("location").getAsString());
-            this.data.width = data.get("width").getAsInt();
-            this.data.height = data.get("height").getAsInt();
-            this.data.u = data.get("u").getAsInt();
-            this.data.v = data.get("v").getAsInt();
-            this.data.textureWidth = MiscUtils.defIfNull(data.get("textureWidth"), () -> new JsonPrimitive(256)).getAsInt();
-            this.data.textureHeight = MiscUtils.defIfNull(data.get("textureHeight"), () -> new JsonPrimitive(256)).getAsInt();
-            this.data.scaleX = MiscUtils.defIfNull(data.get("scaleX"), () -> new JsonPrimitive(1.0D)).getAsDouble();
-            this.data.scaleY = MiscUtils.defIfNull(data.get("scaleY"), () -> new JsonPrimitive(1.0D)).getAsDouble();
-            this.data.tintColor = new ColorObj(MiscUtils.hexToInt(MiscUtils.defIfNull(data.get("color"), () -> new JsonPrimitive("0xFFFFFFFF")).getAsString()));
-            this.data.forceAlpha = MiscUtils.defIfNull(data.get("forceAlpha"), () -> new JsonPrimitive(false)).getAsBoolean();
+            this.data.size = JsonUtils.getIntArray(data.get("size"), Range.is(2));
+            this.data.uv = JsonUtils.getIntArray(data.get("uv"), Range.is(2));
+            this.data.textureSize = JsonUtils.getIntArray(data.get("textureSize"), new int[] {256, 256}, Range.is(2));
+            this.data.scale = JsonUtils.getDoubleArray(data.get("scale"), new double[] {1.0D, 1.0D}, Range.is(2));
+            this.data.tintColor = new ColorObj(MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("color"), "0xFFFFFFFF")));
+            this.data.forceAlpha = JsonUtils.getBoolVal(data.get("forceAlpha"), false);
         }
 
         gui.mc.renderEngine.bindTexture(this.data.location);
@@ -69,28 +66,24 @@ public class TextureGuiElement
             GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         }
         GlStateManager.translate(x, y, gui.zLevel);
-        GlStateManager.scale(this.data.scaleX, this.data.scaleY, 1.0D);
+        GlStateManager.scale(this.data.scale[0], this.data.scale[1], 1.0D);
         GlStateManager.color(this.data.tintColor.fRed(), this.data.tintColor.fGreen(), this.data.tintColor.fBlue(), this.data.tintColor.fAlpha());
-        Gui.drawModalRectWithCustomSizedTexture(0, 0, this.data.u, this.data.v, this.data.width, this.data.height, this.data.textureWidth, this.data.textureHeight);
+        Gui.drawModalRectWithCustomSizedTexture(0, 0, this.data.uv[0], this.data.uv[1], this.data.size[0], this.data.size[1], this.data.textureSize[0], this.data.textureSize[1]);
         GlStateManager.popMatrix();
     }
 
     @Override
     public int getHeight() {
-        return this.data == null ? 0 : this.data.height;
+        return this.data == null ? 0 : this.data.size[1];
     }
 
     private static final class BakedData
     {
         private ResourceLocation location;
-        private int width;
-        private int height;
-        private int textureWidth;
-        private int textureHeight;
-        private int u;
-        private int v;
-        private double scaleX;
-        private double scaleY;
+        private int[] size;
+        private int[] textureSize;
+        private int[] uv;
+        private double[] scale;
         private ColorObj tintColor;
         private boolean forceAlpha;
     }
