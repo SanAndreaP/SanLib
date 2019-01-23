@@ -1,26 +1,15 @@
 {
-  "width": 176,
-  "height": 166,
+  "width": 195,
+  "height": 136,
   "backgroundElements": [
     {
       "type": "texture",
       "x": 0,
       "y": 0,
       "data": {
-        "size": [176, 166],
+        "size": [195, 136],
         "uv": [0, 0],
-        "location": "textures/gui/container/inventory.png"
-      }
-    },
-    {
-      "type": "texture",
-      "x": 2,
-      "y": 2,
-      "data": {
-        "size": [176, 166],
-        "uv": [0, 0],
-        "scale": [0.5, 0.5],
-        "location": "textures/gui/container/inventory.png"
+        "location": "test:guis/test.png"
       }
     }
   ],

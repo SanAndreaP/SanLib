@@ -47,6 +47,21 @@ repositories {
     }
 }
 
+
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java', 'src/main/test']
+        }
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+}
+
+
+
 dependencies {
     deobfCompile "cofh:RedstoneFlux:1.12-2.0.2.3:universal"
     deobfCompile "net.darkhax.tesla:Tesla-1.12.2:1.0.63"

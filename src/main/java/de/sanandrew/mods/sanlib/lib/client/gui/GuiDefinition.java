@@ -74,12 +74,12 @@ public class GuiDefinition
         }
     }
 
-    public void drawForeground(GuiScreen gui, int mouseX, int mouseY, float partialTicks) {
-        Arrays.stream(this.foregroundElements).forEach(e -> e.get().render(gui, partialTicks, e.x, e.y, mouseX, mouseY, e.data));
-    }
-
     public void drawBackground(GuiScreen gui, int mouseX, int mouseY, float partialTicks) {
         Arrays.stream(this.backgroundElements).forEach(e -> e.get().render(gui, partialTicks, e.x, e.y, mouseX, mouseY, e.data));
+    }
+
+    public void drawForeground(GuiScreen gui, int mouseX, int mouseY, float partialTicks) {
+        Arrays.stream(this.foregroundElements).forEach(e -> e.get().render(gui, partialTicks, e.x, e.y, mouseX, mouseY, e.data));
     }
 
     public GuiButton injectData(GuiButton button) {
