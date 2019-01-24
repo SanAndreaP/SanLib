@@ -4,8 +4,7 @@
   "backgroundElements": [
     {
       "type": "texture",
-      "x": 0,
-      "y": 0,
+      "pos": [0, 0],
       "data": {
         "size": [195, 136],
         "uv": [0, 0],
@@ -16,8 +15,7 @@
   "foregroundElements": [
     {
       "type": "text",
-      "x": 3,
-      "y": 5,
+      "pos": [3, 5],
       "data": {
         "color": "0xFFFF0000",
         "text": "sanlib.test.text"
@@ -25,14 +23,116 @@
     },
     {
       "type": "rectangle",
-      "x": 14,
-      "y": 0,
+      "pos": [14, 0],
       "data": {
-        "width": 64,
-        "height": 64,
-        "colorStart": "0x80FF00FF",
-        "colorEnd": "0x8000FFFF",
+        "size": [64, 64],
+        "color": ["0x80FF00FF", "0x8000FFFF"],
         "horizontal": false
+      }
+    },
+    {
+      "type": "scroll_area",
+      "pos": [9, 18],
+      "data": {
+        "areaSize": [160, 110],
+        "scrollbarPos": [175, 18],
+        "scrollbarSize": [12, 110],
+        "buttonTexture": "test:guis/test.png",
+        "buttonHeight": 15,
+        "buttonUV": [232, 0],
+        "buttonDisabledUV": [220, 0],
+        "buttonDeactiveUV": [244, 0],
+        "rasterized": false,
+        "elements": [
+          {
+            "type": "text",
+            "pos": [2, 2],
+            "data": {
+              "color": "0xFFFF0000",
+              "text": "sanlib.test.text"
+            }
+          },
+          {
+            "type": "text",
+            "pos": [2, 12],
+            "data": {
+              "color": "0xFFFF0000",
+              "text": "sanlib.test.text"
+            }
+          },
+          {
+            "type": "text",
+            "pos": [2, 22],
+            "data": {
+              "color": "0xFFFF0000",
+              "text": "sanlib.test.text"
+            }
+          },
+          {
+            "type": "text",
+            "pos": [2, 32],
+            "data": {
+              "color": "0xFFFF0000",
+              "text": "sanlib.test.text"
+            }
+          },
+          {
+            "type": "text",
+            "pos": [2, 52],
+            "data": {
+              "color": "0xFFFF0000",
+              "text": "sanlib.test.text"
+            }
+          },
+          {
+            "type": "text",
+            "pos": [2, 72],
+            "data": {
+              "color": "0xFFFF0000",
+              "text": "sanlib.test.text"
+            }
+          },
+          {
+            "type": "text",
+            "pos": [2, 82],
+            "data": {
+              "color": "0xFFFF0000",
+              "text": "sanlib.test.text"
+            }
+          },
+          {
+            "type": "text",
+            "pos": [2, 92],
+            "data": {
+              "color": "0xFFFF0000",
+              "text": "sanlib.test.text"
+            }
+          },
+          {
+            "type": "text",
+            "pos": [2, 102],
+            "data": {
+              "color": "0xFFFF0000",
+              "text": "sanlib.test.text"
+            }
+          },
+          {
+            "type": "text",
+            "pos": [2, 112],
+            "data": {
+              "color": "0xFFFF0000",
+              "text": "sanlib.test.text"
+            }
+          },
+          {
+            "type": "text",
+            "pos": [2, 122],
+            "data": {
+              "color": "0xFFFF0000",
+              "text": "sanlib.test.text"
+            }
+          }
+        ]
       }
     }
   ]

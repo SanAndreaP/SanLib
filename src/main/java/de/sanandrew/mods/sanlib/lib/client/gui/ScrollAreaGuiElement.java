@@ -1,50 +1,68 @@
 package de.sanandrew.mods.sanlib.lib.client.gui;
 
 import com.google.gson.JsonObject;
-import de.sanandrew.mods.sanlib.lib.ColorObj;
+import de.sanandrew.mods.sanlib.lib.client.util.GuiUtils;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
-import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.Range;
+import org.lwjgl.opengl.GL11;
+
+import java.util.Arrays;
 
 public class ScrollAreaGuiElement
         implements IGuiElement
 {
+    static final ResourceLocation ID = new ResourceLocation("scroll_area");
+
     BakedData data;
 
     @Override
-    public void render(GuiScreen gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
+    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
         if( this.data == null ) {
             this.data = new BakedData();
-            this.data.texture = new ResourceLocation(data.get("texture").getAsString());
-            this.data.size = JsonUtils.getIntArray(data.get("size"), Range.is(2));
-            this.data.uv = JsonUtils.getIntArray(data.get("uv"), Range.is(2));
-            this.data.margin = JsonUtils.getIntArray(data.get("size"), new int[] {0}, Range.between(1, 4));
-            this.data.textureSize = JsonUtils.getIntArray(data.get("textureSize"), new int[] {256, 256}, Range.is(2));
-            this.data.scale = JsonUtils.getDoubleArray(data.get("scale"), new double[] {1.0D, 1.0D}, Range.is(2));
-            this.data.tintColor = new ColorObj(MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("color"), "0xFFFFFFFF")));
-            this.data.forceAlpha = JsonUtils.getBoolVal(data.get("forceAlpha"), false);
+            this.data.areaSize = JsonUtils.getIntArray(data.get("areaSize"), Range.is(2));
+            this.data.scrollPos = JsonUtils.getIntArray(data.get("scrollbarPos"), Range.is(2));
+            this.data.scrollSize = JsonUtils.getIntArray(data.get("scrollbarSize"), Range.is(2));
+            this.data.btnTexture = new ResourceLocation(data.get("buttonTexture").getAsString());
+            this.data.btnHeight = JsonUtils.getIntVal(data.get("buttonHeight"));
+            this.data.btnUV = JsonUtils.getIntArray(data.get("buttonUV"), Range.is(2));
+            this.data.btnDisabledUV = JsonUtils.getIntArray(data.get("buttonDisabledUV"), Range.is(2));
+            this.data.btnDeactiveUV = JsonUtils.getIntArray(data.get("buttonDeactiveUV"), Range.is(2));
+            this.data.rasterized = JsonUtils.getBoolVal(data.get("rasterized"), false);
+
+            this.data.elements = getElements(gui, data);
         }
 
+        GL11.glEnable(GL11.GL_SCISSOR_TEST);
+        GuiUtils.glScissor(gui.getScreenPosX() + x, gui.getScreenPosY() + y, this.data.areaSize[0], this.data.areaSize[1]);
+        Arrays.stream(this.data.elements).forEach(e -> {
+            e.get().render(gui, partTicks, x + e.pos[0], y + e.pos[1], mouseX - x, mouseY - y, e.data);
+        });
+
+        GL11.glDisable(GL11.GL_SCISSOR_TEST);
+    }
+
+    public GuiElementInst[] getElements(IGui gui, JsonObject elementData) {
+        return JsonUtils.GSON.fromJson(elementData.get("elements"), GuiElementInst[].class);
     }
 
     @Override
     public int getHeight() {
-        return 0;
+        return this.data.areaSize[1];
     }
 
     private static final class BakedData
     {
-        private ResourceLocation texture;
-        private int[] uv;
-        private int[] size;
-        private int[] margin;
+        private ResourceLocation btnTexture;
+        private int[] areaSize;
         private int[] scrollPos;
-        private int[] scrollUV;
-        private int[] scrollUVDisabled;
+        private int[] scrollSize;
+        private int btnHeight;
+        private int[] btnUV;
+        private int[] btnDisabledUV;
+        private int[] btnDeactiveUV;
         private boolean rasterized;
 
-        private IGuiElement[] elements;
+        private GuiElementInst[] elements;
     }
 }

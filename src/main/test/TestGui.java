@@ -7,6 +7,7 @@
 
 import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiDefinition;
+import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
@@ -16,6 +17,7 @@ import java.io.IOException;
 
 public class TestGui
         extends GuiScreen
+        implements IGui
 {
     private int posX;
     private int posY;
@@ -53,5 +55,20 @@ public class TestGui
         GlStateManager.popMatrix();
 
         super.drawScreen(mouseX, mouseY, partialTicks);
+    }
+
+    @Override
+    public GuiScreen get() {
+        return this;
+    }
+
+    @Override
+    public int getScreenPosX() {
+        return this.posX;
+    }
+
+    @Override
+    public int getScreenPosY() {
+        return this.posY;
     }
 }

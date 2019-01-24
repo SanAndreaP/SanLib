@@ -6,16 +6,13 @@
  *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.lib.client.gui;
 
-import com.google.gson.JsonObject;
+import net.minecraft.client.gui.GuiScreen;
 
-public class EmptyGuiElement
-        implements IGuiElement
+public interface IGui
 {
-    @Override
-    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) { }
+    GuiScreen get();
 
-    @Override
-    public int getHeight() {
-        return 0;
-    }
+    int getScreenPosX();
+
+    int getScreenPosY();
 }

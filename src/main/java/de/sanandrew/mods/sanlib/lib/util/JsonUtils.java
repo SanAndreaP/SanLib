@@ -168,6 +168,28 @@ public final class JsonUtils
         return GSON.fromJson(json, double[].class);
     }
 
+    public static String[] getStringArray(JsonElement json) {
+        return getStringArray(json, FULL_ARRAY_RANGE);
+    }
+
+    public static String[] getStringArray(JsonElement json, Range<Integer> requiredSize) {
+        requirePrimitiveArray(json, requiredSize);
+
+        return GSON.fromJson(json, String[].class);
+    }
+
+    public static String[] getStringArray(JsonElement json, String[] defVal) {
+        return getStringArray(json, defVal, FULL_ARRAY_RANGE);
+    }
+
+    public static String[] getStringArray(JsonElement json, String[] defVal, Range<Integer> requiredSize) {
+        if( !isPrimitiveArray(json, requiredSize) ) {
+            return defVal;
+        }
+
+        return GSON.fromJson(json, String[].class);
+    }
+
     private static boolean isPrimitiveArray(JsonElement json, Range<Integer> requiredSize) {
         if( json == null || !json.isJsonArray() ) {
             return false;
@@ -177,7 +199,7 @@ public final class JsonUtils
         return requiredSize.contains(arr.size()) && (arr.size() <= 0 || arr.get(0).isJsonPrimitive());
     }
 
-    private static void requirePrimitiveArray(JsonElement json, Range<Integer> requiredSize) {
+    private static JsonArray requireArray(JsonElement json, Range<Integer> requiredSize) {
         if( json == null || json.isJsonNull() ) {
             throw new JsonSyntaxException("Json cannot be null");
         }
@@ -192,6 +214,11 @@ public final class JsonUtils
             int max = requiredSize.getMaximum();
             throw new JsonSyntaxException("Expected array's size needs to be " + (min == max ? Integer.toString(min) : String.format("between %d and %d", min, max)) + "elements big");
         }
+        return arr;
+    }
+
+    private static void requirePrimitiveArray(JsonElement json, Range<Integer> requiredSize) {
+        JsonArray arr = requireArray(json, requiredSize);
 
         if( arr.size() > 0 && !arr.get(0).isJsonPrimitive() ) {
             throw new JsonSyntaxException("Expected array needs to contain primitive values");

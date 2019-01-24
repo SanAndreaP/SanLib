@@ -7,7 +7,6 @@ import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
@@ -29,18 +28,19 @@ import java.util.function.Supplier;
 public class GuiDefinition
         implements ISelectiveResourceReloadListener
 {
-    private static final Map<ResourceLocation, Supplier<IGuiElement>> TYPES = new HashMap<>();
+    static final Map<ResourceLocation, Supplier<IGuiElement>> TYPES = new HashMap<>();
     static {
         TYPES.put(TextGuiElement.ID, TextGuiElement::new);
         TYPES.put(TextureGuiElement.ID, TextureGuiElement::new);
         TYPES.put(RectangleGuiElement.ID, RectangleGuiElement::new);
+        TYPES.put(ScrollAreaGuiElement.ID, ScrollAreaGuiElement::new);
     }
 
     public int width;
     public int height;
 
-    GuiElement[] foregroundElements;
-    GuiElement[] backgroundElements;
+    GuiElementInst[] foregroundElements;
+    GuiElementInst[] backgroundElements;
 
     private Map<Integer, Button> buttons;
 
@@ -69,17 +69,17 @@ public class GuiDefinition
             this.width = JsonUtils.getIntVal(jObj.get("width"));
             this.height = JsonUtils.getIntVal(jObj.get("height"));
 
-            this.backgroundElements = JsonUtils.GSON.fromJson(jObj.get("backgroundElements"), GuiElement[].class);
-            this.foregroundElements = JsonUtils.GSON.fromJson(jObj.get("foregroundElements"), GuiElement[].class);
+            this.backgroundElements = JsonUtils.GSON.fromJson(jObj.get("backgroundElements"), GuiElementInst[].class);
+            this.foregroundElements = JsonUtils.GSON.fromJson(jObj.get("foregroundElements"), GuiElementInst[].class);
         }
     }
 
-    public void drawBackground(GuiScreen gui, int mouseX, int mouseY, float partialTicks) {
-        Arrays.stream(this.backgroundElements).forEach(e -> e.get().render(gui, partialTicks, e.x, e.y, mouseX, mouseY, e.data));
+    public void drawBackground(IGui gui, int mouseX, int mouseY, float partialTicks) {
+        Arrays.stream(this.backgroundElements).forEach(e -> e.get().render(gui, partialTicks, e.pos[0], e.pos[1], mouseX, mouseY, e.data));
     }
 
-    public void drawForeground(GuiScreen gui, int mouseX, int mouseY, float partialTicks) {
-        Arrays.stream(this.foregroundElements).forEach(e -> e.get().render(gui, partialTicks, e.x, e.y, mouseX, mouseY, e.data));
+    public void drawForeground(IGui gui, int mouseX, int mouseY, float partialTicks) {
+        Arrays.stream(this.foregroundElements).forEach(e -> e.get().render(gui, partialTicks, e.pos[0], e.pos[1], mouseX, mouseY, e.data));
     }
 
     public GuiButton injectData(GuiButton button) {
@@ -101,29 +101,6 @@ public class GuiDefinition
             this.reloadDefinition();
         } catch( IOException ex ) {
             SanLib.LOG.log(Level.ERROR, "Error whilst reloading GUI definition", ex);
-        }
-    }
-
-    static final class GuiElement
-    {
-        String type;
-        int x;
-        int y;
-        JsonObject data;
-        IGuiElement element;
-
-        IGuiElement get() {
-            if( this.element == null ) {
-                Supplier<IGuiElement> cnst = TYPES.get(new ResourceLocation(this.type));
-                if( cnst != null ) {
-                    this.element = cnst.get();
-                } else {
-                    SanLib.LOG.log(Level.ERROR, String.format("A GUI Definition uses an unknown type %s for an element!", this.type));
-                    this.element = new EmptyGuiElement();
-                }
-            }
-
-            return this.element;
         }
     }
 

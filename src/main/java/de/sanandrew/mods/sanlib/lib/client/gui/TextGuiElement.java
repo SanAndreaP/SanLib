@@ -23,15 +23,14 @@ import java.util.Objects;
  * JSON format:
  * <pre>
 &#123;
-  "type": "texture",                -- type of element: "text"
-  "x": 0,                           -- relative x coordinate
-  "y": 0,                           -- relative y coordinate
+  "type": "texture",              -- type of element: "text"
+  "pos": [0, 0],                  -- relative position as [x, y] coordinates
   "data": &#123;
     "text": "sanlib.test"         -- The string to be rendered, either plain text or a language key (which will be translated when rendered) can be used
     "color": "0xFF000000",        -- the color (and transparency) of the text as hexadecimal number string (optional, default: "0xFF000000")
     "shadow": false,              -- Wether or not the text should cast a shadow (optional, default: false)
     "wrapWidth": 166,             -- Maximum width a text can have until it is wrapped to a new line, values smaller than 1 will disable wrapping (optional, default: 0)
-    "font": &#123;                     -- custom font (optional, default: "font": &#123; "texture": "standard" &#125;)
+    "font": &#123;                -- custom font (optional, default: "font": &#123; "texture": "standard" &#125;)
       "texture": "galactic",         -- either font name or custom texture resource location, font names can be ("standard" (regular MC font) or "galactic" (standard galactic alphabet))
       "unicode": true,               -- wether or not to use unicode (optional, default: dependent on MC settings)
       "bidirectional": false,        -- wether or not the Unicode Bidirectional Algorithm should be run before rendering any string (optional, default: dependent on MC settings)
@@ -48,7 +47,7 @@ public class TextGuiElement
     private BakedData data;
 
     @Override
-    public void render(GuiScreen gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
+    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
         if( this.data == null ) {
             this.data = new BakedData();
             this.data.text = LangUtils.translate(JsonUtils.getStringVal(data.get("text")));
@@ -58,9 +57,9 @@ public class TextGuiElement
 
             JsonElement cstFont = data.get("font");
             if( cstFont == null ) {
-                this.data.fontRenderer = new Font("standard").get(gui);
+                this.data.fontRenderer = new Font("standard").get(gui.get());
             } else {
-                this.data.fontRenderer = JsonUtils.GSON.fromJson(cstFont, Font.class).get(gui);
+                this.data.fontRenderer = JsonUtils.GSON.fromJson(cstFont, Font.class).get(gui.get());
             }
             this.data.height = this.data.wrapWidth <= 0 ? this.data.fontRenderer.FONT_HEIGHT : this.data.fontRenderer.getWordWrappedHeight(this.data.text, this.data.wrapWidth);
             if( this.data.shadow ) {

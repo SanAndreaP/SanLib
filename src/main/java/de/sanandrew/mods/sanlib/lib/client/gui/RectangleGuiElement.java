@@ -7,18 +7,13 @@
 package de.sanandrew.mods.sanlib.lib.client.gui;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import de.sanandrew.mods.sanlib.lib.client.util.GuiUtils;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.resource.IResourceType;
-
-import java.util.function.Predicate;
+import org.apache.commons.lang3.Range;
 
 public class RectangleGuiElement
         implements IGuiElement
@@ -28,38 +23,34 @@ public class RectangleGuiElement
     private BakedData data;
 
     @Override
-    public void render(GuiScreen gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
+    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
         if( this.data == null ) {
             this.data = new BakedData();
-            this.data.width = JsonUtils.getIntVal(data.get("width"));
-            this.data.height = JsonUtils.getIntVal(data.get("height"));
-            String colorStart = JsonUtils.getStringVal(data.get("colorStart"), "0xFFFFFFFF");
-            this.data.colorStart = MiscUtils.hexToInt(colorStart);
-            this.data.colorEnd = MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("colorEnd"), colorStart));
+            this.data.size = JsonUtils.getIntArray(data.get("size"), Range.is(2));
+            String[] colors = JsonUtils.getStringArray(data.get("color"), new String[] {"0xFFFFFFFF"}, Range.between(1, 2));
+            this.data.color = new int[] {MiscUtils.hexToInt(colors[0]), MiscUtils.hexToInt(colors.length > 1 ? colors[1] : colors[0])};
             this.data.horizontal = JsonUtils.getBoolVal(data.get("horizontal"), false);
         }
 
-        GlStateManager.translate(x, y, gui.zLevel);
+        GlStateManager.translate(x, y, gui.get().zLevel);
         GlStateManager.pushMatrix();
-        if( this.data.colorStart != this.data.colorEnd ) {
-            GuiUtils.drawGradientRect(0, 0, this.data.width, this.data.height, this.data.colorStart, this.data.colorEnd, this.data.horizontal);
+        if( this.data.color[0] != this.data.color[1] ) {
+            GuiUtils.drawGradientRect(0, 0, this.data.size[0], this.data.size[1], this.data.color[0], this.data.color[1], this.data.horizontal);
         } else {
-            Gui.drawRect(0, 0, this.data.width, this.data.height, this.data.colorStart);
+            Gui.drawRect(0, 0, this.data.size[0], this.data.size[1], this.data.color[0]);
         }
         GlStateManager.popMatrix();
     }
 
     @Override
     public int getHeight() {
-        return this.data == null ? 0 : this.data.height;
+        return this.data == null ? 0 : this.data.size[1];
     }
 
     private static final class BakedData
     {
-        private int width;
-        private int height;
-        private int colorStart;
-        private int colorEnd;
+        private int[] size;
+        private int[] color;
         private boolean horizontal;
     }
 }
