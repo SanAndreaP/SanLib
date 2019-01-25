@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -72,6 +73,12 @@ public class GuiDefinition
             this.backgroundElements = JsonUtils.GSON.fromJson(jObj.get("backgroundElements"), GuiElementInst[].class);
             this.foregroundElements = JsonUtils.GSON.fromJson(jObj.get("foregroundElements"), GuiElementInst[].class);
         }
+    }
+
+    public void initGui(IGui gui) {
+        Consumer<GuiElementInst> f = e -> e.get().bakeData(gui, e.data);
+        Arrays.stream(this.backgroundElements).forEach(f);
+        Arrays.stream(this.foregroundElements).forEach(f);
     }
 
     public void drawBackground(IGui gui, int mouseX, int mouseY, float partialTicks) {

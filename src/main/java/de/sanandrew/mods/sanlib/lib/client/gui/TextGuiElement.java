@@ -47,7 +47,7 @@ public class TextGuiElement
     private BakedData data;
 
     @Override
-    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
+    public void bakeData(IGui gui, JsonObject data) {
         if( this.data == null ) {
             this.data = new BakedData();
             this.data.text = LangUtils.translate(JsonUtils.getStringVal(data.get("text")));
@@ -66,7 +66,10 @@ public class TextGuiElement
                 this.data.height += 1;
             }
         }
+    }
 
+    @Override
+    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
         if( this.data.wrapWidth > 0 ) {
             if( this.data.shadow ) {
                 int sdColor = (this.data.color & 0x00FCFCFC) >> 2 | this.data.color & 0xFF000000;

@@ -23,7 +23,7 @@ public class RectangleGuiElement
     private BakedData data;
 
     @Override
-    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
+    public void bakeData(IGui gui, JsonObject data) {
         if( this.data == null ) {
             this.data = new BakedData();
             this.data.size = JsonUtils.getIntArray(data.get("size"), Range.is(2));
@@ -31,7 +31,10 @@ public class RectangleGuiElement
             this.data.color = new int[] {MiscUtils.hexToInt(colors[0]), MiscUtils.hexToInt(colors.length > 1 ? colors[1] : colors[0])};
             this.data.horizontal = JsonUtils.getBoolVal(data.get("horizontal"), false);
         }
+    }
 
+    @Override
+    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
         GlStateManager.translate(x, y, gui.get().zLevel);
         GlStateManager.pushMatrix();
         if( this.data.color[0] != this.data.color[1] ) {

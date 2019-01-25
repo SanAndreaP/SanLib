@@ -12,6 +12,9 @@ public class EmptyGuiElement
         implements IGuiElement
 {
     @Override
+    public void bakeData(IGui gui, JsonObject data) { }
+
+    @Override
     public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) { }
 
     @Override

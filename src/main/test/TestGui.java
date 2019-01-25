@@ -42,6 +42,8 @@ public class TestGui
 
         this.posX = (this.width - this.guiDef.width) / 2;
         this.posY = (this.height - this.guiDef.height) / 2;
+
+        this.guiDef.initGui(this);
     }
 
     @Override

@@ -4,6 +4,8 @@ import com.google.gson.JsonObject;
 
 public interface IGuiElement
 {
+    void bakeData(IGui gui, JsonObject data);
+
     void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data);
 
     int getHeight();

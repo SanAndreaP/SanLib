@@ -42,7 +42,7 @@ public class TextureGuiElement
     private BakedData data;
 
     @Override
-    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
+    public void bakeData(IGui gui, JsonObject data) {
         if( this.data == null ) {
             this.data = new BakedData();
             this.data.location = new ResourceLocation(data.get("location").getAsString());
@@ -53,7 +53,10 @@ public class TextureGuiElement
             this.data.color = new ColorObj(MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("color"), "0xFFFFFFFF")));
             this.data.forceAlpha = JsonUtils.getBoolVal(data.get("forceAlpha"), false);
         }
+    }
 
+    @Override
+    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
         GuiScreen guiScreen = gui.get();
         guiScreen.mc.renderEngine.bindTexture(this.data.location);
         GlStateManager.pushMatrix();

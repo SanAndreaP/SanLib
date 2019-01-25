@@ -1,5 +1,7 @@
 package de.sanandrew.mods.sanlib.lib.client.gui;
 
+import com.google.common.collect.RangeMap;
+import com.google.common.collect.TreeRangeMap;
 import com.google.gson.JsonObject;
 import de.sanandrew.mods.sanlib.lib.client.util.GuiUtils;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
@@ -17,7 +19,7 @@ public class ScrollAreaGuiElement
     BakedData data;
 
     @Override
-    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
+    public void bakeData(IGui gui, JsonObject data) {
         if( this.data == null ) {
             this.data = new BakedData();
             this.data.areaSize = JsonUtils.getIntArray(data.get("areaSize"), Range.is(2));
@@ -30,12 +32,23 @@ public class ScrollAreaGuiElement
             this.data.btnDeactiveUV = JsonUtils.getIntArray(data.get("buttonDeactiveUV"), Range.is(2));
             this.data.rasterized = JsonUtils.getBoolVal(data.get("rasterized"), false);
 
-            this.data.elements = getElements(gui, data);
+            GuiElementInst[] elements = this.getElements(gui, data);
+            Arrays.stream(elements).forEach(e -> {
+                IGuiElement elemInst = e.get();
+                elemInst.bakeData(gui, e.data);
+                int min = e.pos[1];
+                int max = e.pos[1] + elemInst.getHeight();
+                this.data.elements.put(com.google.common.collect.Range.closedOpen(min, max), e);
+            });
         }
+    }
 
+    @Override
+    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         GuiUtils.glScissor(gui.getScreenPosX() + x, gui.getScreenPosY() + y, this.data.areaSize[0], this.data.areaSize[1]);
-        Arrays.stream(this.data.elements).forEach(e -> {
+        
+        this.data.elements.subRangeMap(com.google.common.collect.Range.closedOpen(0, this.data.areaSize[1])).asMapOfRanges().forEach((k, e) -> {
             e.get().render(gui, partTicks, x + e.pos[0], y + e.pos[1], mouseX - x, mouseY - y, e.data);
         });
 
@@ -63,6 +76,7 @@ public class ScrollAreaGuiElement
         private int[] btnDeactiveUV;
         private boolean rasterized;
 
-        private GuiElementInst[] elements;
+        @SuppressWarnings("UnstableApiUsage")
+        protected RangeMap<Integer, GuiElementInst> elements = TreeRangeMap.create();
     }
 }
