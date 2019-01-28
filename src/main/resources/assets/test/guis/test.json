@@ -40,7 +40,6 @@
         "buttonTexture": "test:guis/test.png",
         "buttonHeight": 15,
         "buttonUV": [232, 0],
-        "buttonDisabledUV": [220, 0],
         "buttonDeactiveUV": [244, 0],
         "rasterized": false,
         "elements": [
