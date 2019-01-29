@@ -39,7 +39,7 @@ public class TextureGuiElement
 {
     static final ResourceLocation ID = new ResourceLocation("texture");
 
-    private BakedData data;
+    BakedData data;
 
     @Override
     public void bakeData(IGui gui, JsonObject data) {
@@ -76,10 +76,10 @@ public class TextureGuiElement
         return this.data == null ? 0 : this.data.size[1];
     }
 
-    private static final class BakedData
+    static final class BakedData
     {
         private ResourceLocation location;
-        private int[] size;
+        int[] size;
         private int[] textureSize;
         private int[] uv;
         private double[] scale;

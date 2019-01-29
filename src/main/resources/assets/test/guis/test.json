@@ -22,26 +22,30 @@
       }
     },
     {
-      "type": "rectangle",
-      "pos": [14, 0],
-      "data": {
-        "size": [64, 64],
-        "color": ["0x80FF00FF", "0x8000FFFF"],
-        "horizontal": false
-      }
-    },
-    {
       "type": "scroll_area",
       "pos": [9, 18],
       "data": {
         "areaSize": [160, 110],
-        "scrollbarPos": [175, 18],
-        "scrollbarSize": [12, 110],
-        "buttonTexture": "test:guis/test.png",
-        "buttonHeight": 15,
-        "buttonUV": [232, 0],
-        "buttonDeactiveUV": [244, 0],
+        "scrollbarHeight": 110,
         "rasterized": false,
+        "scrollButton": {
+          "type": "texture",
+          "pos": [175, 18],
+          "data": {
+            "size": [12, 15],
+            "uv": [232, 0],
+            "location": "test:guis/test.png"
+          }
+        },
+        "scrollButtonDeactive": {
+          "type": "texture",
+          "pos": [175, 18],
+          "data": {
+            "size": [12, 15],
+            "uv": [244, 0],
+            "location": "test:guis/test.png"
+          }
+        },
         "elements": [
           {
             "type": "text",
@@ -129,6 +133,15 @@
             "data": {
               "color": "0xFFFF0000",
               "text": "sanlib.test.text"
+            }
+          },
+          {
+            "type": "rectangle",
+            "pos": [14, 132],
+            "data": {
+              "size": [64, 64],
+              "color": ["0x80FF00FF", "0x8000FFFF"],
+              "horizontal": false
             }
           }
         ]

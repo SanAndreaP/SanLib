@@ -88,12 +88,12 @@ public class TextGuiElement
 
     private static final class BakedData
     {
-        String text;
-        int color;
-        boolean shadow;
-        int wrapWidth;
-        FontRenderer fontRenderer;
-        int height;
+        private String text;
+        private int color;
+        private boolean shadow;
+        private int wrapWidth;
+        private FontRenderer fontRenderer;
+        private int height;
     }
 
     @SuppressWarnings("WeakerAccess")

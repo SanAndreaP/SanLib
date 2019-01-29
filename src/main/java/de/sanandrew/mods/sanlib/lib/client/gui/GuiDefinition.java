@@ -89,6 +89,23 @@ public class GuiDefinition
         Arrays.stream(this.foregroundElements).forEach(e -> e.get().render(gui, partialTicks, e.pos[0], e.pos[1], mouseX, mouseY, e.data));
     }
 
+    public void handleMouseInput(IGui gui) throws IOException {
+        Consumer<GuiElementInst> f = e -> {
+            try {
+                e.get().handleMouseInput(gui);
+            } catch( IOException ex ) {
+                throw new IOExceptionWrapper(ex);
+            }
+        };
+
+        try {
+            Arrays.stream(this.backgroundElements).forEach(f);
+            Arrays.stream(this.foregroundElements).forEach(f);
+        } catch( IOExceptionWrapper ex ) {
+            throw ex.ioex;
+        }
+    }
+
     public GuiButton injectData(GuiButton button) {
         Button btn = this.buttons == null ? null : this.buttons.get(button.id);
 
@@ -117,5 +134,18 @@ public class GuiDefinition
         int y;
         int width;
         int height;
+    }
+
+    @SuppressWarnings("ExceptionClassNameDoesntEndWithException")
+    private static class IOExceptionWrapper
+            extends RuntimeException
+    {
+        private static final long serialVersionUID = 8878021439168468744L;
+
+        public final IOException ioex;
+
+        IOExceptionWrapper(IOException ex) {
+            this.ioex = ex;
+        }
     }
 }

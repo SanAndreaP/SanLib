@@ -3,11 +3,13 @@ package de.sanandrew.mods.sanlib.lib.client.gui;
 import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import de.sanandrew.mods.sanlib.lib.client.util.GuiUtils;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.Range;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Arrays;
@@ -18,7 +20,7 @@ public class ScrollAreaGuiElement
 {
     static final ResourceLocation ID = new ResourceLocation("scroll_area");
 
-    BakedData data;
+    protected BakedData data;
 
     protected float scroll;
 
@@ -27,13 +29,19 @@ public class ScrollAreaGuiElement
         if( this.data == null ) {
             this.data = new BakedData();
             this.data.areaSize = JsonUtils.getIntArray(data.get("areaSize"), Range.is(2));
-            this.data.scrollPos = JsonUtils.getIntArray(data.get("scrollbarPos"), Range.is(2));
-            this.data.scrollSize = JsonUtils.getIntArray(data.get("scrollbarSize"), Range.is(2));
-            this.data.btnTexture = new ResourceLocation(data.get("buttonTexture").getAsString());
-            this.data.btnHeight = JsonUtils.getIntVal(data.get("buttonHeight"));
-            this.data.btnUV = JsonUtils.getIntArray(data.get("buttonUV"), Range.is(2));
-            this.data.btnDeactiveUV = JsonUtils.getIntArray(data.get("buttonDeactiveUV"), Range.is(2));
+            this.data.scrollHeight = JsonUtils.getIntVal(data.get("scrollbarHeight"), this.data.areaSize[1]);
             this.data.rasterized = JsonUtils.getBoolVal(data.get("rasterized"), false);
+            this.data.maxScrollDelta = JsonUtils.getFloatVal(data.get("maxScrollDelta"), 1.0F);
+
+            this.data.scrollBtnActive = JsonUtils.GSON.fromJson(data.get("scrollButton"), GuiElementInst.class);
+            this.data.scrollBtnDeactive = JsonUtils.GSON.fromJson(data.get("scrollButtonDeactive"), GuiElementInst.class);
+
+            if( this.data.scrollBtnActive.get() instanceof TextureGuiElement && this.data.scrollBtnDeactive.get() instanceof TextureGuiElement ) {
+                this.data.scrollBtnActive.get().bakeData(gui, this.data.scrollBtnActive.data);
+                this.data.scrollBtnDeactive.get().bakeData(gui, this.data.scrollBtnDeactive.data);
+            } else {
+                throw new JsonParseException("Scroll button must be of type \"texture\" or a subtype of it!");
+            }
 
             GuiElementInst[] elements = this.getElements(gui, data);
             Arrays.stream(elements).forEach(e -> {
@@ -48,24 +56,47 @@ public class ScrollAreaGuiElement
 
     @Override
     public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
-        Map<com.google.common.collect.Range<Integer>, GuiElementInst> renderedElements = this.data.elements.subRangeMap(com.google.common.collect.Range.closedOpen(0, this.data.areaSize[1])).asMapOfRanges();
-        int cntAll = this.data.elements.asMapOfRanges().size();
+        int cntAll = this.data.elementsView.size();
+        int maxHeight = this.data.elements.span().upperEndpoint();
+        int minY = Math.max(0, MathHelper.floor((maxHeight - this.data.areaSize[1]) * this.scroll));
+        int maxY = MathHelper.ceil((maxHeight - this.data.areaSize[1]) * this.scroll) + this.data.areaSize[1];
+
+        Map<com.google.common.collect.Range<Integer>, GuiElementInst> renderedElements = this.data.getSubRange(minY, maxY);
         int cntSub = renderedElements.size();
 
-        gui.get().mc.renderEngine.bindTexture(this.data.btnTexture);
-        int scrollY = y + this.data.scrollPos[1] + Math.round(this.scroll * (this.data.scrollSize[1] - this.data.btnHeight));
+        GuiElementInst btn = cntAll > cntSub ? this.data.scrollBtnActive : this.data.scrollBtnDeactive;
+        int scrollY = btn.pos[1] + Math.round(this.scroll * (this.data.scrollHeight - ((TextureGuiElement) btn.get()).data.size[1]));
+
+        btn.get().render(gui, partTicks, btn.pos[0], scrollY, mouseX, mouseY, btn.data);
 
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         GuiUtils.glScissor(gui.getScreenPosX() + x, gui.getScreenPosY() + y, this.data.areaSize[0], this.data.areaSize[1]);
-        
+
         renderedElements.forEach((k, e) -> {
-            e.get().render(gui, partTicks, x + e.pos[0], y + e.pos[1], mouseX - x, mouseY - y, e.data);
+            e.get().render(gui, partTicks, x + e.pos[0], y + e.pos[1] - minY, mouseX - x, mouseY - y - minY, e.data);
         });
 
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
     }
 
-    public GuiElementInst[] getElements(IGui gui, JsonObject elementData) {
+    //TODO: respect rasterized setting
+    @Override
+    public void handleMouseInput(IGui gui) {
+        int dWheelDir = Mouse.getEventDWheel();
+        if( dWheelDir < 0 ) {
+            this.scroll += Math.min(1.0F / this.data.elementsView.size(), this.data.maxScrollDelta);
+            if( this.scroll > 1.0F ) {
+                this.scroll = 1.0F;
+            }
+        } else if( dWheelDir > 0 ) {
+            this.scroll -= Math.min(1.0F / this.data.elementsView.size(), this.data.maxScrollDelta);
+            if( this.scroll < 0.0F ) {
+                this.scroll = 0.0F;
+            }
+        }
+    }
+
+    protected GuiElementInst[] getElements(IGui gui, JsonObject elementData) {
         return JsonUtils.GSON.fromJson(elementData.get("elements"), GuiElementInst[].class);
     }
 
@@ -76,16 +107,19 @@ public class ScrollAreaGuiElement
 
     private static final class BakedData
     {
-        private ResourceLocation btnTexture;
         private int[] areaSize;
-        private int[] scrollPos;
-        private int[] scrollSize;
-        private int btnHeight;
-        private int[] btnUV;
-        private int[] btnDeactiveUV;
+        private GuiElementInst scrollBtnActive;
+        private GuiElementInst scrollBtnDeactive;
+        private int scrollHeight;
+        private float maxScrollDelta;
         private boolean rasterized;
 
         @SuppressWarnings("UnstableApiUsage")
-        protected RangeMap<Integer, GuiElementInst> elements = TreeRangeMap.create();
+        public final RangeMap<Integer, GuiElementInst> elements = TreeRangeMap.create();
+        public final Map<com.google.common.collect.Range<Integer>, GuiElementInst> elementsView = this.elements.asMapOfRanges();
+
+        public Map<com.google.common.collect.Range<Integer>, GuiElementInst> getSubRange(Integer lower, Integer upper) {
+            return this.elements.subRangeMap(com.google.common.collect.Range.closedOpen(lower, upper)).asMapOfRanges();
+        }
     }
 }

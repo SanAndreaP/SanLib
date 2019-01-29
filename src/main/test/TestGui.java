@@ -60,6 +60,12 @@ public class TestGui
     }
 
     @Override
+    public void handleMouseInput() throws IOException {
+        super.handleMouseInput();
+        this.guiDef.handleMouseInput(this);
+    }
+
+    @Override
     public GuiScreen get() {
         return this;
     }
