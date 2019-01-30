@@ -27,7 +27,7 @@
       "data": {
         "areaSize": [160, 110],
         "scrollbarHeight": 110,
-        "rasterized": false,
+        "rasterized": true,
         "scrollButton": {
           "type": "texture",
           "pos": [175, 18],
