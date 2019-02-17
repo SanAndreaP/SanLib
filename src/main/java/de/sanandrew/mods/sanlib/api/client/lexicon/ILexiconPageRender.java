@@ -6,17 +6,11 @@
  *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.api.client.lexicon;
 
-import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.IOException;
-import java.util.List;
 
-@SideOnly(Side.CLIENT)
 public interface ILexiconPageRender
 {
     /**
@@ -29,16 +23,15 @@ public interface ILexiconPageRender
      * Initializes the renderer for the opened page. Called on {@link GuiScreen#initGui()}
      * @param entry the entry being opened
      * @param helper the lexicon helper
-     * @param globalButtons Deprecated. Use {@link ILexiconGuiHelper#getGuiButtonList()}
-     * @param entryButtons Deprecated. Use {@link ILexiconGuiHelper#getEntryButtonList()}
      */
-    void initPage(ILexiconEntry entry, ILexiconGuiHelper helper, @Deprecated List<GuiButton> globalButtons, @Deprecated List<GuiButton> entryButtons);
+    @SuppressWarnings("JavadocReference")
+    void initPage(ILexiconEntry entry, ILexiconGuiHelper helper);
 
     /**
-     * Called on {@link GuiScreen#updateScreen()},
+     * Called on {@link GuiScreen#tick()}, previously called "updateScreen"
      * @param helper the lexicon helper
      */
-    default void updateScreen(ILexiconGuiHelper helper) { }
+    default void tickScreen(ILexiconGuiHelper helper) { }
 
     default void renderPageOverlay(ILexiconEntry entry, ILexiconGuiHelper helper, int mouseX, int mouseY, float partTicks) { }
 
@@ -50,15 +43,9 @@ public interface ILexiconPageRender
 
     default void loadPageState(NBTTagCompound nbt) { }
 
-    default int shiftEntryPosY() {
-        return 0;
-    }
+    default int shiftEntryPosY() { return 0; }
 
-    default boolean actionPerformed(GuiButton button, ILexiconGuiHelper helper) {
-        return helper.linkActionPerformed(button);
-    }
+    default boolean mouseClicked(double mouseX, double mouseY, int mouseBtn, ILexiconGuiHelper helper) { return false; }
 
-    default void mouseClicked(int mouseX, int mouseY, int mouseBtn, ILexiconGuiHelper helper) throws IOException { }
-
-    default void keyTyped(char typedChar, int keyCode, ILexiconGuiHelper helper) throws IOException { }
+    default boolean charTyped(char typedChar, int keyCode, ILexiconGuiHelper helper) { return false; }
 }

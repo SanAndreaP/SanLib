@@ -7,12 +7,12 @@ import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.resources.IReloadableResourceManager;
-import net.minecraft.client.resources.IResource;
-import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.resources.IReloadableResourceManager;
+import net.minecraft.resources.IResource;
+import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.resource.IResourceType;
-import net.minecraftforge.client.resource.ISelectiveResourceReloadListener;
+import net.minecraftforge.resource.IResourceType;
+import net.minecraftforge.resource.ISelectiveResourceReloadListener;
 import org.apache.logging.log4j.Level;
 
 import java.io.IOException;
@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -49,7 +50,7 @@ public class GuiDefinition
 
     private GuiDefinition(ResourceLocation data) throws IOException {
         this.data = data;
-        ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(this);
+        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(this);
         this.reloadDefinition();
     }
 
@@ -58,8 +59,8 @@ public class GuiDefinition
     }
 
     private void reloadDefinition() throws IOException {
-        try( IResource r = Minecraft.getMinecraft().getResourceManager().getResource(this.data);
-             InputStreamReader reader = new InputStreamReader(r.getInputStream(), StandardCharsets.UTF_8) )
+        try(IResource r = Minecraft.getInstance().getResourceManager().getResource(this.data);
+            InputStreamReader reader = new InputStreamReader(r.getInputStream(), StandardCharsets.UTF_8) )
         {
             JsonElement json = new JsonParser().parse(reader);
             if( !json.isJsonObject() ) {
@@ -89,20 +90,18 @@ public class GuiDefinition
         Arrays.stream(this.foregroundElements).forEach(e -> e.get().render(gui, partialTicks, e.pos[0], e.pos[1], mouseX, mouseY, e.data));
     }
 
-    public void handleMouseInput(IGui gui) throws IOException {
-        Consumer<GuiElementInst> f = e -> {
-            try {
-                e.get().handleMouseInput(gui);
-            } catch( IOException ex ) {
-                throw new IOExceptionWrapper(ex);
-            }
-        };
+    public void onMouseScroll(IGui gui, double scroll) {
+        Function<GuiElementInst, Boolean> f = e -> e.get().onMouseScroll(gui, scroll);
 
-        try {
-            Arrays.stream(this.backgroundElements).forEach(f);
-            Arrays.stream(this.foregroundElements).forEach(f);
-        } catch( IOExceptionWrapper ex ) {
-            throw ex.ioex;
+        for( GuiElementInst elem : this.backgroundElements) {
+            if( f.apply(elem) ) {
+                break;
+            }
+        }
+        for( GuiElementInst elem : this.foregroundElements) {
+            if( f.apply(elem) ) {
+                break;
+            }
         }
     }
 

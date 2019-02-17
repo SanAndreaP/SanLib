@@ -8,7 +8,8 @@ package de.sanandrew.mods.sanlib.lib.util;
 
 import de.sanandrew.mods.sanlib.SanLib;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EntityType;
+import net.minecraft.util.text.translation.LanguageMap;
 
 @SuppressWarnings("unused")
 public final class LangUtils
@@ -24,47 +25,37 @@ public final class LangUtils
     public static final TranslateKey CONTAINER_INV = new TranslateKey("container.inventory");
 
     /**
-     * Wrapper method to {@link net.minecraft.util.text.translation.I18n#canTranslate(String)} for abbreviation.
+     * Wrapper method to {@link LanguageMap#translateKey(String)} for abbreviation.
      * <s>Also tries to translate with [NONE] to en_US if the translation fails</s>
      * @param langKey language key to be translated
      * @return translated key or langKey, if translation fails
      */
-    @SuppressWarnings("deprecation")
     public static String translate(String langKey, Object... args) {
-        return net.minecraft.util.text.translation.I18n.canTranslate(langKey)
-                       ? net.minecraft.util.text.translation.I18n.translateToLocalFormatted(langKey, args)
-                       : langKey;
+        LanguageMap lmap = LanguageMap.getInstance();
+        return lmap.exists(langKey) ? String.format(lmap.translateKey(langKey), args) : langKey;
     }
 
     public static String translate(TranslateKey langKey, Object... args) {
         return translate(langKey.key, args);
     }
 
-    @SuppressWarnings("deprecation")
     public static String translateOrDefault(String langKey, String defaultVal) {
-        return net.minecraft.util.text.translation.I18n.canTranslate(langKey) ? translate(langKey) : defaultVal;
+        return LanguageMap.getInstance().exists(langKey) ? translate(langKey) : defaultVal;
     }
 
     public static String translateOrDefault(TranslateKey langKey, String defaultVal) {
         return translateOrDefault(langKey.key, defaultVal);
     }
 
+    /**
+     * @deprecated Use {@link EntityType#getTranslationKey()}
+     * @param eClass
+     * @return
+     */
+    @Deprecated
     public static String translateEntityCls(Class<? extends Entity> eClass) {
-        String namedEntry = EntityList.getTranslationName(EntityList.getKey(eClass));
-        if( namedEntry != null ) {
-            return translate(ENTITY_NAME.get(namedEntry));
-        }
 
-        return "[UNKNOWN] " + eClass.getName();
-    }
-
-    public static String translateEntityClsDesc(Class<? extends Entity> eClass) {
-        String namedEntry = EntityList.getTranslationName(EntityList.getKey(eClass));
-        if( namedEntry != null ) {
-            return translate(ENTITY_DESC.get(namedEntry));
-        }
-
-        return "";
+        return eClass.getName();
     }
 
     public static final class TranslateKey

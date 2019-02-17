@@ -9,23 +9,20 @@ package de.sanandrew.mods.sanlib.lib.client.util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.RenderItem;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 
 /**
  * An utility class for rendering related stuff.
  */
-@SuppressWarnings("unused")
-@SideOnly(Side.CLIENT)
+@SuppressWarnings({"unused", "WeakerAccess"})
 public final class RenderUtils
 {
-    private static RenderItem renderItem;
+    private static ItemRenderer itemRenderer;
 
     /**
      * Renders an ItemStack onto a GUI purely without any overlay (stack count, durability bar etc.).
@@ -64,28 +61,28 @@ public final class RenderUtils
      * @param doOverlay A flag to determine wether or not to draw the overlay (stack count/custom text, durability bar, etc.).
      */
     public static void renderStackInGui(@Nonnull ItemStack stack, int posX, int posY, double scale, FontRenderer fontRenderer, String customTxt, boolean doOverlay) {
-        if( renderItem == null ) {
-            renderItem = Minecraft.getMinecraft().getRenderItem();
+        if( itemRenderer == null ) {
+            itemRenderer = Minecraft.getInstance().getItemRenderer();
         }
 
-        renderItem.zLevel -= 50.0F;
+        itemRenderer.zLevel -= 50.0F;
         GlStateManager.pushMatrix();
-        GlStateManager.translate(posX, posY, 0.0F);
-        GlStateManager.scale(scale, scale, 1.0F);
+        GlStateManager.translatef(posX, posY, 0.0F);
+        GlStateManager.scaled(scale, scale, 1.0D);
         RenderHelper.enableGUIStandardItemLighting();
-        renderItem.renderItemIntoGUI(stack, 0, 0);
+        itemRenderer.renderItemIntoGUI(stack, 0, 0);
         RenderHelper.disableStandardItemLighting();
         if( doOverlay ) {
             if( fontRenderer != null ) {
-                renderItem.renderItemOverlayIntoGUI(fontRenderer, stack, 0, 0, customTxt);
+                itemRenderer.renderItemOverlayIntoGUI(fontRenderer, stack, 0, 0, customTxt);
                 GlStateManager.disableLighting();
             } else {
-                renderItem.renderItemOverlayIntoGUI(Minecraft.getMinecraft().fontRenderer, stack, 0, 0, "");
+                itemRenderer.renderItemOverlayIntoGUI(Minecraft.getInstance().fontRenderer, stack, 0, 0, "");
                 GlStateManager.disableLighting();
             }
         }
         GlStateManager.popMatrix();
-        renderItem.zLevel += 50.0F;
+        itemRenderer.zLevel += 50.0F;
     }
 
     /**
@@ -99,20 +96,21 @@ public final class RenderUtils
      * @param rotateZ The rotation (in degrees) along the Z axis.
      * @param scale The scaling factor for the rendering. 1.0F is normal size.
      */
+    @SuppressWarnings("deprecation")
     public static void renderStackInWorld(ItemStack stack, double posX, double posY, double posZ, float rotateX, float rotateY, float rotateZ, double scale) {
-        if( renderItem == null ) {
-            renderItem = Minecraft.getMinecraft().getRenderItem();
+        if( itemRenderer == null ) {
+            itemRenderer = Minecraft.getInstance().getItemRenderer();
         }
 
         GlStateManager.pushMatrix();
-        GlStateManager.translate(posX, posY, posZ);
-        GlStateManager.rotate(180.0F, 1.0F, 0.0F, 0.0F);
-        GlStateManager.rotate(rotateX, 1.0F, 0.0F, 0.0F);
-        GlStateManager.rotate(rotateY, 0.0F, 1.0F, 0.0F);
-        GlStateManager.rotate(rotateZ, 0.0F, 0.0F, 1.0F);
-        GlStateManager.scale(scale, scale, scale);
+        GlStateManager.translated(posX, posY, posZ);
+        GlStateManager.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
+        GlStateManager.rotatef(rotateX, 1.0F, 0.0F, 0.0F);
+        GlStateManager.rotatef(rotateY, 0.0F, 1.0F, 0.0F);
+        GlStateManager.rotatef(rotateZ, 0.0F, 0.0F, 1.0F);
+        GlStateManager.scaled(scale, scale, scale);
 
-        renderItem.renderItem(stack, ItemCameraTransforms.TransformType.FIXED);
+        itemRenderer.renderItem(stack, ItemCameraTransforms.TransformType.FIXED);
 
         GlStateManager.popMatrix();
     }

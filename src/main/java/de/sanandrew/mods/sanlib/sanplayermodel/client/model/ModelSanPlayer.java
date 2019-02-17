@@ -10,15 +10,12 @@ import de.sanandrew.mods.sanlib.lib.client.ModelJsonHandler;
 import de.sanandrew.mods.sanlib.lib.client.ModelJsonLoader;
 import de.sanandrew.mods.sanlib.sanplayermodel.Resources;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.RenderSanPlayer;
-import net.minecraft.client.model.ModelPlayer;
-import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.client.renderer.entity.model.ModelPlayer;
 import net.minecraft.entity.Entity;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.resources.IResourceManager;
 
 import java.util.Arrays;
 
-@SideOnly(Side.CLIENT)
 public class ModelSanPlayer
         extends ModelPlayer
         implements ModelJsonHandler<ModelSanPlayer, ModelJsonLoader.ModelJson>

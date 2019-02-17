@@ -9,13 +9,9 @@
 package de.sanandrew.mods.sanlib.client.lexicon.button;
 
 import de.sanandrew.mods.sanlib.client.lexicon.GuiLexicon;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-@SideOnly(Side.CLIENT)
 public class GuiButtonEntryDivider
         extends GuiButton
 {
@@ -24,13 +20,13 @@ public class GuiButtonEntryDivider
     }
 
     @Override
-    public void drawButton(Minecraft mc, int mx, int my, float partTicks) {
+    public void render(int mx, int my, float partTicks) {
         this.enabled = false;
         if( this.visible ) {
             GlStateManager.pushMatrix();
             GlStateManager.enableBlend();
             GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 
             int color1 = 0xC0FFFFFF;
             int color2 = 0x80FFFFFF;

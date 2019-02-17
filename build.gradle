@@ -1,18 +1,19 @@
-import org.codehaus.groovy.runtime.GStringImpl
-
 buildscript {
     repositories {
-        jcenter()
         maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
+            url = 'https://files.minecraftforge.net/maven'
         }
+        jcenter()
+        mavenCentral()
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
     }
 }
-apply plugin: 'net.minecraftforge.gradle.forge'
+
+apply plugin: 'net.minecraftforge.gradle'
+//Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+apply plugin: 'eclipse'
 
 apply plugin: 'idea'
 idea {
@@ -21,101 +22,48 @@ idea {
     }
 }
 
-version = "1.12.2-1.5.1"
+version = "1.13.2-1.6.0"
 group= "de.sanandrew.mods"
 archivesBaseName = "SanLib"
 
-sourceCompatibility = targetCompatibility = "1.8" // Need this here so eclipse task generates correctly.
-compileJava {
-    sourceCompatibility = targetCompatibility = "1.8"
-}
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
 minecraft {
-    version = "1.12.2-14.23.5.2768"
-    runDir = "run"
-    mappings = "snapshot_20180814"
-}
+    mappings channel: 'snapshot', version: '20180921-1.13'
+    accessTransformer = file('src/main/resources/META-INF/sanlib_at.cfg')
 
-repositories {
-    maven {
-        name = "CoFH Maven"
-        url = "http://maven.covers1624.net"
-    }
-	maven {
-        name = "MC Moddev Maven"
-        url = "http://maven.mcmoddev.com"
-    }
-}
-
-
-
-sourceSets {
-    main {
-        java {
-            srcDirs = ['src/main/java', 'src/main/test']
+    runs {
+        client = {
+            // recommended logging data for a userdev environment
+            properties 'forge.logging.markers': 'SCAN,REGISTRIES,REGISTRYDUMP'
+            // recommended logging level for the console
+            properties 'forge.logging.console.level': 'debug'
+            workingDirectory project.file('run').canonicalPath
+            source sourceSets.main
         }
-        resources {
-            srcDirs = ['src/main/resources']
+        server = {
+            // recommended logging data for a userdev environment
+            properties 'forge.logging.markers': 'SCAN,REGISTRIES,REGISTRYDUMP'
+            // recommended logging level for the console
+            properties 'forge.logging.console.level': 'debug'
+            workingDirectory project.file('run').canonicalPath
+            source sourceSets.main
         }
     }
 }
-
-
 
 dependencies {
-    deobfCompile "cofh:RedstoneFlux:1.12-2.0.2.3:universal"
-    deobfCompile "net.darkhax.tesla:Tesla-1.12.2:1.0.63"
-}
-
-apply plugin: 'maven'
-project.ext {
-    releaseRepoUrl = "file://${project(':').projectDir}/maven/" as GStringImpl
-}
-uploadArchives {
-    repositories.mavenDeployer {
-        pom.artifactId = project.name
-        pom.version = project.version
-        repository(url: project.releaseRepoUrl)
-    }
-}
-task signJar(type: SignJar, dependsOn: reobfJar) {
-    onlyIf {
-        project.hasProperty('keyStore')
-    }
-    keyStore = project.findProperty('keyStore')
-    alias = project.findProperty('keyStoreAlias')
-    storePass = project.findProperty('keyStorePass')
-    keyPass = project.findProperty('keyStoreKeyPass')
-    inputFile = jar.archivePath
-    outputFile = jar.archivePath
-}
-
-build.finalizedBy signJar
-build.finalizedBy uploadArchives
-
-processResources {
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
-
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-
-        expand 'version':project.version, 'mcversion':project.minecraft.version
-    }
-
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
-    
-	rename '(.+_at.cfg)', 'META-INF/$1'
+    minecraft 'net.minecraftforge:forge:1.13.2-25.0.10'
 }
 
 jar {
-	manifest {
-		attributes 'FMLAT': 'sanlib_at.cfg'
-	}
-}
-
-artifacts {
-    archives jar
+    manifest {
+        attributes(["Specification-Title": "sanlib",
+                    "Specification-Vendor": "SanAndreasP",
+                    "Specification-Version": "24.0", // We are version 1 of the modlauncher specification
+                    "Implementation-Title": project.name,
+                    "Implementation-Version": "${version}",
+                    "Implementation-Vendor" :"sanlib",
+                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
+    }
 }

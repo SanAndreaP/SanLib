@@ -6,25 +6,8 @@
    *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.lib.util;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTPrimitive;
-import net.minecraft.nbt.NBTTagByte;
-import net.minecraft.nbt.NBTTagByteArray;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagDouble;
-import net.minecraft.nbt.NBTTagFloat;
-import net.minecraft.nbt.NBTTagInt;
-import net.minecraft.nbt.NBTTagIntArray;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagLong;
-import net.minecraft.nbt.NBTTagLongArray;
-import net.minecraft.nbt.NBTTagShort;
-import net.minecraft.nbt.NBTTagString;
+import com.google.gson.*;
+import net.minecraft.nbt.*;
 import net.minecraftforge.common.util.Constants;
 
 import java.util.regex.Pattern;
@@ -54,7 +37,7 @@ final class JsonNbtReader
         return nbt;
     }
 
-    static NBTBase getArray(JsonArray array) {
+    static INBTBase getArray(JsonArray array) {
         if( array.size() > 0 ) {
             JsonElement firstElem = array.get(0);
             NBTPrimitive firstPrimitive = getPrimitive(firstElem);
@@ -89,16 +72,16 @@ final class JsonNbtReader
                 }
             }
             if( firstElem.isJsonPrimitive() ) {
-                NBTBase firstTyped = getTyped(firstElem.getAsJsonPrimitive());
+                INBTBase firstTyped = getTyped(firstElem.getAsJsonPrimitive());
                 NBTTagList list = new NBTTagList();
-                list.appendTag(firstTyped);
+                list.add(firstTyped);
 
                 for( int i = 1, max = array.size(); i < max; i++ ) {
                     JsonElement arrElem = array.get(i);
                     if( arrElem.isJsonPrimitive() ) {
-                        NBTBase arrElemTyped = getTyped(arrElem.getAsJsonPrimitive());
+                        INBTBase arrElemTyped = getTyped(arrElem.getAsJsonPrimitive());
                         if( arrElemTyped.getId() == firstTyped.getId() ) {
-                            list.appendTag(arrElemTyped);
+                            list.add(arrElemTyped);
                         } else {
                             throw new JsonParseException("Cannot add mismatching NBT types to NBT list");
                         }
@@ -112,12 +95,12 @@ final class JsonNbtReader
             if( firstElem.isJsonObject() ) {
                 NBTTagCompound firstNBT = getTagFromJson(firstElem);
                 NBTTagList list = new NBTTagList();
-                list.appendTag(firstNBT);
+                list.add(firstNBT);
 
                 for( int i = 1, max = array.size(); i < max; i++ ) {
                     JsonElement arrElem = array.get(i);
                     if( arrElem.isJsonObject() ) {
-                        list.appendTag(getTagFromJson(arrElem));
+                        list.add(getTagFromJson(arrElem));
                     } else {
                         throw new JsonParseException("Cannot add mismatching NBT types to NBT list");
                     }
@@ -126,16 +109,16 @@ final class JsonNbtReader
                 return list;
             }
             if( firstElem.isJsonArray() ) {
-                NBTBase firstArray = getArray(firstElem.getAsJsonArray());
+                INBTBase firstArray = getArray(firstElem.getAsJsonArray());
                 NBTTagList list = new NBTTagList();
-                list.appendTag(firstArray);
+                list.add(firstArray);
 
                 for( int i = 1, max = array.size(); i < max; i++ ) {
                     JsonElement arrElem = array.get(i);
                     if( arrElem.isJsonArray() ) {
-                        NBTBase arrElemArray = getArray(arrElem.getAsJsonArray());
+                        INBTBase arrElemArray = getArray(arrElem.getAsJsonArray());
                         if( arrElemArray.getId() == firstArray.getId() ) {
-                            list.appendTag(arrElemArray);
+                            list.add(arrElemArray);
                         } else {
                             throw new JsonParseException("Cannot add mismatching NBT types to NBT list");
                         }
@@ -161,7 +144,7 @@ final class JsonNbtReader
 
     static NBTPrimitive getPrimitive(JsonElement elem, int typeId) {
         if( elem.isJsonPrimitive() ) {
-            NBTBase nbt = getTyped(elem.getAsJsonPrimitive());
+            INBTBase nbt = getTyped(elem.getAsJsonPrimitive());
             if( nbt.getId() == typeId ) {
                 return (NBTPrimitive) nbt;
             } else {
@@ -172,7 +155,7 @@ final class JsonNbtReader
         }
     }
 
-    static NBTBase getTyped(JsonPrimitive primitive) {
+    static INBTBase getTyped(JsonPrimitive primitive) {
         if( primitive.isNumber() ) {
             Number nbr = primitive.getAsNumber();
             if( nbr instanceof Float ) {
@@ -207,7 +190,7 @@ final class JsonNbtReader
     private static final Pattern SHORT_PATTERN = Pattern.compile("[-+]?(?:0|[1-9][0-9]*)s", Pattern.CASE_INSENSITIVE);
     private static final Pattern INT_PATTERN = Pattern.compile("[-+]?(?:0|[1-9][0-9]*)");
 
-    static NBTBase tryGetTypedFromString(String s) {
+    static INBTBase tryGetTypedFromString(String s) {
         if( FLOAT_PATTERN.matcher(s).matches() ) {
             return new NBTTagFloat(Float.parseFloat(s.substring(0, s.length() - 1)));
         } else if( BYTE_PATTERN.matcher(s).matches() ) {

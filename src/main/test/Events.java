@@ -16,8 +16,8 @@ public class Events
 {
     @SubscribeEvent
     public static void onKeyPress(InputEvent.KeyInputEvent event) {
-        if( Keyboard.isKeyDown(38) && Minecraft.getMinecraft().currentScreen == null ) {
-            Minecraft.getMinecraft().displayGuiScreen(new TestGui());
+        if( Keyboard.isKeyDown(38) && Minecraft.getInstance().currentScreen == null ) {
+            Minecraft.getInstance().displayGuiScreen(new TestGui());
         }
     }
 }

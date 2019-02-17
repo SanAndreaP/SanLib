@@ -11,16 +11,13 @@ import com.google.gson.stream.JsonReader;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import net.minecraftforge.oredict.OreDictionary;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.Range;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public final class JsonUtils
@@ -242,14 +239,14 @@ public final class JsonUtils
         return getStack((JsonObject) json);
     }
 
-    @Nonnull
-    public static NonNullList<ItemStack> getItemStacks(JsonElement json) {
-        if( json == null || json.isJsonNull() ) {
-            throw new JsonSyntaxException("Json cannot be null");
-        }
-
-        return getStacks(json);
-    }
+//    @Nonnull
+//    public static NonNullList<ItemStack> getItemStacks(JsonElement json) {
+//        if( json == null || json.isJsonNull() ) {
+//            throw new JsonSyntaxException("Json cannot be null");
+//        }
+//
+//        return getStacks(json);
+//    }
 
     private static ItemStack getStack(JsonObject jsonObj) {
         String itemName = net.minecraft.util.JsonUtils.getString(jsonObj, "item");
@@ -257,10 +254,6 @@ public final class JsonUtils
 
         if( item == null ) {
             throw new JsonParseException(String.format("Unknown item '%s'", itemName));
-        }
-
-        if( item.getHasSubtypes() && !jsonObj.has("data") ) {
-            throw new JsonParseException(String.format("Missing data for item '%s'", itemName));
         }
 
         ItemStack stack;
@@ -274,12 +267,11 @@ public final class JsonUtils
 
             tmp.setTag("tag", nbt);
             tmp.setString("id", itemName);
-            tmp.setInteger("Count", net.minecraft.util.JsonUtils.getInt(jsonObj, "count", 1));
-            tmp.setInteger("Damage", net.minecraft.util.JsonUtils.getInt(jsonObj, "data", 0));
+            tmp.setInt("Count", net.minecraft.util.JsonUtils.getInt(jsonObj, "count", 1));
 
-            stack = new ItemStack(tmp);
+            stack = ItemStack.read(tmp);
         } else {
-            stack = new ItemStack(item, net.minecraft.util.JsonUtils.getInt(jsonObj, "count", 1), net.minecraft.util.JsonUtils.getInt(jsonObj, "data", 0));
+            stack = new ItemStack(item, net.minecraft.util.JsonUtils.getInt(jsonObj, "count", 1));
         }
 
         if( !ItemStackUtils.isValid(stack) ) {
@@ -289,34 +281,34 @@ public final class JsonUtils
         return stack;
     }
 
-    private static NonNullList<ItemStack> getStacks(JsonElement json) {
-        NonNullList<ItemStack> items = NonNullList.create();
-
-        if( json == null || json.isJsonNull() ) {
-            throw new JsonSyntaxException("Json cannot be null");
-        }
-
-        if( json.isJsonArray() ) {
-            json.getAsJsonArray().forEach(elem -> {
-                if( elem != null && elem.isJsonObject() ) {
-                    items.addAll(getStacks(elem));
-                } else {
-                    throw new JsonSyntaxException("Expcted stack to be an object");
-                }
-            });
-        } else if( json.isJsonObject() ) {
-            JsonObject jsonObj = json.getAsJsonObject();
-
-            if( jsonObj.has("type") && MiscUtils.defIfNull(jsonObj.get("type").getAsString(), "").equals("forge:ore_dict") ) {
-                String oredictName = jsonObj.get("ore").getAsString();
-                items.addAll(OreDictionary.getOres(oredictName).stream().map(ItemStack::copy).collect(Collectors.toList()));
-            } else {
-                items.add(getStack(jsonObj));
-            }
-        } else {
-            throw new JsonSyntaxException("Expected stack(s) to be an object or an array of objects");
-        }
-
-        return items;
-    }
+//    private static NonNullList<ItemStack> getStacks(JsonElement json) {
+//        NonNullList<ItemStack> items = NonNullList.create();
+//
+//        if( json == null || json.isJsonNull() ) {
+//            throw new JsonSyntaxException("Json cannot be null");
+//        }
+//
+//        if( json.isJsonArray() ) {
+//            json.getAsJsonArray().forEach(elem -> {
+//                if( elem != null && elem.isJsonObject() ) {
+//                    items.addAll(getStacks(elem));
+//                } else {
+//                    throw new JsonSyntaxException("Expcted stack to be an object");
+//                }
+//            });
+//        } else if( json.isJsonObject() ) {
+//            JsonObject jsonObj = json.getAsJsonObject();
+//
+//            if( jsonObj.has("type") && MiscUtils.defIfNull(jsonObj.get("type").getAsString(), "").equals("forge:ore_dict") ) {
+//                String oredictName = jsonObj.get("ore").getAsString();
+//                items.addAll(OreDictionary.getOres(oredictName).stream().map(ItemStack::copy).collect(Collectors.toList()));
+//            } else {
+//                items.add(getStack(jsonObj));
+//            }
+//        } else {
+//            throw new JsonSyntaxException("Expected stack(s) to be an object or an array of objects");
+//        }
+//
+//        return items;
+//    }
 }

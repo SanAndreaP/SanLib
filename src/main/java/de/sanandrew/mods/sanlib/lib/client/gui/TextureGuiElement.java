@@ -58,15 +58,15 @@ public class TextureGuiElement
     @Override
     public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
         GuiScreen guiScreen = gui.get();
-        guiScreen.mc.renderEngine.bindTexture(this.data.location);
+        guiScreen.mc.textureManager.bindTexture(this.data.location);
         GlStateManager.pushMatrix();
         if( this.data.forceAlpha ) {
             GlStateManager.enableBlend();
             GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         }
-        GlStateManager.translate(x, y, guiScreen.zLevel);
-        GlStateManager.scale(this.data.scale[0], this.data.scale[1], 1.0D);
-        GlStateManager.color(this.data.color.fRed(), this.data.color.fGreen(), this.data.color.fBlue(), this.data.color.fAlpha());
+        GlStateManager.translated(x, y, 0.0D);
+        GlStateManager.scaled(this.data.scale[0], this.data.scale[1], 1.0D);
+        GlStateManager.color4f(this.data.color.fRed(), this.data.color.fGreen(), this.data.color.fBlue(), this.data.color.fAlpha());
         Gui.drawModalRectWithCustomSizedTexture(0, 0, this.data.uv[0], this.data.uv[1], this.data.size[0], this.data.size[1], this.data.textureSize[0], this.data.textureSize[1]);
         GlStateManager.popMatrix();
     }

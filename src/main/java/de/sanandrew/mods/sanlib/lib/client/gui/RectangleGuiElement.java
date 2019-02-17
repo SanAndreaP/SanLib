@@ -36,7 +36,7 @@ public class RectangleGuiElement
     @Override
     public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
         GlStateManager.pushMatrix();
-        GlStateManager.translate(x, y, 0);
+        GlStateManager.translatef(x, y, 0);
         if( this.data.color[0] != this.data.color[1] ) {
             GuiUtils.drawGradientRect(0, 0, this.data.size[0], this.data.size[1], this.data.color[0], this.data.color[1], this.data.horizontal);
         } else {

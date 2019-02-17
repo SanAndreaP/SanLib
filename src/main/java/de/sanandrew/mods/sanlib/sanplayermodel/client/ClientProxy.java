@@ -12,10 +12,8 @@ import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.RenderSanA
 import de.sanandrew.mods.sanlib.sanplayermodel.entity.EntitySanArmorStand;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-@SideOnly(Side.CLIENT)
 public class ClientProxy
         extends CommonProxy
 {

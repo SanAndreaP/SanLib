@@ -7,9 +7,6 @@
 package de.sanandrew.mods.sanlib;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.fml.common.discovery.ASMDataTable;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 public class CommonProxy
 {
@@ -17,12 +14,9 @@ public class CommonProxy
         return null;
     }
 
-    public void preInit(FMLPreInitializationEvent event) {
+    public void init() {
     }
 
-    public void postInit(FMLPostInitializationEvent event) {
-    }
-
-    public void loadModLexica(ASMDataTable dataTable) {
+    public void loadComplete() {
     }
 }

@@ -6,62 +6,71 @@
    *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.client.command;
 
-import net.minecraft.command.CommandBase;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import de.sanandrew.mods.sanlib.lib.client.ModelJsonLoader;
+import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.WrongUsageException;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.client.IClientCommand;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.command.CommandSource;
+import net.minecraft.util.text.TextComponentTranslation;
 
-import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.List;
-
-@SideOnly(Side.CLIENT)
 public class CommandSanLibClient
-        extends CommandBase
-        implements IClientCommand
+//        extends Command<>
+//        implements IClientCommand
 {
-    @Override
-    public String getName() {
-        return "sanlibc";
+    public static void register(CommandDispatcher<CommandSource> dispatcher) {
+        dispatcher.register(LiteralArgumentBuilder.<CommandSource>literal("sanlib").requires(src -> src.getWorld().isRemote)
+                                                  .then(RequiredArgumentBuilder.argument("subcommand", StringArgumentType.string()))
+                                                    .executes(CommandSanLibClient::onReloadModels));
     }
 
-    @Override
-    public int getRequiredPermissionLevel() {
-        return 2;
-    }
+    //TODO: register in init!
+    private static int onReloadModels(CommandContext<CommandSource> src) {
+        ModelJsonLoader.REGISTERED_JSON_LOADERS.forEach(loader -> loader.onResourceManagerReload(Minecraft.getInstance().getResourceManager()));
+        Minecraft.getInstance().player.sendMessage(new TextComponentTranslation("commands.sanlibc.reloadModels"));
 
-    @Override
-    public String getUsage(ICommandSender sender) {
-        return "commands.sanlibc.usage";
+        return 1;
     }
-
-    @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        if( args.length < 1 ) {
-            throw new WrongUsageException("commands.sanlibc.usage");
-        } else {
-            if( CommandSanLibCElem.COMMANDS.containsKey(args[0]) ) {
-                CommandSanLibCElem.COMMANDS.get(args[0]).accept(server, sender, args);
-            } else {
-                throw new WrongUsageException("commands.sanlibc.usage");
-            }
-        }
-    }
-
-    @Override
-    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
-        return args.length == 1 ? getListOfStringsMatchingLastWord(args, CommandSanLibCElem.COMMANDS.keySet()) : Collections.emptyList();
-    }
-
-    @Override
-    public boolean allowUsageWithoutPrefix(ICommandSender sender, String message) {
-        return true;
-    }
+//    @Override
+//    public String getName() {
+//        return "sanlibc";
+//    }
+//
+//    @Override
+//    public int getRequiredPermissionLevel() {
+//        return 2;
+//    }
+//
+//    @Override
+//    public String getUsage(ICommandSender sender) {
+//        return "commands.sanlibc.usage";
+//    }
+//
+//    @Override
+//    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+//        if( args.length < 1 ) {
+//            throw new WrongUsageException("commands.sanlibc.usage");
+//        } else {
+//            if( CommandSanLibCElem.COMMANDS.containsKey(args[0]) ) {
+//                CommandSanLibCElem.COMMANDS.get(args[0]).accept(server, sender, args);
+//            } else {
+//                throw new WrongUsageException("commands.sanlibc.usage");
+//            }
+//        }
+//    }
+//
+//    @Override
+//    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos) {
+//        return args.length == 1 ? getListOfStringsMatchingLastWord(args, CommandSanLibCElem.COMMANDS.keySet()) : Collections.emptyList();
+//    }
+//
+//    @Override
+//    public boolean allowUsageWithoutPrefix(ICommandSender sender, String message) {
+//        return true;
+//    }
 
     @FunctionalInterface
     interface TriConsumerCommEx<T, U, V>

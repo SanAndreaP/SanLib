@@ -18,15 +18,12 @@ import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHandSide;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-@SideOnly(Side.CLIENT)
 public class LayerSanStandardClothes
         implements LayerRenderer<EntityLivingBase>
 {
@@ -42,12 +39,12 @@ public class LayerSanStandardClothes
     }
 
     @Override
-    public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+    public void render(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
         this.armTilt = 0.0F;
         this.hasCstChest = false;
 
         boolean visibleOrOutline = !entitylivingbaseIn.isInvisible() || this.renderer.isOutlineRendering();
-        boolean visibleToPlayer = !visibleOrOutline && !entitylivingbaseIn.isInvisibleToPlayer(Minecraft.getMinecraft().player);
+        boolean visibleToPlayer = !visibleOrOutline && !entitylivingbaseIn.isInvisibleToPlayer(Minecraft.getInstance().player);
 
         if( visibleOrOutline || visibleToPlayer ) {
             this.renderClothLayer(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale, EntityEquipmentSlot.CHEST);
@@ -108,7 +105,7 @@ public class LayerSanStandardClothes
             t.setLivingAnimations(entityLivingBaseIn, limbSwing, limbSwingAmount, partialTicks);
             this.renderer.bindTexture(t.getTexture());
 
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             t.render(entityLivingBaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
         }
     }

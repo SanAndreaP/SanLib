@@ -1,0 +1,136 @@
+import org.codehaus.groovy.runtime.GStringImpl
+
+buildscript {
+    repositories {
+        maven { url = 'https://files.minecraftforge.net/maven' }
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+    }
+}
+apply plugin: 'net.minecraftforge.gradle'
+
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+idea {
+    module {
+        inheritOutputDirs = true
+    }
+}
+
+version = "1.12.2-1.5.1"
+group= "de.sanandrew.mods"
+archivesBaseName = "SanLib"
+
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+
+minecraft {
+    mappings channel: 'snapshot', version: '20180921-1.13'
+	accessTransformer = file('sanlib_at.cfg')
+    runs {
+        client = {
+            // recommended logging data for a userdev environment
+            properties 'forge.logging.markers': 'SCAN,REGISTRIES,REGISTRYDUMP'
+            // recommended logging level for the console
+            properties 'forge.logging.console.level': 'debug'
+            workingDirectory project.file('run').canonicalPath
+            source sourceSets.main
+        }
+        server = {
+            // recommended logging data for a userdev environment
+            properties 'forge.logging.markers': 'SCAN,REGISTRIES,REGISTRYDUMP'
+            // recommended logging level for the console
+            properties 'forge.logging.console.level': 'debug'
+            workingDirectory project.file('run').canonicalPath
+            source sourceSets.main
+        }
+    }
+}
+
+repositories {
+    maven {
+        name = "CoFH Maven"
+        url = "http://maven.covers1624.net"
+    }
+	maven {
+        name = "MC Moddev Maven"
+        url = "http://maven.mcmoddev.com"
+    }
+}
+
+
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java', 'src/main/test']
+        }
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+}
+
+
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.13.2-25.0.10'
+    //deobfCompile "cofh:RedstoneFlux:1.12-2.0.2.3:universal"
+    //deobfCompile "net.darkhax.tesla:Tesla-1.12.2:1.0.63"
+}
+
+apply plugin: 'maven'
+project.ext {
+    releaseRepoUrl = "file://${project(':').projectDir}/maven/" as GStringImpl
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        pom.artifactId = project.name
+        pom.version = project.version
+        repository(url: project.releaseRepoUrl)
+    }
+}
+//task signJar(type: SignJar, dependsOn: reobfJar) {
+//    onlyIf {
+//        project.hasProperty('keyStore')
+//    }
+//    keyStore = project.findProperty('keyStore')
+//    alias = project.findProperty('keyStoreAlias')
+//    storePass = project.findProperty('keyStorePass')
+//    keyPass = project.findProperty('keyStoreKeyPass')
+//    inputFile = jar.archivePath
+//    outputFile = jar.archivePath
+//}
+
+//build.finalizedBy signJar
+build.finalizedBy uploadArchives
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mcversion", "1.13.2"
+
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+
+        expand 'version':project.version, 'mcversion':"1.13.2"
+    }
+
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+    
+	rename '(.+_at.cfg)', 'META-INF/$1'
+}
+
+jar {
+	manifest {
+		attributes 'FMLAT': 'sanlib_at.cfg'
+	}
+}
+
+artifacts {
+    archives jar
+}

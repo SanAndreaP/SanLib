@@ -8,16 +8,9 @@ package de.sanandrew.mods.sanlib.api.client.lexicon;
 
 import joptsimple.internal.Strings;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-@SideOnly(Side.CLIENT)
 public abstract class LexiconGroup
         implements ILexiconGroup
 {

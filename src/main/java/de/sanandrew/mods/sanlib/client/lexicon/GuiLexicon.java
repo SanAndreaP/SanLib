@@ -9,45 +9,29 @@
 package de.sanandrew.mods.sanlib.client.lexicon;
 
 import de.sanandrew.mods.sanlib.SanLib;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexicon;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconEntry;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconGroup;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconGuiHelper;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconInst;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconPageRender;
+import de.sanandrew.mods.sanlib.api.client.lexicon.*;
 import de.sanandrew.mods.sanlib.client.lexicon.button.GuiButtonEntry;
 import de.sanandrew.mods.sanlib.client.lexicon.button.GuiButtonEntryDivider;
 import de.sanandrew.mods.sanlib.client.lexicon.button.GuiButtonGroup;
-import de.sanandrew.mods.sanlib.client.lexicon.button.GuiButtonLink;
 import de.sanandrew.mods.sanlib.lib.util.LangUtils;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiConfirmOpenLink;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiYesNoCallback;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.Level;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
-@SideOnly(Side.CLIENT)
 public class GuiLexicon
         extends GuiScreen
-        implements GuiYesNoCallback
 {
     int guiLeft;
     int guiTop;
@@ -57,7 +41,7 @@ public class GuiLexicon
 
     public final ILexicon lexicon;
 
-    private ILexiconGroup group;
+    public ILexiconGroup group;
     private ILexiconEntry entry;
     @Nonnull
     private ILexiconPageRender render;
@@ -67,7 +51,7 @@ public class GuiLexicon
     float scroll;
     int dHeight;
     private boolean isScrolling;
-    private URI clickedURI;
+    public URI clickedURI;
     private boolean updateGUI;
 
     final List<GuiButton> entryButtons;
@@ -85,9 +69,10 @@ public class GuiLexicon
         this.lexicon = lexicon;
     }
 
-    @SuppressWarnings("unchecked")
     public void initGui() {
         super.initGui();
+
+        this.entryButtons.clear();
 
         int guiSizeX = this.lexicon.getGuiSizeX();
         int guiSizeY = this.lexicon.getGuiSizeY();
@@ -101,19 +86,16 @@ public class GuiLexicon
         this.entryY = this.guiTop + this.lexicon.getEntryPosY();
         this.entryHeight = this.lexicon.getEntryHeight();
 
-        this.buttonList.clear();
-        this.entryButtons.clear();
-
         int navOffsetY = this.lexicon.getNavButtonOffsetY();
-        this.buttonList.add(new GuiButtonNav(this.buttonList.size(), this.guiLeft + 30, this.guiTop + navOffsetY, 0, !navHistory.isEmpty()));
-        this.buttonList.add(new GuiButtonNav(this.buttonList.size(), this.guiLeft + (guiSizeX - 10) / 2, this.guiTop + navOffsetY, 1, true));
-        this.buttonList.add(new GuiButtonNav(this.buttonList.size(), this.guiLeft + guiSizeX - 48, this.guiTop + navOffsetY, 2, !navFuture.isEmpty()));
+        this.addButton(new GuiButtonNav(this.buttons.size(), this.guiLeft + 30, this.guiTop + navOffsetY, 0, !navHistory.isEmpty()));
+        this.addButton(new GuiButtonNav(this.buttons.size(), this.guiLeft + (guiSizeX - 10) / 2, this.guiTop + navOffsetY, 1, true));
+        this.addButton(new GuiButtonNav(this.buttons.size(), this.guiLeft + guiSizeX - 48, this.guiTop + navOffsetY, 2, !navFuture.isEmpty()));
 
         if( group == null ) {
             int posX = 0;
             int posY = 0;
             for( ILexiconGroup group : inst.getGroups() ) {
-                this.buttonList.add(new GuiButtonGroup(this, this.buttonList.size(), this.entryX + 2 + posX, this.entryY + 2 + posY, group, this::groupBtnMouseOver));
+                this.buttons.add(new GuiButtonGroup(this, this.buttons.size(), this.entryX + 2 + posX, this.entryY + 2 + posY, group, this::groupBtnMouseOver));
                 if( (posX += 34) > this.lexicon.getEntryWidth() - 12 ) {
                     posX = 0;
                     posY += 34;
@@ -139,7 +121,7 @@ public class GuiLexicon
                 int shift = this.render.shiftEntryPosY();
                 this.entryY += shift;
                 this.entryHeight -= shift;
-                this.render.initPage(entry, this.renderHelper, this.buttonList, this.entryButtons);
+                this.render.initPage(entry, this.renderHelper);
                 this.render.loadPageState(this.changedPageNbt);
             } else {
                 SanLib.LOG.log(Level.ERROR, String.format("cannot render lexicon page entry %s as render ID %s is not registered!", entry.getId(), entry.getPageRenderId()));
@@ -147,11 +129,11 @@ public class GuiLexicon
             }
         }
 
-        this.updateScreen();
+        this.tick();
     }
 
     @Override
-    public void updateScreen() {
+    public void tick() {
         if( this.updateGUI ) {
             this.updateGUI = false;
             this.initGui();
@@ -169,24 +151,37 @@ public class GuiLexicon
             btn.enabled = btn.y - Math.round(scroll * this.dHeight) > 0 && btn.y - Math.round(scroll * this.dHeight) + btn.height <= this.entryHeight;
         }
 
-        this.render.updateScreen(this.renderHelper);
+        this.render.tickScreen(this.renderHelper);
     }
 
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partTicks) {
-        boolean mouseDown = Mouse.isButtonDown(0);
+    @Nonnull
+    public <T extends GuiButton> T addButton(@Nonnull T button) {
+        return super.addButton(button);
+    }
+
+    @Nonnull
+    <T extends GuiButton> T addEntryButton(@Nonnull T button) {
+        this.entryButtons.add(button);
+        this.children.add(button);
+        return button;
+    }
+
+    @Override
+    public void render(int mouseX, int mouseY, float partTicks) {
+        boolean mouseDown = this.mc.mouseHelper.isLeftDown();
         int entryWidth = this.lexicon.getEntryWidth();
 
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.drawDefaultBackground();
 
-        this.mc.renderEngine.bindTexture(this.lexicon.getBackgroundTexture());
+        this.mc.textureManager.bindTexture(this.lexicon.getBackgroundTexture());
 
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.lexicon.getGuiSizeX(), this.lexicon.getGuiSizeY());
 
         GlStateManager.pushMatrix();
-        GlStateManager.translate(this.entryX + entryWidth, this.entryY, 0.0F);
+        GlStateManager.translatef(this.entryX + entryWidth, this.entryY, 0.0F);
         drawRect(0, 0, 6, this.entryHeight, 0x30000000);
         if( this.dHeight > 0 ) {
             drawRect(0, Math.round((this.entryHeight - 16) * scroll), 6, Math.round((this.entryHeight - 16) * scroll + 16), 0x800000FF);
@@ -195,7 +190,7 @@ public class GuiLexicon
 
         if( entry != null ) {
             GlStateManager.pushMatrix();
-            GlStateManager.translate(this.guiLeft, this.guiTop, 0.0F);
+            GlStateManager.translatef(this.guiLeft, this.guiTop, 0.0F);
             this.render.renderPageOverlay(entry, this.renderHelper, mouseX - this.entryX, mouseY - entryY, partTicks);
             GlStateManager.popMatrix();
         }
@@ -203,20 +198,20 @@ public class GuiLexicon
         GlStateManager.pushMatrix();
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         this.renderHelper.doEntryScissoring();
-        GlStateManager.translate(this.entryX, this.entryY, 0.0F);
+        GlStateManager.translatef(this.entryX, this.entryY, 0.0F);
 
-        GlStateManager.translate(0.0F, Math.round(-scroll * this.dHeight), 0.0F);
+        GlStateManager.translatef(0.0F, Math.round(-scroll * this.dHeight), 0.0F);
 
         if( entry != null ) {
             this.render.renderPageEntry(entry, this.renderHelper, mouseX - this.entryX, mouseY - entryY, Math.round(scroll * this.dHeight), partTicks);
         } else if( group != null ) {
             String s = TextFormatting.ITALIC + LangUtils.translate(LangUtils.LEXICON_GROUP_NAME.get(this.lexicon.getModId(), group.getId()));
-            this.renderHelper.getFontRenderer().drawString(s, 2, 2, 0xFF33AA33, false);
+            this.renderHelper.getFontRenderer().drawString(s, 2, 2, 0xFF33AA33);
             Gui.drawRect(2, 12, entryWidth - 2, 13, 0xFF33AA33);
         }
 
         for( GuiButton btn : this.entryButtons ) {
-            btn.drawButton(this.mc, mouseX - this.entryX, mouseY - this.entryY + Math.round(scroll * this.dHeight), partTicks);
+            btn.render(mouseX - this.entryX, mouseY - this.entryY + Math.round(scroll * this.dHeight), partTicks);
         }
 
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
@@ -237,7 +232,7 @@ public class GuiLexicon
             scroll = mouseDelta / (this.entryHeight - 16.0F);
         }
 
-        super.drawScreen(mouseX, mouseY, partTicks);
+        super.render(mouseX, mouseY, partTicks);
 
         if( this.drawFrameLast != null ) {
             this.drawFrameLast.run();
@@ -245,7 +240,7 @@ public class GuiLexicon
         }
     }
 
-    void changePage(ILexiconGroup group, ILexiconEntry entry, float scroll, boolean doHistory) {
+    public void changePage(ILexiconGroup group, ILexiconEntry entry, float scroll, boolean doHistory) {
         if( doHistory ) {
             History h = new History(this.group, this.entry, this.scroll);
             this.render.savePageState(h.nbt);
@@ -260,7 +255,7 @@ public class GuiLexicon
 
     private void groupBtnMouseOver(ILexiconGroup group, int mouseX, int mouseY) {
         GlStateManager.pushMatrix();
-        GlStateManager.translate(mouseX + 12, mouseY - 12, 32.0F);
+        GlStateManager.translatef(mouseX + 12, mouseY - 12, 32.0F);
 
         String title = LangUtils.translate(LangUtils.LEXICON_GROUP_NAME.get(this.lexicon.getModId(), group.getId()));
         int bkgColor = 0xF0101010;
@@ -280,76 +275,21 @@ public class GuiLexicon
         this.drawGradientRect(-3,            -3,          textWidth + 3, -3 + 1,          lightBg, lightBg);
         this.drawGradientRect(-3,            tHeight + 2, textWidth + 3, tHeight + 3,     darkBg,  darkBg);
 
-        this.renderHelper.getFontRenderer().drawString(title, 0, 0, 0xFFFFFFFF, true);
+        this.renderHelper.getFontRenderer().drawStringWithShadow(title, 0, 0, 0xFFFFFFFF);
         GlStateManager.popMatrix();
     }
 
     @Override
-    public void handleMouseInput() throws IOException {
+    public boolean mouseScrolled(double height) {
         if( this.dHeight > 0 ) {
-            int dwheel = Mouse.getEventDWheel() / 120;
+            float dwheel = (float) height / 120.0F;
             if( dwheel != 0 ) {
-                scroll = Math.min(1.0F, Math.max(0.0F, (scroll * this.dHeight - dwheel * 16.0F) / this.dHeight));
+                this.scroll = Math.min(1.0F, Math.max(0.0F, (scroll * this.dHeight - dwheel * 16.0F) / this.dHeight));
+                return true;
             }
         }
 
-        super.handleMouseInput();
-    }
-
-    @Override
-    protected void actionPerformed(GuiButton button) throws IOException {
-        if( !this.render.actionPerformed(button, this.renderHelper) ) {
-            if( button instanceof GuiButtonNav ) {
-                History h;
-                switch( ((GuiButtonNav) button).buttonType ) {
-                    case 0:
-                        h = navHistory.pollLast();
-                        if( h != null ) {
-                            History fh = new History(group, entry, scroll);
-                            this.render.savePageState(fh.nbt);
-                            navFuture.offer(fh);
-                            this.changedPageNbt = h.nbt;
-                            this.changePage(h.group, h.entry, h.scroll, false);
-                        }
-                        break;
-                    case 1:
-                        this.changedPageNbt = new NBTTagCompound();
-                        this.changePage(null, null, 0.0F, true);
-                        break;
-                    case 2:
-                        h = navFuture.pollLast();
-                        if( h != null ) {
-                            History ph = new History(group, entry, scroll);
-                            this.render.savePageState(ph.nbt);
-                            navHistory.offer(ph);
-                            this.changedPageNbt = h.nbt;
-                            this.changePage(h.group, h.entry, h.scroll, false);
-                        }
-                        break;
-                }
-            } else if( button instanceof GuiButtonGroup ) {
-                GuiButtonGroup grpButton = (GuiButtonGroup) button;
-                List<ILexiconEntry> entries = grpButton.group.getEntries();
-                this.changePage(grpButton.group, entries.size() == 1 ? entries.get(0) : null, 0.0F, true);
-            } else if( button instanceof GuiButtonEntry ) {
-                this.changePage(group, ((GuiButtonEntry) button).getEntry(), 0.0F, true);
-            } else if( button instanceof GuiButtonLink ) {
-                try {
-                    GuiButtonLink btnLink = (GuiButtonLink) button;
-                    this.clickedURI = new URI(btnLink.getLink());
-                    if( this.mc.gameSettings.chatLinksPrompt ) {
-                        this.mc.displayGuiScreen(new GuiConfirmOpenLink(this, this.clickedURI.toString(), 0, btnLink.isTrusted()));
-                    } else {
-                        openLink(this.clickedURI);
-                    }
-                } catch( URISyntaxException e ) {
-                    SanLib.LOG.log(Level.ERROR, "Cannot create invalid URI", e);
-                    this.clickedURI = null;
-                }
-            } else {
-                super.actionPerformed(button);
-            }
-        }
+        return false;
     }
 
     float getZLevel() {
@@ -357,7 +297,7 @@ public class GuiLexicon
     }
 
     @Override
-    public void confirmClicked(boolean isYes, int id) {
+    public void confirmResult(boolean isYes, int id) {
         if( id == 0 ) {
             if( isYes ) {
                 openLink(this.clickedURI);
@@ -369,25 +309,13 @@ public class GuiLexicon
     }
 
     @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseBtn) throws IOException {
-        super.mouseClicked(mouseX, mouseY, mouseBtn);
-
-        if( mouseBtn == 0 ) {
-            for( GuiButton btn : this.entryButtons ) {
-                if( btn.mousePressed(this.mc, mouseX - this.entryX, mouseY - this.entryY + Math.round(scroll * this.dHeight)) ) {
-                    btn.playPressSound(this.mc.getSoundHandler());
-                    this.actionPerformed(btn);
-                }
-            }
-        }
-
-        this.render.mouseClicked(mouseX, mouseY, mouseBtn, this.renderHelper);
+    public boolean mouseClicked(double mouseX, double mouseY, int mouseBtn) {
+        return this.render.mouseClicked(mouseX, mouseY, mouseBtn, this.renderHelper) || super.mouseClicked(mouseX, mouseY, mouseBtn);
     }
 
     @Override
-    protected void keyTyped(char typedChar, int keyCode) throws IOException {
-        super.keyTyped(typedChar, keyCode);
-        this.render.keyTyped(typedChar, keyCode, this.renderHelper);
+    public boolean charTyped(char typedChar, int keyCode) {
+        return this.render.charTyped(typedChar, keyCode, this.renderHelper) || super.charTyped(typedChar, keyCode);
     }
 
     @Override
@@ -395,7 +323,7 @@ public class GuiLexicon
         return false;
     }
 
-    private static void openLink(URI uri) {
+    public static void openLink(URI uri) {
         try {
             java.awt.Desktop.getDesktop().browse(uri);
         } catch( Throwable throwable ) {
@@ -429,11 +357,11 @@ public class GuiLexicon
         }
 
         @Override
-        public void drawButton(Minecraft mc, int mouseX, int mouseY, float partTicks) {
+        public void render(int mouseX, int mouseY, float partTicks) {
             if( this.visible ) {
                 boolean over = mouseX >= this.x && mouseX < this.x + this.width && mouseY >= this.y && mouseY < this.y + this.height;
 
-                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 mc.getTextureManager().bindTexture(GuiLexicon.this.lexicon.getBackgroundTexture());
                 GlStateManager.enableBlend();
                 GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
@@ -445,6 +373,37 @@ public class GuiLexicon
                 GlStateManager.disableBlend();
             }
         }
+
+        @Override
+        public void onClick(double mouseX, double mouseY) {
+            History h;
+            switch( this.buttonType ) {
+                case 0:
+                    h = GuiLexicon.this.navHistory.pollLast();
+                    if( h != null ) {
+                        this.navHistory(h, GuiLexicon.this.navFuture);
+                    }
+                    break;
+                case 1:
+                    GuiLexicon.this.changedPageNbt = new NBTTagCompound();
+                    GuiLexicon.this.changePage(null, null, 0.0F, true);
+                    break;
+                case 2:
+                    h = GuiLexicon.this.navFuture.pollLast();
+                    if( h != null ) {
+                        this.navHistory(h, GuiLexicon.this.navHistory);
+                    }
+                    break;
+            }
+        }
+
+        private void navHistory(History h, Deque<History> nav) {
+            History nh = new History(GuiLexicon.this.group, GuiLexicon.this.entry, GuiLexicon.this.scroll);
+            GuiLexicon.this.render.savePageState(nh.nbt);
+            nav.offer(nh);
+            GuiLexicon.this.changedPageNbt = h.nbt;
+            GuiLexicon.this.changePage(h.group, h.entry, h.scroll, false);
+        }
     }
 
     private static final class EmptyRenderer
@@ -453,12 +412,12 @@ public class GuiLexicon
         private static final ILexiconPageRender INSTANCE = new EmptyRenderer();
 
         @Override public String getId() { return ""; }
-        @Override public void initPage(ILexiconEntry entry, ILexiconGuiHelper helper, List<GuiButton> globalButtons, List<GuiButton> entryButtons) { }
+        @Override public void initPage(ILexiconEntry entry, ILexiconGuiHelper helper) { }
         @Override public void renderPageEntry(ILexiconEntry entry, ILexiconGuiHelper helper, int mouseX, int mouseY, int scrollY, float partTicks) { }
         @Override public int getEntryHeight(ILexiconEntry entry, ILexiconGuiHelper helper) { return 0; }
     }
 
     List<GuiButton> getButtonList() {
-        return this.buttonList;
+        return this.buttons;
     }
 }

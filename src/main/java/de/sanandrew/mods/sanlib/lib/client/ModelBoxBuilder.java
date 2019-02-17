@@ -6,8 +6,8 @@
    *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.lib.client;
 
-import net.minecraft.client.model.ModelBase;
-import net.minecraft.client.model.ModelRenderer;
+import net.minecraft.client.renderer.entity.model.ModelBase;
+import net.minecraft.client.renderer.entity.model.ModelRenderer;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -39,8 +39,8 @@ public final class ModelBoxBuilder<T extends ModelRenderer>
     /**
      * Creates a new Model Box Builder with a custom box class.
      * @param model    The model instance
-     * @param boxClass The custom box class. Note: It MUST be a child of the {@link net.minecraft.client.model.ModelRenderer} class and override the
-     *                 {@link net.minecraft.client.model.ModelRenderer#ModelRenderer(net.minecraft.client.model.ModelBase)} parent constructor!
+     * @param boxClass The custom box class. Note: It MUST be a child of the {@link ModelRenderer} class and override the
+     *                 {@link ModelRenderer#ModelRenderer(ModelBase)} parent constructor!
      * @return A new instance of the ModelBoxBuilder.
      */
     public static <T extends ModelRenderer> ModelBoxBuilder<T> newBuilder(final ModelBase model, Class<T> boxClass) {
@@ -51,7 +51,7 @@ public final class ModelBoxBuilder<T extends ModelRenderer>
      * Creates a new Model Box Builder with a custom box class and name.
      * @param model    The model instance
      * @param name     A name for the box
-     * @param boxClass The custom box class. Note: It MUST be a child of the {@link net.minecraft.client.model.ModelRenderer} class and override the
+     * @param boxClass The custom box class. Note: It MUST be a child of the {@link ModelRenderer} class and override the
      *                 {@link net.minecraft.client.model.ModelRenderer#ModelRenderer(net.minecraft.client.model.ModelBase, java.lang.String)} parent constructor!
      * @return A new instance of the ModelBoxBuilder.
      */

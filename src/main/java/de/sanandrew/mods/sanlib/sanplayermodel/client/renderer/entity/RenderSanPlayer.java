@@ -7,6 +7,8 @@
 package de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity;
 
 import de.sanandrew.mods.sanlib.SanLib;
+import de.sanandrew.mods.sanlib.lib.util.ReflectionUtils;
+import de.sanandrew.mods.sanlib.sanplayermodel.Reflections;
 import de.sanandrew.mods.sanlib.sanplayermodel.Resources;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.model.ModelSanPlayer;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.layers.LayerCustomHeldItem;
@@ -24,13 +26,10 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.EnumHandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.Level;
 
 import javax.annotation.Nonnull;
 
-@SideOnly( Side.CLIENT )
 public class RenderSanPlayer
         extends RenderPlayer
 {
@@ -69,7 +68,9 @@ public class RenderSanPlayer
                 yShifted = y - 0.125D;
             }
 
-            this.setModelVisibilities(player);
+            ReflectionUtils.invokeCachedMethod(RenderPlayer.class, this, Reflections.SET_MODEL_VISIBILITIES.mcp, Reflections.SET_MODEL_VISIBILITIES.srg,
+                    new Class[] {AbstractClientPlayer.class}, new Object[] {player});
+//            this.setModelVisibilities(player);
             GlStateManager.enableBlendProfile(GlStateManager.Profile.PLAYER_SKIN);
             doRenderLivingBase(player, x, yShifted, z, partialTicks);
             GlStateManager.disableBlendProfile(GlStateManager.Profile.PLAYER_SKIN);
@@ -80,7 +81,7 @@ public class RenderSanPlayer
         GlStateManager.pushMatrix();
         GlStateManager.disableCull();
         this.myModel.swingProgress = this.getSwingProgress(player, partialTicks);
-        boolean shouldSit = player.isRiding() && (player.getRidingEntity() != null && player.getRidingEntity().shouldRiderSit());
+        boolean shouldSit = player.getRidingEntity() != null && player.getRidingEntity().shouldRiderSit();
         this.myModel.isRiding = shouldSit;
         this.myModel.isChild = player.isChild();
 
@@ -120,7 +121,7 @@ public class RenderSanPlayer
             float limbSwingAmount = 0.0F;
             float limbSwing = 0.0F;
 
-            if( !player.isRiding() ) {
+            if( !shouldSit ) {
                 limbSwingAmount = player.prevLimbSwingAmount + (player.limbSwingAmount - player.prevLimbSwingAmount) * partialTicks;
                 limbSwing = player.limbSwing - player.limbSwingAmount * (1.0F - partialTicks);
 
@@ -135,7 +136,7 @@ public class RenderSanPlayer
                 interpolDelta = interpolHead - interpolOffset;
             }
 
-            GlStateManager.enableAlpha();
+            GlStateManager.enableAlphaTest();
             this.myModel.setLivingAnimations(player, limbSwing, limbSwingAmount, partialTicks);
             this.myModel.setRotationAngles(limbSwing, limbSwingAmount, rotFloat, interpolDelta, rotPitch, scale, player);
 
@@ -178,9 +179,9 @@ public class RenderSanPlayer
             SanLib.LOG.log(Level.ERROR, "Couldn't render SanAndreasP", ex);
         }
 
-        GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
+        GlStateManager.activeTexture(OpenGlHelper.GL_TEXTURE1);
         GlStateManager.enableTexture2D();
-        GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
+        GlStateManager.activeTexture(OpenGlHelper.GL_TEXTURE0);
         GlStateManager.enableCull();
         GlStateManager.popMatrix();
     }
@@ -194,8 +195,9 @@ public class RenderSanPlayer
     @Override
     public void renderRightArm(AbstractClientPlayer clientPlayer) {
         this.bindTexture(this.getEntityTexture(clientPlayer));
-        GlStateManager.color(1.0F, 1.0F, 1.0F);
-        this.setModelVisibilities(clientPlayer);
+        GlStateManager.color3f(1.0F, 1.0F, 1.0F);
+        ReflectionUtils.invokeCachedMethod(RenderPlayer.class, this, Reflections.SET_MODEL_VISIBILITIES.mcp, Reflections.SET_MODEL_VISIBILITIES.srg,
+                new Class[] {AbstractClientPlayer.class}, new Object[] {clientPlayer});
         GlStateManager.enableBlend();
         this.myModel.swingProgress = 0.0F;
         this.myModel.isSneak = false;
@@ -211,8 +213,9 @@ public class RenderSanPlayer
     @Override
     public void renderLeftArm(AbstractClientPlayer clientPlayer) {
         this.bindTexture(this.getEntityTexture(clientPlayer));
-        GlStateManager.color(1.0F, 1.0F, 1.0F);
-        this.setModelVisibilities(clientPlayer);
+        GlStateManager.color3f(1.0F, 1.0F, 1.0F);
+        ReflectionUtils.invokeCachedMethod(RenderPlayer.class, this, Reflections.SET_MODEL_VISIBILITIES.mcp, Reflections.SET_MODEL_VISIBILITIES.srg,
+                new Class[] {AbstractClientPlayer.class}, new Object[] {clientPlayer});
         GlStateManager.enableBlend();
         this.myModel.swingProgress = 0.0F;
         this.myModel.isSneak = false;

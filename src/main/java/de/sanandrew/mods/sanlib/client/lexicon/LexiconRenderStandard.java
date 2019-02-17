@@ -9,20 +9,12 @@ package de.sanandrew.mods.sanlib.client.lexicon;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconEntry;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconGuiHelper;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconPageRender;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.List;
-
-@SideOnly(Side.CLIENT)
 public class LexiconRenderStandard
         implements ILexiconPageRender
 {
 
     private int drawHeight;
-    private List<GuiButton> entryButtons;
 
     @Override
     public String getId() {
@@ -30,9 +22,7 @@ public class LexiconRenderStandard
     }
 
     @Override
-    public void initPage(ILexiconEntry entry, ILexiconGuiHelper helper, List<GuiButton> globalButtons, List<GuiButton> entryButtons) {
-        this.entryButtons = entryButtons;
-    }
+    public void initPage(ILexiconEntry entry, ILexiconGuiHelper helper) { }
 
     @Override
     public void renderPageEntry(ILexiconEntry entry, ILexiconGuiHelper helper, int mouseX, int mouseY, int scrollY, float partTicks) {
@@ -41,7 +31,7 @@ public class LexiconRenderStandard
         helper.drawTitleCenter(0, entry);
 
         this.drawHeight = 55;
-        this.drawHeight += helper.drawContentString(2, this.drawHeight, entry, this.entryButtons);
+        this.drawHeight += helper.drawContentString(2, this.drawHeight, entry, true);
 
         int height = entryWidth / 2;
         if( helper.tryDrawPicture(entry.getPicture(), 0, this.drawHeight + 8, entryWidth, height) ) {

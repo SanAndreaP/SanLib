@@ -13,10 +13,8 @@ import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.client.ClientTickHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.resources.IResource;
+import net.minecraft.resources.IResource;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.Level;
 import org.lwjgl.opengl.ARBFragmentShader;
 import org.lwjgl.opengl.ARBShaderObjects;
@@ -29,7 +27,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.function.Consumer;
 
-@SideOnly(Side.CLIENT)
 @SuppressWarnings("unused")
 public final class ShaderHelper
 {
@@ -136,7 +133,7 @@ public final class ShaderHelper
 
     private static String readFileAsString(ResourceLocation file) throws IOException {
         StringBuilder source = new StringBuilder();
-        try( IResource res = Minecraft.getMinecraft().getResourceManager().getResource(file); InputStream in = res.getInputStream() ) {
+        try( IResource res = Minecraft.getInstance().getResourceManager().getResource(file); InputStream in = res.getInputStream() ) {
             try( BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8")) ) {
                 String line;
                 while( (line = reader.readLine()) != null ) {

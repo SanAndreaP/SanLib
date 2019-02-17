@@ -11,8 +11,10 @@ import com.google.gson.JsonObject;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import de.sanandrew.mods.sanlib.lib.util.LangUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.fonts.Font;
 import net.minecraft.util.ResourceLocation;
 
 import java.lang.ref.WeakReference;
@@ -32,7 +34,6 @@ import java.util.Objects;
     "wrapWidth": 166,             -- Maximum width a text can have until it is wrapped to a new line, values smaller than 1 will disable wrapping (optional, default: 0)
     "font": &#123;                -- custom font (optional, default: "font": &#123; "texture": "standard" &#125;)
       "texture": "galactic",         -- either font name or custom texture resource location, font names can be ("standard" (regular MC font) or "galactic" (standard galactic alphabet))
-      "unicode": true,               -- wether or not to use unicode (optional, default: dependent on MC settings)
       "bidirectional": false,        -- wether or not the Unicode Bidirectional Algorithm should be run before rendering any string (optional, default: dependent on MC settings)
     &#125;
   &#125;
@@ -57,9 +58,9 @@ public class TextGuiElement
 
             JsonElement cstFont = data.get("font");
             if( cstFont == null ) {
-                this.data.fontRenderer = new Font("standard").get(gui.get());
+                this.data.fontRenderer = new FontInst("standard").get(gui.get());
             } else {
-                this.data.fontRenderer = JsonUtils.GSON.fromJson(cstFont, Font.class).get(gui.get());
+                this.data.fontRenderer = JsonUtils.GSON.fromJson(cstFont, FontInst.class).get(gui.get());
             }
             this.data.height = this.data.wrapWidth <= 0 ? this.data.fontRenderer.FONT_HEIGHT : this.data.fontRenderer.getWordWrappedHeight(this.data.text, this.data.wrapWidth);
             if( this.data.shadow ) {
@@ -77,7 +78,11 @@ public class TextGuiElement
             }
             this.data.fontRenderer.drawSplitString(this.data.text, x, y, this.data.color, this.data.wrapWidth);
         } else {
-            this.data.fontRenderer.drawString(this.data.text, x, y, this.data.color, this.data.shadow);
+            if( this.data.shadow ) {
+                this.data.fontRenderer.drawStringWithShadow(this.data.text, x, y, this.data.color);
+            } else {
+                this.data.fontRenderer.drawString(this.data.text, x, y, this.data.color);
+            }
         }
     }
 
@@ -96,19 +101,17 @@ public class TextGuiElement
         private int height;
     }
 
-    @SuppressWarnings("WeakerAccess")
-    private static final class Font
+    private static final class FontInst
     {
         String texture;
-        Boolean unicode;
         Boolean bidirectional;
 
         private WeakReference<FontRenderer> frInst;
 
         @SuppressWarnings("unused")
-        public Font() { }
+        public FontInst() { }
 
-        Font(String tx) {
+        FontInst(String tx) {
             this.texture = tx;
         }
 
@@ -116,12 +119,11 @@ public class TextGuiElement
             if( "standard".equals(this.texture) ) {
                 return gui.mc.fontRenderer;
             } else if( "galactic".equals(this.texture) ) {
-                return gui.mc.standardGalacticFontRenderer;
+                return gui.mc.getFontResourceManager().getFontRenderer(Minecraft.standardGalacticFontRenderer);
             } else {
                 FontRenderer fr = this.frInst == null ? null : this.frInst.get();
                 if( fr == null ) {
-                    this.frInst = new WeakReference<>(new FontRenderer(gui.mc.gameSettings, new ResourceLocation(this.texture), gui.mc.renderEngine,
-                                                                       this.unicode != null ? this.unicode : gui.mc.gameSettings.language != null && gui.mc.isUnicode()));
+                    this.frInst = new WeakReference<>(new FontRenderer(gui.mc.textureManager, new Font(gui.mc.textureManager, new ResourceLocation(this.texture))));
                     fr = Objects.requireNonNull(this.frInst.get());
                     if( this.bidirectional != null ) {
                         fr.setBidiFlag(this.bidirectional);
@@ -137,7 +139,7 @@ public class TextGuiElement
         @Override
         @SuppressWarnings("NonFinalFieldReferencedInHashCode")
         public int hashCode() {
-            return Objects.hash(this.texture, this.unicode, this.bidirectional);
+            return Objects.hash(this.texture, this.bidirectional);
         }
     }
 }

@@ -9,18 +9,12 @@ package de.sanandrew.mods.sanlib.client.lexicon.search;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import de.sanandrew.mods.sanlib.SanLib;
-import de.sanandrew.mods.sanlib.api.client.lexicon.IGuiButtonEntry;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconEntry;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconGroup;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconGuiHelper;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconPageRender;
+import de.sanandrew.mods.sanlib.api.client.lexicon.*;
 import de.sanandrew.mods.sanlib.client.lexicon.LexiconRegistry;
 import de.sanandrew.mods.sanlib.lib.util.LangUtils;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +22,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-@SideOnly(Side.CLIENT)
 public class LexiconRenderSearch
         implements ILexiconPageRender
 {
@@ -39,7 +32,6 @@ public class LexiconRenderSearch
     public static final int ENTRY_BTN_HEIGHT = 14;
 
     private int drawHeight;
-    private List<GuiButton> entryButtons;
     private GuiTextField search;
     private String lastFilterText;
 
@@ -57,8 +49,7 @@ public class LexiconRenderSearch
     }
 
     @Override
-    public void initPage(ILexiconEntry entry, ILexiconGuiHelper helper, List<GuiButton> globalButtons, List<GuiButton> entryButtons) {
-        this.entryButtons = entryButtons;
+    public void initPage(ILexiconEntry entry, ILexiconGuiHelper helper) {
         this.lastFilterText = "\u00A0";
 
         this.search = new GuiTextField(0, helper.getFontRenderer(), helper.getLexicon().getEntryPosX() + 1, helper.getLexicon().getEntryPosY() + 1,
@@ -69,9 +60,9 @@ public class LexiconRenderSearch
         LexiconRegistry.INSTANCE.getInstance(helper.getLexicon().getModId()).getGroups().forEach(grp -> {
             grp.getEntries().forEach(ntry -> {
                 if( !ntry.getSrcText().isEmpty() && !ntry.getSrcTitle().isEmpty() ) {
-                    IGuiButtonEntry btn = helper.getNewEntryButton(this.entryButtons.size(), 6, 0, ntry, helper.getFontRenderer());
+                    IGuiButtonEntry btn = helper.getNewEntryButton(helper.getEntryButtonList().size(), 6, 0, ntry, helper.getFontRenderer());
                     btn.get().visible = false;
-                    this.entryButtons.add(btn.get());
+                    helper.addEntryButton(btn.get());
                     this.allEntries.put(ntry.getSrcTitle(), ntry.getSrcText(), btn);
                 }
             });
@@ -79,8 +70,8 @@ public class LexiconRenderSearch
     }
 
     @Override
-    public void updateScreen(ILexiconGuiHelper helper) {
-        this.search.updateCursorCounter();
+    public void tickScreen(ILexiconGuiHelper helper) {
+        this.search.tick();
 
         if( !this.search.getText().equals(this.lastFilterText) ) {
             this.drawHeight = 0;
@@ -123,7 +114,7 @@ public class LexiconRenderSearch
 
     @Override
     public void renderPageOverlay(ILexiconEntry entry, ILexiconGuiHelper helper, int mouseX, int mouseY, float partTicks) {
-        this.search.drawTextBox();
+        this.search.drawTextField(mouseX, mouseY, partTicks);
     }
 
     @Override
@@ -149,21 +140,22 @@ public class LexiconRenderSearch
     }
 
     @Override
-    public void mouseClicked(int mouseX, int mouseY, int mouseBtn, ILexiconGuiHelper helper) {
+    public boolean mouseClicked(double mouseX, double mouseY, int mouseBtn, ILexiconGuiHelper helper) {
         mouseX -= helper.getGuiX();
         mouseY -= helper.getGuiY();
 
-        this.search.mouseClicked(mouseX, mouseY, mouseBtn);
+        boolean ret = this.search.mouseClicked(mouseX, mouseY, mouseBtn);
         if( mouseBtn == 1 && mouseX >= this.search.x && mouseX < this.search.x + this.search.width && mouseY >= this.search.y
             && mouseY < this.search.y + this.search.height )
         {
             this.search.setText("");
         }
+        return ret;
     }
 
     @Override
-    public void keyTyped(char typedChar, int keyCode, ILexiconGuiHelper helper) {
-        this.search.textboxKeyTyped(typedChar, keyCode);
+    public boolean charTyped(char typedChar, int keyCode, ILexiconGuiHelper helper) {
+        return this.search.charTyped(typedChar, keyCode);
     }
 
     @Override

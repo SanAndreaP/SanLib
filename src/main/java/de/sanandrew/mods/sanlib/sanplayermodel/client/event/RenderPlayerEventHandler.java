@@ -15,23 +15,22 @@ import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLivingEvent.Pre;
 import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.fml.common.eventhandler.EventPriority;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.opengl.GL11;
 
-@SideOnly(Side.CLIENT)
 public class RenderPlayerEventHandler
 {
     private RenderSanPlayer sanPlayerModel = null;
     private float playerPartTicks = 0.0F;
 
     private void lazyLoad() {
-        Minecraft mc = Minecraft.getMinecraft();
+        Minecraft mc = Minecraft.getInstance();
         if( this.sanPlayerModel == null && mc.player != null ) {
             this.sanPlayerModel = new RenderSanPlayer(mc.getRenderManager());
             mc.getRenderManager().getSkinMap().get("slim").layerRenderers.forEach(layer -> {
@@ -65,14 +64,14 @@ public class RenderPlayerEventHandler
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onHandRender(RenderHandEvent event) {
-        Minecraft mc = Minecraft.getMinecraft();
+        Minecraft mc = Minecraft.getInstance();
         if( SLibConfig.Client.allowCustomSanModel && SanPlayerModel.isSanPlayer(mc.player) ) {
             this.lazyLoad();
 
             GL11.glPushMatrix();
 
             boolean flag = mc.getRenderViewEntity() instanceof EntityLivingBase && ((EntityLivingBase) mc.getRenderViewEntity()).isPlayerSleeping();
-            if( mc.gameSettings.thirdPersonView == 0 && this.sanPlayerModel != null && !flag && !mc.gameSettings.hideGUI && mc.playerController != null && !mc.playerController.isSpectator() ) {
+            if( mc.gameSettings.thirdPersonView == 0 && this.sanPlayerModel != null && !flag && !mc.gameSettings.hideGUI && mc.playerController != null && !mc.playerController.isSpectatorMode() ) {
                 String skinType = mc.player.getSkinType();
                 Render<AbstractClientPlayer> rend = mc.getRenderManager().getEntityRenderObject(mc.player);
                 RenderPlayer skin = mc.getRenderManager().getSkinMap().get(skinType);

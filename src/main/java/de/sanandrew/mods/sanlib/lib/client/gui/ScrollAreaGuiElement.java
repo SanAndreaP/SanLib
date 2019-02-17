@@ -9,7 +9,6 @@ import de.sanandrew.mods.sanlib.lib.client.util.GuiUtils;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Arrays;
@@ -58,7 +57,7 @@ public class ScrollAreaGuiElement
 
     @Override
     public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
-        boolean isLmbDown = Mouse.isButtonDown(0);
+        boolean isLmbDown = gui.get().mc.mouseHelper.isLeftDown();
         int cntAll = this.data.elementsView.size();
         BakedData.ScrollData sData = this.data.getScrollData(this.scroll);
 
@@ -96,9 +95,8 @@ public class ScrollAreaGuiElement
     }
 
     @Override
-    public void handleMouseInput(IGui gui) {
-        int dWheelDir = Mouse.getEventDWheel();
-        if( dWheelDir < 0 ) {
+    public boolean onMouseScroll(IGui gui, double scroll) {
+        if( scroll < 0 ) {
             if( this.data.rasterized ) {
                 this.scroll = this.getRasterScroll(true);
             } else {
@@ -108,7 +106,9 @@ public class ScrollAreaGuiElement
             if( this.scroll > 1.0F ) {
                 this.scroll = 1.0F;
             }
-        } else if( dWheelDir > 0 ) {
+
+            return true;
+        } else if( scroll > 0 ) {
             if( this.data.rasterized ) {
                 this.scroll = this.getRasterScroll(false);
             } else {
@@ -118,7 +118,11 @@ public class ScrollAreaGuiElement
             if( this.scroll < 0.0F ) {
                 this.scroll = 0.0F;
             }
+
+            return true;
         }
+
+        return false;
     }
 
     private float getRasterScroll(boolean next) {

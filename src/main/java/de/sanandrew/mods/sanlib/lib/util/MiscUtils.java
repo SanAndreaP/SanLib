@@ -8,19 +8,11 @@ package de.sanandrew.mods.sanlib.lib.util;
 
 import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.lib.XorShiftRandom;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTPrimitive;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagDouble;
-import net.minecraft.nbt.NBTTagFloat;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraftforge.fml.common.ModContainer;
+import net.minecraft.nbt.*;
+import net.minecraftforge.fml.ModContainer;
 import org.apache.logging.log4j.Level;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
@@ -319,7 +311,7 @@ public final class MiscUtils
 
     /**
      * Looks inside a directory (outside and inside of classpath) and calls the processor for each file found
-     * @param mod The mod container to be looked in (Use {@link net.minecraftforge.fml.common.Loader} to get one)
+     * @param mod The mod container to be looked in
      * @param base The path of the directory to be scanned
      * @param preprocessor A functional reference that gets called before the files are scanned. Its parameter is the path to the directory.
      *                     It should return true if successful, false otherwise (which also cancels further operations)
@@ -327,19 +319,20 @@ public final class MiscUtils
      *                  It should return true if the processing was successful, false otherwise (which also cancels further operations)
      * @return true if both the preprocessor (for the directory) and the processor (for each file) return true, false otherwise.
      */
+    //TODO: fix
     public static boolean findFiles(ModContainer mod, String base, Function<Path, Boolean> preprocessor, BiFunction<Path, Path, Boolean> processor) {
-        File source = mod.getSource();
-
-        if( source.isFile() ) {
-            try( FileSystem fs = FileSystems.newFileSystem(source.toPath(), null) ) {
-                return findFilesIntrn(fs.getPath('/' + base), mod, preprocessor, processor);
-            } catch( IOException e ) {
-                SanLib.LOG.log(Level.ERROR, "Error loading FileSystem from jar: ", e);
-                return false;
-            }
-        } else if( source.isDirectory() ) {
-            return findFilesIntrn(source.toPath().resolve(base), mod, preprocessor, processor);
-        }
+//        File source = mod.getModInfo().getOwningFile().getFileProperties();
+//
+//        if( source.isFile() ) {
+//            try( FileSystem fs = FileSystems.newFileSystem(source.toPath(), null) ) {
+//                return findFilesIntrn(fs.getPath('/' + base), mod, preprocessor, processor);
+//            } catch( IOException e ) {
+//                SanLib.LOG.log(Level.ERROR, "Error loading FileSystem from jar: ", e);
+//                return false;
+//            }
+//        } else if( source.isDirectory() ) {
+//            return findFilesIntrn(source.toPath().resolve(base), mod, preprocessor, processor);
+//        }
 
         return false;
     }
@@ -378,7 +371,7 @@ public final class MiscUtils
 
     public static boolean doesNbtContainOther(final NBTTagCompound mainNBT, final NBTTagCompound otherNBT, boolean strict) {
         return otherNBT == null
-               || (mainNBT != null && otherNBT.getKeySet().stream().allMatch(key -> {
+               || (mainNBT != null && otherNBT.keySet().stream().allMatch(key -> {
                         if( mainNBT.hasKey(key) ) {
                             if( strict ) {
                                 return mainNBT.getTagId(key) == otherNBT.getTagId(key) && mainNBT.getTag(key).equals(otherNBT.getTag(key));
@@ -392,7 +385,7 @@ public final class MiscUtils
                );
     }
 
-    private static boolean compareNBTBase(NBTBase main, NBTBase other) {
+    private static boolean compareNBTBase(INBTBase main, INBTBase other) {
         if( main instanceof NBTPrimitive && other instanceof NBTPrimitive ) {
             NBTPrimitive mainBase = ((NBTPrimitive) main);
             NBTPrimitive otherBase = ((NBTPrimitive) other);
@@ -406,8 +399,8 @@ public final class MiscUtils
             NBTTagList otherList = (NBTTagList) other.copy();
 
             if( mainList.getTagType() == otherList.getTagType() ) {
-                for( int i = mainList.tagCount() - 1; i >= 0 && otherList.tagCount() > 0; i-- ) {
-                    for( int j = otherList.tagCount() - 1; j >= 0; j-- ) {
+                for( int i = mainList.size() - 1; i >= 0 && otherList.size() > 0; i-- ) {
+                    for( int j = otherList.size() - 1; j >= 0; j-- ) {
                         if( compareNBTBase(mainList.get(i), otherList.get(j)) ) {
                             otherList.removeTag(j);
                             break;
@@ -415,7 +408,7 @@ public final class MiscUtils
                     }
                 }
 
-                return otherList.tagCount() == 0;
+                return otherList.size() == 0;
             }
 
             return false;
@@ -426,7 +419,7 @@ public final class MiscUtils
         }
     }
 
-    private static boolean isNbtDouble(NBTBase base) {
+    private static boolean isNbtDouble(INBTBase base) {
         return base instanceof NBTTagDouble || base instanceof NBTTagFloat;
     }
 }

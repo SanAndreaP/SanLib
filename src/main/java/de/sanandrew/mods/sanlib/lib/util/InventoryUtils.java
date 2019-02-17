@@ -13,8 +13,10 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.VanillaHopperItemHandler;
 
 import javax.annotation.Nonnull;
 
@@ -42,7 +44,7 @@ public final class InventoryUtils
         for( int i = 0; i < size; i++ ) {
             ItemStack invStack = inv.getStackInSlot(i);
             if( ItemStackUtils.isValid(invStack) ) {
-                if( ItemStackUtils.areEqual(stack, invStack, checkNbt) ) {
+                if( ItemStackUtils.areEqual(stack, invStack) && (!checkNbt || ItemStack.areItemStackTagsEqual(stack, invStack)) ) {
                     return new Tuple(i, invStack);
                 }
             }
@@ -67,7 +69,7 @@ public final class InventoryUtils
         ItemStack stack = is.copy();
         for( int i = begin; i < end; i++ ) {
             ItemStack invIS = inv.getStackInSlot(i);
-            if( ItemStackUtils.areEqual(is, invIS, checkNBT) ) {
+            if( ItemStackUtils.areEqual(is, invIS) && (!checkNBT || ItemStack.areItemStackTagsEqual(is, invIS)) ) {
                 int fit = Math.min(invIS.getMaxStackSize(), maxStackSize) - invIS.getCount();
                 int stackCnt = stack.getCount();
                 if( fit >= stackCnt ) {
@@ -106,7 +108,7 @@ public final class InventoryUtils
         for( int i = begin; i < end && ItemStackUtils.isValid(is); ++i ) {
             ItemStack invIS = inv.getStackInSlot(i);
             int rest;
-            if( ItemStackUtils.areEqual(is, invIS, checkNBT) ) {
+            if( ItemStackUtils.areEqual(is, invIS) && (!checkNBT || ItemStack.areItemStackTagsEqual(is, invIS)) ) {
                 rest = is.getCount() + invIS.getCount();
                 int maxStack = Math.min(invIS.getMaxStackSize(), maxStackSize);
                 if( rest <= maxStack ) {
@@ -148,23 +150,25 @@ public final class InventoryUtils
     }
 
     @Nonnull
+    @SuppressWarnings("ConstantConditions")
     public static ItemStack addStackToCapability(@Nonnull ItemStack is, ICapabilityProvider provider, EnumFacing facing, boolean simulate, int maxStackSize, int begin, int end) {
-        if( ItemStackUtils.isValid(is) && provider.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing) ) {
-            IItemHandler handler = provider.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing);
-            assert handler != null;
+        if( ItemStackUtils.isValid(is) ) {
+            IItemHandler handler = provider.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing).orElse(null);
 
-            maxStackSize = Math.min(maxStackSize, is.getCount());
-            end = Math.min(end, handler.getSlots());
+            if( handler != null ) {
+                maxStackSize = Math.min(maxStackSize, is.getCount());
+                end = Math.min(end, handler.getSlots());
 
-            for( int i = begin; i < end; i++ ) {
-                ItemStack maxStack = is.copy();
-                maxStack.setCount(maxStackSize);
-                maxStack = handler.insertItem(i, maxStack, simulate);
-                if( !ItemStackUtils.isValid(maxStack) ) {
-                    is.setCount(is.getCount() - maxStackSize);
-                }
-                if( is.getCount() <= 0 ) {
-                    return ItemStackUtils.getEmpty();
+                for (int i = begin; i < end; i++) {
+                    ItemStack maxStack = is.copy();
+                    maxStack.setCount(maxStackSize);
+                    maxStack = handler.insertItem(i, maxStack, simulate);
+                    if (!ItemStackUtils.isValid(maxStack)) {
+                        is.setCount(is.getCount() - maxStackSize);
+                    }
+                    if (is.getCount() <= 0) {
+                        return ItemStackUtils.getEmpty();
+                    }
                 }
             }
         }

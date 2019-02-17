@@ -9,12 +9,9 @@ package de.sanandrew.mods.sanlib.api.client.lexicon;
 import de.sanandrew.mods.sanlib.lib.util.LangUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 
-@SideOnly(Side.CLIENT)
 public interface ILexiconEntry
 {
     String getId();

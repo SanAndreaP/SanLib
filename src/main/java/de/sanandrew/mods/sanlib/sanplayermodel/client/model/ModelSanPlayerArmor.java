@@ -11,20 +11,17 @@ import de.sanandrew.mods.sanlib.lib.client.ModelJsonLoader;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.RenderSanPlayer;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.layers.LayerSanArmor;
 import de.sanandrew.mods.sanlib.sanplayermodel.entity.EntitySanArmorStand;
-import net.minecraft.client.model.ModelBiped;
-import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.client.renderer.entity.model.ModelBiped;
+import net.minecraft.client.renderer.entity.model.ModelPlayer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Arrays;
 
-@SideOnly(Side.CLIENT)
 public class ModelSanPlayerArmor
         extends ModelPlayer
         implements ModelJsonHandler<ModelSanPlayerArmor, LayerSanArmor.ModelJsonArmor>
@@ -210,7 +207,7 @@ public class ModelSanPlayerArmor
         public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
             GlStateManager.pushMatrix();
             if( entityIn.isSneaking() ) {
-                GlStateManager.translate(0.0F, -0.2F, 0.0F);
+                GlStateManager.translatef(0.0F, -0.2F, 0.0F);
             }
             super.render(entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
             GlStateManager.popMatrix();

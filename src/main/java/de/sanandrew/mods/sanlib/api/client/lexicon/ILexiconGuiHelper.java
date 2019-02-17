@@ -56,9 +56,9 @@ public interface ILexiconGuiHelper
      * @param y the y-position of the text block.
      * @param wrapWidth the width the text should be wrapped in.
      * @param textColor the color of the text.
-     * @param links an instance of a list which is used to save the links detected; can be null, but no buttons will be created in that case.
+     * @param detectLinks wether or not to detect links in the text
      */
-    void drawContentString(String str, int x, int y, int wrapWidth, int textColor, List<GuiButton> links);
+    void drawContentString(String str, int x, int y, int wrapWidth, int textColor, boolean detectLinks);
 
     int getWordWrappedHeight(String str, int wrapWidth);
 
@@ -68,7 +68,6 @@ public interface ILexiconGuiHelper
 
     void drawTextureRect(int x, int y, int u, int v, int w, int h);
 
-    @SuppressWarnings("ConstantConditions")
     boolean tryLoadTexture(ResourceLocation location);
 
     boolean linkActionPerformed(GuiButton button);
@@ -93,10 +92,10 @@ public interface ILexiconGuiHelper
      * @param x the x-position of the text block. Note that the distance from the right side of the entry area will be the same as this position.
      * @param y the y-position of the text block.
      * @param entry the entry whose text should be rendered
-     * @param links an instance of a list which is used to save the links detected; can be null, but no buttons will be created in that case.
+     * @param detectLinks wether or not to detect links in the text
      * @return the total height of the text rendered
      */
-    int drawContentString(int x, int y, ILexiconEntry entry, List<GuiButton> links);
+    int drawContentString(int x, int y, ILexiconEntry entry, boolean detectLinks);
 
     IGuiButtonEntry getNewEntryButton(int id, int x, int y, ILexiconEntry entry, FontRenderer fontRenderer);
 
@@ -109,4 +108,8 @@ public interface ILexiconGuiHelper
     List<GuiButton> getGuiButtonList();
 
     NonNullList<IRecipe> getMatchingRecipes(ItemStack output);
+
+    <T extends GuiButton> T addEntryButton(T button);
+
+    <T extends GuiButton> T addGuiButton(T button);
 }

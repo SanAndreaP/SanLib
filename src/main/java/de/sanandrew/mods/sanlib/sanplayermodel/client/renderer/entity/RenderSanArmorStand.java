@@ -8,18 +8,15 @@ package de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity;
 
 import de.sanandrew.mods.sanlib.sanplayermodel.client.model.ModelSanArmorStand;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.layers.LayerSanArmor;
-import net.minecraft.client.model.ModelArmorStandArmor;
 import net.minecraft.client.renderer.entity.RenderArmorStand;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.entity.layers.LayerBipedArmor;
 import net.minecraft.client.renderer.entity.layers.LayerCustomHead;
 import net.minecraft.client.renderer.entity.layers.LayerElytra;
 import net.minecraft.client.renderer.entity.layers.LayerHeldItem;
+import net.minecraft.client.renderer.entity.model.ModelArmorStandArmor;
 import net.minecraft.entity.item.EntityArmorStand;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-@SideOnly(Side.CLIENT)
 public class RenderSanArmorStand
         extends RenderArmorStand
 {

@@ -7,12 +7,7 @@
 
 import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiDefinition;
-import de.sanandrew.mods.sanlib.lib.util.config.Category;
 import de.sanandrew.mods.sanlib.lib.util.config.ConfigUtils;
-import de.sanandrew.mods.sanlib.lib.util.config.EnumExclude;
-import de.sanandrew.mods.sanlib.lib.util.config.Pattern;
-import de.sanandrew.mods.sanlib.lib.util.config.Range;
-import de.sanandrew.mods.sanlib.lib.util.config.Value;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;

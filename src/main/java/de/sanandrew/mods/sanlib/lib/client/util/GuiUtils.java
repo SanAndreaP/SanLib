@@ -7,28 +7,17 @@
 package de.sanandrew.mods.sanlib.lib.client.util;
 
 import de.sanandrew.mods.sanlib.lib.ColorObj;
-import de.sanandrew.mods.sanlib.lib.util.ReflectionUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
-
-import javax.annotation.Nonnull;
-import java.nio.ByteBuffer;
-import java.util.List;
 
 /**
  * An utility class for GUIs and GUI related stuff.
  */
 @SuppressWarnings("unused")
-@SideOnly(Side.CLIENT)
 public final class GuiUtils
 {
     /**
@@ -40,7 +29,7 @@ public final class GuiUtils
      * @param height The height of the scissor box.
      */
     public static void glScissor(int x, int y, int width, int height) {
-        Minecraft mc = Minecraft.getMinecraft();
+        Minecraft mc = Minecraft.getInstance();
         int scaleFactor = 1;
         int guiScale = mc.gameSettings.guiScale;
 
@@ -48,30 +37,31 @@ public final class GuiUtils
             guiScale = 1000;
         }
 
-        while( scaleFactor < guiScale && mc.displayWidth / (scaleFactor + 1) >= 320 && mc.displayHeight / (scaleFactor + 1) >= 240 ) {
+        while( scaleFactor < guiScale && mc.mainWindow.getWidth() / (scaleFactor + 1) >= 320 && mc.mainWindow.getHeight() / (scaleFactor + 1) >= 240 ) {
             ++scaleFactor;
         }
 
-        GL11.glScissor(x * scaleFactor, mc.displayHeight - (y + height) * scaleFactor, width * scaleFactor, height * scaleFactor);
+        GL11.glScissor(x * scaleFactor, mc.mainWindow.getHeight() - (y + height) * scaleFactor, width * scaleFactor, height * scaleFactor);
     }
 
-    /**
-     * Returns the tooltip from an ItemStack without the info whilst holding SHIFT (added by some mods).
-     * @param stack The ItemStack.
-     * @return The tooltip of the ItemStack.
-     */
-    public static List<?> getTooltipWithoutShift(@Nonnull ItemStack stack) {
-        ByteBuffer keyDownBuffer = ReflectionUtils.getCachedFieldValue(Keyboard.class, null, "keyDownBuffer", "keyDownBuffer");
-        byte lShift = keyDownBuffer.get(Keyboard.KEY_LSHIFT);
-        byte rShift = keyDownBuffer.get(Keyboard.KEY_RSHIFT);
-        keyDownBuffer.put(Keyboard.KEY_LSHIFT, (byte) 0);
-        keyDownBuffer.put(Keyboard.KEY_RSHIFT, (byte) 0);
-        List<?> tooltip = stack.getTooltip(Minecraft.getMinecraft().player, ITooltipFlag.TooltipFlags.NORMAL);
-        keyDownBuffer.put(Keyboard.KEY_LSHIFT, lShift);
-        keyDownBuffer.put(Keyboard.KEY_RSHIFT, rShift);
-
-        return tooltip;
-    }
+    //TODO: possibly not gonna fix this...
+//    /**
+//     * Returns the tooltip from an ItemStack without the info whilst holding SHIFT (added by some mods).
+//     * @param stack The ItemStack.
+//     * @return The tooltip of the ItemStack.
+//     */
+//    public static List<?> getTooltipWithoutShift(@Nonnull ItemStack stack) {
+//        ByteBuffer keyDownBuffer = ReflectionUtils.getCachedFieldValue(Keyboard.class, null, "keyDownBuffer", "keyDownBuffer");
+//        byte lShift = keyDownBuffer.get(Keyboard.KEY_LSHIFT);
+//        byte rShift = keyDownBuffer.get(Keyboard.KEY_RSHIFT);
+//        keyDownBuffer.put(Keyboard.KEY_LSHIFT, (byte) 0);
+//        keyDownBuffer.put(Keyboard.KEY_RSHIFT, (byte) 0);
+//        List<?> tooltip = stack.getTooltip(Minecraft.getInstance().player, ITooltipFlag.TooltipFlags.NORMAL);
+//        keyDownBuffer.put(Keyboard.KEY_LSHIFT, lShift);
+//        keyDownBuffer.put(Keyboard.KEY_RSHIFT, rShift);
+//
+//        return tooltip;
+//    }
 
     /**
      * draws a rectangular texture with the fixed resolution 256x256 or a multiple of it.
@@ -132,8 +122,8 @@ public final class GuiUtils
 
         GlStateManager.disableTexture2D();
         GlStateManager.enableBlend();
-        GlStateManager.disableAlpha();
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.disableAlphaTest();
+        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         GlStateManager.shadeModel(GL11.GL_SMOOTH);
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();
@@ -152,7 +142,7 @@ public final class GuiUtils
         tessellator.draw();
         GlStateManager.shadeModel(GL11.GL_FLAT);
         GlStateManager.disableBlend();
-        GlStateManager.enableAlpha();
+        GlStateManager.enableAlphaTest();
         GlStateManager.enableTexture2D();
     }
 }

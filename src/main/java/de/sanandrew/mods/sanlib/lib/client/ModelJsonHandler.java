@@ -6,8 +6,8 @@
    *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.lib.client;
 
-import net.minecraft.client.model.ModelBase;
-import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.client.renderer.entity.model.ModelBase;
+import net.minecraft.resources.IResourceManager;
 
 /**
  * An object that handles events during the loading of JSON-Models via the {@link ModelJsonLoader}.
@@ -30,7 +30,7 @@ public interface ModelJsonHandler<T extends ModelBase & ModelJsonHandler<T, U>, 
     void setTexture(String textureStr);
 
     /**
-     * Returns the scaling value for the {@link net.minecraft.client.model.ModelRenderer ModelRenderer} cubes to be used.
+     * Returns the scaling value for the {@link net.minecraft.client.renderer.entity.model.ModelRenderer ModelRenderer} cubes to be used.
      * Default implementation returns {@code 0.0F}
      * @return the scaling value
      */

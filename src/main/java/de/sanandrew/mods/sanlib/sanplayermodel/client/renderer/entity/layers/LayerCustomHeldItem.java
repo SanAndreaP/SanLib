@@ -10,15 +10,13 @@ import de.sanandrew.mods.sanlib.lib.util.ItemStackUtils;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.RenderSanPlayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
+import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHandSide;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-@SideOnly(Side.CLIENT)
+@SuppressWarnings("deprecated")
 public class LayerCustomHeldItem
         implements LayerRenderer<EntityPlayer>
 {
@@ -28,7 +26,8 @@ public class LayerCustomHeldItem
         this.renderer = renderer;
     }
 
-    public void doRenderLayer(EntityPlayer player, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+    @Override
+    public void render(EntityPlayer player, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
         boolean isRight = player.getPrimaryHand() == EnumHandSide.RIGHT;
         ItemStack leftItem = isRight ? player.getHeldItemOffhand() : player.getHeldItemMainhand();
         ItemStack rightItem = isRight ? player.getHeldItemMainhand() : player.getHeldItemOffhand();
@@ -45,11 +44,11 @@ public class LayerCustomHeldItem
         if( ItemStackUtils.isValid(stack) ) {
             GlStateManager.pushMatrix();
             this.renderer.getMainModel().postRenderArm(0.0625F, handSide);
-            GlStateManager.rotate(-90.0F, 1.0F, 0.0F, 0.0F);
-            GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
+            GlStateManager.rotatef(-90.0F, 1.0F, 0.0F, 0.0F);
+            GlStateManager.rotatef(180.0F, 0.0F, 1.0F, 0.0F);
             boolean isLeft = handSide == EnumHandSide.LEFT;
-            GlStateManager.translate(isLeft ? -0.05 : 0.05, 0.125F, -0.625F);
-            Minecraft.getMinecraft().getItemRenderer().renderItemSide(player, stack, transformType, isLeft);
+            GlStateManager.translated(isLeft ? -0.05D : 0.05D, 0.125D, -0.625D);
+            Minecraft.getInstance().getItemRenderer().renderItem(stack, player, transformType, isLeft);
             GlStateManager.popMatrix();
         }
     }

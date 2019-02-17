@@ -12,16 +12,15 @@ import com.google.gson.JsonSyntaxException;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import de.sanandrew.mods.sanlib.sanplayermodel.SanPlayerModel;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.ModelBase;
-import net.minecraft.client.model.ModelRenderer;
-import net.minecraft.client.resources.IResource;
-import net.minecraft.client.resources.IResourceManager;
-import net.minecraft.client.resources.SimpleReloadableResourceManager;
+import net.minecraft.client.renderer.entity.model.ModelBase;
+import net.minecraft.client.renderer.entity.model.ModelRenderer;
+import net.minecraft.resources.IResource;
+import net.minecraft.resources.IResourceManager;
+import net.minecraft.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.resource.IResourceType;
-import net.minecraftforge.client.resource.ISelectiveResourceReloadListener;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.resource.IResourceType;
+import net.minecraftforge.resource.ISelectiveResourceReloadListener;
+import net.minecraftforge.resource.VanillaResourceType;
 import org.apache.logging.log4j.Level;
 
 import java.io.BufferedReader;
@@ -35,8 +34,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static net.minecraftforge.client.resource.VanillaResourceType.TEXTURES;
-
 /**
  * This class loads a JSON file as a model to be used with entities and TESRs.<br>
  * It loads it from a ResourceLocation, builds the ModelRenderer boxes and adds them to the ModelBase cube list.<br>
@@ -47,7 +44,6 @@ import static net.minecraftforge.client.resource.VanillaResourceType.TEXTURES;
  * @param <T> The type of the ModelBase class loading and handling the boxes/cubes.
  * @param <U> The type of a ModelJson.
  */
-@SideOnly(Side.CLIENT)
 @SuppressWarnings("unused")
 public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U extends ModelJsonLoader.ModelJson>
         implements ISelectiveResourceReloadListener, IResourceType
@@ -106,8 +102,8 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
         this.loaded = false;
         this.jsonClass = jsonClass;
 
-        if( Minecraft.getMinecraft().getResourceManager() instanceof SimpleReloadableResourceManager ) {
-            ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(this);
+        if( Minecraft.getInstance().getResourceManager() instanceof SimpleReloadableResourceManager) {
+            ((SimpleReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(this);
         }
 
         REGISTERED_JSON_LOADERS.add(this);
@@ -117,16 +113,16 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
         this.cstBoxRenderer.put("boxName", rendererClass);
     }
 
-    /**
-     * Removes this loader from the Resource Manager reload listener list.
-     */
-    public void unregister() {
-        if( Minecraft.getMinecraft().getResourceManager() instanceof SimpleReloadableResourceManager ) {
-            ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).reloadListeners.remove(this);
-        }
-
-        REGISTERED_JSON_LOADERS.remove(this);
-    }
+//    /**
+//     * Removes this loader from the Resource Manager reload listener list.
+//     */
+//    public void unregister() {
+//        if( Minecraft.getInstance().getResourceManager() instanceof SimpleReloadableResourceManager ) {
+//            ((SimpleReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener().remove(this);
+//        }
+//
+//        REGISTERED_JSON_LOADERS.remove(this);
+//    }
 
     private void loadJson(ResourceLocation resource, Map<String, Boolean> mandatoryChecklist)
             throws IOException, JsonIOException, JsonSyntaxException
@@ -137,8 +133,8 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
     private void loadJson(ResourceLocation resource, boolean isMain, Map<String, Boolean> mandatoryChecklist, Map<String, ChildCube> children, Map<String, ModelRenderer> mainBoxesList)
             throws IOException, JsonIOException, JsonSyntaxException
     {
-        try( IResource res = Minecraft.getMinecraft().getResourceManager().getResource(resource);
-             BufferedReader in = new BufferedReader(new InputStreamReader(res.getInputStream())) )
+        try(IResource res = Minecraft.getInstance().getResourceManager().getResource(resource);
+            BufferedReader in = new BufferedReader(new InputStreamReader(res.getInputStream())) )
         {
             U json = new Gson().fromJson(in, this.jsonClass);
             if( json.parent != null && !json.parent.isEmpty() ) {
@@ -282,7 +278,7 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
 
     @Override
     public void onResourceManagerReload(IResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) {
-        if( resourcePredicate.test(this) || resourcePredicate.test(TEXTURES) ) {
+        if( resourcePredicate.test(this) || resourcePredicate.test(VanillaResourceType.TEXTURES) ) {
             this.modelBase.onReload(resourceManager, this);
         }
     }

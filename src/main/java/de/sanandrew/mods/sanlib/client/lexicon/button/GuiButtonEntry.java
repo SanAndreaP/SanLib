@@ -12,25 +12,22 @@ import de.sanandrew.mods.sanlib.api.client.lexicon.IGuiButtonEntry;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconEntry;
 import de.sanandrew.mods.sanlib.client.ClientTickHandler;
 import de.sanandrew.mods.sanlib.client.lexicon.GuiLexicon;
-import de.sanandrew.mods.sanlib.lib.util.LangUtils;
 import de.sanandrew.mods.sanlib.lib.client.util.RenderUtils;
-import net.minecraft.client.Minecraft;
+import de.sanandrew.mods.sanlib.lib.util.LangUtils;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 
-@SideOnly(Side.CLIENT)
 public class GuiButtonEntry
         extends GuiButton
         implements IGuiButtonEntry
 {
     private static final float TIME = 1.0F;
     private final ILexiconEntry entry;
+    private final GuiLexicon gui;
 
     @Nonnull
     private final ItemStack icon;
@@ -45,10 +42,11 @@ public class GuiButtonEntry
         this.icon = entry.getEntryIcon();
         this.fontRenderer = fontRenderer;
         this.enabled = false;
+        this.gui = gui;
     }
 
     @Override
-    public void drawButton(Minecraft mc, int mx, int my, float partTicks) {
+    public void render(int mx, int my, float partTicks) {
         float gameTicks = ClientTickHandler.ticksInGame;
         float timeDelta = (gameTicks - this.lastTime) * partTicks;
         this.lastTime = gameTicks;
@@ -65,7 +63,7 @@ public class GuiButtonEntry
             GlStateManager.pushMatrix();
             GlStateManager.enableBlend();
             GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 
             float alphaMulti = this.ticksHovered / TIME;
             int color1 = 0x00FFFFFF | ((Math.max(0x00, Math.min(0xC0, StrictMath.round(0xC0 * alphaMulti))) << 24) & 0xFF000000);
@@ -78,10 +76,15 @@ public class GuiButtonEntry
 
             RenderUtils.renderStackInGui(this.icon, this.x + 2, this.y + 3, 0.5D);
 
-            this.fontRenderer.drawString(this.displayString, this.x + 12, this.y + 3, 0xFF000000, false);
+            this.fontRenderer.drawString(this.displayString, this.x + 12, this.y + 3, 0xFF000000);
 
             GlStateManager.popMatrix();
         }
+    }
+
+    @Override
+    public void onClick(double mouseX, double mouseY) {
+        this.gui.changePage(this.gui.group, this.entry, 0.0F, true);
     }
 
     @Override

@@ -10,7 +10,7 @@ public interface IGuiElement
 
     void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data);
 
-    default void handleMouseInput(IGui gui) throws IOException { }
+    default boolean onMouseScroll(IGui gui, double scroll) { return false; }
 
     int getHeight();
 }

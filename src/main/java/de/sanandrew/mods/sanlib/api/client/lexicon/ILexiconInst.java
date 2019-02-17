@@ -7,12 +7,9 @@
 package de.sanandrew.mods.sanlib.api.client.lexicon;
 
 import net.minecraft.client.gui.Gui;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.List;
 
-@SideOnly(Side.CLIENT)
 public interface ILexiconInst
 {
     boolean registerGroup(ILexiconGroup group);
@@ -30,9 +27,6 @@ public interface ILexiconInst
     ILexiconPageRender removePageRender(String id);
 
     ILexicon getLexicon();
-
-    @Deprecated
-    String getCraftingRenderID();
     
     String getStandardRenderID();
 

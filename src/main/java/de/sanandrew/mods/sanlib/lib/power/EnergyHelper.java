@@ -20,32 +20,34 @@ public final class EnergyHelper
 
     public static boolean canConnectEnergy(TileEntity te, EnumFacing facing) {
         //noinspection SimplifiableIfStatement
-        if( COFH_EXISTS && te instanceof cofh.redstoneflux.api.IEnergyHandler ) {
-            return ((cofh.redstoneflux.api.IEnergyHandler) te).canConnectEnergy(facing);
-        }
-        if( TESLA_EXISTS ) {
-            if( te.getCapability(net.darkhax.tesla.capability.TeslaCapabilities.CAPABILITY_CONSUMER, facing) != null ) {
-                return true;
-            }
-            if( te.getCapability(net.darkhax.tesla.capability.TeslaCapabilities.CAPABILITY_PRODUCER, facing) != null ) {
-                return true;
-            }
-        }
-        IEnergyStorage stg = te.getCapability(CapabilityEnergy.ENERGY, facing);
+        //TODO: re-add mod-compatibility
+//        if( COFH_EXISTS && te instanceof cofh.redstoneflux.api.IEnergyHandler ) {
+//            return ((cofh.redstoneflux.api.IEnergyHandler) te).canConnectEnergy(facing);
+//        }
+//        if( TESLA_EXISTS ) {
+//            if( te.getCapability(net.darkhax.tesla.capability.TeslaCapabilities.CAPABILITY_CONSUMER, facing) != null ) {
+//                return true;
+//            }
+//            if( te.getCapability(net.darkhax.tesla.capability.TeslaCapabilities.CAPABILITY_PRODUCER, facing) != null ) {
+//                return true;
+//            }
+//        }
+        IEnergyStorage stg = te.getCapability(CapabilityEnergy.ENERGY, facing).orElse(null);
         return stg != null && (stg.canExtract() || stg.canReceive());
     }
 
     public static long receiveEnergy(TileEntity te, EnumFacing facing, long amount, boolean simulate) {
-        if( COFH_EXISTS && te instanceof cofh.redstoneflux.api.IEnergyReceiver ) {
-            return ((cofh.redstoneflux.api.IEnergyReceiver) te).receiveEnergy(facing, (int) amount, simulate);
-        }
-        if( TESLA_EXISTS ) {
-            net.darkhax.tesla.api.ITeslaConsumer consumer = te.getCapability(net.darkhax.tesla.capability.TeslaCapabilities.CAPABILITY_CONSUMER, facing);
-            if( consumer != null ) {
-                return consumer.givePower(amount, simulate);
-            }
-        }
-        IEnergyStorage stg = te.getCapability(CapabilityEnergy.ENERGY, facing);
+        //TODO: re-add mod-compatibility
+//        if( COFH_EXISTS && te instanceof cofh.redstoneflux.api.IEnergyReceiver ) {
+//            return ((cofh.redstoneflux.api.IEnergyReceiver) te).receiveEnergy(facing, (int) amount, simulate);
+//        }
+//        if( TESLA_EXISTS ) {
+//            net.darkhax.tesla.api.ITeslaConsumer consumer = te.getCapability(net.darkhax.tesla.capability.TeslaCapabilities.CAPABILITY_CONSUMER, facing);
+//            if( consumer != null ) {
+//                return consumer.givePower(amount, simulate);
+//            }
+//        }
+        IEnergyStorage stg = te.getCapability(CapabilityEnergy.ENERGY, facing).orElse(null);
         if( stg != null ) {
             return stg.receiveEnergy((int) amount, simulate);
         }
@@ -54,16 +56,17 @@ public final class EnergyHelper
     }
 
     public static long extractEnergy(TileEntity te, EnumFacing facing, long amount, boolean simulate) {
-        if( COFH_EXISTS && te instanceof cofh.redstoneflux.api.IEnergyProvider ) {
-            return ((cofh.redstoneflux.api.IEnergyProvider) te).extractEnergy(facing, (int) amount, simulate);
-        }
-        if( TESLA_EXISTS ) {
-            net.darkhax.tesla.api.ITeslaProducer producer = te.getCapability(net.darkhax.tesla.capability.TeslaCapabilities.CAPABILITY_PRODUCER, facing);
-            if( producer != null ) {
-                return producer.takePower(amount, simulate);
-            }
-        }
-        IEnergyStorage stg = te.getCapability(CapabilityEnergy.ENERGY, facing);
+        //TODO: re-add mod-compatibility
+//        if( COFH_EXISTS && te instanceof cofh.redstoneflux.api.IEnergyProvider ) {
+//            return ((cofh.redstoneflux.api.IEnergyProvider) te).extractEnergy(facing, (int) amount, simulate);
+//        }
+//        if( TESLA_EXISTS ) {
+//            net.darkhax.tesla.api.ITeslaProducer producer = te.getCapability(net.darkhax.tesla.capability.TeslaCapabilities.CAPABILITY_PRODUCER, facing);
+//            if( producer != null ) {
+//                return producer.takePower(amount, simulate);
+//            }
+//        }
+        IEnergyStorage stg = te.getCapability(CapabilityEnergy.ENERGY, facing).orElse(null);
         if( stg != null ) {
             return stg.extractEnergy((int) amount, simulate);
         }

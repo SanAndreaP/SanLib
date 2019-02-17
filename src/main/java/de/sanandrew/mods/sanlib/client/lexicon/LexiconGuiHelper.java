@@ -6,19 +6,13 @@
  *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.client.lexicon;
 
-import de.sanandrew.mods.sanlib.api.client.lexicon.CraftingGrid;
-import de.sanandrew.mods.sanlib.api.client.lexicon.IGuiButtonEntry;
-import de.sanandrew.mods.sanlib.api.client.lexicon.IGuiButtonLink;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexicon;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconEntry;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconGroup;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconGuiHelper;
+import de.sanandrew.mods.sanlib.api.client.lexicon.*;
 import de.sanandrew.mods.sanlib.client.lexicon.button.GuiButtonEntry;
 import de.sanandrew.mods.sanlib.client.lexicon.button.GuiButtonLink;
 import de.sanandrew.mods.sanlib.lib.client.util.GuiUtils;
-import de.sanandrew.mods.sanlib.lib.util.LangUtils;
 import de.sanandrew.mods.sanlib.lib.client.util.RenderUtils;
 import de.sanandrew.mods.sanlib.lib.util.ItemStackUtils;
+import de.sanandrew.mods.sanlib.lib.util.LangUtils;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
@@ -28,30 +22,23 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.ShapedRecipes;
+import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.oredict.ShapedOreRecipe;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 public class LexiconGuiHelper
         implements ILexiconGuiHelper
@@ -123,10 +110,10 @@ public class LexiconGuiHelper
     @Override
     public void drawItemGrid(int x, int y, int mouseX, int mouseY, int scrollY, @Nonnull ItemStack stack, float scale, boolean drawTooltip) {
         this.gui.mc.getTextureManager().bindTexture(this.gui.lexicon.getBackgroundTexture());
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.pushMatrix();
-        GlStateManager.translate(x, y, 0.0F);
-        GlStateManager.scale(scale, scale, 1.0F);
+        GlStateManager.translatef(x, y, 0.0F);
+        GlStateManager.scalef(scale, scale, 1.0F);
         GlStateManager.enableBlend();
         this.drawTextureRect(0, 0, 238, 0, 18, 18);
         GlStateManager.popMatrix();
@@ -138,13 +125,13 @@ public class LexiconGuiHelper
         if( mouseOver && ItemStackUtils.isValid(stack) ) {
             this.gui.drawFrameLast = () -> {
                 GlStateManager.pushMatrix();
-                GlStateManager.translate(this.gui.entryX, this.gui.entryY + this.gui.entryHeight - 20, 96.0F);
+                GlStateManager.translatef(this.gui.entryX, this.gui.entryY + this.gui.entryHeight - 20, 96.0F);
                 Gui.drawRect(0, 0, this.gui.lexicon.getEntryWidth(), 20, 0xD0000000);
 
-                List tooltip = GuiUtils.getTooltipWithoutShift(stack);
-                this.getFontRenderer().drawString(tooltip.get(0).toString(), 22, 2, 0xFFFFFFFF, false);
+                List tooltip = stack.getTooltip(this.gui.mc.player, ITooltipFlag.TooltipFlags.NORMAL);
+                this.getFontRenderer().drawString(tooltip.get(0).toString(), 22, 2, 0xFFFFFFFF);
                 if( drawTooltip && tooltip.size() > 1 ) {
-                    this.getFontRenderer().drawString(tooltip.get(1).toString(), 22, 11, 0xFF808080, false);
+                    this.getFontRenderer().drawString(tooltip.get(1).toString(), 22, 11, 0xFF808080);
                 }
 
                 RenderUtils.renderStackInGui(stack, 2, 2, 1.0F, this.getFontRenderer());
@@ -154,21 +141,21 @@ public class LexiconGuiHelper
         }
 
         GlStateManager.pushMatrix();
-        GlStateManager.translate(fx, fy, 0.0F);
+        GlStateManager.translatef(fx, fy, 0.0F);
         if( ItemStackUtils.isValid(stack) ) {
             RenderUtils.renderStackInGui(stack, 0, 0, scale, this.getFontRenderer());
         }
 
         if( mouseOver ) {
-            GlStateManager.translate(0.0F, 0.0F, 64.0F);
-            GlStateManager.scale(scale, scale, 1.0F);
+            GlStateManager.translatef(0.0F, 0.0F, 64.0F);
+            GlStateManager.scalef(scale, scale, 1.0F);
             Gui.drawRect(0, 0, 16, 16, 0x80FFFFFF);
         }
         GlStateManager.popMatrix();
     }
 
     @Override
-    public void drawContentString(String str, int x, int y, int wrapWidth, int textColor, List<GuiButton> links) {
+    public void drawContentString(String str, int x, int y, int wrapWidth, int textColor, boolean detectLinks) {
         FontRenderer fontRenderer = this.getFontRenderer();
         Map<Integer, String> foundLinks = new HashMap<>();
         str = replaceLinkedText(str, foundLinks);
@@ -186,33 +173,33 @@ public class LexiconGuiHelper
                 for( Map.Entry<Integer, String> entry : entries ) {
                     String s = line.substring(lastUsedId, entry.getKey() - currLength);
                     int sl = fontRenderer.getStringWidth(s);
-                    fontRenderer.drawString(s, lineX, y, textColor, false);
+                    fontRenderer.drawString(s, lineX, y, textColor);
                     lineX += sl;
 
                     int entrySplitId = entry.getValue().indexOf('|');
                     String t = entry.getValue().substring(0, entrySplitId);
                     int tl = fontRenderer.getStringWidth(t);
-                    if( links != null ) {
-                        GuiButton lnk = links.stream().filter(button -> button.id == entry.getKey()).findFirst().orElse(null);
+                    if( detectLinks ) {
+                        GuiButton lnk = this.gui.entryButtons.stream().filter(button -> button.id == entry.getKey()).findFirst().orElse(null);
                         if( lnk == null ) {
                             lnk = new GuiButtonLink(this.gui, entry.getKey(), lineX, y, t, entry.getValue().substring(entrySplitId + 1), this.getFontRenderer());
-                            links.add(lnk);
+                            this.gui.entryButtons.add(lnk);
                         } else {
                             lnk.x = lineX;
                             lnk.y = y;
                         }
                     } else {
-                        fontRenderer.drawString(t, lineX, y, textColor, false);
+                        fontRenderer.drawString(t, lineX, y, textColor);
                     }
                     lineX += tl;
 
                     lastUsedId += s.length() + t.length();
                 }
                 if( lastUsedId < line.length() ) {
-                    fontRenderer.drawString(line.substring(lastUsedId), lineX, y, textColor, false);
+                    fontRenderer.drawString(line.substring(lastUsedId), lineX, y, textColor);
                 }
             } else {
-                fontRenderer.drawString(line, x, y, textColor, false);
+                fontRenderer.drawString(line, x, y, textColor);
             }
             y += fontRenderer.FONT_HEIGHT;
             drawnCharacters = newLength;
@@ -258,15 +245,7 @@ public class LexiconGuiHelper
 
     @Override
     public FontRenderer getFontRenderer() {
-        if( this.gui.lexicon.forceUnicode() ) {
-            if( unicodeFr == null ) {
-                unicodeFr = new FontRenderer(this.gui.mc.gameSettings, new ResourceLocation("textures/font/ascii.png"), this.gui.mc.renderEngine, true);
-            }
-
-            return unicodeFr;
-        } else {
-            return this.gui.mc.fontRenderer;
-        }
+        return this.gui.mc.fontRenderer;
     }
 
     @Override
@@ -313,7 +292,7 @@ public class LexiconGuiHelper
 
         if( this.checkedResources.containsKey(location) ) {
             if( this.checkedResources.get(location) ) {
-                this.gui.mc.renderEngine.bindTexture(location);
+                this.gui.mc.textureManager.bindTexture(location);
                 return true;
             } else {
                 return false;
@@ -321,7 +300,7 @@ public class LexiconGuiHelper
         }
 
         try {
-            if( this.gui.mc.renderEngine.getTexture(location) == null ) {
+            if( this.gui.mc.textureManager.getTexture(location) == null ) {
                 new SimpleTexture(location).loadTexture(this.gui.mc.getResourceManager());
             }
         } catch( IOException ex ) {
@@ -329,7 +308,7 @@ public class LexiconGuiHelper
             return false;
         }
 
-        this.gui.mc.renderEngine.bindTexture(location);
+        this.gui.mc.textureManager.bindTexture(location);
         this.checkedResources.put(location, true);
         return true;
     }
@@ -362,12 +341,9 @@ public class LexiconGuiHelper
         int w = 0, h = 0;
         List<IRecipe> allRecipes = new ArrayList<>();
         for( IRecipe recipe : recipes ) {
-            if( recipe instanceof ShapedRecipes ) {
-                w = Math.max(w, ((ShapedRecipes) recipe).recipeWidth);
-                h = Math.max(h, ((ShapedRecipes) recipe).recipeHeight);
-            } else if( recipe instanceof ShapedOreRecipe ) {
-                w = Math.max(w, ((ShapedOreRecipe) recipe).getRecipeWidth());
-                h = Math.max(h, ((ShapedOreRecipe) recipe).getRecipeHeight());
+            if( recipe instanceof ShapedRecipe ) {
+                w = Math.max(w, ((ShapedRecipe) recipe).getRecipeWidth());
+                h = Math.max(h, ((ShapedRecipe) recipe).getRecipeHeight());
             } else {
                 int ingredientSize = recipe.getIngredients().size();
                 w = Math.max(w, MathHelper.ceil(MathHelper.sqrt(ingredientSize)));
@@ -392,10 +368,10 @@ public class LexiconGuiHelper
         final int mY = grid.getHeight();
         this.drawItemGrid(x + mX * 18 + 4 + 18, y + Math.max(mY * 9 - 18, 0), mouseX, mouseY, scrollY, grid.getResult(), 2.0F, false);
         this.tryLoadTexture(this.gui.lexicon.getBackgroundTexture());
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.enableBlend();
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
-                                            GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+                                         GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         this.drawTextureRect(x + mX * 18 + 2, y + 12 + Math.max(mY * 9 - 18, 0), 238, isShapeless ? 30 : 18, 18, 12);
 
         for( int gx = 0; gx < mX; gx++ ) {
@@ -413,7 +389,7 @@ public class LexiconGuiHelper
     public boolean tryDrawPicture(ResourceLocation location, int x, int y, int width, int height) {
         if( this.tryLoadTexture(location) ) {
             this.drawRect(x, y, x + width, y + height, 0xFF000000);
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             this.drawTextureRect(x + 1, y + 1, width - 2, height - 2, 0.0F, 0.0F, 1.0F, 1.0F);
             return true;
         }
@@ -429,7 +405,7 @@ public class LexiconGuiHelper
     @Override
     public void drawTitleCenter(int y, ILexiconEntry entry) {
         String s = this.getTitle(entry);
-        this.getFontRenderer().drawString(s, (this.getLexicon().getEntryWidth() - this.getFontRenderer().getStringWidth(s)) / 2, y, this.getLexicon().getTitleColor());
+        this.getFontRenderer().drawString(s, (this.getLexicon().getEntryWidth() - this.getFontRenderer().getStringWidth(s)) / 2.0F, y, this.getLexicon().getTitleColor());
     }
 
     @Override
@@ -442,11 +418,11 @@ public class LexiconGuiHelper
     }
 
     @Override
-    public int drawContentString(int x, int y, ILexiconEntry entry, List<GuiButton> links) {
+    public int drawContentString(int x, int y, ILexiconEntry entry, boolean detectLinks) {
         int entryWidth = this.getLexicon().getEntryWidth();
         String s = LangUtils.translate(LangUtils.LEXICON_ENTRY_TEXT.get(this.getLexicon().getModId(), entry.getGroupId(), entry.getId())).replace("\\n", "\n");
 
-        this.drawContentString(s, x, y, entryWidth - x * 2, this.getLexicon().getTextColor(), links);
+        this.drawContentString(s, x, y, entryWidth - x * 2, this.getLexicon().getTextColor(), detectLinks);
         return this.getWordWrappedHeight(s, entryWidth - x * 2) + 3;
     }
 
@@ -478,10 +454,20 @@ public class LexiconGuiHelper
     @Override
     public NonNullList<IRecipe> getMatchingRecipes(ItemStack output) {
         NonNullList<IRecipe> recipes = NonNullList.create();
-        StreamSupport.stream(CraftingManager.REGISTRY.spliterator(), false)
-                     .filter(r -> !r.isDynamic() && ItemStackUtils.areEqualNbtFit(output, r.getRecipeOutput(), false, true, false) && r.canFit(3, 3))
+        this.gui.mc.world.getRecipeManager().getRecipes().stream()
+                     .filter(r -> !r.isDynamic() && ItemStack.areItemsEqual(output, r.getRecipeOutput()) && r.canFit(3, 3))
                      .findFirst().ifPresent(recipes::add);
 
         return recipes;
+    }
+
+    @Override
+    public <T extends GuiButton> T addEntryButton(T button) {
+        return this.gui.addEntryButton(button);
+    }
+
+    @Override
+    public <T extends GuiButton> T addGuiButton(T button) {
+        return this.gui.addButton(button);
     }
 }

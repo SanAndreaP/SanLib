@@ -7,25 +7,14 @@
 package de.sanandrew.mods.sanlib.client.lexicon;
 
 import de.sanandrew.mods.sanlib.SanLib;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexicon;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconEntry;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconGroup;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconInst;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconPageRender;
+import de.sanandrew.mods.sanlib.api.client.lexicon.*;
 import de.sanandrew.mods.sanlib.lib.util.LangUtils;
 import joptsimple.internal.Strings;
 import net.minecraft.client.gui.Gui;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.Level;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-@SideOnly(Side.CLIENT)
 public final class LexiconInstance
         implements ILexiconInst
 {
@@ -47,7 +36,6 @@ public final class LexiconInstance
         this.lexiconDef = lexiconDef;
 
         this.registerPageRender(new LexiconRenderStandard());
-        this.registerPageRender(new LexiconRenderCraftingGrid());
     }
 
     @Override
@@ -128,12 +116,6 @@ public final class LexiconInstance
     @Override
     public ILexicon getLexicon() {
         return this.lexiconDef;
-    }
-
-    @Override
-    @Deprecated
-    public String getCraftingRenderID() {
-        return RENDER_ID_CRAFTING;
     }
 
     @Override
