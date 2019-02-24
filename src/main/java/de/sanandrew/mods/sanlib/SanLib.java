@@ -22,11 +22,11 @@ public class SanLib
 {
     public static final String ID = "sanlib";
     public static final String NAME = "San's Library";
-    public static final String CERTIFICATE_FINGERPRINT = "df48348748b5e141b1d118e2302a8d5be930b708";
-    static final String VERSION = "1.5.1";
-    static final String ACCEPTED_REMOTE_VER = "[1.5.1,)";
+    public static final String CERTIFICATE_FINGERPRINT = "@FINGERPRINT@";
+    static final String VERSION = "1.6.0";
+    static final String ACCEPTED_REMOTE_VER = "[1.6.0,)";
     static final String MCVER = "[1.12.2, 1.13)";
-    static final String DEPENDENCIES = "required-after:forge@[14.23.2.2611,]";
+    static final String DEPENDENCIES = "required-after:forge@[14.23.5.2768,]";
 
     public static final Logger LOG = LogManager.getLogger(ID);
 

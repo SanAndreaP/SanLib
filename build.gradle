@@ -21,7 +21,7 @@ idea {
     }
 }
 
-version = "1.12.2-1.5.1"
+version = "1.12.2-1.6.0"
 group= "de.sanandrew.mods"
 archivesBaseName = "SanLib"
 
@@ -34,6 +34,10 @@ minecraft {
     version = "1.12.2-14.23.5.2768"
     runDir = "run"
     mappings = "snapshot_20180814"
+    replace '@FINGERPRINT@', project.findProperty('signSHA1')
+    //Makes those replacement changes to the main mod class.
+    //My mod class is set in my project's gradle.properties file.
+    replaceIn "SanLib.java"
 }
 
 repositories {
@@ -73,7 +77,7 @@ project.ext {
 }
 uploadArchives {
     repositories.mavenDeployer {
-        pom.artifactId = project.name
+        pom.artifactId = project.archivesBaseName
         pom.version = project.version
         repository(url: project.releaseRepoUrl)
     }
@@ -108,6 +112,7 @@ processResources {
     }
     
 	rename '(.+_at.cfg)', 'META-INF/$1'
+    exclude 'assets/test'
 }
 
 jar {
