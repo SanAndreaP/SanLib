@@ -35,6 +35,7 @@ public class GuiDefinition
         TYPES.put(TextureGuiElement.ID, TextureGuiElement::new);
         TYPES.put(RectangleGuiElement.ID, RectangleGuiElement::new);
         TYPES.put(ScrollAreaGuiElement.ID, ScrollAreaGuiElement::new);
+        TYPES.put(ContainerNameGuiElement.ID, ContainerNameGuiElement::new);
     }
 
     public int width;

@@ -50,7 +50,7 @@ public class TextGuiElement
     public void bakeData(IGui gui, JsonObject data) {
         if( this.data == null ) {
             this.data = new BakedData();
-            this.data.text = LangUtils.translate(JsonUtils.getStringVal(data.get("text")));
+            this.data.text = getBakedText(gui, data);
             this.data.color = MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("color"), "0xFF000000"));
             this.data.shadow = JsonUtils.getBoolVal(data.get("shadow"), false);
             this.data.wrapWidth = JsonUtils.getIntVal(data.get("wrapWidth"), 0);
@@ -68,16 +68,25 @@ public class TextGuiElement
         }
     }
 
+    public String getBakedText(IGui gui, JsonObject data) {
+        return LangUtils.translate(JsonUtils.getStringVal(data.get("text")));
+    }
+
+    public String getDynamicText(IGui gui, String originalText) {
+        return originalText;
+    }
+
     @Override
     public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
+        String s = this.getDynamicText(gui, this.data.text);
         if( this.data.wrapWidth > 0 ) {
             if( this.data.shadow ) {
                 int sdColor = (this.data.color & 0x00FCFCFC) >> 2 | this.data.color & 0xFF000000;
-                this.data.fontRenderer.drawSplitString(this.data.text, x + 1, y + 1, sdColor, this.data.wrapWidth);
+                this.data.fontRenderer.drawSplitString(s, x + 1, y + 1, sdColor, this.data.wrapWidth);
             }
-            this.data.fontRenderer.drawSplitString(this.data.text, x, y, this.data.color, this.data.wrapWidth);
+            this.data.fontRenderer.drawSplitString(s, x, y, this.data.color, this.data.wrapWidth);
         } else {
-            this.data.fontRenderer.drawString(this.data.text, x, y, this.data.color, this.data.shadow);
+            this.data.fontRenderer.drawString(s, x, y, this.data.color, this.data.shadow);
         }
     }
 
