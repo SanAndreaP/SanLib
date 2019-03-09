@@ -15,6 +15,7 @@ import net.minecraftforge.client.resource.IResourceType;
 import net.minecraftforge.client.resource.ISelectiveResourceReloadListener;
 import org.apache.logging.log4j.Level;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -29,7 +30,7 @@ import java.util.function.Supplier;
 public class GuiDefinition
         implements ISelectiveResourceReloadListener
 {
-    static final Map<ResourceLocation, Supplier<IGuiElement>> TYPES = new HashMap<>();
+    public static final Map<ResourceLocation, Supplier<IGuiElement>> TYPES = new HashMap<>();
     static {
         TYPES.put(TextGuiElement.ID, TextGuiElement::new);
         TYPES.put(TextureGuiElement.ID, TextureGuiElement::new);
@@ -121,7 +122,7 @@ public class GuiDefinition
     }
 
     @Override
-    public void onResourceManagerReload(IResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) {
+    public void onResourceManagerReload(@Nonnull IResourceManager resourceManager, @Nonnull Predicate<IResourceType> resourcePredicate) {
         try {
             this.reloadDefinition();
         } catch( IOException ex ) {
