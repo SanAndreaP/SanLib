@@ -76,6 +76,10 @@ public class TextGuiElement
         return originalText;
     }
 
+    public int getTextWidth(IGui gui) {
+        return this.data.wrapWidth > 0 ? this.data.wrapWidth : this.data.fontRenderer.getStringWidth(this.getDynamicText(gui, this.data.text));
+    }
+
     @Override
     public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
         String s = this.getDynamicText(gui, this.data.text);
