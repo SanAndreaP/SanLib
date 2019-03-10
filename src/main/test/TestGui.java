@@ -79,4 +79,16 @@ public class TestGui
     public int getScreenPosY() {
         return this.posY;
     }
+
+    @Override
+    public float getZLevel() {
+        return this.zLevel;
+    }
+
+    @Override
+    public float setZLevel(float newZ) {
+        float origZ = this.zLevel;
+        this.zLevel = newZ;
+        return origZ;
+    }
 }

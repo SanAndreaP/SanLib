@@ -13,6 +13,7 @@ import de.sanandrew.mods.sanlib.lib.util.LangUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
 import java.lang.ref.WeakReference;
@@ -83,6 +84,8 @@ public class TextGuiElement
     @Override
     public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
         String s = this.getDynamicText(gui, this.data.text);
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(0.0D, 0.0D, gui.getZLevel());
         if( this.data.wrapWidth > 0 ) {
             if( this.data.shadow ) {
                 int sdColor = (this.data.color & 0x00FCFCFC) >> 2 | this.data.color & 0xFF000000;
@@ -92,6 +95,7 @@ public class TextGuiElement
         } else {
             this.data.fontRenderer.drawString(s, x, y, this.data.color, this.data.shadow);
         }
+        GlStateManager.popMatrix();
     }
 
     @Override

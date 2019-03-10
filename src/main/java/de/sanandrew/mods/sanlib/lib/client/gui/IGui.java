@@ -15,4 +15,8 @@ public interface IGui
     int getScreenPosX();
 
     int getScreenPosY();
+
+    float getZLevel();
+
+    float setZLevel(float newZ);
 }
