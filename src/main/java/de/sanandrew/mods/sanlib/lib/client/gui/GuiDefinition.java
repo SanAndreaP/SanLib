@@ -40,6 +40,7 @@ public class GuiDefinition
         TYPES.put(ContainerName.ID, ContainerName::new);
         TYPES.put(RedstoneFluxBar.ID, RedstoneFluxBar::new);
         TYPES.put(RedstoneFluxLabel.ID, RedstoneFluxLabel::new);
+        TYPES.put(DynamicText.ID, DynamicText::new);
     }
 
     public int width;

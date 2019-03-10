@@ -23,7 +23,7 @@ public class RedstoneFluxBar
     @Override
     public void bakeData(IGui gui, JsonObject data) {
         if( !(gui instanceof IGuiEnergyContainer) ) {
-            throw new RuntimeException("Cannot use rfluxbar on a GUI which doesn't implement IGuiEnergyContainer");
+            throw new RuntimeException("Cannot use rflux_bar on a GUI which doesn't implement IGuiEnergyContainer");
         }
         if( this.data == null ) {
             this.data = new BakedData();

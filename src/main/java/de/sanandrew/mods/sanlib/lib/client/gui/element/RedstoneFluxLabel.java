@@ -10,6 +10,15 @@ public class RedstoneFluxLabel
     public static final ResourceLocation ID = new ResourceLocation("rflux_label");
 
     @Override
+    public void bakeData(IGui gui, JsonObject data) {
+        if( !(gui instanceof RedstoneFluxBar.IGuiEnergyContainer) ) {
+            throw new RuntimeException("Cannot use rflux_label on a GUI which doesn't implement IGuiEnergyContainer");
+        }
+
+        super.bakeData(gui, data);
+    }
+
+    @Override
     public Text getTextElement(IGui gui, JsonObject data) {
         Text elem = new RedstoneFluxLabelText();
         elem.bakeData(gui, data);

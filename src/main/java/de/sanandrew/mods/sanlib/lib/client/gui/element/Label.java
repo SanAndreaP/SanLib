@@ -16,9 +16,6 @@ public abstract class Label
 
     @Override
     public void bakeData(IGui gui, JsonObject data) {
-        if( !(gui instanceof RedstoneFluxBar.IGuiEnergyContainer) ) {
-            throw new RuntimeException("Cannot use rfluxlabel on a GUI which doesn't implement IGuiEnergyContainer");
-        }
         if( this.data == null ) {
             this.data = new BakedData();
             this.data.size = JsonUtils.getIntArray(data.get("size"), Range.is(2));
