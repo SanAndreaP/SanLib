@@ -4,9 +4,11 @@
  * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
  *                http://creativecommons.org/licenses/by-nc-sa/4.0/
  *******************************************************************************************************************/
-package de.sanandrew.mods.sanlib.lib.client.gui;
+package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonObject;
+import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
+import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.client.util.GuiUtils;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
@@ -15,10 +17,10 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.Range;
 
-public class RectangleGuiElement
+public class Rectangle
         implements IGuiElement
 {
-    static final ResourceLocation ID = new ResourceLocation("rectangle");
+    public static final ResourceLocation ID = new ResourceLocation("rectangle");
 
     private BakedData data;
 

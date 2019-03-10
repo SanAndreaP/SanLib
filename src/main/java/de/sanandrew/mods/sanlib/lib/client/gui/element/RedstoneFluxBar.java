@@ -1,48 +1,30 @@
-/* ******************************************************************************************************************
- * Authors:   SanAndreasP
- * Copyright: SanAndreasP
- * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
- *                http://creativecommons.org/licenses/by-nc-sa/4.0/
- *******************************************************************************************************************/
-package de.sanandrew.mods.sanlib.lib.client.gui;
+package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonObject;
 import de.sanandrew.mods.sanlib.lib.ColorObj;
+import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
+import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.Range;
 
-/**
- * JSON format:
- * <pre>
-&#123;
-  "type": "texture",                                                 -- type of element: "texture"
-  "pos": [0, 0],                                                     -- relative position as [x, y] coordinates
-  "data": &#123;
-    "location": "minecraft:textures/gui/container/inventory.png"     -- resource location of texture
-    "size": [176, 166],                                              -- size of textured rectangle as [width, height]
-    "uv": [0, 0],                                                    -- coordinates of the texture on the texture sheet as [u, v]
-    "textureSize": [256, 256],                                       -- size of the texture sheet as [width, height] (optional, default: [256, 256])
-    "scale": [1.0, 1.0],                                             -- scaling of the textured rectangle as [scaleX, scaleY] (optional, default: [1.0, 1.0])
-    "color": "0xFFFFFFFF",                                           -- the tint color (and transparency) of the textured rectangle as hexadecimal number string (optional, default: "0xFFFFFFFF")
-    "forceAlpha": false,                                             -- wether or not the texture can be forced to use transparency, as some elements might deactivate it (optional, default: false)
-  &#125;
-&#125;
- * </pre>
- */
-public class TextureGuiElement
+@SuppressWarnings({"Duplicates"})
+public class RedstoneFluxBar
         implements IGuiElement
 {
-    static final ResourceLocation ID = new ResourceLocation("texture");
+    public static final ResourceLocation ID = new ResourceLocation("rflux_bar");
 
-    BakedData data;
+    private BakedData data;
 
     @Override
     public void bakeData(IGui gui, JsonObject data) {
+        if( !(gui instanceof IGuiEnergyContainer) ) {
+            throw new RuntimeException("Cannot use rfluxbar on a GUI which doesn't implement IGuiEnergyContainer");
+        }
         if( this.data == null ) {
             this.data = new BakedData();
             this.data.location = new ResourceLocation(data.get("location").getAsString());
@@ -57,16 +39,24 @@ public class TextureGuiElement
 
     @Override
     public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
+        IGuiEnergyContainer gec = (IGuiEnergyContainer) gui;
+
         gui.get().mc.renderEngine.bindTexture(this.data.location);
         GlStateManager.pushMatrix();
         if( this.data.forceAlpha ) {
             GlStateManager.enableBlend();
             GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         }
-        GlStateManager.translate(x, y, gui.getZLevel());
+        GlStateManager.translate(x, y, 0.0D);
         GlStateManager.scale(this.data.scale[0], this.data.scale[1], 1.0D);
         GlStateManager.color(this.data.color.fRed(), this.data.color.fGreen(), this.data.color.fBlue(), this.data.color.fAlpha());
-        Gui.drawModalRectWithCustomSizedTexture(0, 0, this.data.uv[0], this.data.uv[1], this.data.size[0], this.data.size[1], this.data.textureSize[0], this.data.textureSize[1]);
+
+
+        double energyPerc = gec.getEnergy() / (double) gec.getMaxEnergy();
+        int energyBarY = Math.max(0, Math.min(this.data.size[1], MathHelper.ceil((1.0D - energyPerc) * this.data.size[1])));
+
+        Gui.drawModalRectWithCustomSizedTexture(0, energyBarY, this.data.uv[0], this.data.uv[1] + energyBarY, this.data.size[0], this.data.size[1] - energyBarY, this.data.textureSize[0], this.data.textureSize[1]);
+
         GlStateManager.popMatrix();
     }
 
@@ -84,5 +74,12 @@ public class TextureGuiElement
         private double[] scale;
         private ColorObj color;
         private boolean forceAlpha;
+    }
+
+    public interface IGuiEnergyContainer
+    {
+        int getEnergy();
+
+        int getMaxEnergy();
     }
 }

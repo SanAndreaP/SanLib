@@ -1,10 +1,13 @@
-package de.sanandrew.mods.sanlib.lib.client.gui;
+package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
+import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
+import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.client.util.GuiUtils;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
@@ -16,10 +19,10 @@ import java.util.Arrays;
 import java.util.Map;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
-public class ScrollAreaGuiElement
+public class ScrollArea
         implements IGuiElement
 {
-    static final ResourceLocation ID = new ResourceLocation("scroll_area");
+    public static final ResourceLocation ID = new ResourceLocation("scroll_area");
 
     protected BakedData data;
     protected float scroll;
@@ -38,7 +41,7 @@ public class ScrollAreaGuiElement
             this.data.scrollBtnActive = JsonUtils.GSON.fromJson(data.get("scrollButton"), GuiElementInst.class);
             this.data.scrollBtnDeactive = JsonUtils.GSON.fromJson(data.get("scrollButtonDeactive"), GuiElementInst.class);
 
-            if( this.data.scrollBtnActive.get() instanceof TextureGuiElement && this.data.scrollBtnDeactive.get() instanceof TextureGuiElement ) {
+            if( this.data.scrollBtnActive.get() instanceof Texture && this.data.scrollBtnDeactive.get() instanceof Texture) {
                 this.data.scrollBtnActive.get().bakeData(gui, this.data.scrollBtnActive.data);
                 this.data.scrollBtnDeactive.get().bakeData(gui, this.data.scrollBtnDeactive.data);
             } else {
@@ -66,7 +69,7 @@ public class ScrollAreaGuiElement
         int cntSub = renderedElements.size();
 
         GuiElementInst btn = cntAll > cntSub ? this.data.scrollBtnActive : this.data.scrollBtnDeactive;
-        TextureGuiElement btnElem = (TextureGuiElement) btn.get();
+        Texture btnElem = (Texture) btn.get();
 
 
         if( cntAll > cntSub && isLmbDown ) {

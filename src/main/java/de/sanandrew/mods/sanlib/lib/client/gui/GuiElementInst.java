@@ -15,12 +15,12 @@ import java.util.function.Supplier;
 
 public final class GuiElementInst
 {
-    String type;
-    int[] pos;
-    JsonObject data;
-    IGuiElement element;
+    public String type;
+    public int[] pos;
+    public JsonObject data;
+    public IGuiElement element;
 
-    IGuiElement get() {
+    public IGuiElement get() {
         if( this.element == null ) {
             Supplier<IGuiElement> cnst = GuiDefinition.TYPES.get(new ResourceLocation(this.type));
             if( cnst != null ) {

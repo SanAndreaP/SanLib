@@ -1,12 +1,13 @@
-package de.sanandrew.mods.sanlib.lib.client.gui;
+package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonObject;
+import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import net.minecraft.util.ResourceLocation;
 
-public class ContainerNameGuiElement
-    extends TextGuiElement
+public class ContainerName
+    extends Text
 {
-    static final ResourceLocation ID = new ResourceLocation("container_name");
+    public static final ResourceLocation ID = new ResourceLocation("container_name");
 
     @Override
     public String getBakedText(IGui gui, JsonObject data) {

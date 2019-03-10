@@ -6,11 +6,7 @@
  *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.client.lexicon;
 
-import de.sanandrew.mods.sanlib.api.client.lexicon.CraftingGrid;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconEntry;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconEntryCraftingGrid;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconGuiHelper;
-import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconPageRender;
+import de.sanandrew.mods.sanlib.api.client.lexicon.*;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
@@ -22,6 +18,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("DeprecatedIsStillUsed")
 @SideOnly(Side.CLIENT)
 @Deprecated
 public class LexiconRenderCraftingGrid

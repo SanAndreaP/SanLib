@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.sanandrew.mods.sanlib.SanLib;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.*;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -32,11 +33,13 @@ public class GuiDefinition
 {
     public static final Map<ResourceLocation, Supplier<IGuiElement>> TYPES = new HashMap<>();
     static {
-        TYPES.put(TextGuiElement.ID, TextGuiElement::new);
-        TYPES.put(TextureGuiElement.ID, TextureGuiElement::new);
-        TYPES.put(RectangleGuiElement.ID, RectangleGuiElement::new);
-        TYPES.put(ScrollAreaGuiElement.ID, ScrollAreaGuiElement::new);
-        TYPES.put(ContainerNameGuiElement.ID, ContainerNameGuiElement::new);
+        TYPES.put(Text.ID, Text::new);
+        TYPES.put(Texture.ID, Texture::new);
+        TYPES.put(Rectangle.ID, Rectangle::new);
+        TYPES.put(ScrollArea.ID, ScrollArea::new);
+        TYPES.put(ContainerName.ID, ContainerName::new);
+        TYPES.put(RedstoneFluxBar.ID, RedstoneFluxBar::new);
+        TYPES.put(RedstoneFluxLabel.ID, RedstoneFluxLabel::new);
     }
 
     public int width;
