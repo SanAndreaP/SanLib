@@ -57,6 +57,7 @@ public class Text
             this.data.color = MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("color"), "0xFF000000"));
             this.data.shadow = JsonUtils.getBoolVal(data.get("shadow"), false);
             this.data.wrapWidth = JsonUtils.getIntVal(data.get("wrapWidth"), 0);
+            this.data.justifyRight = JsonUtils.getBoolVal(data.get("justifyRight"), false);
 
             JsonElement cstFont = data.get("font");
             if( cstFont == null ) {
@@ -88,13 +89,25 @@ public class Text
         String s = this.getDynamicText(gui, this.data.text);
         GlStateManager.pushMatrix();
         GlStateManager.translate(0.0D, 0.0D, gui.getZLevel());
+
         if( this.data.wrapWidth > 0 ) {
+            boolean origBidi = this.data.fontRenderer.getBidiFlag();
+            if( this.data.justifyRight ) {
+                x -= this.data.wrapWidth;
+                this.data.fontRenderer.setBidiFlag(true);
+            }
             if( this.data.shadow ) {
                 int sdColor = (this.data.color & 0x00FCFCFC) >> 2 | this.data.color & 0xFF000000;
                 this.data.fontRenderer.drawSplitString(s, x + 1, y + 1, sdColor, this.data.wrapWidth);
             }
             this.data.fontRenderer.drawSplitString(s, x, y, this.data.color, this.data.wrapWidth);
+            if( this.data.justifyRight ) {
+                this.data.fontRenderer.setBidiFlag(origBidi);
+            }
         } else {
+            if( this.data.justifyRight ) {
+                x -= this.data.fontRenderer.getStringWidth(s);
+            }
             this.data.fontRenderer.drawString(s, x, y, this.data.color, this.data.shadow);
         }
         GlStateManager.popMatrix();
@@ -113,6 +126,7 @@ public class Text
         private int wrapWidth;
         private FontRenderer fontRenderer;
         private int height;
+        private boolean justifyRight;
     }
 
     @SuppressWarnings("WeakerAccess")
