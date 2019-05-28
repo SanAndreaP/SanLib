@@ -107,20 +107,23 @@ public class ScrollArea
             } else {
                 this.scroll += Math.min(1.0F / this.data.elementsView.size(), this.data.maxScrollDelta);
             }
-
-            if( this.scroll > 1.0F ) {
-                this.scroll = 1.0F;
-            }
+            this.clipScroll();
         } else if( dWheelDir > 0 ) {
             if( this.data.rasterized ) {
                 this.scroll = this.getRasterScroll(false);
             } else {
                 this.scroll -= Math.min(1.0F / this.data.elementsView.size(), this.data.maxScrollDelta);
             }
+            this.clipScroll();
+        }
+    }
 
-            if( this.scroll < 0.0F ) {
-                this.scroll = 0.0F;
-            }
+    private void clipScroll() {
+        if( this.scroll < 0.0F ) {
+            this.scroll = 0.0F;
+        }
+        if( this.scroll > 1.0F ) {
+            this.scroll = 1.0F;
         }
     }
 
