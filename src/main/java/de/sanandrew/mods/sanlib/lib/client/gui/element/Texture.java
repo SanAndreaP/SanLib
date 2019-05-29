@@ -41,7 +41,7 @@ public class Texture
 {
     public static final ResourceLocation ID = new ResourceLocation("texture");
 
-    BakedData data;
+    public BakedData data;
 
     @Override
     public void bakeData(IGui gui, JsonObject data) {
