@@ -42,12 +42,13 @@ import java.util.Objects;
 &#125;
  * </pre>
  */
+@SuppressWarnings("WeakerAccess")
 public class Text
         implements IGuiElement
 {
     public static final ResourceLocation ID = new ResourceLocation("text");
 
-    private BakedData data;
+    public BakedData data;
 
     @Override
     public void bakeData(IGui gui, JsonObject data) {
@@ -118,34 +119,34 @@ public class Text
         return this.data == null ? 0 : this.data.height;
     }
 
-    private static final class BakedData
+    public static final class BakedData
     {
-        private String text;
-        private int color;
-        private boolean shadow;
-        private int wrapWidth;
-        private FontRenderer fontRenderer;
-        private int height;
-        private boolean justifyRight;
+        public String text;
+        public int color;
+        public boolean shadow;
+        public int wrapWidth;
+        public FontRenderer fontRenderer;
+        public int height;
+        public boolean justifyRight;
     }
 
     @SuppressWarnings("WeakerAccess")
-    private static final class Font
+    public static final class Font
     {
-        String texture;
-        Boolean unicode;
-        Boolean bidirectional;
+        public String texture;
+        public Boolean unicode;
+        public Boolean bidirectional;
 
-        private WeakReference<FontRenderer> frInst;
+        public WeakReference<FontRenderer> frInst;
 
         @SuppressWarnings("unused")
         public Font() { }
 
-        Font(String tx) {
+        public Font(String tx) {
             this.texture = tx;
         }
 
-        FontRenderer get(GuiScreen gui) {
+        public FontRenderer get(GuiScreen gui) {
             if( "standard".equals(this.texture) ) {
                 return gui.mc.fontRenderer;
             } else if( "galactic".equals(this.texture) ) {

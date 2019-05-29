@@ -9,10 +9,11 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import org.apache.commons.lang3.Range;
 
+@SuppressWarnings("WeakerAccess")
 public abstract class Label
         implements IGuiElement
 {
-    private BakedData data;
+    public BakedData data;
 
     @Override
     public void bakeData(IGui gui, JsonObject data) {
@@ -75,7 +76,7 @@ public abstract class Label
 
     static final class BakedData
     {
-        int[] size;
-        private Text textRenderer;
+        public int[] size;
+        public Text textRenderer;
     }
 }

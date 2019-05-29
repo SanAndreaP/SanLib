@@ -17,12 +17,13 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.Range;
 
+@SuppressWarnings("WeakerAccess")
 public class Rectangle
         implements IGuiElement
 {
     public static final ResourceLocation ID = new ResourceLocation("rectangle");
 
-    private BakedData data;
+    public BakedData data;
 
     @Override
     public void bakeData(IGui gui, JsonObject data) {
@@ -52,10 +53,10 @@ public class Rectangle
         return this.data == null ? 0 : this.data.size[1];
     }
 
-    private static final class BakedData
+    public static final class BakedData
     {
-        private int[] size;
-        private int[] color;
-        private boolean horizontal;
+        public int[] size;
+        public int[] color;
+        public boolean horizontal;
     }
 }

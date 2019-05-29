@@ -35,6 +35,7 @@ import org.apache.commons.lang3.Range;
 &#125;
  * </pre>
  */
+@SuppressWarnings("WeakerAccess")
 public class Texture
         implements IGuiElement
 {
@@ -67,8 +68,12 @@ public class Texture
         GlStateManager.translate(x, y, gui.getZLevel());
         GlStateManager.scale(this.data.scale[0], this.data.scale[1], 1.0D);
         GlStateManager.color(this.data.color.fRed(), this.data.color.fGreen(), this.data.color.fBlue(), this.data.color.fAlpha());
-        Gui.drawModalRectWithCustomSizedTexture(0, 0, this.data.uv[0], this.data.uv[1], this.data.size[0], this.data.size[1], this.data.textureSize[0], this.data.textureSize[1]);
+        drawRect(gui);
         GlStateManager.popMatrix();
+    }
+
+    void drawRect(IGui gui) {
+        Gui.drawModalRectWithCustomSizedTexture(0, 0, this.data.uv[0], this.data.uv[1], this.data.size[0], this.data.size[1], this.data.textureSize[0], this.data.textureSize[1]);
     }
 
     @Override
@@ -76,14 +81,14 @@ public class Texture
         return this.data == null ? 0 : this.data.size[1];
     }
 
-    static final class BakedData
+    public static final class BakedData
     {
-        private ResourceLocation location;
-        int[] size;
-        private int[] textureSize;
-        private int[] uv;
-        private double[] scale;
-        private ColorObj color;
-        private boolean forceAlpha;
+        public ResourceLocation location;
+        public int[] size;
+        public int[] textureSize;
+        public int[] uv;
+        public double[] scale;
+        public ColorObj color;
+        public boolean forceAlpha;
     }
 }

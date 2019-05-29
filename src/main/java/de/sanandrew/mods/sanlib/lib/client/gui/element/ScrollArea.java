@@ -24,10 +24,10 @@ public class ScrollArea
 {
     public static final ResourceLocation ID = new ResourceLocation("scroll_area");
 
-    protected BakedData data;
-    protected float scroll;
+    public BakedData data;
+    public float scroll;
 
-    private boolean prevLmbDown;
+    public boolean prevLmbDown;
 
     @Override
     public void bakeData(IGui gui, JsonObject data) {
@@ -118,7 +118,7 @@ public class ScrollArea
         }
     }
 
-    private void clipScroll() {
+    public void clipScroll() {
         if( this.scroll < 0.0F ) {
             this.scroll = 0.0F;
         }
@@ -127,7 +127,7 @@ public class ScrollArea
         }
     }
 
-    private float getRasterScroll(boolean next) {
+    public float getRasterScroll(boolean next) {
         BakedData.ScrollData sData = this.data.getScrollData(this.scroll);
         Map<Range<Integer>, GuiElementInst> sRange = this.data.getSubRange(sData.minY, sData.maxY, false);
         Map.Entry<Range<Integer>, GuiElementInst> first = sRange.entrySet().stream().findFirst().orElse(null);
@@ -154,7 +154,7 @@ public class ScrollArea
         return 1.0F / scrollArea * second.getValue().pos[1];
     }
 
-    protected GuiElementInst[] getElements(IGui gui, JsonObject elementData) {
+    public GuiElementInst[] getElements(IGui gui, JsonObject elementData) {
         return JsonUtils.GSON.fromJson(elementData.get("elements"), GuiElementInst[].class);
     }
 
@@ -164,20 +164,20 @@ public class ScrollArea
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    private static final class BakedData
+    public static final class BakedData
     {
-        private int[] areaSize;
-        private GuiElementInst scrollBtnActive;
-        private GuiElementInst scrollBtnDeactive;
-        private int scrollHeight;
-        private float maxScrollDelta;
-        private boolean rasterized;
+        public int[] areaSize;
+        public GuiElementInst scrollBtnActive;
+        public GuiElementInst scrollBtnDeactive;
+        public int scrollHeight;
+        public float maxScrollDelta;
+        public boolean rasterized;
 
         @SuppressWarnings("UnstableApiUsage")
         public final RangeMap<Integer, GuiElementInst> elements = TreeRangeMap.create();
         public final Map<Range<Integer>, GuiElementInst> elementsView = this.elements.asMapOfRanges();
 
-        private ScrollData getScrollData(float scroll) {
+        public ScrollData getScrollData(float scroll) {
             ScrollData data = new ScrollData();
 
             data.totalHeight = this.elements.span().upperEndpoint();
@@ -193,11 +193,11 @@ public class ScrollArea
             return desc ? sub.asDescendingMapOfRanges() : sub.asMapOfRanges();
         }
 
-        private static final class ScrollData
+        public static final class ScrollData
         {
-            private int totalHeight;
-            private int minY;
-            private int maxY;
+            public int totalHeight;
+            public int minY;
+            public int maxY;
         }
     }
 }

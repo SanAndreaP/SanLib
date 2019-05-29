@@ -5,12 +5,13 @@ import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 
+@SuppressWarnings("WeakerAccess")
 public class DynamicText
     extends Text
 {
     public static final ResourceLocation ID = new ResourceLocation("dynamic_text");
 
-    private String key;
+    public String key;
 
     @Override
     public void bakeData(IGui gui, JsonObject data) {
