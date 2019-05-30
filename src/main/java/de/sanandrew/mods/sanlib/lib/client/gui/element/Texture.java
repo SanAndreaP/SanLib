@@ -65,7 +65,7 @@ public class Texture
             GlStateManager.enableBlend();
             GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         }
-        GlStateManager.translate(x, y, gui.getZLevel());
+        GlStateManager.translate(x, y, 0.0D);
         GlStateManager.scale(this.data.scale[0], this.data.scale[1], 1.0D);
         GlStateManager.color(this.data.color.fRed(), this.data.color.fGreen(), this.data.color.fBlue(), this.data.color.fAlpha());
         drawRect(gui);

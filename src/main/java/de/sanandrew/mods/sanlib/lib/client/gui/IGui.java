@@ -12,11 +12,9 @@ public interface IGui
 {
     GuiScreen get();
 
+    GuiDefinition getDefinition();
+
     int getScreenPosX();
 
     int getScreenPosY();
-
-    float getZLevel();
-
-    float setZLevel(float newZ);
 }

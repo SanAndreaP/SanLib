@@ -16,6 +16,7 @@ import java.util.function.Supplier;
 public final class GuiElementInst
 {
     public String type;
+    public String id;
     public int[] pos;
     public JsonObject data;
     public IGuiElement element;

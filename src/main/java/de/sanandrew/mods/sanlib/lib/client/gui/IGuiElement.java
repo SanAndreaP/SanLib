@@ -9,6 +9,8 @@ public interface IGuiElement
 {
     void bakeData(IGui gui, JsonObject data);
 
+    default void update(IGui gui, JsonObject data) {}
+
     void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data);
 
     default void handleMouseInput(IGui gui) throws IOException { }

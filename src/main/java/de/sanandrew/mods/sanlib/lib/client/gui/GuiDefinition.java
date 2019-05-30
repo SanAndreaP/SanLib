@@ -1,5 +1,6 @@
 package de.sanandrew.mods.sanlib.lib.client.gui;
 
+import com.google.common.base.Strings;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -49,12 +50,15 @@ public class GuiDefinition
     GuiElementInst[] foregroundElements;
     GuiElementInst[] backgroundElements;
 
+    private Map<String, GuiElementInst> idToElementMap;
+
     private Map<Integer, Button> buttons;
 
     private final ResourceLocation data;
 
     private GuiDefinition(ResourceLocation data) throws IOException {
         this.data = data;
+        this.idToElementMap = new HashMap<>();
         ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(this);
         this.reloadDefinition();
     }
@@ -64,6 +68,8 @@ public class GuiDefinition
     }
 
     private void reloadDefinition() throws IOException {
+        this.idToElementMap.clear();
+
         try( IResource r = Minecraft.getMinecraft().getResourceManager().getResource(this.data);
              InputStreamReader reader = new InputStreamReader(r.getInputStream(), StandardCharsets.UTF_8) )
         {
@@ -78,6 +84,9 @@ public class GuiDefinition
 
             this.backgroundElements = JsonUtils.GSON.fromJson(jObj.get("backgroundElements"), GuiElementInst[].class);
             this.foregroundElements = JsonUtils.GSON.fromJson(jObj.get("foregroundElements"), GuiElementInst[].class);
+
+            Arrays.stream(this.backgroundElements).forEach(e -> { if( !Strings.isNullOrEmpty(e.id) ) this.idToElementMap.put(e.id, e); });
+            Arrays.stream(this.foregroundElements).forEach(e -> { if( !Strings.isNullOrEmpty(e.id) ) this.idToElementMap.put(e.id, e); });
         }
     }
 
@@ -125,6 +134,10 @@ public class GuiDefinition
         return button;
     }
 
+    public GuiElementInst getElementById(String id) {
+        return this.idToElementMap.get(id);
+    }
+
     @Override
     public void onResourceManagerReload(@Nonnull IResourceManager resourceManager, @Nonnull Predicate<IResourceType> resourcePredicate) {
         try {
@@ -132,6 +145,12 @@ public class GuiDefinition
         } catch( IOException ex ) {
             SanLib.LOG.log(Level.ERROR, "Error whilst reloading GUI definition", ex);
         }
+    }
+
+    public void update(IGui gui) {
+        Consumer<GuiElementInst> f = e -> e.get().update(gui, e.data);
+        Arrays.stream(this.backgroundElements).forEach(f);
+        Arrays.stream(this.foregroundElements).forEach(f);
     }
 
     static final class Button

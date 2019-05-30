@@ -47,6 +47,11 @@ public class TestGui
     }
 
     @Override
+    public void updateScreen() {
+        this.guiDef.update(this);
+    }
+
+    @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         this.drawDefaultBackground();
 
@@ -71,6 +76,11 @@ public class TestGui
     }
 
     @Override
+    public GuiDefinition getDefinition() {
+        return this.guiDef;
+    }
+
+    @Override
     public int getScreenPosX() {
         return this.posX;
     }
@@ -78,17 +88,5 @@ public class TestGui
     @Override
     public int getScreenPosY() {
         return this.posY;
-    }
-
-    @Override
-    public float getZLevel() {
-        return this.zLevel;
-    }
-
-    @Override
-    public float setZLevel(float newZ) {
-        float origZ = this.zLevel;
-        this.zLevel = newZ;
-        return origZ;
     }
 }

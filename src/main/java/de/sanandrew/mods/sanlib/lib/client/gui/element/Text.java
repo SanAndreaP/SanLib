@@ -88,8 +88,6 @@ public class Text
     @Override
     public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
         String s = this.getDynamicText(gui, this.data.text);
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(0.0D, 0.0D, gui.getZLevel());
 
         if( this.data.wrapWidth > 0 ) {
             boolean origBidi = this.data.fontRenderer.getBidiFlag();
@@ -111,7 +109,6 @@ public class Text
             }
             this.data.fontRenderer.drawString(s, x, y, this.data.color, this.data.shadow);
         }
-        GlStateManager.popMatrix();
     }
 
     @Override
