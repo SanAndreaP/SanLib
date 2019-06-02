@@ -20,6 +20,11 @@ public class EmptyGuiElement
     public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) { }
 
     @Override
+    public int getWidth() {
+        return 0;
+    }
+
+    @Override
     public int getHeight() {
         return 0;
     }

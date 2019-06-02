@@ -77,8 +77,13 @@ public class Texture
     }
 
     @Override
+    public int getWidth() {
+        return this.data.size[0];
+    }
+
+    @Override
     public int getHeight() {
-        return this.data == null ? 0 : this.data.size[1];
+        return this.data.size[1];
     }
 
     public static final class BakedData

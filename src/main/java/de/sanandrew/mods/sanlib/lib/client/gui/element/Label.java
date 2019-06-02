@@ -70,6 +70,11 @@ public abstract class Label
     }
 
     @Override
+    public int getWidth() {
+        return 0;
+    }
+
+    @Override
     public int getHeight() {
         return 0;
     }

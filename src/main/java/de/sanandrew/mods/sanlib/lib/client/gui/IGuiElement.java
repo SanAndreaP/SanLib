@@ -15,5 +15,7 @@ public interface IGuiElement
 
     default void handleMouseInput(IGui gui) throws IOException { }
 
+    int getWidth();
+
     int getHeight();
 }

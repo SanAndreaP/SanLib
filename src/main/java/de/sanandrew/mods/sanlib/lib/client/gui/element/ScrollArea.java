@@ -175,6 +175,11 @@ public class ScrollArea
     }
 
     @Override
+    public int getWidth() {
+        return this.data.areaSize[0];
+    }
+
+    @Override
     public int getHeight() {
         return this.data.areaSize[1];
     }

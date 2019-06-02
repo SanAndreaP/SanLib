@@ -49,6 +49,8 @@ public class Text
     public static final ResourceLocation ID = new ResourceLocation("text");
 
     public BakedData data;
+    private int currWidth;
+    private int currHeight;
 
     @Override
     public void bakeData(IGui gui, JsonObject data) {
@@ -66,9 +68,9 @@ public class Text
             } else {
                 this.data.fontRenderer = JsonUtils.GSON.fromJson(cstFont, Font.class).get(gui.get());
             }
-            this.data.height = this.data.wrapWidth <= 0 ? this.data.fontRenderer.FONT_HEIGHT : this.data.fontRenderer.getWordWrappedHeight(this.data.text, this.data.wrapWidth);
+            this.currHeight = this.data.wrapWidth <= 0 ? this.data.fontRenderer.FONT_HEIGHT : this.data.fontRenderer.getWordWrappedHeight(this.data.text, this.data.wrapWidth);
             if( this.data.shadow ) {
-                this.data.height += 1;
+                this.currHeight += 1;
             }
         }
     }
@@ -90,6 +92,7 @@ public class Text
         String s = this.getDynamicText(gui, this.data.text);
 
         if( this.data.wrapWidth > 0 ) {
+            this.currWidth = this.data.wrapWidth;
             boolean origBidi = this.data.fontRenderer.getBidiFlag();
             if( this.data.justifyRight ) {
                 x -= this.data.wrapWidth;
@@ -112,8 +115,13 @@ public class Text
     }
 
     @Override
+    public int getWidth() {
+        return this.currWidth;
+    }
+
+    @Override
     public int getHeight() {
-        return this.data == null ? 0 : this.data.height;
+        return this.currHeight;
     }
 
     public static final class BakedData
@@ -123,7 +131,6 @@ public class Text
         public boolean shadow;
         public int wrapWidth;
         public FontRenderer fontRenderer;
-        public int height;
         public boolean justifyRight;
     }
 
