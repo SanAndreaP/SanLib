@@ -91,8 +91,8 @@ public class Text
     public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
         String s = this.getDynamicText(gui, this.data.text);
 
+        this.currWidth = this.getTextWidth(gui);
         if( this.data.wrapWidth > 0 ) {
-            this.currWidth = this.data.wrapWidth;
             boolean origBidi = this.data.fontRenderer.getBidiFlag();
             if( this.data.justifyRight ) {
                 x -= this.data.wrapWidth;
