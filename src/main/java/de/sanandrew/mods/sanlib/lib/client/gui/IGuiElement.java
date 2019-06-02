@@ -15,6 +15,12 @@ public interface IGuiElement
 
     default void handleMouseInput(IGui gui) throws IOException { }
 
+    default void mouseClicked(IGui gui, int mouseX, int mouseY, int mouseButton) throws IOException { }
+
+    default void mouseReleased(IGui gui, int mouseX, int mouseY, int state) { }
+
+    default void mouseClickMove(IGui gui, int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) { }
+
     int getWidth();
 
     int getHeight();

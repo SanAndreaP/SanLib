@@ -89,4 +89,22 @@ public class TestGui
     public int getScreenPosY() {
         return this.posY;
     }
+
+    @Override
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+        this.guiDef.mouseClicked(this, mouseX, mouseY, mouseButton);
+    }
+
+    @Override
+    protected void mouseReleased(int mouseX, int mouseY, int state) {
+        super.mouseReleased(mouseX, mouseY, state);
+        this.guiDef.mouseReleased(this, mouseX, mouseY, state);
+    }
+
+    @Override
+    protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+        super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+        this.guiDef.mouseClickMove(this, mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+    }
 }

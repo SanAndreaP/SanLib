@@ -121,6 +121,37 @@ public class GuiDefinition
         }
     }
 
+    public void mouseClicked(IGui gui, int mouseX, int mouseY, int mouseButton) throws IOException {
+        Consumer<GuiElementInst> f = e -> {
+            try {
+                e.get().mouseClicked(gui, mouseX, mouseY, mouseButton);
+            } catch( IOException ex ) {
+                throw new IOExceptionWrapper(ex);
+            }
+        };
+
+        try {
+            Arrays.stream(this.backgroundElements).forEach(f);
+            Arrays.stream(this.foregroundElements).forEach(f);
+        } catch( IOExceptionWrapper ex ) {
+            throw ex.ioex;
+        }
+    }
+
+    public void mouseReleased(IGui gui, int mouseX, int mouseY, int state) {
+        Consumer<GuiElementInst> f = e -> e.get().mouseReleased(gui, mouseX, mouseY, state);
+
+        Arrays.stream(this.backgroundElements).forEach(f);
+        Arrays.stream(this.foregroundElements).forEach(f);
+    }
+
+    public void mouseClickMove(IGui gui, int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+        Consumer<GuiElementInst> f = e -> e.get().mouseClickMove(gui, mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+
+        Arrays.stream(this.backgroundElements).forEach(f);
+        Arrays.stream(this.foregroundElements).forEach(f);
+    }
+
     public GuiButton injectData(GuiButton button) {
         Button btn = this.buttons == null ? null : this.buttons.get(button.id);
 
