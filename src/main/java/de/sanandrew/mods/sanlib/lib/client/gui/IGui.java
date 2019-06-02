@@ -17,4 +17,6 @@ public interface IGui
     int getScreenPosX();
 
     int getScreenPosY();
+
+    default void performAction(IGuiElement element, int action) { }
 }
