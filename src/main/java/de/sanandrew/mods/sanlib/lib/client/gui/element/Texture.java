@@ -72,7 +72,7 @@ public class Texture
         GlStateManager.popMatrix();
     }
 
-    void drawRect(IGui gui) {
+    protected void drawRect(IGui gui) {
         Gui.drawModalRectWithCustomSizedTexture(0, 0, this.data.uv[0], this.data.uv[1], this.data.size[0], this.data.size[1], this.data.textureSize[0], this.data.textureSize[1]);
     }
 

@@ -23,7 +23,7 @@ public class RedstoneFluxBar
     }
 
     @Override
-    void drawRect(IGui gui) {
+    protected void drawRect(IGui gui) {
         IGuiEnergyContainer gec = (IGuiEnergyContainer) gui;
 
         double energyPerc = gec.getEnergy() / (double) gec.getMaxEnergy();
