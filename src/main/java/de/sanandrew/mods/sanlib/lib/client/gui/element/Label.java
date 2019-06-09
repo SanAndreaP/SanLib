@@ -27,8 +27,8 @@ public class Label
             this.data.size = JsonUtils.getIntArray(data.get("size"), Range.is(2));
             this.data.backgroundColor = MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("backgroundColor"), "0xF0100010"));
             this.data.borderTopColor = MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("borderTopColor"), "0x505000FF"));
-            this.data.borderBottomColor = MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("borderBottomColor"), "0x505000FE"));
-            this.data.setPadding(JsonUtils.getIntArray(data.get("padding"), new int[] { 0, 0, 0, 1 }, Range.between(0, 4)));
+            this.data.borderBottomColor = MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("borderBottomColor"), "0x5028007F"));
+            this.data.setPadding(JsonUtils.getIntArray(data.get("padding"), new int[0], Range.between(0, 4)));
 
             this.data.content = JsonUtils.GSON.fromJson(data.get("content"), GuiElementInst.class);
             gui.getDefinition().initElement(this.data.content);

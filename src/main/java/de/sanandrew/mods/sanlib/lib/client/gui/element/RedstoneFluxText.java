@@ -20,6 +20,11 @@ public class RedstoneFluxText
     }
 
     @Override
+    public int getHeight() {
+        return super.getHeight() - 2;
+    }
+
+    @Override
     public String getDynamicText(IGui gui, String originalText) {
         RedstoneFluxBar.IGuiEnergyContainer gec = (RedstoneFluxBar.IGuiEnergyContainer) gui;
         return String.format("%d / %d RF", gec.getEnergy(), gec.getMaxEnergy());
