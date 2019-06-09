@@ -35,7 +35,7 @@ import org.apache.commons.lang3.Range;
 &#125;
  * </pre>
  */
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "Duplicates"})
 public class Texture
         implements IGuiElement
 {
@@ -47,7 +47,7 @@ public class Texture
     public void bakeData(IGui gui, JsonObject data) {
         if( this.data == null ) {
             this.data = new BakedData();
-            this.data.location = new ResourceLocation(data.get("location").getAsString());
+            this.data.texture = gui.getDefinition().getTexture(data.get("texture"));
             this.data.size = JsonUtils.getIntArray(data.get("size"), Range.is(2));
             this.data.uv = JsonUtils.getIntArray(data.get("uv"), Range.is(2));
             this.data.textureSize = JsonUtils.getIntArray(data.get("textureSize"), new int[] {256, 256}, Range.is(2));
@@ -59,7 +59,7 @@ public class Texture
 
     @Override
     public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
-        gui.get().mc.renderEngine.bindTexture(this.data.location);
+        gui.get().mc.renderEngine.bindTexture(this.data.texture);
         GlStateManager.pushMatrix();
         if( this.data.forceAlpha ) {
             GlStateManager.enableBlend();
@@ -88,7 +88,7 @@ public class Texture
 
     public static final class BakedData
     {
-        public ResourceLocation location;
+        public ResourceLocation texture;
         public int[] size;
         public int[] textureSize;
         public int[] uv;

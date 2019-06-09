@@ -1,18 +1,23 @@
 package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonObject;
+import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.client.util.GuiUtils;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
+import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.Range;
 
 @SuppressWarnings("WeakerAccess")
-public abstract class Label
+public class Label
         implements IGuiElement
 {
+    public static final ResourceLocation ID = new ResourceLocation("label");
+
     public BakedData data;
 
     @Override
@@ -20,52 +25,48 @@ public abstract class Label
         if( this.data == null ) {
             this.data = new BakedData();
             this.data.size = JsonUtils.getIntArray(data.get("size"), Range.is(2));
-            this.data.textRenderer = getTextElement(gui, data.get("textElement").getAsJsonObject());
+            this.data.backgroundColor = MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("backgroundColor"), "0xF0100010"));
+            this.data.borderTopColor = MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("borderTopColor"), "0x505000FF"));
+            this.data.borderBottomColor = MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("borderBottomColor"), "0x505000FE"));
+            this.data.content = JsonUtils.GSON.fromJson(data.get("content"), GuiElementInst.class);
+            this.data.setPadding(JsonUtils.getIntArray(data.get("padding"), new int[] { 0, 0, 0, 1 }, Range.between(0, 4)));
+            gui.getDefinition().initElement(this.data.content);
         }
     }
 
-    public abstract Text getTextElement(IGui gui, JsonObject data);
-
     @Override
     public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
-        int screenX = gui.getScreenPosX();
-        int screenY = gui.getScreenPosY();
-        int absX = x + screenX;
-        int absY = y + screenY;
-        if( mouseX >= absX && mouseX < absX + this.data.size[0] && mouseY >= absY && mouseY < absY + this.data.size[1] ) {
-            int textWidth = this.data.textRenderer.getTextWidth(gui);
-            int xPos = mouseX - screenX + 12;
-            int yPos = mouseY - screenY - 14;
-            int height = this.data.textRenderer.getHeight();
+        int locMouseX = mouseX - gui.getScreenPosX();
+        int locMouseY = mouseY - gui.getScreenPosY();
+        if( locMouseX >= x && locMouseX < x + this.data.size[0] && locMouseY >= y && locMouseY < y + this.data.size[1] ) {
+            IGuiElement contentElem = this.data.content.get();
+            int width = contentElem.getWidth() + this.data.padding[1] + this.data.padding[3];
+            int height = contentElem.getHeight() + this.data.padding[0] + this.data.padding[2];
+            int xPos = locMouseX + 12;
+            int yPos = locMouseY - 14;
 
-            if( screenX + xPos + textWidth + 4 > gui.get().width ) {
-                xPos -= textWidth + 28;
+            if( mouseX + width + 16 > gui.get().width ) {
+                xPos -= width + 28;
             }
 
-            int bkgColor = 0xF0100010;
-            int lightBg = 0x505000FF;
-            int darkBg = (lightBg & 0xFEFEFE) >> 1 | lightBg & 0xFF000000;
-
             GlStateManager.disableDepth();
-            Gui.drawRect(xPos - 3,             yPos - 4,          xPos + textWidth + 3, yPos - 3,          bkgColor);
-            Gui.drawRect(xPos - 3,             yPos + height + 3, xPos + textWidth + 3, yPos + height + 4, bkgColor);
-            Gui.drawRect(xPos - 3,             yPos - 3,          xPos + textWidth + 3, yPos + height + 3, bkgColor);
-            Gui.drawRect(xPos - 4,             yPos - 3,          xPos - 3,             yPos + height + 3, bkgColor);
-            Gui.drawRect(xPos + textWidth + 3, yPos - 3,          xPos + textWidth + 4, yPos + height + 3, bkgColor);
+            Gui.drawRect(xPos - 3,         yPos - 4,          xPos + width + 3, yPos - 3,          this.data.backgroundColor);
+            Gui.drawRect(xPos - 3,         yPos + height + 3, xPos + width + 3, yPos + height + 4, this.data.backgroundColor);
+            Gui.drawRect(xPos - 3,         yPos - 3,          xPos + width + 3, yPos + height + 3, this.data.backgroundColor);
+            Gui.drawRect(xPos - 4,         yPos - 3,          xPos - 3,         yPos + height + 3, this.data.backgroundColor);
+            Gui.drawRect(xPos + width + 3, yPos - 3,          xPos + width + 4, yPos + height + 3, this.data.backgroundColor);
 
-            GuiUtils.drawGradientRect(xPos - 3,             yPos - 3 + 1,      1, height + 4, lightBg, darkBg, true);
-            GuiUtils.drawGradientRect(xPos + textWidth + 2, yPos - 3 + 1,      1, height + 4, lightBg, darkBg, true);
-            Gui.drawRect(xPos - 3,             yPos - 3,          xPos + textWidth + 3, yPos - 2,         lightBg);
-            Gui.drawRect(xPos - 3,             yPos + height + 2, xPos + textWidth + 3, yPos + height + 3, darkBg);
+            GuiUtils.drawGradientRect(xPos - 3,         yPos - 2, 1, height + 4, this.data.borderTopColor, this.data.borderBottomColor, true);
+            GuiUtils.drawGradientRect(xPos + width + 2, yPos - 2, 1, height + 4, this.data.borderTopColor, this.data.borderBottomColor, true);
+            Gui.drawRect(xPos - 3, yPos - 3,          xPos + width + 3, yPos - 2,          this.data.borderTopColor);
+            Gui.drawRect(xPos - 3, yPos + height + 2, xPos + width + 3, yPos + height + 3, this.data.borderBottomColor);
 
-            GlStateManager.pushMatrix();
-            GlStateManager.translate(xPos, yPos, 0.0F);
-
-            this.data.textRenderer.render(gui, partTicks, 0, 1, mouseX, mouseY, data);
+            contentElem.render(gui, partTicks,
+                               xPos + this.data.padding[3] + this.data.content.pos[0], yPos + this.data.padding[0] + this.data.content.pos[1],
+                               mouseX, mouseY,
+                               data);
 
             GlStateManager.enableDepth();
-
-            GlStateManager.popMatrix();
         }
     }
 
@@ -82,6 +83,24 @@ public abstract class Label
     static final class BakedData
     {
         public int[] size;
-        public Text textRenderer;
+        public GuiElementInst content;
+        public int backgroundColor;
+        public int borderTopColor;
+        public int borderBottomColor;
+        public int[] padding;
+
+        public void setPadding(int[] padding) {
+            if( padding == null || padding.length == 0 ) {
+                this.padding = new int[] { 0, 0, 0, 0 };
+                return;
+            }
+
+            switch( padding.length ) {
+                case 1: this.padding = new int[] { this.padding[0], this.padding[0], this.padding[0], this.padding[0] }; break;
+                case 2: this.padding = new int[] { this.padding[0], this.padding[1], this.padding[0], this.padding[1] }; break;
+                case 3: this.padding = new int[] { this.padding[0], this.padding[1], this.padding[2], this.padding[1] }; break;
+                case 4: this.padding = new int[] { this.padding[0], this.padding[1], this.padding[2], this.padding[3] }; break;
+            }
+        }
     }
 }

@@ -88,6 +88,11 @@ public class Text
     }
 
     @Override
+    public void update(IGui gui, JsonObject data) {
+        this.currWidth = this.getTextWidth(gui);
+    }
+
+    @Override
     public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
         String s = this.getDynamicText(gui, this.data.text);
 

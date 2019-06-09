@@ -8,7 +8,6 @@ import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.*;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
@@ -39,13 +38,17 @@ public class GuiDefinition
         TYPES.put(Rectangle.ID, Rectangle::new);
         TYPES.put(ScrollArea.ID, ScrollArea::new);
         TYPES.put(ContainerName.ID, ContainerName::new);
+        TYPES.put(Label.ID, Label::new);
         TYPES.put(RedstoneFluxBar.ID, RedstoneFluxBar::new);
-        TYPES.put(RedstoneFluxLabel.ID, RedstoneFluxLabel::new);
+        TYPES.put(RedstoneFluxText.ID, RedstoneFluxText::new);
         TYPES.put(DynamicText.ID, DynamicText::new);
+        TYPES.put(Button.ID, Button::new);
+        TYPES.put(ButtonTextLabel.ID, ButtonTextLabel::new);
     }
 
     public int width;
     public int height;
+    private ResourceLocation texture;
 
     GuiElementInst[] foregroundElements;
     GuiElementInst[] backgroundElements;
@@ -81,13 +84,29 @@ public class GuiDefinition
 
             this.width = JsonUtils.getIntVal(jObj.get("width"));
             this.height = JsonUtils.getIntVal(jObj.get("height"));
+            this.texture = jObj.has("texture") ? new ResourceLocation(jObj.get("texture").getAsString()) : null;
 
             this.backgroundElements = JsonUtils.GSON.fromJson(jObj.get("backgroundElements"), GuiElementInst[].class);
             this.foregroundElements = JsonUtils.GSON.fromJson(jObj.get("foregroundElements"), GuiElementInst[].class);
 
-            Arrays.stream(this.backgroundElements).forEach(e -> { if( !Strings.isNullOrEmpty(e.id) ) this.idToElementMap.put(e.id, e); });
-            Arrays.stream(this.foregroundElements).forEach(e -> { if( !Strings.isNullOrEmpty(e.id) ) this.idToElementMap.put(e.id, e); });
+            Arrays.stream(this.backgroundElements).forEach(this::initElement);
+            Arrays.stream(this.foregroundElements).forEach(this::initElement);
         }
+    }
+
+    public void initElement(GuiElementInst e) {
+        if( e != null ) {
+            if( !Strings.isNullOrEmpty(e.id) ) this.idToElementMap.put(e.id, e);
+            if( e.data == null ) e.data = new JsonObject();
+        }
+    }
+
+    public ResourceLocation getTexture(JsonElement texture) {
+        if( texture != null ) {
+            return new ResourceLocation(texture.getAsString());
+        }
+
+        return this.texture;
     }
 
     public void initGui(IGui gui) {
@@ -152,19 +171,6 @@ public class GuiDefinition
         Arrays.stream(this.foregroundElements).forEach(f);
     }
 
-    public GuiButton injectData(GuiButton button) {
-        Button btn = this.buttons == null ? null : this.buttons.get(button.id);
-
-        if( btn != null ) {
-            button.x = btn.x;
-            button.y = btn.y;
-            button.width = btn.width;
-            button.height = btn.height;
-        }
-
-        return button;
-    }
-
     public GuiElementInst getElementById(String id) {
         return this.idToElementMap.get(id);
     }
@@ -182,14 +188,6 @@ public class GuiDefinition
         Consumer<GuiElementInst> f = e -> e.get().update(gui, e.data);
         Arrays.stream(this.backgroundElements).forEach(f);
         Arrays.stream(this.foregroundElements).forEach(f);
-    }
-
-    static final class Button
-    {
-        int x;
-        int y;
-        int width;
-        int height;
     }
 
     @SuppressWarnings("ExceptionClassNameDoesntEndWithException")

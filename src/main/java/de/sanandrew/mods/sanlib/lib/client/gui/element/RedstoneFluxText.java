@@ -1,0 +1,27 @@
+package de.sanandrew.mods.sanlib.lib.client.gui.element;
+
+import com.google.gson.JsonObject;
+import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
+import net.minecraft.util.ResourceLocation;
+
+public class RedstoneFluxText
+        extends Text
+{
+    public static final ResourceLocation ID = new ResourceLocation("rflux_text");
+
+    @Override
+    public String getBakedText(IGui gui, JsonObject data) {
+        return "";
+    }
+
+    @Override
+    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
+        super.render(gui, partTicks, x, y, mouseX, mouseY, data);
+    }
+
+    @Override
+    public String getDynamicText(IGui gui, String originalText) {
+        RedstoneFluxBar.IGuiEnergyContainer gec = (RedstoneFluxBar.IGuiEnergyContainer) gui;
+        return String.format("%d / %d RF", gec.getEnergy(), gec.getMaxEnergy());
+    }
+}
