@@ -10,6 +10,13 @@ public class RedstoneFluxText
     public static final ResourceLocation ID = new ResourceLocation("rflux_text");
 
     @Override
+    public void bakeData(IGui gui, JsonObject data) {
+        if( !data.has("color") ) data.addProperty("color", "0xFFFFFFFF");
+
+        super.bakeData(gui, data);
+    }
+
+    @Override
     public String getBakedText(IGui gui, JsonObject data) {
         return "";
     }
