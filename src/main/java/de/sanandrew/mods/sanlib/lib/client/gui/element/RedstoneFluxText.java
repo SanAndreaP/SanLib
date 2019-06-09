@@ -12,6 +12,7 @@ public class RedstoneFluxText
     @Override
     public void bakeData(IGui gui, JsonObject data) {
         if( !data.has("color") ) data.addProperty("color", "0xFFFFFFFF");
+        if( !data.has("shadow") ) data.addProperty("shadow", true);
 
         super.bakeData(gui, data);
     }
