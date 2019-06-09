@@ -98,10 +98,10 @@ public class Label
             }
 
             switch( padding.length ) {
-                case 1: this.padding = new int[] { this.padding[0], this.padding[0], this.padding[0], this.padding[0] }; break;
-                case 2: this.padding = new int[] { this.padding[0], this.padding[1], this.padding[0], this.padding[1] }; break;
-                case 3: this.padding = new int[] { this.padding[0], this.padding[1], this.padding[2], this.padding[1] }; break;
-                case 4: this.padding = new int[] { this.padding[0], this.padding[1], this.padding[2], this.padding[3] }; break;
+                case 1: this.padding = new int[] { padding[0], padding[0], padding[0], padding[0] }; break;
+                case 2: this.padding = new int[] { padding[0], padding[1], padding[0], padding[1] }; break;
+                case 3: this.padding = new int[] { padding[0], padding[1], padding[2], padding[1] }; break;
+                case 4: this.padding = new int[] { padding[0], padding[1], padding[2], padding[3] }; break;
             }
         }
     }
