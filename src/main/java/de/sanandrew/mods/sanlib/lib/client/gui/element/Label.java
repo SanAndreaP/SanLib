@@ -37,6 +37,11 @@ public class Label
     }
 
     @Override
+    public void update(IGui gui, JsonObject data) {
+        this.data.content.get().update(gui, this.data.content.data);
+    }
+
+    @Override
     public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
         int locMouseX = mouseX - gui.getScreenPosX();
         int locMouseY = mouseY - gui.getScreenPosY();
