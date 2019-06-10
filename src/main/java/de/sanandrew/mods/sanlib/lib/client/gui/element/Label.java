@@ -45,7 +45,7 @@ public class Label
             int width = contentElem.getWidth() + this.data.padding[1] + this.data.padding[3];
             int height = contentElem.getHeight() + this.data.padding[0] + this.data.padding[2];
             int xPos = locMouseX + 12;
-            int yPos = locMouseY - 14;
+            int yPos = locMouseY - 12;
 
             if( mouseX + width + 16 > gui.get().width ) {
                 xPos -= width + 28;
