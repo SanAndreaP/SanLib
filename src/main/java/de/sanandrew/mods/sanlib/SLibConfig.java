@@ -10,6 +10,7 @@ package de.sanandrew.mods.sanlib;
 
 import de.sanandrew.mods.sanlib.lib.util.config.Category;
 import de.sanandrew.mods.sanlib.lib.util.config.ConfigUtils;
+import de.sanandrew.mods.sanlib.lib.util.config.Init;
 import de.sanandrew.mods.sanlib.lib.util.config.Value;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
@@ -36,6 +37,16 @@ public final class SLibConfig
         public static boolean allowCustomSanModel = true;
         @Value(comment = "Whether or not to allow splash text to be written into the window title.", reqMcRestart = true)
         public static boolean setSplashTitle = true;
+
+        @Init(Init.Stage.PRE)
+        public static void init() {
+            System.out.println("ClientPreInit");
+        }
+
+        @Init(Init.Stage.POST)
+        public static void postinit() {
+            System.out.println("ClientPostInit");
+        }
     }
 
     static void initConfiguration(FMLPreInitializationEvent event) {
@@ -49,6 +60,16 @@ public final class SLibConfig
         if( config.hasChanged() ) {
             config.save();
         }
+    }
+
+    @Init(Init.Stage.PRE)
+    public static void init() {
+        System.out.println("GlobalPreInit");
+    }
+
+    @Init(Init.Stage.POST)
+    public static void postinit() {
+        System.out.println("GlobalPostInit");
     }
 
     @SubscribeEvent

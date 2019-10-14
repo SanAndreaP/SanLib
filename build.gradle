@@ -35,8 +35,6 @@ minecraft {
     runDir = "run"
     mappings = "snapshot_20180814"
     replace '@FINGERPRINT@', project.findProperty('signSHA1')
-    //Makes those replacement changes to the main mod class.
-    //My mod class is set in my project's gradle.properties file.
     replaceIn "SanLib.java"
 }
 
@@ -51,21 +49,6 @@ repositories {
     }
 }
 
-
-
-sourceSets {
-    main {
-        java {
-            srcDirs = ['src/main/java', 'src/main/test']
-        }
-        resources {
-            srcDirs = ['src/main/resources']
-        }
-    }
-}
-
-
-
 dependencies {
     deobfCompile "cofh:RedstoneFlux:1.12-2.0.2.3:universal"
     deobfCompile "net.darkhax.tesla:Tesla-1.12.2:1.0.63"
@@ -75,6 +58,7 @@ apply plugin: 'maven'
 project.ext {
     releaseRepoUrl = "file://${project(':').projectDir}/maven/" as GStringImpl
 }
+
 uploadArchives {
     repositories.mavenDeployer {
         pom.artifactId = project.archivesBaseName
@@ -82,6 +66,7 @@ uploadArchives {
         repository(url: project.releaseRepoUrl)
     }
 }
+
 task signJar(type: SignJar, dependsOn: reobfJar) {
     onlyIf {
         project.hasProperty('keyStore')

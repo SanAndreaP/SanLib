@@ -75,8 +75,7 @@ public final class GuiUtils
 
     /**
      * draws a rectangular texture with the fixed resolution 256x256 or a multiple of it.
-     * @deprecated Use {@link net.minecraft.client.gui.Gui#drawTexturedModalRect(int, int, int, int, int, int)}
-     *             or {@link net.minecraft.client.gui.Gui#drawModalRectWithCustomSizedTexture(int, int, float, float, int, int, float, float)}
+     *
      * @param xPos The X coordinate on screen for the texture to appear at.
      * @param yPos The Y coordinate on screen for the texture to appear at.
      * @param z The Z index of the texture
@@ -85,14 +84,13 @@ public final class GuiUtils
      * @param width The width of the texture
      * @param height The height of the texture
      */
-    @Deprecated
     public static void drawTexturedModalRect(int xPos, int yPos, float z, int u, int v, int width, int height) {
         drawTexturedModalRect(xPos, yPos, z, u, v, width, height, 0.00390625F, 0.00390625F);
     }
 
     /**
      * draws a rectangular texture with a custom resolution scale.
-     * @deprecated Use {@link net.minecraft.client.gui.Gui#drawModalRectWithCustomSizedTexture(int, int, float, float, int, int, float, float)}
+     *
      * @param xPos The X coordinate on screen for the texture to appear at.
      * @param yPos The Y coordinate on screen for the texture to appear at.
      * @param z The Z index of the texture
@@ -103,7 +101,6 @@ public final class GuiUtils
      * @param resScaleX The resolution scale on the X axis. Can be calculated via {@code 1F / texture width in pixel}, e.g. {@code 1F / 256F = 0.00390625F}
      * @param resScaleY The resolution scale on the Y axis. Can be calculated via {@code 1F / texture height in pixel}, e.g. {@code 1F / 256F = 0.00390625F}
      */
-    @Deprecated
     public static void drawTexturedModalRect(int xPos, int yPos, float z, int u, int v, int width, int height, float resScaleX, float resScaleY) {
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
@@ -117,6 +114,7 @@ public final class GuiUtils
 
     /**
      * draws a rectangle with a gradient color
+     *
      * @param x the X coordinate on screen for the rectangle to appear at
      * @param y the Y coordinate on screen for the rectangle to appear at
      * @param width the width of the rectangle

@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-@SuppressWarnings({"NewClassNamingConvention", "unused", "WeakerAccess"})
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class ConfigUtils
 {
     @SuppressWarnings("serial")
@@ -69,17 +69,24 @@ public class ConfigUtils
     }
 
     public static void loadCategories(Configuration config, Class<?> base) {
+        invokeInit(base, Init.Stage.PRE);
         loadCategories(config, base, null);
+        invokeInit(base, Init.Stage.POST);
     }
 
     private static void loadCategories(Configuration config, Class<?> base, String prefix) {
         for( Class<?> c : base.getDeclaredClasses() ) {
             loadCategory(config, c, prefix);
         }
+    }
 
+    private static void invokeInit(Class<?> base, Init.Stage stage) {
         if( !base.isEnum() ) {
             try {
-                Method init = Arrays.stream(base.getMethods()).filter(m -> m.getAnnotation(Init.class) != null).findFirst().orElseGet(() -> getOldInit(base));
+                Method init = Arrays.stream(base.getMethods()).filter(m -> {
+                    Init a = m.getAnnotation(Init.class);
+                    return a != null && a.value() == stage;
+                }).findFirst().orElseGet(() -> getOldInit(base));
                 if( init != null ) {
                     init.invoke(null);
                 }
@@ -138,8 +145,10 @@ public class ConfigUtils
                     }
                 }
             } else {
+                invokeInit(c, Init.Stage.PRE);
                 loadCategories(config, c, qualifiedName);
                 loadValues(config, qualifiedName, c);
+                invokeInit(c, Init.Stage.POST);
             }
         }
     }
