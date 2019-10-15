@@ -19,6 +19,10 @@ public @interface Range
 
     int maxI() default Integer.MAX_VALUE;
 
+    long minL() default Long.MIN_VALUE;
+
+    long maxL() default Long.MAX_VALUE;
+
     double minD() default -Double.MAX_VALUE;
 
     double maxD() default Double.MAX_VALUE;

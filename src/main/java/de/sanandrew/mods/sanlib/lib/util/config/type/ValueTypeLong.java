@@ -13,52 +13,59 @@ import net.minecraftforge.common.config.Property;
 import java.lang.reflect.Field;
 
 @SuppressWarnings("ObjectEquality")
-public class ValueTypeInteger
+public class ValueTypeLong
         implements IValueType
 {
     @Override
     public boolean typeFits(Class<?> type) {
-        return type == int.class || type == short.class || type == byte.class;
+        return type == long.class;
     }
 
     @Override
     public Object getDefaultValue(Class<?> type, Field f, Object instance) throws IllegalAccessException, IllegalArgumentException {
-        return f.getInt(instance);
+        return f.getLong(instance);
     }
 
     @Override
     public Property getProperty(Configuration config, String category, String name, Object defaultVal, String propComment, Range propRange) {
-        int min = propRange.minI();
-        int max = propRange.maxI();
+        long min = propRange.minL();
+        long max = propRange.maxL();
+        long dvl = (long) defaultVal;
         StringBuilder comment = new StringBuilder(propComment);
-        if( min == Integer.MIN_VALUE ) {
-            if( max == Integer.MAX_VALUE ) {
+
+        if( min == Long.MIN_VALUE ) {
+            if( max == Long.MAX_VALUE ) {
                 comment.append(" [default: ").append(defaultVal).append(']');
             } else {
                 comment.append(" [maximum: ").append(max).append(", default: ").append(defaultVal).append(']');
             }
-        } else if( max == Integer.MAX_VALUE ) {
+        } else if( max == Long.MAX_VALUE ) {
             comment.append(" [minimum: ").append(min).append(", default: ").append(defaultVal).append(']');
         } else {
             comment.append(" [range: ").append(min).append(" ~ ").append(max).append(", default: ").append(defaultVal).append(']');
         }
 
-        return config.get(category, name, (int) defaultVal, comment.toString().trim(), min, max);
+        Property prop = config.get(category, name, Long.toString(dvl), comment.toString().trim(), Property.Type.DOUBLE);
+        prop.setDefaultValue(Long.toString(dvl));
+        prop.setMinValue(min);
+        prop.setMaxValue(max);
+
+        if( !prop.isLongValue() ) {
+            prop.setValue(dvl);
+        }
+
+        return prop;
     }
 
     @Override
     public void setValue(Class<?> type, Field f, Object instance, Property p, Object defaultVal, Range propRange) throws IllegalAccessException, IllegalArgumentException {
-        int i = p.getInt();
-        if( i < propRange.minI() || i > propRange.maxI() ) {
+        long i = p.getLong();
+        if( i < propRange.minL() || i > propRange.maxL() ) {
             throw new IllegalArgumentException(String.format("The property %s does not fall within range!", p.getName()));
         }
 
-        if( type == long.class || type == int.class ) {
-            f.setInt(instance, i);
-        } else if( type == short.class ) {
-            f.setShort(instance, (short) i);
-        } else if( type == byte.class ) {
-            f.setByte(instance, (byte) i);
+        if( type == long.class ) {
+            f.setLong(instance, i);
         }
     }
 }

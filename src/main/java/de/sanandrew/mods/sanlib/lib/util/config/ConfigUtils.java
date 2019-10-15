@@ -15,6 +15,7 @@ import de.sanandrew.mods.sanlib.lib.util.config.type.ValueTypeArrayString;
 import de.sanandrew.mods.sanlib.lib.util.config.type.ValueTypeBoolean;
 import de.sanandrew.mods.sanlib.lib.util.config.type.ValueTypeFloatingPoint;
 import de.sanandrew.mods.sanlib.lib.util.config.type.ValueTypeInteger;
+import de.sanandrew.mods.sanlib.lib.util.config.type.ValueTypeLong;
 import de.sanandrew.mods.sanlib.lib.util.config.type.ValueTypeString;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
@@ -48,6 +49,7 @@ public class ConfigUtils
         this.add(new ValueTypeArrayDouble());
         this.add(new ValueTypeArrayBoolean());
         this.add(new ValueTypeArrayString());
+        this.add(new ValueTypeLong());
     }};
 
     private static final Map<String, Object> DEFAULTS = new HashMap<>();
