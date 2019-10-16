@@ -165,6 +165,8 @@ public class ConfigUtils
             Value val = f.getAnnotation(Value.class);
             try {
                 if( val != null ) {
+                    f.setAccessible(true);
+
                     Class<?> cv = f.getType();
                     String name = val.value().isEmpty() ? f.getName() : val.value();
                     String category = val.category().isEmpty() ? catName : val.category();
