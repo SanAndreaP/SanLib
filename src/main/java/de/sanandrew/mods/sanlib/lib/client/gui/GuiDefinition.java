@@ -171,6 +171,23 @@ public class GuiDefinition
         Arrays.stream(this.foregroundElements).forEach(f);
     }
 
+    public void keyTyped(char typedChar, int keyCode) throws IOException {
+        Consumer<GuiElementInst> f = e -> {
+            try {
+                e.get().keyTyped(typedChar, keyCode);
+            } catch( IOException ex ) {
+                throw new IOExceptionWrapper(ex);
+            }
+        };
+
+        try {
+            Arrays.stream(this.backgroundElements).forEach(f);
+            Arrays.stream(this.foregroundElements).forEach(f);
+        } catch( IOExceptionWrapper ex ) {
+            throw ex.ioex;
+        }
+    }
+
     public GuiElementInst getElementById(String id) {
         return this.idToElementMap.get(id);
     }

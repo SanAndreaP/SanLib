@@ -1,4 +1,4 @@
-/* ******************************************************************************************************************
+package santest;/* ******************************************************************************************************************
  * Authors:   SanAndreasP
  * Copyright: SanAndreasP
  * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
@@ -25,7 +25,7 @@ public class TestGui
 
     public TestGui() {
         try {
-            this.guiDef = GuiDefinition.getNewDefinition(new ResourceLocation("test", "guis/test.json"));
+            this.guiDef = GuiDefinition.getNewDefinition(new ResourceLocation("santest", "guis/test.json"));
         } catch( IOException e ) {
             SanLib.LOG.log(Level.ERROR, e);
         }
@@ -106,5 +106,11 @@ public class TestGui
     protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
         this.guiDef.mouseClickMove(this, mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+    }
+
+    @Override
+    protected void keyTyped(char typedChar, int keyCode) throws IOException {
+        super.keyTyped(typedChar, keyCode);
+        this.guiDef.keyTyped(typedChar, keyCode);
     }
 }

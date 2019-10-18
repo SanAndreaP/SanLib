@@ -229,7 +229,7 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
             Arrays.asList(this.mandatNames).forEach((name) -> mandatoryChecklist.put(name, false));
             loadJson(this.resLoc, mandatoryChecklist);
         } catch( IOException ex) {
-            SanPlayerModel.LOG.log(Level.INFO, String.format("Can't load model location %s!", this.resLoc.toString()));
+            SanPlayerModel.LOG.log(Level.WARN, String.format("Can't load model location %s!", this.resLoc.toString()));
             this.nameToBoxList.clear();
             this.boxToNameList.clear();
             this.mainBoxes = new ModelRenderer[0];

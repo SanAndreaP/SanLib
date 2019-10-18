@@ -5,6 +5,7 @@ import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 
 import java.io.IOException;
 
+@SuppressWarnings({ "RedundantThrows", "unused" })
 public interface IGuiElement
 {
     void bakeData(IGui gui, JsonObject data);
@@ -24,4 +25,6 @@ public interface IGuiElement
     int getWidth();
 
     int getHeight();
+
+    default void keyTyped(char typedChar, int keyCode) throws IOException { }
 }

@@ -82,14 +82,12 @@ public class ScrollArea
         GuiElementInst btn = this.countAll > this.countSub ? this.data.scrollBtnActive : this.data.scrollBtnDeactive;
         Texture btnElem = (Texture) btn.get();
 
-        int adjMouseX = mouseX - gui.getScreenPosX();
-        int adjMouseY = mouseY - gui.getScreenPosY();
         if( this.countAll > this.countSub && isLmbDown ) {
             if( this.prevLmbDown
-                    || (adjMouseX >= this.data.scrollBtnActive.pos[0] && adjMouseX < this.data.scrollBtnActive.pos[0] + btnElem.data.size[0]
-                    && adjMouseY >= this.data.scrollBtnActive.pos[1] && adjMouseY < this.data.scrollBtnActive.pos[1] + this.data.scrollHeight) )
+                || (mouseX >= this.data.scrollBtnActive.pos[0] && mouseX < this.data.scrollBtnActive.pos[0] + btnElem.data.size[0]
+                    && mouseY >= this.data.scrollBtnActive.pos[1] && mouseY < this.data.scrollBtnActive.pos[1] + this.data.scrollHeight) )
             {
-                int scrollAmt = adjMouseY - this.data.scrollBtnActive.pos[1] - btnElem.data.size[1] / 2;
+                int scrollAmt = mouseY - this.data.scrollBtnActive.pos[1] - btnElem.data.size[1] / 2;
                 this.scroll = Math.max(0.0F, Math.min(1.0F, 1.0F / (this.data.scrollHeight - btnElem.data.size[1]) * scrollAmt));
 
                 this.prevLmbDown = true;
