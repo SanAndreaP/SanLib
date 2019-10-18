@@ -159,7 +159,6 @@ public class ConfigUtils
         loadValues(config, catName, c, null);
     }
 
-    @SuppressWarnings({"ObjectEquality", "FloatingPointEquality"})
     private static void loadValues(Configuration config, String catName, Class<?> c, Object inst) {
         for( Field f : c.getDeclaredFields() ) {
             Value val = f.getAnnotation(Value.class);

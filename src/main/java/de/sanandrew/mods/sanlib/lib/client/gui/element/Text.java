@@ -49,8 +49,8 @@ public class Text
     public static final ResourceLocation ID = new ResourceLocation("text");
 
     public BakedData data;
-    private int currWidth;
-    private int currHeight;
+    protected int currWidth;
+    protected int currHeight;
 
     @Override
     public void bakeData(IGui gui, JsonObject data) {

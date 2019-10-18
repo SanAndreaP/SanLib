@@ -173,7 +173,7 @@ public class Button
                          this.data.textureSize[0], this.data.textureSize[1]);
     }
 
-    private static void drawTiledTexture(int x, int y, float u, float v, int uWidth, int vHeight, int width, int height, int sheetWidth, int sheetHeight) {
+    protected static void drawTiledTexture(int x, int y, float u, float v, int uWidth, int vHeight, int width, int height, int sheetWidth, int sheetHeight) {
         int txWidth = width;
         int txHeight = height;
         int uvX = Math.min(uWidth, width);
