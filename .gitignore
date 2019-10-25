@@ -220,3 +220,5 @@ eclipse/
 classes/
 *.iml
 run/
+src/main/java/santest
+src/main/resources/assets/santest
