@@ -15,7 +15,9 @@ import net.minecraft.util.math.MathHelper;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
@@ -26,10 +28,10 @@ public class ScrollArea
 
     public BakedData data;
     public float scroll;
-    protected BakedData.ScrollData sData;
+    protected BakedData.ScrollData sData = new BakedData.ScrollData();
     protected int countAll;
     protected int countSub;
-    protected Map<Range<Integer>, GuiElementInst> renderedElements;
+    protected Map<Range<Integer>, GuiElementInst> renderedElements = Collections.emptyMap();
 
     public boolean prevLmbDown;
 
@@ -69,14 +71,12 @@ public class ScrollArea
         this.renderedElements = this.data.getSubRange(this.sData.minY, this.sData.maxY, false);
         this.countAll = this.data.elementsView.size();
         this.countSub = this.renderedElements.size();
+
+        this.renderedElements.forEach((r, e) -> e.get().update(gui, e.data));
     }
 
     @Override
     public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
-        if( this.sData == null || this.renderedElements == null ) {
-            return;
-        }
-
         boolean isLmbDown = Mouse.isButtonDown(0);
 
         GuiElementInst btn = this.countAll > this.countSub ? this.data.scrollBtnActive : this.data.scrollBtnDeactive;
@@ -109,7 +109,7 @@ public class ScrollArea
     }
 
     @Override
-    public void handleMouseInput(IGui gui) {
+    public void handleMouseInput(IGui gui) throws IOException {
         if( this.countAll <= this.countSub ) {
             return;
         }
@@ -130,6 +130,46 @@ public class ScrollArea
             }
             this.clipScroll();
         }
+
+        for( Map.Entry<Range<Integer >, GuiElementInst > e : this.renderedElements.entrySet() ) {
+            e.getValue().get().handleMouseInput(gui);
+        }
+    }
+
+    @Override
+    public boolean mouseClicked(IGui gui, int mouseX, int mouseY, int mouseButton) throws IOException {
+        for( Map.Entry<Range<Integer >, GuiElementInst > e : this.renderedElements.entrySet() ) {
+            if( e.getValue().get().mouseClicked(gui, mouseX, mouseY, mouseButton) ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public void mouseClickMove(IGui gui, int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+        for( Map.Entry<Range<Integer >, GuiElementInst > e : this.renderedElements.entrySet() ) {
+            e.getValue().get().mouseClickMove(gui, mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+        }
+    }
+
+    @Override
+    public void mouseReleased(IGui gui, int mouseX, int mouseY, int state) {
+        for( Map.Entry<Range<Integer >, GuiElementInst > e : this.renderedElements.entrySet() ) {
+            e.getValue().get().mouseReleased(gui, mouseX, mouseY, state);
+        }
+    }
+
+    @Override
+    public boolean keyTyped(IGui gui, char typedChar, int keyCode) throws IOException {
+        for( Map.Entry<Range<Integer >, GuiElementInst > e : this.renderedElements.entrySet() ) {
+            if( e.getValue().get().keyTyped(gui, typedChar, keyCode) ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public void clipScroll() {

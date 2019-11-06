@@ -54,11 +54,14 @@
             }
           },
           {
-            "type": "text",
+            "type": "textfield",
             "pos": [2, 12],
             "data": {
-              "color": "0xFFFF0000",
-              "text": "sanlib.test.text"
+              "size": [120, 12],
+              "textColor": "0xFFA03090",
+              "shadow": false,
+              "text": "a test text, yay",
+              "drawBackground": false
             }
           },
           {

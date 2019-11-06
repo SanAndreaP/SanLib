@@ -5,7 +5,18 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.sanandrew.mods.sanlib.SanLib;
-import de.sanandrew.mods.sanlib.lib.client.gui.element.*;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.Button;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.ButtonTextLabel;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.ContainerName;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.DynamicText;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.Label;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.Rectangle;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.RedstoneFluxBar;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.RedstoneFluxText;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.ScrollArea;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.Text;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.TextField;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.Texture;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IReloadableResourceManager;
@@ -14,6 +25,7 @@ import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.resource.IResourceType;
 import net.minecraftforge.client.resource.ISelectiveResourceReloadListener;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import org.apache.logging.log4j.Level;
 
 import javax.annotation.Nonnull;
@@ -21,13 +33,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-@SuppressWarnings({"unused", "WeakerAccess", "MismatchedQueryAndUpdateOfCollection"})
+@SuppressWarnings({ "unused", "WeakerAccess", "MismatchedQueryAndUpdateOfCollection", "UnusedReturnValue" })
 public class GuiDefinition
         implements ISelectiveResourceReloadListener
 {
@@ -44,6 +58,7 @@ public class GuiDefinition
         TYPES.put(DynamicText.ID, DynamicText::new);
         TYPES.put(Button.ID, Button::new);
         TYPES.put(ButtonTextLabel.ID, ButtonTextLabel::new);
+        TYPES.put(TextField.ID, TextField::new);
     }
 
     public int width;
@@ -52,6 +67,9 @@ public class GuiDefinition
 
     GuiElementInst[] foregroundElements;
     GuiElementInst[] backgroundElements;
+
+    EnumMap<IGuiElement.PriorityTarget, GuiElementInst[]> prioritizedFgElements = new EnumMap<>(IGuiElement.PriorityTarget.class);
+    EnumMap<IGuiElement.PriorityTarget, GuiElementInst[]> prioritizedBgElements = new EnumMap<>(IGuiElement.PriorityTarget.class);
 
     private Map<String, GuiElementInst> idToElementMap;
 
@@ -91,6 +109,11 @@ public class GuiDefinition
 
             Arrays.stream(this.backgroundElements).forEach(this::initElement);
             Arrays.stream(this.foregroundElements).forEach(this::initElement);
+
+            for( IGuiElement.PriorityTarget tgt : IGuiElement.PriorityTarget.VALUES ) {
+                this.prioritizedBgElements.put(tgt, getPrioritizedElements(this.backgroundElements, tgt));
+                this.prioritizedFgElements.put(tgt, getPrioritizedElements(this.foregroundElements, tgt));
+            }
         }
     }
 
@@ -123,69 +146,81 @@ public class GuiDefinition
         Arrays.stream(this.foregroundElements).forEach(e -> e.get().render(gui, partialTicks, e.pos[0], e.pos[1], mouseX, mouseY, e.data));
     }
 
-    public void handleMouseInput(IGui gui) throws IOException {
-        Consumer<GuiElementInst> f = e -> {
-            try {
-                e.get().handleMouseInput(gui);
-            } catch( IOException ex ) {
-                throw new IOExceptionWrapper(ex);
-            }
-        };
+    private static GuiElementInst[] getPrioritizedElements(GuiElementInst[] elements, IGuiElement.PriorityTarget target) {
+        return Arrays.stream(elements).sorted(Comparator.comparing(e -> getPriority(e, target))).toArray(GuiElementInst[]::new);
+    }
 
-        try {
-            Arrays.stream(this.backgroundElements).forEach(f);
-            Arrays.stream(this.foregroundElements).forEach(f);
-        } catch( IOExceptionWrapper ex ) {
-            throw ex.ioex;
+    public void handleMouseInput(IGui gui) throws IOException {
+        for( GuiElementInst e : this.prioritizedBgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
+            e.get().handleMouseInput(gui);
+        }
+        for( GuiElementInst e : this.prioritizedFgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
+            e.get().handleMouseInput(gui);
         }
     }
 
-    public void mouseClicked(IGui gui, int mouseX, int mouseY, int mouseButton) throws IOException {
-        Consumer<GuiElementInst> f = e -> {
-            try {
-                e.get().mouseClicked(gui, mouseX, mouseY, mouseButton);
-            } catch( IOException ex ) {
-                throw new IOExceptionWrapper(ex);
+    public boolean mouseClicked(IGui gui, int mouseX, int mouseY, int mouseButton) throws IOException {
+        for( GuiElementInst e : this.prioritizedBgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
+            if( e.get().mouseClicked(gui, mouseX, mouseY, mouseButton) ) {
+                return true;
             }
-        };
-
-        try {
-            Arrays.stream(this.backgroundElements).forEach(f);
-            Arrays.stream(this.foregroundElements).forEach(f);
-        } catch( IOExceptionWrapper ex ) {
-            throw ex.ioex;
         }
+        for( GuiElementInst e : this.prioritizedFgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
+            if( e.get().mouseClicked(gui, mouseX, mouseY, mouseButton) ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public void mouseReleased(IGui gui, int mouseX, int mouseY, int state) {
-        Consumer<GuiElementInst> f = e -> e.get().mouseReleased(gui, mouseX, mouseY, state);
-
-        Arrays.stream(this.backgroundElements).forEach(f);
-        Arrays.stream(this.foregroundElements).forEach(f);
+        for( GuiElementInst e : this.prioritizedBgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
+            e.get().mouseReleased(gui, mouseX, mouseY, state);
+        }
+        for( GuiElementInst e : this.prioritizedFgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
+            e.get().mouseReleased(gui, mouseX, mouseY, state);
+        }
     }
 
     public void mouseClickMove(IGui gui, int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-        Consumer<GuiElementInst> f = e -> e.get().mouseClickMove(gui, mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-
-        Arrays.stream(this.backgroundElements).forEach(f);
-        Arrays.stream(this.foregroundElements).forEach(f);
+        for( GuiElementInst e : this.prioritizedBgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
+            e.get().mouseClickMove(gui, mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+        }
+        for( GuiElementInst e : this.prioritizedFgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
+            e.get().mouseClickMove(gui, mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+        }
     }
 
-    public void keyTyped(char typedChar, int keyCode) throws IOException {
-        Consumer<GuiElementInst> f = e -> {
-            try {
-                e.get().keyTyped(typedChar, keyCode);
-            } catch( IOException ex ) {
-                throw new IOExceptionWrapper(ex);
+    public boolean keyTyped(IGui gui, char typedChar, int keyCode) throws IOException {
+        for( GuiElementInst e : this.prioritizedBgElements.get(IGuiElement.PriorityTarget.KEY_INPUT) ) {
+            if( e.get().keyTyped(gui, typedChar, keyCode) ) {
+                return true;
             }
-        };
-
-        try {
-            Arrays.stream(this.backgroundElements).forEach(f);
-            Arrays.stream(this.foregroundElements).forEach(f);
-        } catch( IOExceptionWrapper ex ) {
-            throw ex.ioex;
         }
+        for( GuiElementInst e : this.prioritizedFgElements.get(IGuiElement.PriorityTarget.KEY_INPUT) ) {
+            if( e.get().keyTyped(gui, typedChar, keyCode) ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static EventPriority getPriority(GuiElementInst elem, IGuiElement.PriorityTarget target) {
+        IGuiElement.Priorities pAnnotation = elem.getClass().getAnnotation(IGuiElement.Priorities.class);
+        if( pAnnotation == null ) {
+            return EventPriority.NORMAL;
+        }
+
+        IGuiElement.Priority[] priorities = pAnnotation.value();
+        for( IGuiElement.Priority priority : priorities ) {
+            if( priority.target() == target ) {
+                return priority.value();
+            }
+        }
+
+        return EventPriority.NORMAL;
     }
 
     public GuiElementInst getElementById(String id) {
@@ -205,18 +240,5 @@ public class GuiDefinition
         Consumer<GuiElementInst> f = e -> e.get().update(gui, e.data);
         Arrays.stream(this.backgroundElements).forEach(f);
         Arrays.stream(this.foregroundElements).forEach(f);
-    }
-
-    @SuppressWarnings("ExceptionClassNameDoesntEndWithException")
-    private static class IOExceptionWrapper
-            extends RuntimeException
-    {
-        private static final long serialVersionUID = 8878021439168468744L;
-
-        public final IOException ioex;
-
-        IOExceptionWrapper(IOException ex) {
-            this.ioex = ex;
-        }
     }
 }

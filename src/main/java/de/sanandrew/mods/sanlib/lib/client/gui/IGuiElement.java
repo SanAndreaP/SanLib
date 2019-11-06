@@ -1,9 +1,14 @@
 package de.sanandrew.mods.sanlib.lib.client.gui;
 
 import com.google.gson.JsonObject;
-import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 
 import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 @SuppressWarnings({ "RedundantThrows", "unused" })
 public interface IGuiElement
@@ -16,7 +21,7 @@ public interface IGuiElement
 
     default void handleMouseInput(IGui gui) throws IOException { }
 
-    default void mouseClicked(IGui gui, int mouseX, int mouseY, int mouseButton) throws IOException { }
+    default boolean mouseClicked(IGui gui, int mouseX, int mouseY, int mouseButton) throws IOException { return false; }
 
     default void mouseReleased(IGui gui, int mouseX, int mouseY, int state) { }
 
@@ -26,5 +31,29 @@ public interface IGuiElement
 
     int getHeight();
 
-    default void keyTyped(char typedChar, int keyCode) throws IOException { }
+    default boolean keyTyped(IGui gui, char typedChar, int keyCode) throws IOException { return false; }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    @interface Priorities
+    {
+        Priority[] value();
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Repeatable(Priorities.class)
+    @Target(ElementType.TYPE)
+    @interface Priority
+    {
+        EventPriority value();
+        PriorityTarget target();
+    }
+
+    enum PriorityTarget
+    {
+        MOUSE_INPUT,
+        KEY_INPUT;
+
+        public static final PriorityTarget[] VALUES = values();
+    }
 }

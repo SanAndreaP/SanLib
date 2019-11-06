@@ -111,6 +111,6 @@ public class TestGui
     @Override
     protected void keyTyped(char typedChar, int keyCode) throws IOException {
         super.keyTyped(typedChar, keyCode);
-        this.guiDef.keyTyped(typedChar, keyCode);
+        this.guiDef.keyTyped(this, typedChar, keyCode);
     }
 }

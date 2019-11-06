@@ -27,8 +27,8 @@ public class Button
 
     public BakedData data;
 
-    protected int currMouseX;
-    protected int currMouseY;
+    protected int     currMouseX;
+    protected int     currMouseY;
     protected boolean isCurrHovering;
 
     @Override
@@ -37,14 +37,14 @@ public class Button
             this.data = new BakedData();
             this.data.texture = new ResourceLocation(JsonUtils.getStringVal(data.get("texture"), "textures/gui/widgets.png"));
             this.data.size = JsonUtils.getIntArray(data.get("size"), Range.is(2));
-            this.data.uvEnabled = JsonUtils.getIntArray(data.get("uvEnabled"), new int[] {0, 66}, Range.is(2));
-            this.data.uvHover = JsonUtils.getIntArray(data.get("uvHover"), new int[] {0, 86}, Range.is(2));
-            this.data.uvDisabled = JsonUtils.getIntArray(data.get("uvDisabled"), new int[] {0, 46}, Range.is(2));
-            this.data.uvSize = JsonUtils.getIntArray(data.get("uvSize"), new int[] {200, 20}, Range.is(2));
+            this.data.uvEnabled = JsonUtils.getIntArray(data.get("uvEnabled"), new int[] { 0, 66 }, Range.is(2));
+            this.data.uvHover = JsonUtils.getIntArray(data.get("uvHover"), new int[] { 0, 86 }, Range.is(2));
+            this.data.uvDisabled = JsonUtils.getIntArray(data.get("uvDisabled"), new int[] { 0, 46 }, Range.is(2));
+            this.data.uvSize = JsonUtils.getIntArray(data.get("uvSize"), new int[] { 200, 20 }, Range.is(2));
             this.data.ctHorizontal = JsonUtils.getIntVal(data.get("ctHorizontal"), 190);
             this.data.ctVertical = JsonUtils.getIntVal(data.get("ctVertical"), 14);
             this.data.buttonFunction = JsonUtils.getIntVal(data.get("buttonFunction"));
-            this.data.textureSize = JsonUtils.getIntArray(data.get("textureSize"), new int[] {256, 256}, Range.is(2));
+            this.data.textureSize = JsonUtils.getIntArray(data.get("textureSize"), new int[] { 256, 256 }, Range.is(2));
             this.data.forceAlpha = JsonUtils.getBoolVal(data.get("forceAlpha"), false);
 
             JsonElement lbl = data.get("label");
@@ -54,7 +54,7 @@ public class Button
             }
             this.data.centerLabel = JsonUtils.getBoolVal(data.get("centerLabel"), true);
 
-            this.data.dummyButton = new GuiButton(this.data.buttonFunction, 0, 0, "");
+            this.data.button = new GuiButton(this.data.buttonFunction, 0, 0, "");
         }
     }
 
@@ -83,7 +83,7 @@ public class Button
                 int lblY = this.data.label.pos[1];
 
                 IButtonLabel labelElem = (IButtonLabel) this.data.label.get();
-                if (this.data.centerLabel) {
+                if( this.data.centerLabel ) {
                     lblX = (this.data.size[0] - labelElem.getWidth()) / 2;
                     lblY = (this.data.size[1] - labelElem.getHeight() + 1) / 2;
                 }
@@ -94,14 +94,14 @@ public class Button
     }
 
     @Override
-    public void mouseClicked(IGui gui, int mouseX, int mouseY, int mouseButton) {
+    public boolean mouseClicked(IGui gui, int mouseX, int mouseY, int mouseButton) {
         if( mouseButton == 0 && this.isVisible() && this.isEnabled() && this.isCurrHovering ) {
             GuiScreen gs = gui.get();
-            GuiButton btn = this.data.dummyButton;
-            List<GuiButton> btnList = new ArrayList<>(Collections.singletonList(this.data.dummyButton));
+            GuiButton btn = this.data.button;
+            List<GuiButton> btnList = new ArrayList<>(Collections.singletonList(this.data.button));
             GuiScreenEvent.ActionPerformedEvent.Pre event = new GuiScreenEvent.ActionPerformedEvent.Pre(gs, btn, btnList);
             if( MinecraftForge.EVENT_BUS.post(event) ) {
-                return;
+                return true;
             }
             btn = event.getButton();
 
@@ -110,7 +110,11 @@ public class Button
             if( gs.equals(gs.mc.currentScreen) ) {
                 MinecraftForge.EVENT_BUS.post(new GuiScreenEvent.ActionPerformedEvent.Post(gs, btn, btnList));
             }
+
+            return true;
         }
+
+        return false;
     }
 
     public boolean isHovering(IGui gui, int x, int y, int mouseX, int mouseY) {
@@ -185,6 +189,7 @@ public class Button
                 height -= vHeight;
                 uvY = Math.min(vHeight, height);
             }
+
             height = txHeight;
             uvY = Math.min(vHeight, height);
 
@@ -204,38 +209,38 @@ public class Button
     }
 
     public void setVisible(boolean visible) {
-        this.data.dummyButton.visible = visible;
+        this.data.button.visible = visible;
     }
 
     public boolean isVisible() {
-        return this.data.dummyButton.visible;
+        return this.data.button.visible;
     }
 
     public void setEnabled(boolean enabled) {
-        this.data.dummyButton.enabled = enabled;
+        this.data.button.enabled = enabled;
     }
 
     public boolean isEnabled() {
-        return this.data.dummyButton.enabled;
+        return this.data.button.enabled;
     }
 
     public static final class BakedData
     {
         public ResourceLocation texture;
-        public int[] size;
-        public int[] textureSize;
-        public int[] uvEnabled;
-        public int[] uvHover;
-        public int[] uvDisabled;
-        public int[] uvSize;
-        public int ctHorizontal;
-        public int ctVertical;
-        public boolean forceAlpha;
-        public int buttonFunction;
+        public int[]            size;
+        public int[]            textureSize;
+        public int[]            uvEnabled;
+        public int[]            uvHover;
+        public int[]            uvDisabled;
+        public int[]            uvSize;
+        public int              ctHorizontal;
+        public int              ctVertical;
+        public boolean          forceAlpha;
+        public int              buttonFunction;
 
-        public GuiButton dummyButton;
+        public GuiButton button;
 
         public GuiElementInst label;
-        public boolean centerLabel;
+        public boolean        centerLabel;
     }
 }
