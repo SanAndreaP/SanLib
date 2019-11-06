@@ -8,6 +8,7 @@ package de.sanandrew.mods.sanlib.lib.client.gui;
 
 import net.minecraft.client.gui.GuiScreen;
 
+@SuppressWarnings("UnusedReturnValue")
 public interface IGui
 {
     GuiScreen get();
@@ -18,5 +19,5 @@ public interface IGui
 
     int getScreenPosY();
 
-    default void performAction(IGuiElement element, int action) { }
+    default boolean performAction(IGuiElement element, int action) { return false; }
 }
