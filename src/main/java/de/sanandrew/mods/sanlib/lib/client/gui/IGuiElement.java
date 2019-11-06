@@ -27,6 +27,8 @@ public interface IGuiElement
 
     default void mouseClickMove(IGui gui, int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) { }
 
+    default void guiClosed(IGui gui) {}
+
     int getWidth();
 
     int getHeight();

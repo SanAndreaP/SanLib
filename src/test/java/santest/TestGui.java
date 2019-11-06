@@ -113,4 +113,10 @@ public class TestGui
         super.keyTyped(typedChar, keyCode);
         this.guiDef.keyTyped(this, typedChar, keyCode);
     }
+
+    @Override
+    public void onGuiClosed() {
+        super.onGuiClosed();
+        this.guiDef.guiClosed(this);
+    }
 }

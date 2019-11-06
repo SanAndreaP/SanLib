@@ -207,6 +207,15 @@ public class GuiDefinition
         return false;
     }
 
+    public void guiClosed(IGui gui) {
+        for( GuiElementInst e : this.backgroundElements ) {
+            e.get().guiClosed(gui);
+        }
+        for( GuiElementInst e : this.foregroundElements ) {
+            e.get().guiClosed(gui);
+        }
+    }
+
     private static EventPriority getPriority(GuiElementInst elem, IGuiElement.PriorityTarget target) {
         IGuiElement.Priorities pAnnotation = elem.getClass().getAnnotation(IGuiElement.Priorities.class);
         if( pAnnotation == null ) {
