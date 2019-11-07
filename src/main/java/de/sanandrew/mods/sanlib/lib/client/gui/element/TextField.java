@@ -16,6 +16,7 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import org.apache.commons.lang3.Range;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 @SuppressWarnings("unused")
 @IGuiElement.Priority(value = EventPriority.HIGHEST, target = IGuiElement.PriorityTarget.KEY_INPUT)
@@ -122,6 +123,28 @@ public class TextField
 
     public void setCursorPositionEnd() {
         this.data.textfield.setCursorPositionEnd();
+    }
+
+    private boolean enabled = true;
+    public void setEnabled(boolean enabled) {
+        this.data.textfield.setEnabled(enabled);
+        this.enabled = enabled;
+    }
+
+    public void setVisible(boolean enabled) {
+        this.data.textfield.setVisible(enabled);
+    }
+
+    public boolean isEnabled() {
+        return this.enabled;
+    }
+
+    public boolean isVisible() {
+        return this.data.textfield.getVisible();
+    }
+
+    public void setValidator(Predicate<String> validator) {
+        this.data.textfield.setValidator(validator::test);
     }
 
     @Override
