@@ -22,6 +22,10 @@ public final class GuiElementInst
     public IGuiElement element;
 
     public IGuiElement get() {
+        return this.get(IGuiElement.class);
+    }
+
+    public <T extends IGuiElement> T get(Class<T> returnCls) {
         if( this.element == null ) {
             Supplier<IGuiElement> cnst = GuiDefinition.TYPES.get(new ResourceLocation(this.type));
             if( cnst != null ) {
@@ -32,6 +36,6 @@ public final class GuiElementInst
             }
         }
 
-        return this.element;
+        return returnCls.cast(this.element);
     }
 }

@@ -10,9 +10,7 @@ package de.sanandrew.mods.sanlib;
 
 import de.sanandrew.mods.sanlib.lib.util.config.Category;
 import de.sanandrew.mods.sanlib.lib.util.config.ConfigUtils;
-import de.sanandrew.mods.sanlib.lib.util.config.Init;
 import de.sanandrew.mods.sanlib.lib.util.config.Value;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
