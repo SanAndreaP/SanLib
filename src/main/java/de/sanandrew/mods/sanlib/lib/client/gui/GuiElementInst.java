@@ -17,7 +17,7 @@ public final class GuiElementInst
 {
     public String type;
     public String id;
-    public int[] pos;
+    public int[] pos = new int[2];
     public JsonObject data;
     public IGuiElement element;
 
