@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@SuppressWarnings({"WeakerAccess", "Duplicates"})
+@SuppressWarnings({ "WeakerAccess", "Duplicates", "unused" })
 public class Button
         implements IGuiElement
 {
@@ -37,10 +37,10 @@ public class Button
             this.data = new BakedData();
             this.data.texture = new ResourceLocation(JsonUtils.getStringVal(data.get("texture"), "textures/gui/widgets.png"));
             this.data.size = JsonUtils.getIntArray(data.get("size"), Range.is(2));
-            this.data.uvEnabled = JsonUtils.getIntArray(data.get("uvEnabled"), new int[] { 0, 66 }, Range.is(2));
-            this.data.uvHover = JsonUtils.getIntArray(data.get("uvHover"), new int[] { 0, 86 }, Range.is(2));
-            this.data.uvDisabled = JsonUtils.getIntArray(data.get("uvDisabled"), new int[] { 0, 46 }, Range.is(2));
             this.data.uvSize = JsonUtils.getIntArray(data.get("uvSize"), new int[] { 200, 20 }, Range.is(2));
+            this.data.uvEnabled = JsonUtils.getIntArray(data.get("uvEnabled"), new int[] { 0, 66 }, Range.is(2));
+            this.data.uvHover = JsonUtils.getIntArray(data.get("uvHover"), new int[] { this.data.uvEnabled[0], this.data.uvEnabled[1] + this.data.uvSize[1] }, Range.is(2));
+            this.data.uvDisabled = JsonUtils.getIntArray(data.get("uvDisabled"), new int[] { this.data.uvEnabled[0], this.data.uvEnabled[1] - this.data.uvSize[1] }, Range.is(2));
             this.data.ctHorizontal = JsonUtils.getIntVal(data.get("ctHorizontal"), 190);
             this.data.ctVertical = JsonUtils.getIntVal(data.get("ctVertical"), 14);
             this.data.buttonFunction = JsonUtils.getIntVal(data.get("buttonFunction"));
@@ -128,53 +128,56 @@ public class Button
                    ? (hovered ? this.data.uvHover : this.data.uvEnabled)
                    : this.data.uvDisabled;
 
-        int cornerWidth = (this.data.uvSize[0] - this.data.ctHorizontal) / 2;
-        int cornerHeight = (this.data.uvSize[1] - this.data.ctVertical) / 2;
+        if( this.data.uvSize[0] == this.data.size[0] && this.data.uvSize[1] == this.data.size[1] ) {
+            Gui.drawModalRectWithCustomSizedTexture(0, 0, uv[0], uv[1], this.data.size[0], this.data.size[1], this.data.textureSize[0], this.data.textureSize[1]);
+        } else {
+            int cornerWidth = (this.data.uvSize[0] - this.data.ctHorizontal) / 2;
+            int cornerHeight = (this.data.uvSize[1] - this.data.ctVertical) / 2;
 
+            Gui.drawModalRectWithCustomSizedTexture(0, 0,
+                                                    uv[0], uv[1],
+                                                    cornerWidth, cornerHeight,
+                                                    this.data.textureSize[0], this.data.textureSize[1]);
+            Gui.drawModalRectWithCustomSizedTexture(0, this.data.size[1] - cornerHeight,
+                                                    uv[0], uv[1] + this.data.uvSize[1] - cornerHeight,
+                                                    cornerWidth, cornerHeight,
+                                                    this.data.textureSize[0], this.data.textureSize[1]);
+            Gui.drawModalRectWithCustomSizedTexture(this.data.size[0] - cornerWidth, 0,
+                                                    uv[0] + this.data.uvSize[0] - cornerWidth, uv[1],
+                                                    cornerWidth, cornerHeight,
+                                                    this.data.textureSize[0], this.data.textureSize[1]);
+            Gui.drawModalRectWithCustomSizedTexture(this.data.size[0] - cornerWidth, this.data.size[1] - cornerHeight,
+                                                    uv[0] + this.data.uvSize[0] - cornerWidth, uv[1] + this.data.uvSize[1] - cornerHeight,
+                                                    cornerWidth, cornerHeight,
+                                                    this.data.textureSize[0], this.data.textureSize[1]);
 
-        Gui.drawModalRectWithCustomSizedTexture(0, 0,
-                                                uv[0], uv[1],
-                                                cornerWidth, cornerHeight,
-                                                this.data.textureSize[0], this.data.textureSize[1]);
-        Gui.drawModalRectWithCustomSizedTexture(0, this.data.size[1] - cornerHeight,
-                                                uv[0], uv[1] + this.data.uvSize[1] - cornerHeight,
-                                                cornerWidth, cornerHeight,
-                                                this.data.textureSize[0], this.data.textureSize[1]);
-        Gui.drawModalRectWithCustomSizedTexture(this.data.size[0] - cornerWidth, 0,
-                                                uv[0] + this.data.uvSize[0] - cornerWidth, uv[1],
-                                                cornerWidth, cornerHeight,
-                                                this.data.textureSize[0], this.data.textureSize[1]);
-        Gui.drawModalRectWithCustomSizedTexture(this.data.size[0] - cornerWidth, this.data.size[1] - cornerHeight,
-                                                uv[0] + this.data.uvSize[0] - cornerWidth, uv[1] + this.data.uvSize[1] - cornerHeight,
-                                                cornerWidth, cornerHeight,
-                                                this.data.textureSize[0], this.data.textureSize[1]);
+            drawTiledTexture(0, cornerHeight,
+                             uv[0], uv[1] + cornerHeight,
+                             cornerWidth, this.data.uvSize[1] - cornerHeight * 2,
+                             cornerWidth, this.data.size[1] - cornerHeight * 2,
+                             this.data.textureSize[0], this.data.textureSize[1]);
+            drawTiledTexture(cornerWidth, 0,
+                             uv[0] + cornerWidth, uv[1],
+                             this.data.uvSize[0] - cornerWidth * 2, cornerHeight,
+                             this.data.size[0] - cornerWidth * 2, cornerHeight,
+                             this.data.textureSize[0], this.data.textureSize[1]);
+            drawTiledTexture(this.data.size[0] - cornerWidth, cornerHeight,
+                             uv[0] + this.data.uvSize[0] - cornerWidth, uv[1] + cornerHeight,
+                             cornerWidth, this.data.uvSize[1] - cornerHeight * 2,
+                             cornerWidth, this.data.size[1] - cornerHeight * 2,
+                             this.data.textureSize[0], this.data.textureSize[1]);
+            drawTiledTexture(cornerWidth, this.data.size[1] - cornerHeight,
+                             uv[0] + cornerWidth, uv[1] + this.data.uvSize[1] - cornerHeight,
+                             this.data.uvSize[0] - cornerWidth * 2, cornerHeight,
+                             this.data.size[0] - cornerWidth * 2, cornerHeight,
+                             this.data.textureSize[0], this.data.textureSize[1]);
 
-        drawTiledTexture(0, cornerHeight,
-                         uv[0], uv[1] + cornerHeight,
-                         cornerWidth, this.data.uvSize[1] - cornerHeight * 2,
-                         cornerWidth, this.data.size[1] - cornerHeight * 2,
-                         this.data.textureSize[0], this.data.textureSize[1]);
-        drawTiledTexture(cornerWidth, 0,
-                         uv[0] + cornerWidth, uv[1],
-                         this.data.uvSize[0] - cornerWidth * 2, cornerHeight,
-                         this.data.size[0] - cornerWidth * 2, cornerHeight,
-                         this.data.textureSize[0], this.data.textureSize[1]);
-        drawTiledTexture(this.data.size[0] - cornerWidth, cornerHeight,
-                         uv[0] + this.data.uvSize[0] - cornerWidth, uv[1] + cornerHeight,
-                         cornerWidth, this.data.uvSize[1] - cornerHeight * 2,
-                         cornerWidth, this.data.size[1] - cornerHeight * 2,
-                         this.data.textureSize[0], this.data.textureSize[1]);
-        drawTiledTexture(cornerWidth, this.data.size[1] - cornerHeight,
-                         uv[0] + cornerWidth, uv[1] + this.data.uvSize[1] - cornerHeight,
-                         this.data.uvSize[0] - cornerWidth * 2, cornerHeight,
-                         this.data.size[0] - cornerWidth * 2, cornerHeight,
-                         this.data.textureSize[0], this.data.textureSize[1]);
-
-        drawTiledTexture(cornerWidth, cornerHeight,
-                         uv[0] + cornerWidth, uv[1] + cornerHeight,
-                         this.data.uvSize[0] - cornerWidth * 2, this.data.uvSize[1] - cornerHeight * 2,
-                         this.data.size[0] - cornerWidth * 2, this.data.size[1] - cornerHeight * 2,
-                         this.data.textureSize[0], this.data.textureSize[1]);
+            drawTiledTexture(cornerWidth, cornerHeight,
+                             uv[0] + cornerWidth, uv[1] + cornerHeight,
+                             this.data.uvSize[0] - cornerWidth * 2, this.data.uvSize[1] - cornerHeight * 2,
+                             this.data.size[0] - cornerWidth * 2, this.data.size[1] - cornerHeight * 2,
+                             this.data.textureSize[0], this.data.textureSize[1]);
+        }
     }
 
     protected static void drawTiledTexture(int x, int y, float u, float v, int uWidth, int vHeight, int width, int height, int sheetWidth, int sheetHeight) {
