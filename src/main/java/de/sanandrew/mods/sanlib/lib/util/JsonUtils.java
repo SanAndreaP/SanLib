@@ -6,7 +6,13 @@
    *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.lib.util;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -20,7 +26,9 @@ import org.apache.commons.lang3.Range;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Arrays;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public final class JsonUtils
@@ -139,7 +147,7 @@ public final class JsonUtils
     }
 
     public static int[] getIntArray(JsonElement json, int[] defVal, Range<Integer> requiredSize) {
-        if( !isPrimitiveArray(json, requiredSize) ) {
+        if( isNotPrimitiveArray(json, requiredSize) ) {
             return defVal;
         }
 
@@ -161,7 +169,7 @@ public final class JsonUtils
     }
 
     public static double[] getDoubleArray(JsonElement json, double[] defVal, Range<Integer> requiredSize) {
-        if( !isPrimitiveArray(json, requiredSize) ) {
+        if( isNotPrimitiveArray(json, requiredSize) ) {
             return defVal;
         }
 
@@ -183,20 +191,20 @@ public final class JsonUtils
     }
 
     public static String[] getStringArray(JsonElement json, String[] defVal, Range<Integer> requiredSize) {
-        if( !isPrimitiveArray(json, requiredSize) ) {
+        if( isNotPrimitiveArray(json, requiredSize) ) {
             return defVal;
         }
 
         return GSON.fromJson(json, String[].class);
     }
 
-    private static boolean isPrimitiveArray(JsonElement json, Range<Integer> requiredSize) {
+    private static boolean isNotPrimitiveArray(JsonElement json, Range<Integer> requiredSize) {
         if( json == null || !json.isJsonArray() ) {
-            return false;
+            return true;
         }
 
         JsonArray arr = json.getAsJsonArray();
-        return requiredSize.contains(arr.size()) && (arr.size() <= 0 || arr.get(0).isJsonPrimitive());
+        return !requiredSize.contains(arr.size()) || (arr.size() > 0 && !arr.get(0).isJsonPrimitive());
     }
 
     private static JsonArray requireArray(JsonElement json, Range<Integer> requiredSize) {
@@ -318,5 +326,120 @@ public final class JsonUtils
         }
 
         return items;
+    }
+
+    public static void addDefaultJsonProperty(JsonObject jobj, String name, String val) {
+        if( !jobj.has(name) ) { jobj.addProperty(name, val); }
+    }
+
+    public static void addDefaultJsonProperty(JsonObject jobj, String name, Boolean val) {
+        if( !jobj.has(name) ) { jobj.addProperty(name, val); }
+    }
+
+    public static void addDefaultJsonProperty(JsonObject jobj, String name, Character val) {
+        if( !jobj.has(name) ) { jobj.addProperty(name, val); }
+    }
+
+    public static void addDefaultJsonProperty(JsonObject jobj, String name, Number val) {
+        if( !jobj.has(name) ) { jobj.addProperty(name, val); }
+    }
+
+    public static void addDefaultJsonProperty(JsonObject jobj, String name, String[] val) {
+        if( !jobj.has(name) ) { addJsonProperty(jobj, name, val); }
+    }
+
+    public static void addDefaultJsonProperty(JsonObject jobj, String name, Boolean[] val) {
+        if( !jobj.has(name) ) { addJsonProperty(jobj, name, val); }
+    }
+
+    public static void addDefaultJsonProperty(JsonObject jobj, String name, Character[] val) {
+        if( !jobj.has(name) ) { addJsonProperty(jobj, name, val); }
+    }
+
+    public static void addDefaultJsonProperty(JsonObject jobj, String name, Number[] val) {
+        if( !jobj.has(name) ) { addJsonProperty(jobj, name, val); }
+    }
+
+    public static void addDefaultJsonProperty(JsonObject jobj, String name, int[] arr) {
+        if( !jobj.has(name) ) { addJsonProperty(jobj, name, arr); }
+    }
+
+    public static void addDefaultJsonProperty(JsonObject jobj, String name, long[] arr) {
+        if( !jobj.has(name) ) { addJsonProperty(jobj, name, arr); }
+    }
+
+    public static void addDefaultJsonProperty(JsonObject jobj, String name, double[] arr) {
+        if( !jobj.has(name) ) { addJsonProperty(jobj, name, arr); }
+    }
+
+    public static void addDefaultJsonProperty(JsonObject jobj, String name, byte[] arr) {
+        if( !jobj.has(name) ) { addJsonProperty(jobj, name, arr); }
+    }
+
+    public static void addDefaultJsonProperty(JsonObject jobj, String name, short[] arr) {
+        if( !jobj.has(name) ) { addJsonProperty(jobj, name, arr); }
+    }
+
+    public static void addDefaultJsonProperty(JsonObject jobj, String name, float[] arr) {
+        if( !jobj.has(name) ) { addJsonProperty(jobj, name, arr); }
+    }
+
+    private static Number[] convertNArray(Object arr) {
+        if( arr instanceof int[] )    return Arrays.stream((int[])    arr).mapToObj(e -> (Number) e).toArray(Number[]::new);
+        if( arr instanceof long[] )   return Arrays.stream((long[])   arr).mapToObj(e -> (Number) e).toArray(Number[]::new);
+        if( arr instanceof double[] ) return Arrays.stream((double[]) arr).mapToObj(e -> (Number) e).toArray(Number[]::new);
+        if( arr instanceof byte[] )  { byte[] na = (byte[])   arr; return IntStream.range(0, na.length).mapToObj(i -> (Number) na[i]).toArray(Number[]::new); }
+        if( arr instanceof short[] ) { short[] na = (short[]) arr; return IntStream.range(0, na.length).mapToObj(i -> (Number) na[i]).toArray(Number[]::new); }
+        if( arr instanceof float[] ) { float[] na = (float[]) arr; return IntStream.range(0, na.length).mapToObj(i -> (Number) na[i]).toArray(Number[]::new); }
+
+        throw new IllegalArgumentException("The given array does not hold numeric values!");
+    }
+
+    public static void addJsonProperty(JsonObject jobj, String name, int[] arr) {
+        addJsonProperty(jobj, name, convertNArray(arr));
+    }
+
+    public static void addJsonProperty(JsonObject jobj, String name, long[] arr) {
+        addJsonProperty(jobj, name, convertNArray(arr));
+    }
+
+    public static void addJsonProperty(JsonObject jobj, String name, double[] arr) {
+        addJsonProperty(jobj, name, convertNArray(arr));
+    }
+
+    public static void addJsonProperty(JsonObject jobj, String name, byte[] arr) {
+        addJsonProperty(jobj, name, convertNArray(arr));
+    }
+
+    public static void addJsonProperty(JsonObject jobj, String name, short[] arr) {
+        addJsonProperty(jobj, name, convertNArray(arr));
+    }
+
+    public static void addJsonProperty(JsonObject jobj, String name, float[] arr) {
+        addJsonProperty(jobj, name, convertNArray(arr));
+    }
+
+    public static void addJsonProperty(JsonObject jobj, String name, Number[] arr) {
+        JsonArray jarr = new JsonArray();
+        for( Number i : arr ) jarr.add(i);
+        jobj.add(name, jarr);
+    }
+
+    public static void addJsonProperty(JsonObject jobj, String name, String[] arr) {
+        JsonArray jarr = new JsonArray();
+        for( String i : arr ) jarr.add(i);
+        jobj.add(name, jarr);
+    }
+
+    public static void addJsonProperty(JsonObject jobj, String name, Boolean[] arr) {
+        JsonArray jarr = new JsonArray();
+        for( Boolean i : arr ) jarr.add(i);
+        jobj.add(name, jarr);
+    }
+
+    public static void addJsonProperty(JsonObject jobj, String name, Character[] arr) {
+        JsonArray jarr = new JsonArray();
+        for( Character i : arr ) jarr.add(i);
+        jobj.add(name, jarr);
     }
 }

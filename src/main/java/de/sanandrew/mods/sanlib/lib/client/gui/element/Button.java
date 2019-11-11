@@ -106,7 +106,7 @@ public class Button
             btn = event.getButton();
 
             btn.playPressSound(gs.mc.getSoundHandler());
-            gui.performAction(this, btn.id);
+            this.performAction(gui, btn.id);
             if( gs.equals(gs.mc.currentScreen) ) {
                 MinecraftForge.EVENT_BUS.post(new GuiScreenEvent.ActionPerformedEvent.Post(gs, btn, btnList));
             }
@@ -115,6 +115,10 @@ public class Button
         }
 
         return false;
+    }
+
+    public void performAction(IGui gui, int id) {
+        gui.performAction(this, id);
     }
 
     public boolean isHovering(IGui gui, int x, int y, int mouseX, int mouseY) {
