@@ -87,7 +87,7 @@ public class Label
         return 0;
     }
 
-    static final class BakedData
+    public static final class BakedData
     {
         public int[] size;
         public GuiElementInst content;
