@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/SanAndreasP/SanLib/1.12/sanlib-entity-model-schema.json",
+  "type": "object",
+  "properties": {
+    "texture": { "type": "string", "default": null },
+    "parent":  { "type": "string", "default": null },
+    "cubes":   {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "boxName":        { "type": "string" },
+          "sizeX":          { "type": "integer" },
+          "sizeY":          { "type": "integer" },
+          "sizeZ":          { "type": "integer" },
+          "textureX":       { "type": "integer" },
+          "textureY":       { "type": "integer" },
+          "offsetX":        { "type": "number" },
+          "offsetY":        { "type": "number" },
+          "offsetZ":        { "type": "number" },
+          "textureWidth":   { "type": "number", "default": 64.0 },
+          "textureHeight":  { "type": "number", "default": 32.0 },
+          "mirror":         { "type": "boolean", "default": false },
+          "rotationPointX": { "type": "number", "default": 0.0 },
+          "rotationPointY": { "type": "number", "default": 0.0 },
+          "rotationPointZ": { "type": "number", "default": 0.0 },
+          "rotateAngleX":   { "type": "number", "default": 0.0 },
+          "rotateAngleY":   { "type": "number", "default": 0.0 },
+          "rotateAngleZ":   { "type": "number", "default": 0.0 },
+          "isHidden":       { "type": "boolean", "default": false },
+          "parentBox":      { "type": "string", "default": null },
+          "scaling":        { "type": "string", "default": null, "pattern": "[x\\s+\\-*/^\\d.,()]|(a?sin)|(a?cos)|(a?tan)|(sqrt)" }
+        },
+        "required": ["boxName", "sizeX", "sizeY", "sizeZ", "textureX", "textureY", "offsetX", "offsetY", "offsetZ"]
+      }
+    }
+  },
+  "required": ["cubes"]
+}

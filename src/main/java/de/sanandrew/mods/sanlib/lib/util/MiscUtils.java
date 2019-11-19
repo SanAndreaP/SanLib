@@ -146,13 +146,13 @@ public final class MiscUtils
                                 x = StrictMath.sin(Math.toRadians(x));
                                 break;
                             case "asin":
-                                x = StrictMath.sin(Math.toRadians(x));
+                                x = StrictMath.asin(Math.toRadians(x));
                                 break;
                             case "cos":
                                 x = StrictMath.cos(Math.toRadians(x));
                                 break;
                             case "acos":
-                                x = StrictMath.cos(Math.toRadians(x));
+                                x = StrictMath.acos(Math.toRadians(x));
                                 break;
                             case "tan":
                                 x = StrictMath.tan(Math.toRadians(x));
