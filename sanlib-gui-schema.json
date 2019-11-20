@@ -9,10 +9,10 @@
         "properties": {
           "type": { "type": "string" },
           "id":   { "type": "string", "default": null },
-          "pos":  { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" } },
+          "pos":  { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" }, "default": [0, 0] },
           "data": { "type": "object", "default": {} }
         },
-        "required": ["type", "pos"]
+        "required": ["type"]
       }
     }
   },
