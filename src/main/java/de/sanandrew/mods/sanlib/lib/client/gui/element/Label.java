@@ -30,10 +30,17 @@ public class Label
             this.data.borderBottomColor = MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("borderBottomColor"), "0x5028007F"));
             this.data.setPadding(JsonUtils.getIntArray(data.get("padding"), new int[0], Range.between(0, 4)));
 
-            this.data.content = JsonUtils.GSON.fromJson(data.get("content"), GuiElementInst.class);
-            gui.getDefinition().initElement(this.data.content);
-            this.data.content.get().bakeData(gui, this.data.content.data);
+            this.data.content = this.getLabel(gui, data);
         }
+    }
+
+    public GuiElementInst getLabel(IGui gui, JsonObject data) {
+        GuiElementInst lbl = JsonUtils.GSON.fromJson(data.get("content"), GuiElementInst.class);
+
+        gui.getDefinition().initElement(lbl);
+        this.data.content.get().bakeData(gui, lbl.data);
+
+        return lbl;
     }
 
     @Override
