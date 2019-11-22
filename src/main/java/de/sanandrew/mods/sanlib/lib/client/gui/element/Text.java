@@ -15,12 +15,10 @@ import de.sanandrew.mods.sanlib.lib.util.LangUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
-
 
 /**
  * JSON format:
