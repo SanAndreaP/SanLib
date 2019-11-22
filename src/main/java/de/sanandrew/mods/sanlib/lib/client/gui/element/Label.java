@@ -38,7 +38,7 @@ public class Label
         GuiElementInst lbl = JsonUtils.GSON.fromJson(data.get("content"), GuiElementInst.class);
 
         gui.getDefinition().initElement(lbl);
-        this.data.content.get().bakeData(gui, lbl.data);
+        lbl.get().bakeData(gui, lbl.data);
 
         return lbl;
     }
