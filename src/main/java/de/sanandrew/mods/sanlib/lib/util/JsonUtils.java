@@ -395,6 +395,22 @@ public final class JsonUtils
         throw new IllegalArgumentException("The given array does not hold numeric values!");
     }
 
+    public static void addJsonProperty(JsonObject jobj, String name, String val) {
+        jobj.addProperty(name, val);
+    }
+
+    public static void addJsonProperty(JsonObject jobj, String name, Boolean val) {
+        jobj.addProperty(name, val);
+    }
+
+    public static void addJsonProperty(JsonObject jobj, String name, Character val) {
+        jobj.addProperty(name, val);
+    }
+
+    public static void addJsonProperty(JsonObject jobj, String name, Number val) {
+        jobj.addProperty(name, val);
+    }
+
     public static void addJsonProperty(JsonObject jobj, String name, int[] arr) {
         addJsonProperty(jobj, name, convertNArray(arr));
     }
