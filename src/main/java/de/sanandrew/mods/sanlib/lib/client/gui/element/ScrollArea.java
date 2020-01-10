@@ -84,8 +84,8 @@ public class ScrollArea
 
         if( this.countAll > this.countSub && isLmbDown ) {
             if( this.prevLmbDown
-                || (mouseX >= this.data.scrollBtnActive.pos[0] && mouseX < this.data.scrollBtnActive.pos[0] + btnElem.data.size[0]
-                    && mouseY >= this.data.scrollBtnActive.pos[1] && mouseY < this.data.scrollBtnActive.pos[1] + this.data.scrollHeight) )
+                || IGuiElement.isHovering(gui, this.data.scrollBtnActive.pos[0], this.data.scrollBtnActive.pos[1], mouseX, mouseY,
+                                          btnElem.data.size[0], this.data.scrollHeight) )
             {
                 int scrollAmt = mouseY - this.data.scrollBtnActive.pos[1] - btnElem.data.size[1] / 2;
                 this.scroll = Math.max(0.0F, Math.min(1.0F, 1.0F / (this.data.scrollHeight - btnElem.data.size[1]) * scrollAmt));

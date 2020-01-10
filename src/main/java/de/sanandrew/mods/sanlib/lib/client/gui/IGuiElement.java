@@ -58,4 +58,10 @@ public interface IGuiElement
 
         public static final PriorityTarget[] VALUES = values();
     }
+
+    static boolean isHovering(IGui gui, int x, int y, int mouseX, int mouseY, int width, int height) {
+        mouseX -= gui.getScreenPosX();
+        mouseY -= gui.getScreenPosY();
+        return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
+    }
 }

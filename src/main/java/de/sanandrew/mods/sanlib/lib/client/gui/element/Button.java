@@ -64,7 +64,7 @@ public class Button
             this.currMouseX = mouseX;
             this.currMouseY = mouseY;
 
-            this.isCurrHovering = this.isHovering(gui, x, y, mouseX, mouseY);
+            this.isCurrHovering = IGuiElement.isHovering(gui, x, y, mouseX, mouseY, this.data.size[0], this.data.size[1]);
             boolean isEnabled = this.isEnabled();
 
             gui.get().mc.renderEngine.bindTexture(this.data.texture);
@@ -119,12 +119,6 @@ public class Button
 
     public void performAction(IGui gui, int id) {
         gui.performAction(this, id);
-    }
-
-    public boolean isHovering(IGui gui, int x, int y, int mouseX, int mouseY) {
-        mouseX -= gui.getScreenPosX();
-        mouseY -= gui.getScreenPosY();
-        return mouseX >= x && mouseX < x + this.data.size[0] && mouseY >= y && mouseY < y + this.data.size[1];
     }
 
     protected void drawRect(boolean enabled, boolean hovered) {
