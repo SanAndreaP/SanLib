@@ -87,7 +87,7 @@ public class ScrollArea
                 || IGuiElement.isHovering(gui, this.data.scrollBtnActive.pos[0], this.data.scrollBtnActive.pos[1], mouseX, mouseY,
                                           btnElem.data.size[0], this.data.scrollHeight) )
             {
-                int scrollAmt = mouseY - this.data.scrollBtnActive.pos[1] - btnElem.data.size[1] / 2;
+                int scrollAmt = mouseY - gui.getScreenPosY() - this.data.scrollBtnActive.pos[1] - btnElem.data.size[1] / 2;
                 this.scroll = Math.max(0.0F, Math.min(1.0F, 1.0F / (this.data.scrollHeight - btnElem.data.size[1]) * scrollAmt));
 
                 this.prevLmbDown = true;
