@@ -239,7 +239,7 @@ public class ScrollArea
         public ScrollData getScrollData(float scroll, boolean rasterized) {
             ScrollData data = new ScrollData();
 
-            data.totalHeight = this.elements.span().upperEndpoint();
+            data.totalHeight = this.elementsView.size() > 0 ? this.elements.span().upperEndpoint() : 0;
             data.minY = Math.max(0, MathHelper.floor((data.totalHeight - this.areaSize[1]) * scroll));
             data.maxY = MathHelper.ceil((data.totalHeight - this.areaSize[1]) * scroll) + this.areaSize[1];
 

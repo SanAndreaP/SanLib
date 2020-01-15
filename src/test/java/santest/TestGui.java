@@ -57,8 +57,8 @@ public class TestGui
 
         GlStateManager.pushMatrix();
         GlStateManager.translate(this.posX, this.posY, 0.0F);
-        this.guiDef.drawBackground(this, mouseX - this.posX, mouseY - this.posY, partialTicks);
-        this.guiDef.drawForeground(this, mouseX - this.posX, mouseY - this.posY, partialTicks);
+        this.guiDef.drawBackground(this, mouseX, mouseY, partialTicks);
+        this.guiDef.drawForeground(this, mouseX, mouseY, partialTicks);
         GlStateManager.popMatrix();
 
         super.drawScreen(mouseX, mouseY, partialTicks);
