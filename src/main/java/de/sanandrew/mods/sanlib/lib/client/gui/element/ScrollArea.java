@@ -35,6 +35,9 @@ public class ScrollArea
 
     public boolean prevLmbDown;
 
+    protected int posX;
+    protected int posY;
+
     @Override
     public void bakeData(IGui gui, JsonObject data) {
         if( this.data == null ) {
@@ -77,6 +80,9 @@ public class ScrollArea
 
     @Override
     public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
+        this.posX = x;
+        this.posY = y;
+
         boolean isLmbDown = Mouse.isButtonDown(0);
 
         GuiElementInst btn = this.countAll > this.countSub ? this.data.scrollBtnActive : this.data.scrollBtnDeactive;
@@ -138,9 +144,11 @@ public class ScrollArea
 
     @Override
     public boolean mouseClicked(IGui gui, int mouseX, int mouseY, int mouseButton) throws IOException {
-        for( Map.Entry<Range<Integer >, GuiElementInst > e : this.renderedElements.entrySet() ) {
-            if( e.getValue().get().mouseClicked(gui, mouseX, mouseY, mouseButton) ) {
-                return true;
+        if( IGuiElement.isHovering(gui, this.posX, this.posY, mouseX, mouseY, this.data.areaSize[0], this.data.areaSize[1]) ) {
+            for( Map.Entry<Range<Integer>, GuiElementInst> e : this.renderedElements.entrySet() ) {
+                if( e.getValue().get().mouseClicked(gui, mouseX, mouseY, mouseButton) ) {
+                    return true;
+                }
             }
         }
 
@@ -149,15 +157,19 @@ public class ScrollArea
 
     @Override
     public void mouseClickMove(IGui gui, int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-        for( Map.Entry<Range<Integer >, GuiElementInst > e : this.renderedElements.entrySet() ) {
-            e.getValue().get().mouseClickMove(gui, mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+        if( IGuiElement.isHovering(gui, this.posX, this.posY, mouseX, mouseY, this.data.areaSize[0], this.data.areaSize[1]) ) {
+            for( Map.Entry<Range<Integer>, GuiElementInst> e : this.renderedElements.entrySet() ) {
+                e.getValue().get().mouseClickMove(gui, mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+            }
         }
     }
 
     @Override
     public void mouseReleased(IGui gui, int mouseX, int mouseY, int state) {
-        for( Map.Entry<Range<Integer >, GuiElementInst > e : this.renderedElements.entrySet() ) {
-            e.getValue().get().mouseReleased(gui, mouseX, mouseY, state);
+        if( IGuiElement.isHovering(gui, this.posX, this.posY, mouseX, mouseY, this.data.areaSize[0], this.data.areaSize[1]) ) {
+            for( Map.Entry<Range<Integer>, GuiElementInst> e : this.renderedElements.entrySet() ) {
+                e.getValue().get().mouseReleased(gui, mouseX, mouseY, state);
+            }
         }
     }
 
