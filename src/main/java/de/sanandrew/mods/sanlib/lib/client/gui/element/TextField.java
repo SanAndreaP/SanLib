@@ -1,5 +1,6 @@
 package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
+import com.google.common.base.Strings;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
@@ -33,10 +34,12 @@ public class TextField
             this.data = new BakedData();
             this.data.size = JsonUtils.getIntArray(data.get("size"), Range.is(2));
             this.data.text = JsonUtils.getStringVal(data.get("text"), "");
+            this.data.placeholderText = JsonUtils.getStringVal(data.get("placeholderText"), "");
             this.data.shadow = JsonUtils.getBoolVal(data.get("shadow"), true);
             this.data.canLoseFocus = JsonUtils.getBoolVal(data.get("canLoseFocus"), true);
             this.data.drawBackground = JsonUtils.getBoolVal(data.get("drawBackground"), true);
             this.data.color = MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("textColor"), "0xFFE0E0E0"));
+            this.data.placeholderColor = MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("placeholderColor"), "0xFF707070"));
             this.data.disabledColor = MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("disabledTextColor"), "0xFF707070"));
 
             JsonElement cstFont = data.get("font");
@@ -65,6 +68,11 @@ public class TextField
         this.data.textfield.x = x;
         this.data.textfield.y = y;
         this.data.textfield.drawTextBox();
+        if( !this.isFocused() && !Strings.isNullOrEmpty(this.data.placeholderText) && Strings.isNullOrEmpty(this.getText()) ) {
+            x += (this.data.drawBackground ? 4 : 0);
+            y += (this.data.drawBackground ? (this.data.size[1] - 8) / 2 : 0);
+            this.data.fontRenderer.drawString(LangUtils.translate(this.data.placeholderText), x, y, this.data.placeholderColor, this.data.shadow);
+        }
     }
 
     @Override
@@ -163,10 +171,12 @@ public class TextField
         public int[]        size;
         public int          color;
         public int          disabledColor;
+        public int          placeholderColor;
         public boolean      canLoseFocus;
         public boolean      drawBackground;
         public boolean      shadow;
         public String       text;
+        public String       placeholderText;
         public FontRenderer fontRenderer;
 
         public GuiTextField textfield;
