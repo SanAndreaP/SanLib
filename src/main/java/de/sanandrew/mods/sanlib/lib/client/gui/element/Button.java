@@ -64,7 +64,7 @@ public class Button
             this.currMouseX = mouseX;
             this.currMouseY = mouseY;
 
-            this.isCurrHovering = IGuiElement.isHovering(gui, x, y, mouseX, mouseY, this.data.size[0], this.data.size[1]);
+            this.isCurrHovering = isHovering(gui, x, y, mouseX, mouseY);
             boolean isEnabled = this.isEnabled();
 
             gui.get().mc.renderEngine.bindTexture(this.data.texture);
@@ -91,6 +91,10 @@ public class Button
                 labelElem.renderLabel(gui, partTicks, x + lblX, y + lblY, mouseX, mouseY, this.data.label.data, isEnabled, this.isCurrHovering);
             }
         }
+    }
+
+    public boolean isHovering(IGui gui, int x, int y, int mouseX, int mouseY) {
+        return IGuiElement.isHovering(gui, x, y, mouseX, mouseY, this.data.size[0], this.data.size[1]);
     }
 
     @Override
