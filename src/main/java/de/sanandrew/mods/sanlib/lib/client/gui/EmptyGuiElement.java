@@ -28,4 +28,12 @@ public class EmptyGuiElement
     public int getHeight() {
         return 0;
     }
+
+    @Override
+    public boolean isVisible() {
+        return false;
+    }
+
+    @Override
+    public void setVisible(boolean visible) { }
 }

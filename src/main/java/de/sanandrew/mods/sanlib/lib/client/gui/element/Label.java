@@ -1,6 +1,7 @@
 package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
@@ -19,6 +20,8 @@ public class Label
     public static final ResourceLocation ID = new ResourceLocation("label");
 
     public BakedData data;
+    protected boolean isVisible;
+    protected IGuiElement visibleFor;
 
     @Override
     public void bakeData(IGui gui, JsonObject data) {
@@ -30,12 +33,27 @@ public class Label
             this.data.borderBottomColor = MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("borderBottomColor"), "0x5028007F"));
             this.data.setPadding(JsonUtils.getIntArray(data.get("padding"), new int[0], Range.between(0, 4)));
 
+            GuiElementInst elemFor = gui.getDefinition().getElementById(JsonUtils.getStringVal(data.get("for"), ""));
+            this.visibleFor = elemFor == null ? null : elemFor.get();
+
             this.data.content = this.getLabel(gui, data);
         }
     }
 
     public GuiElementInst getLabel(IGui gui, JsonObject data) {
-        GuiElementInst lbl = JsonUtils.GSON.fromJson(data.get("content"), GuiElementInst.class);
+        GuiElementInst lbl = null;
+        if( data.has("content") ) {
+            lbl = JsonUtils.GSON.fromJson(data.get("content"), GuiElementInst.class);
+
+        } else if( data.has("text") ) {
+            lbl = new GuiElementInst();
+            lbl.element = new Text();
+            lbl.data = new JsonObject();
+            JsonUtils.addJsonProperty(lbl.data, "text", JsonUtils.getStringVal(data.get("text")));
+            JsonUtils.addJsonProperty(lbl.data, "color", "0xFFFFFFFF");
+        } else {
+            throw new JsonParseException("No data property called \"content\" or \"text\" has been found.");
+        }
 
         gui.getDefinition().initElement(lbl);
         lbl.get().bakeData(gui, lbl.data);
@@ -92,6 +110,16 @@ public class Label
     @Override
     public int getHeight() {
         return 0;
+    }
+
+    @Override
+    public boolean isVisible() {
+        return this.isVisible && (this.visibleFor == null || this.visibleFor.isVisible());
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        this.isVisible = visible;
     }
 
     public static final class BakedData

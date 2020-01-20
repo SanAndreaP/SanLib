@@ -26,6 +26,8 @@ public class TextField
 {
     public static final ResourceLocation ID = new ResourceLocation("textfield");
 
+    private boolean enabled = true;
+
     public BakedData data;
 
     @Override
@@ -133,20 +135,21 @@ public class TextField
         this.data.textfield.setCursorPositionEnd();
     }
 
-    private boolean enabled = true;
+    public boolean isEnabled() {
+        return this.enabled;
+    }
+
     public void setEnabled(boolean enabled) {
         this.data.textfield.setEnabled(enabled);
         this.enabled = enabled;
     }
 
-    public void setVisible(boolean enabled) {
-        this.data.textfield.setVisible(enabled);
+    @Override
+    public void setVisible(boolean visible) {
+        this.data.textfield.setVisible(visible);
     }
 
-    public boolean isEnabled() {
-        return this.enabled;
-    }
-
+    @Override
     public boolean isVisible() {
         return this.data.textfield.getVisible();
     }

@@ -22,6 +22,7 @@ public class ButtonTextLabel
     protected int colorEnabled;
     protected int colorHover;
     protected int colorDisabled;
+    protected boolean isVisible;
 
     @Override
     public void bakeData(IGui gui, JsonObject data) {
@@ -42,5 +43,15 @@ public class ButtonTextLabel
         this.data.color = enabled ? (hovered ? this.colorHover : this.colorEnabled) : this.colorDisabled;
 
         super.render(gui, partTicks, x, y, mouseX, mouseY, data);
+    }
+
+    @Override
+    public boolean isVisible() {
+        return this.isVisible;
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        this.isVisible = visible;
     }
 }

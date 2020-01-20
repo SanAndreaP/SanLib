@@ -43,6 +43,8 @@ public class Texture
 
     public BakedData data;
 
+    protected boolean isVisible;
+
     @Override
     public void bakeData(IGui gui, JsonObject data) {
         if( this.data == null ) {
@@ -84,6 +86,16 @@ public class Texture
     @Override
     public int getHeight() {
         return this.data.size[1];
+    }
+
+    @Override
+    public boolean isVisible() {
+        return this.isVisible;
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        this.isVisible = visible;
     }
 
     public static final class BakedData

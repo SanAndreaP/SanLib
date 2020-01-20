@@ -35,6 +35,10 @@ public interface IGuiElement
 
     default boolean keyTyped(IGui gui, char typedChar, int keyCode) throws IOException { return false; }
 
+    boolean isVisible();
+
+    void setVisible(boolean visible);
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
     @interface Priorities

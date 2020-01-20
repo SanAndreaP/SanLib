@@ -49,6 +49,7 @@ public class Text
     public BakedData data;
     protected int currWidth;
     protected int currHeight;
+    protected boolean isVisible;
 
     @Override
     public void bakeData(IGui gui, JsonObject data) {
@@ -125,6 +126,16 @@ public class Text
     @Override
     public int getHeight() {
         return this.currHeight;
+    }
+
+    @Override
+    public boolean isVisible() {
+        return this.isVisible;
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        this.isVisible = visible;
     }
 
     public static final class BakedData

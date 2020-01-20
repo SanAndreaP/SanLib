@@ -37,6 +37,7 @@ public class ScrollArea
 
     protected int posX;
     protected int posY;
+    protected boolean isVisible;
 
     @Override
     public void bakeData(IGui gui, JsonObject data) {
@@ -232,6 +233,16 @@ public class ScrollArea
     @Override
     public int getHeight() {
         return this.data.areaSize[1];
+    }
+
+    @Override
+    public boolean isVisible() {
+        return this.isVisible;
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        this.isVisible = visible;
     }
 
     @SuppressWarnings("UnstableApiUsage")

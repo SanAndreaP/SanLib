@@ -213,10 +213,12 @@ public class Button
         return this.data.size[1];
     }
 
+    @Override
     public void setVisible(boolean visible) {
         this.data.button.visible = visible;
     }
 
+    @Override
     public boolean isVisible() {
         return this.data.button.visible;
     }
