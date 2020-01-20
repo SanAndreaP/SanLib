@@ -24,7 +24,7 @@ public class Rectangle
     public static final ResourceLocation ID = new ResourceLocation("rectangle");
 
     public BakedData data;
-    protected boolean isVisible;
+    protected boolean isVisible = true;
 
     @Override
     public void bakeData(IGui gui, JsonObject data) {

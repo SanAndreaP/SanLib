@@ -37,7 +37,7 @@ public class ScrollArea
 
     protected int posX;
     protected int posY;
-    protected boolean isVisible;
+    protected boolean isVisible = true;
 
     @Override
     public void bakeData(IGui gui, JsonObject data) {

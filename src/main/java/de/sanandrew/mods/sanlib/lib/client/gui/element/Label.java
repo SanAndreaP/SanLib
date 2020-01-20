@@ -20,7 +20,7 @@ public class Label
     public static final ResourceLocation ID = new ResourceLocation("label");
 
     public BakedData data;
-    protected boolean isVisible;
+    protected boolean isVisible = true;
     protected IGuiElement visibleFor;
 
     @Override
@@ -41,10 +41,9 @@ public class Label
     }
 
     public GuiElementInst getLabel(IGui gui, JsonObject data) {
-        GuiElementInst lbl = null;
+        GuiElementInst lbl;
         if( data.has("content") ) {
             lbl = JsonUtils.GSON.fromJson(data.get("content"), GuiElementInst.class);
-
         } else if( data.has("text") ) {
             lbl = new GuiElementInst();
             lbl.element = new Text();

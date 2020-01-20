@@ -20,6 +20,7 @@ public final class GuiElementInst
     public int[] pos = new int[2];
     public JsonObject data;
     public IGuiElement element;
+    public boolean firstRenderUpdate;
 
     public IGuiElement get() {
         return this.get(IGuiElement.class);

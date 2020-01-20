@@ -133,17 +133,31 @@ public class GuiDefinition
     }
 
     public void initGui(IGui gui) {
-        Consumer<GuiElementInst> f = e -> e.get().bakeData(gui, e.data);
+        Consumer<GuiElementInst> f = e -> {
+            e.firstRenderUpdate = false;
+            e.get().bakeData(gui, e.data);
+        };
         Arrays.stream(this.backgroundElements).forEach(f);
         Arrays.stream(this.foregroundElements).forEach(f);
     }
 
+    public static void renderElement(IGui gui, int mouseX, int mouseY, float partialTicks, GuiElementInst e) {
+        IGuiElement ie = e.get();
+        if( !e.firstRenderUpdate ) {
+            e.firstRenderUpdate = true;
+            ie.update(gui, e.data);
+        }
+        if( ie.isVisible() ) {
+            ie.render(gui, partialTicks, e.pos[0], e.pos[1], mouseX, mouseY, e.data);
+        }
+    }
+
     public void drawBackground(IGui gui, int mouseX, int mouseY, float partialTicks) {
-        Arrays.stream(this.backgroundElements).forEach(e -> e.get().render(gui, partialTicks, e.pos[0], e.pos[1], mouseX, mouseY, e.data));
+        Arrays.stream(this.backgroundElements).forEach(e -> renderElement(gui, mouseX, mouseY, partialTicks, e));
     }
 
     public void drawForeground(IGui gui, int mouseX, int mouseY, float partialTicks) {
-        Arrays.stream(this.foregroundElements).forEach(e -> e.get().render(gui, partialTicks, e.pos[0], e.pos[1], mouseX, mouseY, e.data));
+        Arrays.stream(this.foregroundElements).forEach(e -> renderElement(gui, mouseX, mouseY, partialTicks, e));
     }
 
     private static GuiElementInst[] getPrioritizedElements(GuiElementInst[] elements, IGuiElement.PriorityTarget target) {
@@ -246,7 +260,10 @@ public class GuiDefinition
     }
 
     public void update(IGui gui) {
-        Consumer<GuiElementInst> f = e -> e.get().update(gui, e.data);
+        Consumer<GuiElementInst> f = e -> {
+            e.firstRenderUpdate = true;
+            e.get().update(gui, e.data);
+        };
         Arrays.stream(this.backgroundElements).forEach(f);
         Arrays.stream(this.foregroundElements).forEach(f);
     }

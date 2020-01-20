@@ -49,7 +49,7 @@ public class Text
     public BakedData data;
     protected int currWidth;
     protected int currHeight;
-    protected boolean isVisible;
+    protected boolean isVisible = true;
 
     @Override
     public void bakeData(IGui gui, JsonObject data) {

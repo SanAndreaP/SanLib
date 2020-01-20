@@ -22,7 +22,7 @@ public class ButtonTextLabel
     protected int colorEnabled;
     protected int colorHover;
     protected int colorDisabled;
-    protected boolean isVisible;
+    protected boolean isVisible = true;
 
     @Override
     public void bakeData(IGui gui, JsonObject data) {
