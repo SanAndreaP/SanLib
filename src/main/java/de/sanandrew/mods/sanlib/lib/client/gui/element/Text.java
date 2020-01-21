@@ -18,6 +18,7 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ResourceLocation;
 
 import java.lang.ref.WeakReference;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -59,7 +60,8 @@ public class Text
             this.data.color = MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("color"), "0xFF000000"));
             this.data.shadow = JsonUtils.getBoolVal(data.get("shadow"), false);
             this.data.wrapWidth = JsonUtils.getIntVal(data.get("wrapWidth"), 0);
-            this.data.justifyRight = JsonUtils.getBoolVal(data.get("justifyRight"), false);
+            this.data.justify = Justify.fromString(JsonUtils.getStringVal(data.get("justify"), "left"));
+            this.data.lineHeight = JsonUtils.getIntVal(data.get("lineHeight"), 9);
 
             JsonElement cstFont = data.get("font");
             if( cstFont == null ) {
@@ -67,7 +69,9 @@ public class Text
             } else {
                 this.data.fontRenderer = JsonUtils.GSON.fromJson(cstFont, Font.class).get(gui.get());
             }
-            this.currHeight = this.data.wrapWidth <= 0 ? this.data.fontRenderer.FONT_HEIGHT : this.data.fontRenderer.getWordWrappedHeight(this.data.text, this.data.wrapWidth);
+            this.currHeight = this.data.wrapWidth <= 0
+                              ? this.data.text.split("\n").length * this.data.lineHeight
+                              : this.data.fontRenderer.listFormattedStringToWidth(this.data.text, this.data.wrapWidth).size() * this.data.lineHeight;
             if( this.data.shadow ) {
                 this.currHeight += 1;
             }
@@ -96,26 +100,50 @@ public class Text
         String s = this.getDynamicText(gui, this.data.text);
 
         this.currWidth = this.getTextWidth(gui);
+        String[] ln;
         if( this.data.wrapWidth > 0 ) {
-            boolean origBidi = this.data.fontRenderer.getBidiFlag();
-            if( this.data.justifyRight ) {
-                x -= this.data.wrapWidth;
-                this.data.fontRenderer.setBidiFlag(true);
-            }
-            if( this.data.shadow ) {
-                int sdColor = (this.data.color & 0x00FCFCFC) >> 2 | this.data.color & 0xFF000000;
-                this.data.fontRenderer.drawSplitString(s, x + 1, y + 1, sdColor, this.data.wrapWidth);
-            }
-            this.data.fontRenderer.drawSplitString(s, x, y, this.data.color, this.data.wrapWidth);
-            if( this.data.justifyRight ) {
-                this.data.fontRenderer.setBidiFlag(origBidi);
-            }
+            ln = this.data.fontRenderer.listFormattedStringToWidth(s, this.data.wrapWidth).toArray(new String[0]);
         } else {
-            if( this.data.justifyRight ) {
-                x -= this.data.fontRenderer.getStringWidth(s);
-            }
-            this.data.fontRenderer.drawString(s, x, y, this.data.color, this.data.shadow);
+            ln = s.split("\n");
         }
+        this.currHeight = ln.length * this.data.lineHeight;
+
+        for( String sln : ln ) {
+            this.renderLine(sln, x, y);
+            y += this.data.lineHeight;
+        }
+    }
+
+    private void renderLine(String s, int x, int y) {
+        switch( this.data.justify ) {
+            case JUSTIFY:
+                if( this.data.wrapWidth > 0 ) {
+                    String[] words = s.split("\\s");
+                    float spaceDist = this.data.wrapWidth;
+                    int[] wordWidths = new int[words.length];
+                    for( int i = 0; i < words.length; i++ ) {
+                        wordWidths[i] = this.data.fontRenderer.getStringWidth(words[i]);
+                        spaceDist -= wordWidths[i];
+                    }
+                    spaceDist /= words.length - 1;
+                    for( int i = 0; i < words.length; i++ ) {
+                        this.data.fontRenderer.drawString(words[i], x, y, this.data.color, this.data.shadow);
+                        x += wordWidths[i] + spaceDist;
+                    }
+                    break;
+                }
+                // else fall-through
+            case LEFT:
+                this.data.fontRenderer.drawString(s, x, y, this.data.color, this.data.shadow);
+                break;
+            case RIGHT:
+                this.data.fontRenderer.drawString(s, x - this.data.fontRenderer.getStringWidth(s), y, this.data.color, this.data.shadow);
+                break;
+            case CENTER:
+                this.data.fontRenderer.drawString(s, x - (this.data.fontRenderer.getStringWidth(s) / 2.0F), y, this.data.color, this.data.shadow);
+                break;
+        }
+
     }
 
     @Override
@@ -145,7 +173,8 @@ public class Text
         public boolean shadow;
         public int wrapWidth;
         public FontRenderer fontRenderer;
-        public boolean justifyRight;
+        public Justify justify;
+        public int lineHeight;
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -190,6 +219,18 @@ public class Text
         @SuppressWarnings("NonFinalFieldReferencedInHashCode")
         public int hashCode() {
             return Objects.hash(this.texture, this.unicode, this.bidirectional);
+        }
+    }
+
+    enum Justify
+    {
+        LEFT,
+        CENTER,
+        RIGHT,
+        JUSTIFY;
+
+        static Justify fromString(String s) {
+            return Justify.valueOf(s.toUpperCase(Locale.ROOT));
         }
     }
 }
