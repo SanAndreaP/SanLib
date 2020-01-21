@@ -31,9 +31,9 @@ public final class LangUtils
      */
     @SuppressWarnings("deprecation")
     public static String translate(String langKey, Object... args) {
-        return net.minecraft.util.text.translation.I18n.canTranslate(langKey)
-                       ? net.minecraft.util.text.translation.I18n.translateToLocalFormatted(langKey, args)
-                       : langKey;
+        return (net.minecraft.util.text.translation.I18n.canTranslate(langKey)
+                ? net.minecraft.util.text.translation.I18n.translateToLocalFormatted(langKey, args)
+                : langKey).replace("\\n", "\n");
     }
 
     public static String translate(TranslateKey langKey, Object... args) {

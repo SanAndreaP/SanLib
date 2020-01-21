@@ -87,7 +87,16 @@ public class Text
     }
 
     public int getTextWidth(IGui gui) {
-        return this.data.wrapWidth > 0 ? this.data.wrapWidth : this.data.fontRenderer.getStringWidth(this.getDynamicText(gui, this.data.text));
+        if( this.data.wrapWidth > 0 ) {
+            if( this.data.justify == Justify.JUSTIFY ) {
+                return this.data.wrapWidth;
+            } else {
+                return this.data.fontRenderer.listFormattedStringToWidth(this.getDynamicText(gui, this.data.text), this.data.wrapWidth)
+                                             .stream().map(s -> this.data.fontRenderer.getStringWidth(s)).reduce(0, Math::max, Math::max);
+            }
+        }
+
+        return this.data.fontRenderer.getStringWidth(this.getDynamicText(gui, this.data.text));
     }
 
     @Override
