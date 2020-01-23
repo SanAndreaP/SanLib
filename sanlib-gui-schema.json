@@ -29,5 +29,5 @@
       "$ref": "#/definitions/elements"
     }
   },
-  "required": ["width", "height", "backgroundElements", "foregroundElements"]
+  "required": ["backgroundElements", "foregroundElements"]
 }
