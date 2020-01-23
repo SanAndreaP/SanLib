@@ -32,10 +32,12 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -91,7 +93,25 @@ public class GuiDefinition
     private void reloadDefinition() throws IOException {
         this.idToElementMap.clear();
 
-        try( IResource r = Minecraft.getMinecraft().getResourceManager().getResource(this.data);
+        List<GuiElementInst> bgElem = new ArrayList<>();
+        List<GuiElementInst> fgElem = new ArrayList<>();
+
+        this.loadFile(this.data, bgElem, fgElem);
+
+        this.backgroundElements = bgElem.toArray(new GuiElementInst[0]);
+        this.foregroundElements = fgElem.toArray(new GuiElementInst[0]);
+
+        Arrays.stream(this.backgroundElements).forEach(this::initElement);
+        Arrays.stream(this.foregroundElements).forEach(this::initElement);
+
+        for( IGuiElement.PriorityTarget tgt : IGuiElement.PriorityTarget.VALUES ) {
+            this.prioritizedBgElements.put(tgt, getPrioritizedElements(this.backgroundElements, tgt));
+            this.prioritizedFgElements.put(tgt, getPrioritizedElements(this.foregroundElements, tgt));
+        }
+    }
+
+    private void loadFile(ResourceLocation location, List<GuiElementInst> bgElem, List<GuiElementInst> fgElem) throws IOException {
+        try( IResource r = Minecraft.getMinecraft().getResourceManager().getResource(location);
              InputStreamReader reader = new InputStreamReader(r.getInputStream(), StandardCharsets.UTF_8) )
         {
             JsonElement json = new JsonParser().parse(reader);
@@ -100,20 +120,18 @@ public class GuiDefinition
             }
             JsonObject jObj = json.getAsJsonObject();
 
-            this.width = JsonUtils.getIntVal(jObj.get("width"));
-            this.height = JsonUtils.getIntVal(jObj.get("height"));
-            this.texture = jObj.has("texture") ? new ResourceLocation(jObj.get("texture").getAsString()) : null;
-
-            this.backgroundElements = JsonUtils.GSON.fromJson(jObj.get("backgroundElements"), GuiElementInst[].class);
-            this.foregroundElements = JsonUtils.GSON.fromJson(jObj.get("foregroundElements"), GuiElementInst[].class);
-
-            Arrays.stream(this.backgroundElements).forEach(this::initElement);
-            Arrays.stream(this.foregroundElements).forEach(this::initElement);
-
-            for( IGuiElement.PriorityTarget tgt : IGuiElement.PriorityTarget.VALUES ) {
-                this.prioritizedBgElements.put(tgt, getPrioritizedElements(this.backgroundElements, tgt));
-                this.prioritizedFgElements.put(tgt, getPrioritizedElements(this.foregroundElements, tgt));
+            if( jObj.has("parent") ) {
+                this.loadFile(new ResourceLocation(JsonUtils.getStringVal(jObj.get("parent"))), bgElem, fgElem);
             }
+
+            this.width = JsonUtils.getIntVal(jObj.get("width"), this.width);
+            this.height = JsonUtils.getIntVal(jObj.get("height"), this.height);
+            if( jObj.has("texture") ) {
+                this.texture = new ResourceLocation(jObj.get("texture").getAsString());
+            }
+
+            bgElem.addAll(Arrays.asList(JsonUtils.GSON.fromJson(jObj.get("backgroundElements"), GuiElementInst[].class)));
+            fgElem.addAll(Arrays.asList(JsonUtils.GSON.fromJson(jObj.get("foregroundElements"), GuiElementInst[].class)));
         }
     }
 
