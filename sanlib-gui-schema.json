@@ -18,8 +18,8 @@
   },
   "type": "object",
   "properties": {
-    "width":   { "type": "integer", "minimum": 0},
-    "height":  { "type": "integer", "minimum": 0},
+    "width":   { "type": "integer", "minimum": 0, "default": 0 },
+    "height":  { "type": "integer", "minimum": 0, "default": 0 },
     "texture": { "type": "string", "default": null },
     "parent":  { "type": "string", "default": null },
     "backgroundElements":   {
