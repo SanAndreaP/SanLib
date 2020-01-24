@@ -18,6 +18,7 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ResourceLocation;
 
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -96,7 +97,8 @@ public class Text
             }
         }
 
-        return this.data.fontRenderer.getStringWidth(this.getDynamicText(gui, this.data.text));
+        return Arrays.stream(this.getDynamicText(gui, this.data.text).split("\n")).map(s -> this.data.fontRenderer.getStringWidth(s))
+                     .reduce(0, Math::max, Math::max);
     }
 
     @Override
