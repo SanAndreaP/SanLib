@@ -46,6 +46,7 @@ public class Rectangle
         } else {
             Gui.drawRect(0, 0, this.data.size[0], this.data.size[1], this.data.color[0]);
         }
+        GlStateManager.enableBlend();
         GlStateManager.popMatrix();
     }
 
