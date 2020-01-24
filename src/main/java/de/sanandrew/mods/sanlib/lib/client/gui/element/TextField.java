@@ -10,6 +10,7 @@ import de.sanandrew.mods.sanlib.lib.util.LangUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.GuiPageButtonList;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
@@ -17,9 +18,11 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import org.apache.commons.lang3.Range;
 
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({ "unused", "WeakerAccess" })
 @IGuiElement.Priority(value = EventPriority.HIGHEST, target = IGuiElement.PriorityTarget.KEY_INPUT)
 public class TextField
         implements IGuiElement
@@ -156,6 +159,15 @@ public class TextField
 
     public void setValidator(Predicate<String> validator) {
         this.data.textfield.setValidator(validator::test);
+    }
+
+    public void setResponder(Consumer<String> responder) {
+        this.data.textfield.setGuiResponder(new GuiPageButtonList.GuiResponder()
+        {
+            @Override public void setEntryValue(int id, boolean value) { }
+            @Override public void setEntryValue(int id, float value) { }
+            @Override public void setEntryValue(int id, String value) { responder.accept(value); }
+        });
     }
 
     @Override
