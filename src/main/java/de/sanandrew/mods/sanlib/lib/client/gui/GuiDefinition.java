@@ -9,6 +9,7 @@ import de.sanandrew.mods.sanlib.lib.client.gui.element.Button;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.ButtonTextLabel;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.ContainerName;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.DynamicText;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.GroupBox;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.Item;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.Label;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.Rectangle;
@@ -63,6 +64,7 @@ public class GuiDefinition
         TYPES.put(ButtonTextLabel.ID, ButtonTextLabel::new);
         TYPES.put(TextField.ID, TextField::new);
         TYPES.put(Item.ID, Item::new);
+        TYPES.put(GroupBox.ID, GroupBox::new);
     }
 
     public int width;
