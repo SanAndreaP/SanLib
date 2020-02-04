@@ -239,6 +239,8 @@ public final class ColorObj
      * @param luminance The new luminance value, from {@code 0.0F} - {@code 1.0F}
      */
     public void calcAndSetRgbFromHsl(float hue, float saturation, float luminance) {
+        hue %= 360.0F;
+
         float c = (1.0F - Math.abs(2.0F * luminance - 1.0F)) * saturation;
         float x = c * (1.0F - Math.abs((hue / 60.0F) % 2.0F - 1.0F));
         float m = luminance - c / 2.0F;
