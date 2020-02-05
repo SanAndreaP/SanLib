@@ -2,6 +2,7 @@ package de.sanandrew.mods.sanlib.lib.function;
 
 import java.util.Objects;
 
+@SuppressWarnings("unused")
 @FunctionalInterface
 public interface Ex2Function<T, R, E1 extends Throwable, E2 extends Throwable>
 {

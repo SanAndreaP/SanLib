@@ -12,6 +12,7 @@ import java.util.Objects;
  * @param <V> the type of the third argument to the operation
  * @see java.util.function.Consumer
  */
+@SuppressWarnings("unused")
 @FunctionalInterface
 public interface TriConsumer<T, U, V>
 {
