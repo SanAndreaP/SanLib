@@ -15,6 +15,7 @@ import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumHandSide;
 import net.minecraft.util.math.MathHelper;
@@ -93,17 +94,17 @@ public class ModelSanPlayer
     }
 
     public static void setSwimmingRotation(Entity e, ModelPlayer model, float limbSwing, float limbSwingAmount) {
-        boolean isSwimming = (e.isInWater() && e.isSprinting());
-        if( isSwimming || e.height == 0.6F ) {
-            float f = (float) (e.motionX * e.motionX + e.motionY * e.motionY + e.motionZ * e.motionZ) / 0.10F;
-            if( f < 1.0F ) {
-                f = 1.0F;
-            }
+        if( !(e instanceof EntityPlayer) ) {
+            return;
+        }
 
+        boolean isSwimming = (e.isInWater() && e.isSprinting());
+        EntityPlayer p = (EntityPlayer) e;
+        if( !(e.isEntityAlive() && p.isPlayerSleeping()) && !p.isElytraFlying() && (isSwimming || e.height == 0.6F) ) {
             model.bipedLeftArm.rotateAngleX = 0.0F;
             model.bipedRightArm.rotateAngleX = 0.0F;
-            model.bipedRightArm.rotateAngleZ = (float) Math.PI * 0.5F + MathHelper.cos((float) (limbSwing * 0.6662F + Math.PI)) * 2.0F * limbSwingAmount * 1.8F / f;
-            model.bipedLeftArm.rotateAngleZ = (float) -Math.PI * 0.5F + MathHelper.cos(limbSwing * 0.6662F) * 2.0F * limbSwingAmount * 1.8F / f;
+            model.bipedRightArm.rotateAngleZ = (float) Math.PI * 0.5F + MathHelper.cos((float) (limbSwing * 0.6662F + Math.PI)) * 2.0F * 0.7F;
+            model.bipedLeftArm.rotateAngleZ = (float) -Math.PI * 0.5F + MathHelper.cos(limbSwing * 0.6662F) * 2.0F * 0.7F;
 
             if( isSwimming ) {
                 model.bipedHead.rotateAngleX *= 0.2F;

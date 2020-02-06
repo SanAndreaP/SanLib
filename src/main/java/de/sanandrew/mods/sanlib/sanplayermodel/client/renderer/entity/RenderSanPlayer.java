@@ -224,18 +224,14 @@ public class RenderSanPlayer
         super.applyRotations(player, ageInTicks, rotationYaw, partialTicks);
 
         boolean isSwimming = player.isInWater() && player.isSprinting();
-        if( (!(player.isEntityAlive() && player.isPlayerSleeping()) && !player.isElytraFlying() && isSwimming)
-            || player.height == 0.6F )
+        if( (!(player.isEntityAlive() && player.isPlayerSleeping()) && !player.isElytraFlying())
+            && (isSwimming || player.height == 0.6F) )
         {
             float pitch = player.height == 0.6F && !isSwimming ? 0.0F : player.rotationPitch;
             float f3 = pitch + (-90.0F - pitch * 2.0F) * 1.0F;
             GlStateManager.rotate(f3, 1.0F, 0.0F, 0.0F);
             GlStateManager.translate(0.0F, -1.0F, 0.2F);
         }
-    }
-
-    private float lerp(float pitch, float pitchOp) {
-        return pitch + (pitchOp - pitch) * 1.0F;
     }
 
     public boolean isOutlineRendering() {
