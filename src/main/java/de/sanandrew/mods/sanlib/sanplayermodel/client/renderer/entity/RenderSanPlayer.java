@@ -13,6 +13,7 @@ import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.layers.Lay
 import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.layers.LayerSanArmor;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.layers.LayerSanStandardClothes;
 import net.minecraft.client.entity.AbstractClientPlayer;
+import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -193,23 +194,15 @@ public class RenderSanPlayer
 
     @Override
     public void renderRightArm(AbstractClientPlayer clientPlayer) {
-        this.bindTexture(this.getEntityTexture(clientPlayer));
-        GlStateManager.color(1.0F, 1.0F, 1.0F);
-        this.setModelVisibilities(clientPlayer);
-        GlStateManager.enableBlend();
-        this.myModel.swingProgress = 0.0F;
-        this.myModel.isSneak = false;
-        this.myModel.setRotationAngles(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F, clientPlayer);
-        this.myModel.bipedRightArm.rotateAngleX = 0.0F;
-        this.myModel.bipedRightArm.rotateAngleZ = 0.1F;
-        this.myModel.bipedRightArm.render(0.0625F);
-        this.layerClothes.renderHand(clientPlayer, 0.0625F, EnumHandSide.RIGHT);
-        this.layerArmor.renderHand(clientPlayer, 0.0625F, EnumHandSide.RIGHT);
-        GlStateManager.disableBlend();
+        renderArm(clientPlayer, EnumHandSide.RIGHT);
     }
 
     @Override
     public void renderLeftArm(AbstractClientPlayer clientPlayer) {
+        renderArm(clientPlayer, EnumHandSide.LEFT);
+    }
+
+    private void renderArm(AbstractClientPlayer clientPlayer, EnumHandSide side) {
         this.bindTexture(this.getEntityTexture(clientPlayer));
         GlStateManager.color(1.0F, 1.0F, 1.0F);
         this.setModelVisibilities(clientPlayer);
@@ -217,12 +210,32 @@ public class RenderSanPlayer
         this.myModel.swingProgress = 0.0F;
         this.myModel.isSneak = false;
         this.myModel.setRotationAngles(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F, clientPlayer);
-        this.myModel.bipedLeftArm.rotateAngleX = 0.0F;
-        this.myModel.bipedLeftArm.rotateAngleZ = -0.1F;
-        this.myModel.bipedLeftArm.render(0.0625F);
-        this.layerClothes.renderHand(clientPlayer, 0.0625F, EnumHandSide.LEFT);
-        this.layerArmor.renderHand(clientPlayer, 0.0625F, EnumHandSide.LEFT);
+        ModelRenderer arm = side == EnumHandSide.RIGHT ? this.myModel.bipedRightArm : this.myModel.bipedLeftArm;
+        arm.rotateAngleX = 0.0F;
+        arm.rotateAngleZ = side == EnumHandSide.RIGHT ? 0.1F : -0.1F;
+        arm.render(0.0625F);
+        this.layerClothes.renderHand(clientPlayer, 0.0625F, side);
+        this.layerArmor.renderHand(clientPlayer, 0.0625F, side);
         GlStateManager.disableBlend();
+    }
+
+    @Override
+    protected void applyRotations(AbstractClientPlayer player, float ageInTicks, float rotationYaw, float partialTicks) {
+        super.applyRotations(player, ageInTicks, rotationYaw, partialTicks);
+
+        boolean isSwimming = player.isInWater() && player.isSprinting();
+        if( (!(player.isEntityAlive() && player.isPlayerSleeping()) && !player.isElytraFlying() && isSwimming)
+            || player.height == 0.6F )
+        {
+            float pitch = player.height == 0.6F && !isSwimming ? 0.0F : player.rotationPitch;
+            float f3 = pitch + (-90.0F - pitch * 2.0F) * 1.0F;
+            GlStateManager.rotate(f3, 1.0F, 0.0F, 0.0F);
+            GlStateManager.translate(0.0F, -1.0F, 0.2F);
+        }
+    }
+
+    private float lerp(float pitch, float pitchOp) {
+        return pitch + (pitchOp - pitch) * 1.0F;
     }
 
     public boolean isOutlineRendering() {

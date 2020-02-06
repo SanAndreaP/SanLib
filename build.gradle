@@ -7,11 +7,18 @@ buildscript {
             name = "forge"
             url = "http://files.minecraftforge.net/maven"
         }
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath "com.wynprice.cursemaven:CurseMaven:2.1.1"
     }
 }
+
+apply plugin: "com.wynprice.cursemaven"
+
 apply plugin: 'net.minecraftforge.gradle.forge'
 
 apply plugin: 'idea'
@@ -33,7 +40,7 @@ compileJava {
 }
 
 minecraft {
-    version = "1.12.2-14.23.5.2768"
+    version = "1.12.2-14.23.5.2811"
     runDir = "run"
     mappings = "snapshot_20180814"
     replace '@FINGERPRINT@', project.findProperty('signSHA1')
@@ -54,6 +61,7 @@ repositories {
 dependencies {
     deobfCompile "cofh:RedstoneFlux:1.12-2.0.2.3:universal"
     deobfCompile "net.darkhax.tesla:Tesla-1.12.2:1.0.63"
+    deobfCompile "curse.maven:ido:2818003"
 }
 
 apply plugin: 'maven'

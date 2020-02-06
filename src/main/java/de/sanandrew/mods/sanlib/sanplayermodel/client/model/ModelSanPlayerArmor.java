@@ -108,6 +108,8 @@ public class ModelSanPlayerArmor
                     break;
             }
         } else {
+            ModelSanPlayer.setSwimmingRotation(entity, this, limbSwing, limbSwingAmount);
+
             switch (this.slot) {
                 case CHEST:
                     this.bipedBody.rotateAngleX *= 0.5F;

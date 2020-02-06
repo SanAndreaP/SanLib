@@ -11,8 +11,13 @@ import de.sanandrew.mods.sanlib.lib.client.ModelJsonLoader;
 import de.sanandrew.mods.sanlib.sanplayermodel.Resources;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.RenderSanPlayer;
 import net.minecraft.client.model.ModelPlayer;
+import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumHandSide;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -40,6 +45,8 @@ public class ModelSanPlayer
 
     public void setRotationAngles(float limbSwing, float limbSwingAmount, float rotFloat, float rotYaw, float rotPitch, float partTicks, Entity entity) {
         super.setRotationAngles(limbSwing, limbSwingAmount, rotFloat, rotYaw, rotPitch, partTicks, entity);
+
+        setSwimmingRotation(entity, this, limbSwing, limbSwingAmount);
 
         this.bipedBody.rotateAngleX *= 0.5F;
 
@@ -82,6 +89,27 @@ public class ModelSanPlayer
         } else {
             model.bipedLeftLeg.rotationPointY = 11.0F;
             model.bipedRightLeg.rotationPointY = 11.0F;
+        }
+    }
+
+    public static void setSwimmingRotation(Entity e, ModelPlayer model, float limbSwing, float limbSwingAmount) {
+        boolean isSwimming = (e.isInWater() && e.isSprinting());
+        if( isSwimming || e.height == 0.6F ) {
+            float f = (float) (e.motionX * e.motionX + e.motionY * e.motionY + e.motionZ * e.motionZ) / 0.10F;
+            if( f < 1.0F ) {
+                f = 1.0F;
+            }
+
+            model.bipedLeftArm.rotateAngleX = 0.0F;
+            model.bipedRightArm.rotateAngleX = 0.0F;
+            model.bipedRightArm.rotateAngleZ = (float) Math.PI * 0.5F + MathHelper.cos((float) (limbSwing * 0.6662F + Math.PI)) * 2.0F * limbSwingAmount * 1.8F / f;
+            model.bipedLeftArm.rotateAngleZ = (float) -Math.PI * 0.5F + MathHelper.cos(limbSwing * 0.6662F) * 2.0F * limbSwingAmount * 1.8F / f;
+
+            if( isSwimming ) {
+                model.bipedHead.rotateAngleX *= 0.2F;
+            }
+
+            model.bipedHead.rotateAngleX -= 0.8F;
         }
     }
 
