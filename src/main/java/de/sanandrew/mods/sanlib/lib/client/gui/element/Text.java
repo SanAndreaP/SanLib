@@ -8,6 +8,7 @@ package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
@@ -19,7 +20,8 @@ import net.minecraft.util.ResourceLocation;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
-import java.util.Locale;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -47,35 +49,70 @@ public class Text
         implements IGuiElement
 {
     public static final ResourceLocation ID = new ResourceLocation("text");
+    
+    public String               text;
+    public int                  color;
+    public Map<String, Integer> colors;
+    public boolean              shadow;
+    public int                  wrapWidth;
+    public FontRenderer         fontRenderer;
+    public int                  lineHeight;
 
-    public BakedData data;
-    protected int currWidth;
-    protected int currHeight;
-    protected boolean isVisible = true;
+    protected String                 defaultColor;
+    protected int                    currWidth;
+    protected int                    currHeight;
+    protected boolean                isVisible = true;
+    protected GuiElementInst.Justify justify;
 
     @Override
-    public void bakeData(IGui gui, JsonObject data) {
-        if( this.data == null ) {
-            this.data = new BakedData();
-            this.data.text = getBakedText(gui, data);
-            this.data.color = MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("color"), "0xFF000000"));
-            this.data.shadow = JsonUtils.getBoolVal(data.get("shadow"), false);
-            this.data.wrapWidth = JsonUtils.getIntVal(data.get("wrapWidth"), 0);
-            this.data.justify = Justify.fromString(JsonUtils.getStringVal(data.get("justify"), "left"));
-            this.data.lineHeight = JsonUtils.getIntVal(data.get("lineHeight"), 9);
+    public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) {
+        this.justify = inst.alignHorizontal;
 
-            JsonElement cstFont = data.get("font");
-            if( cstFont == null ) {
-                this.data.fontRenderer = new Font("standard").get(gui.get());
+        this.colors = new HashMap<>();
+        this.defaultColor = null;
+        if( data.has("color") ) {
+            JsonElement clrData = data.get("color");
+            if( clrData.isJsonObject() ) {
+                for( Map.Entry<String, JsonElement> o : clrData.getAsJsonObject().entrySet() ) {
+                    String key = o.getKey();
+                    if( key.equalsIgnoreCase("default") || this.defaultColor == null ) {
+                        this.defaultColor = key;
+                    }
+
+                    this.colors.put(key, MiscUtils.hexToInt(o.getValue().getAsString()));
+                }
+
+                this.color = this.colors.get(this.defaultColor);
+            } else if( clrData.isJsonPrimitive() ) {
+                int clr = MiscUtils.hexToInt(clrData.getAsString());
+                this.defaultColor = "default";
+                this.colors.put(this.defaultColor, clr);
+                this.color = clr;
             } else {
-                this.data.fontRenderer = JsonUtils.GSON.fromJson(cstFont, Font.class).get(gui.get());
+                this.defaultColor = "default";
+                this.colors.put(this.defaultColor, 0xFF000000);
+                this.color = 0xFF000000;
             }
-            this.currHeight = this.data.wrapWidth <= 0
-                              ? this.data.text.split("\n").length * this.data.lineHeight
-                              : this.data.fontRenderer.listFormattedStringToWidth(this.data.text, this.data.wrapWidth).size() * this.data.lineHeight;
-            if( this.data.shadow ) {
-                this.currHeight += 1;
-            }
+        }
+
+        this.text = getBakedText(gui, data);
+        this.shadow = JsonUtils.getBoolVal(data.get("shadow"), false);
+        this.wrapWidth = JsonUtils.getIntVal(data.get("wrapWidth"), 0);
+        this.lineHeight = JsonUtils.getIntVal(data.get("lineHeight"), 9);
+
+        JsonElement cstFont = data.get("font");
+        if( cstFont == null ) {
+            this.fontRenderer = new Font("standard").get(gui.get());
+        } else {
+            this.fontRenderer = JsonUtils.GSON.fromJson(cstFont, Font.class).get(gui.get());
+        }
+
+        this.currWidth = this.getTextWidth(gui);
+        this.currHeight = this.wrapWidth <= 0
+                          ? this.text.split("\n").length * this.lineHeight
+                          : this.fontRenderer.listFormattedStringToWidth(this.text, this.wrapWidth).size() * this.lineHeight;
+        if( this.shadow ) {
+            this.currHeight += 1;
         }
     }
 
@@ -88,73 +125,61 @@ public class Text
     }
 
     public int getTextWidth(IGui gui) {
-        if( this.data.wrapWidth > 0 ) {
-            if( this.data.justify == Justify.JUSTIFY ) {
-                return this.data.wrapWidth;
+        if( this.wrapWidth > 0 ) {
+            if( this.justify == GuiElementInst.Justify.JUSTIFY ) {
+                return this.wrapWidth;
             } else {
-                return this.data.fontRenderer.listFormattedStringToWidth(this.getDynamicText(gui, this.data.text), this.data.wrapWidth)
-                                             .stream().map(s -> this.data.fontRenderer.getStringWidth(s)).reduce(0, Math::max, Math::max);
+                return this.fontRenderer.listFormattedStringToWidth(this.getDynamicText(gui, this.text), this.wrapWidth)
+                                             .stream().map(s -> this.fontRenderer.getStringWidth(s)).reduce(0, Math::max, Math::max);
             }
         }
 
-        return Arrays.stream(this.getDynamicText(gui, this.data.text).split("\n")).map(s -> this.data.fontRenderer.getStringWidth(s))
+        return Arrays.stream(this.getDynamicText(gui, this.text).split("\n")).map(s -> this.fontRenderer.getStringWidth(s))
                      .reduce(0, Math::max, Math::max);
     }
 
     @Override
-    public void update(IGui gui, JsonObject data) {
-        this.currWidth = this.getTextWidth(gui);
-    }
-
-    @Override
     public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
-        String s = this.getDynamicText(gui, this.data.text);
+        String s = this.getDynamicText(gui, this.text);
 
         this.currWidth = this.getTextWidth(gui);
         String[] ln;
-        if( this.data.wrapWidth > 0 ) {
-            ln = this.data.fontRenderer.listFormattedStringToWidth(s, this.data.wrapWidth).toArray(new String[0]);
+        if( this.wrapWidth > 0 ) {
+            ln = this.fontRenderer.listFormattedStringToWidth(s, this.wrapWidth).toArray(new String[0]);
         } else {
             ln = s.split("\n");
         }
-        this.currHeight = ln.length * this.data.lineHeight;
+        this.currHeight = ln.length * this.lineHeight;
 
         for( String sln : ln ) {
             this.renderLine(sln, x, y);
-            y += this.data.lineHeight;
+            y += this.lineHeight;
         }
     }
 
     private void renderLine(String s, int x, int y) {
-        switch( this.data.justify ) {
-            case JUSTIFY:
-                if( this.data.wrapWidth > 0 ) {
-                    String[] words = s.split("\\s");
-                    float spaceDist = this.data.wrapWidth;
-                    int[] wordWidths = new int[words.length];
-                    for( int i = 0; i < words.length; i++ ) {
-                        wordWidths[i] = this.data.fontRenderer.getStringWidth(words[i]);
-                        spaceDist -= wordWidths[i];
-                    }
-                    spaceDist /= words.length - 1;
-                    for( int i = 0; i < words.length; i++ ) {
-                        this.data.fontRenderer.drawString(words[i], x, y, this.data.color, this.data.shadow);
-                        x += wordWidths[i] + spaceDist;
-                    }
-                    break;
+        if( this.justify == GuiElementInst.Justify.JUSTIFY ) {
+            if( this.wrapWidth > 0 ) {
+                String[] words = s.split("\\s");
+                float spaceDist = this.wrapWidth;
+                int[] wordWidths = new int[words.length];
+
+                for( int i = 0; i < words.length; i++ ) {
+                    wordWidths[i] = this.fontRenderer.getStringWidth(words[i]);
+                    spaceDist -= wordWidths[i];
                 }
-                // else fall-through
-            case LEFT:
-                this.data.fontRenderer.drawString(s, x, y, this.data.color, this.data.shadow);
-                break;
-            case RIGHT:
-                this.data.fontRenderer.drawString(s, x - this.data.fontRenderer.getStringWidth(s), y, this.data.color, this.data.shadow);
-                break;
-            case CENTER:
-                this.data.fontRenderer.drawString(s, x - (this.data.fontRenderer.getStringWidth(s) / 2.0F), y, this.data.color, this.data.shadow);
-                break;
+
+                spaceDist /= words.length - 1;
+                for( int i = 0; i < words.length; i++ ) {
+                    this.fontRenderer.drawString(words[i], x, y, this.color, this.shadow);
+                    x += wordWidths[i] + spaceDist;
+                }
+
+                return;
+            }
         }
 
+        this.fontRenderer.drawString(s, x, y, this.color, this.shadow);
     }
 
     @Override
@@ -167,25 +192,12 @@ public class Text
         return this.currHeight;
     }
 
-    @Override
-    public boolean isVisible() {
-        return this.isVisible;
-    }
+    public void setColor(String colorId) {
+        if( colorId == null || !this.colors.containsKey(colorId) ) {
+            colorId = this.defaultColor;
+        }
 
-    @Override
-    public void setVisible(boolean visible) {
-        this.isVisible = visible;
-    }
-
-    public static final class BakedData
-    {
-        public String text;
-        public int color;
-        public boolean shadow;
-        public int wrapWidth;
-        public FontRenderer fontRenderer;
-        public Justify justify;
-        public int lineHeight;
+        this.color = this.colors.get(colorId);
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -233,15 +245,4 @@ public class Text
         }
     }
 
-    enum Justify
-    {
-        LEFT,
-        CENTER,
-        RIGHT,
-        JUSTIFY;
-
-        static Justify fromString(String s) {
-            return Justify.valueOf(s.toUpperCase(Locale.ROOT));
-        }
-    }
 }

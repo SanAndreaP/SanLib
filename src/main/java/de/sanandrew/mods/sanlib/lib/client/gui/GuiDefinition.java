@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.Button;
-import de.sanandrew.mods.sanlib.lib.client.gui.element.ButtonTextLabel;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.ContainerName;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.DynamicText;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.GroupBox;
@@ -61,7 +60,6 @@ public class GuiDefinition
         TYPES.put(RedstoneFluxText.ID, RedstoneFluxText::new);
         TYPES.put(DynamicText.ID, DynamicText::new);
         TYPES.put(Button.ID, Button::new);
-        TYPES.put(ButtonTextLabel.ID, ButtonTextLabel::new);
         TYPES.put(TextField.ID, TextField::new);
         TYPES.put(Item.ID, Item::new);
         TYPES.put(GroupBox.ID, GroupBox::new);
@@ -157,20 +155,31 @@ public class GuiDefinition
     public void initGui(IGui gui) {
         Consumer<GuiElementInst> f = e -> {
             e.firstRenderUpdate = false;
-            e.get().bakeData(gui, e.data);
+            e.get().bakeData(gui, e.data, e);
         };
         Arrays.stream(this.backgroundElements).forEach(f);
         Arrays.stream(this.foregroundElements).forEach(f);
     }
 
     public static void renderElement(IGui gui, int mouseX, int mouseY, float partialTicks, GuiElementInst e) {
+        renderElement(gui, e.pos[0], e.pos[1], mouseX, mouseY, partialTicks, e);
+    }
+
+    public static void renderElement(IGui gui, int x, int y, int mouseX, int mouseY, float partialTicks, GuiElementInst e) {
         IGuiElement ie = e.get();
-        if( !e.firstRenderUpdate ) {
-            e.firstRenderUpdate = true;
-            ie.update(gui, e.data);
-        }
-        if( ie.isVisible() ) {
-            ie.render(gui, partialTicks, e.pos[0], e.pos[1], mouseX, mouseY, e.data);
+        if( e.isVisible() ) {
+            if( !e.firstRenderUpdate ) {
+                e.firstRenderUpdate = true;
+                ie.update(gui, e.data);
+            }
+
+            x = e.alignHorizontal == GuiElementInst.Justify.RIGHT ? x - ie.getWidth()
+                                                                  : e.alignHorizontal == GuiElementInst.Justify.CENTER ? x - ie.getWidth() / 2
+                                                                                                                       : x;
+            y = e.alignVertical == GuiElementInst.Justify.BOTTOM ? y - ie.getHeight()
+                                                                 : e.alignVertical == GuiElementInst.Justify.CENTER ? y - ie.getHeight() / 2
+                                                                                                                    : y;
+            ie.render(gui, partialTicks, x, y, mouseX, mouseY, e.data);
         }
     }
 
@@ -188,21 +197,25 @@ public class GuiDefinition
 
     public void handleMouseInput(IGui gui) throws IOException {
         for( GuiElementInst e : this.prioritizedBgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
-            e.get().handleMouseInput(gui);
+            if( e.isVisible() ) {
+                e.get().handleMouseInput(gui);
+            }
         }
         for( GuiElementInst e : this.prioritizedFgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
-            e.get().handleMouseInput(gui);
+            if( e.isVisible() ) {
+                e.get().handleMouseInput(gui);
+            }
         }
     }
 
     public boolean mouseClicked(IGui gui, int mouseX, int mouseY, int mouseButton) throws IOException {
         for( GuiElementInst e : this.prioritizedBgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
-            if( e.get().mouseClicked(gui, mouseX, mouseY, mouseButton) ) {
+            if( e.isVisible() && e.get().mouseClicked(gui, mouseX, mouseY, mouseButton) ) {
                 return true;
             }
         }
         for( GuiElementInst e : this.prioritizedFgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
-            if( e.get().mouseClicked(gui, mouseX, mouseY, mouseButton) ) {
+            if( e.isVisible() && e.get().mouseClicked(gui, mouseX, mouseY, mouseButton) ) {
                 return true;
             }
         }
@@ -212,30 +225,38 @@ public class GuiDefinition
 
     public void mouseReleased(IGui gui, int mouseX, int mouseY, int state) {
         for( GuiElementInst e : this.prioritizedBgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
-            e.get().mouseReleased(gui, mouseX, mouseY, state);
+            if( e.isVisible() ) {
+                e.get().mouseReleased(gui, mouseX, mouseY, state);
+            }
         }
         for( GuiElementInst e : this.prioritizedFgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
-            e.get().mouseReleased(gui, mouseX, mouseY, state);
+            if( e.isVisible() ) {
+                e.get().mouseReleased(gui, mouseX, mouseY, state);
+            }
         }
     }
 
     public void mouseClickMove(IGui gui, int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
         for( GuiElementInst e : this.prioritizedBgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
-            e.get().mouseClickMove(gui, mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+            if( e.isVisible() ) {
+                e.get().mouseClickMove(gui, mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+            }
         }
         for( GuiElementInst e : this.prioritizedFgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
-            e.get().mouseClickMove(gui, mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+            if( e.isVisible() ) {
+                e.get().mouseClickMove(gui, mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+            }
         }
     }
 
     public boolean keyTyped(IGui gui, char typedChar, int keyCode) throws IOException {
         for( GuiElementInst e : this.prioritizedBgElements.get(IGuiElement.PriorityTarget.KEY_INPUT) ) {
-            if( e.get().keyTyped(gui, typedChar, keyCode) ) {
+            if( e.isVisible() && e.get().keyTyped(gui, typedChar, keyCode) ) {
                 return true;
             }
         }
         for( GuiElementInst e : this.prioritizedFgElements.get(IGuiElement.PriorityTarget.KEY_INPUT) ) {
-            if( e.get().keyTyped(gui, typedChar, keyCode) ) {
+            if( e.isVisible() && e.get().keyTyped(gui, typedChar, keyCode) ) {
                 return true;
             }
         }
@@ -245,10 +266,14 @@ public class GuiDefinition
 
     public void guiClosed(IGui gui) {
         for( GuiElementInst e : this.backgroundElements ) {
-            e.get().guiClosed(gui);
+            if( e.isVisible() ) {
+                e.get().guiClosed(gui);
+            }
         }
         for( GuiElementInst e : this.foregroundElements ) {
-            e.get().guiClosed(gui);
+            if( e.isVisible() ) {
+                e.get().guiClosed(gui);
+            }
         }
     }
 
@@ -283,8 +308,10 @@ public class GuiDefinition
 
     public void update(IGui gui) {
         Consumer<GuiElementInst> f = e -> {
-            e.firstRenderUpdate = true;
-            e.get().update(gui, e.data);
+            if( e.isVisible() ) {
+                e.firstRenderUpdate = true;
+                e.get().update(gui, e.data);
+            }
         };
         Arrays.stream(this.backgroundElements).forEach(f);
         Arrays.stream(this.foregroundElements).forEach(f);

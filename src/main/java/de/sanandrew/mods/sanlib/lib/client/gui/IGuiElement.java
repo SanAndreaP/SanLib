@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
 @SuppressWarnings({ "RedundantThrows", "unused" })
 public interface IGuiElement
 {
-    void bakeData(IGui gui, JsonObject data);
+    void bakeData(IGui gui, JsonObject data, GuiElementInst inst);
 
     default void update(IGui gui, JsonObject data) {}
 
@@ -34,10 +34,6 @@ public interface IGuiElement
     int getHeight();
 
     default boolean keyTyped(IGui gui, char typedChar, int keyCode) throws IOException { return false; }
-
-    boolean isVisible();
-
-    void setVisible(boolean visible);
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
