@@ -33,6 +33,8 @@ public interface IGuiElement
 
     int getHeight();
 
+    default boolean isVisible() { return true; }
+
     default boolean keyTyped(IGui gui, char typedChar, int keyCode) throws IOException { return false; }
 
     @Retention(RetentionPolicy.RUNTIME)

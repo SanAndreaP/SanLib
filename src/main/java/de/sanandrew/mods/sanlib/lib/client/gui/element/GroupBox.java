@@ -10,12 +10,12 @@ import org.apache.commons.lang3.Range;
 import java.util.Map;
 
 public class GroupBox
-        extends ElementParent
+        extends ElementParent<String>
 {
     public static final ResourceLocation ID = new ResourceLocation("group_box");
 
     private static final String LABEL = "label";
-    private static final String[] RECTS = { "TOP_LEFT", "TOP_RIGHT", "LEFT", "RIGHT", "BOTTOM" };
+    private static final String[] RECTS = { "top_left", "top_right", "left", "right", "bottom" };
 
     protected int[] size;
 

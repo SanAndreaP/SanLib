@@ -10,7 +10,7 @@ import de.sanandrew.mods.sanlib.lib.client.gui.element.ContainerName;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.DynamicText;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.GroupBox;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.Item;
-import de.sanandrew.mods.sanlib.lib.client.gui.element.Label;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.Tooltip;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.Rectangle;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.RedstoneFluxBar;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.RedstoneFluxText;
@@ -55,7 +55,7 @@ public class GuiDefinition
         TYPES.put(Rectangle.ID, Rectangle::new);
         TYPES.put(ScrollArea.ID, ScrollArea::new);
         TYPES.put(ContainerName.ID, ContainerName::new);
-        TYPES.put(Label.ID, Label::new);
+        TYPES.put(Tooltip.ID, Tooltip::new);
         TYPES.put(RedstoneFluxBar.ID, RedstoneFluxBar::new);
         TYPES.put(RedstoneFluxText.ID, RedstoneFluxText::new);
         TYPES.put(DynamicText.ID, DynamicText::new);
@@ -173,12 +173,15 @@ public class GuiDefinition
                 ie.update(gui, e.data);
             }
 
-            x = e.alignHorizontal == GuiElementInst.Justify.RIGHT ? x - ie.getWidth()
-                                                                  : e.alignHorizontal == GuiElementInst.Justify.CENTER ? x - ie.getWidth() / 2
-                                                                                                                       : x;
-            y = e.alignVertical == GuiElementInst.Justify.BOTTOM ? y - ie.getHeight()
-                                                                 : e.alignVertical == GuiElementInst.Justify.CENTER ? y - ie.getHeight() / 2
-                                                                                                                    : y;
+            switch( e.getAlignmentH() ) {
+                case RIGHT: x -= ie.getWidth(); break;
+                case CENTER: x -= ie.getWidth() / 2; break;
+            }
+            switch( e.getAlignmentV() ) {
+                case BOTTOM: y -= ie.getHeight(); break;
+                case CENTER: y -= ie.getHeight() / 2; break;
+            }
+
             ie.render(gui, partialTicks, x, y, mouseX, mouseY, e.data);
         }
     }

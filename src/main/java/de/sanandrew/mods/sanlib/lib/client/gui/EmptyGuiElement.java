@@ -14,7 +14,7 @@ public class EmptyGuiElement
         implements IGuiElement
 {
     @Override
-    public void bakeData(IGui gui, JsonObject data) { }
+    public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) { }
 
     @Override
     public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) { }
@@ -33,7 +33,4 @@ public class EmptyGuiElement
     public boolean isVisible() {
         return false;
     }
-
-    @Override
-    public void setVisible(boolean visible) { }
 }

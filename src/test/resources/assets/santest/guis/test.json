@@ -10,6 +10,15 @@
         "size": [195, 136],
         "uv": [0, 0]
       }
+    },
+    {
+      "type": "button",
+      "pos": [80, 0],
+      "data": {
+        "size": [50, 60],
+        "labelText": "testing\ntesting2",
+        "buttonFunction": 0
+      }
     }
   ],
   "foregroundElements": [
@@ -27,21 +36,11 @@
       "data": {
         "areaSize": [160, 110],
         "scrollbarHeight": 110,
+        "scrollbarPos": [175, 18],
         "scrollButton": {
-          "type": "texture",
-          "pos": [175, 18],
-          "data": {
             "size": [12, 15],
-            "uv": [232, 0]
-          }
-        },
-        "scrollButtonDeactive": {
-          "type": "texture",
-          "pos": [175, 18],
-          "data": {
-            "size": [12, 15],
-            "uv": [244, 0]
-          }
+            "uv": [232, 0],
+            "uvDisabled": [244, 0]
         },
         "elements": [
           {
@@ -55,27 +54,27 @@
           {
             "type": "text",
             "pos": [80, 300],
+            "alignment": ["center"],
             "data": {
               "color": "0xFFFF3300",
-              "justify": "center",
               "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.\nVivamus viverra consectetur orci.\nFusce lectus odio, cursus sit amet ex ac, congue faucibus turpis.\nAliquam lobortis malesuada hendrerit.\nVivamus dapibus ullamcorper finibus.\nDonec tempus ultricies iaculis.\nNam eu orci sed odio fringilla iaculis a in lacus.\nCras maximus, nunc vitae pellentesque volutpat, ante eros luctus urna, ac gravida elit quam molestie augue.\nPhasellus eu rutrum neque, sed viverra ipsum.\nCurabitur mattis maximus neque rhoncus auctor.\nEtiam sed eros libero.\nMorbi non vestibulum lorem, luctus mollis tortor.\nDonec eros purus, fringilla ac scelerisque sit amet, lacinia sit amet arcu.\nSuspendisse id mauris eu sapien consectetur egestas.\nMorbi scelerisque erat nec gravida iaculis.\nSed ullamcorper eget sem vitae porta.\nInteger accumsan enim enim, nec scelerisque neque iaculis vel."
             }
           },
           {
             "type": "text",
             "pos": [160, 600],
+            "alignment": ["right"],
             "data": {
               "color": "0xFFFF6600",
-              "justify": "right",
               "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.\nVivamus viverra consectetur orci.\nFusce lectus odio, cursus sit amet ex ac, congue faucibus turpis.\nAliquam lobortis malesuada hendrerit.\nVivamus dapibus ullamcorper finibus.\nDonec tempus ultricies iaculis.\nNam eu orci sed odio fringilla iaculis a in lacus.\nCras maximus, nunc vitae pellentesque volutpat, ante eros luctus urna, ac gravida elit quam molestie augue.\nPhasellus eu rutrum neque, sed viverra ipsum.\nCurabitur mattis maximus neque rhoncus auctor.\nEtiam sed eros libero.\nMorbi non vestibulum lorem, luctus mollis tortor.\nDonec eros purus, fringilla ac scelerisque sit amet, lacinia sit amet arcu.\nSuspendisse id mauris eu sapien consectetur egestas.\nMorbi scelerisque erat nec gravida iaculis.\nSed ullamcorper eget sem vitae porta.\nInteger accumsan enim enim, nec scelerisque neque iaculis vel."
             }
           },
           {
             "type": "text",
             "pos": [0, 900],
+            "alignment": ["justify"],
             "data": {
               "color": "0xFFFF9900",
-              "justify": "justify",
               "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.\nVivamus viverra consectetur orci.\nFusce lectus odio, cursus sit amet ex ac, congue faucibus turpis.\nAliquam lobortis malesuada hendrerit.\nVivamus dapibus ullamcorper finibus.\nDonec tempus ultricies iaculis.\nNam eu orci sed odio fringilla iaculis a in lacus.\nCras maximus, nunc vitae pellentesque volutpat, ante eros luctus urna, ac gravida elit quam molestie augue.\nPhasellus eu rutrum neque, sed viverra ipsum.\nCurabitur mattis maximus neque rhoncus auctor.\nEtiam sed eros libero.\nMorbi non vestibulum lorem, luctus mollis tortor.\nDonec eros purus, fringilla ac scelerisque sit amet, lacinia sit amet arcu.\nSuspendisse id mauris eu sapien consectetur egestas.\nMorbi scelerisque erat nec gravida iaculis.\nSed ullamcorper eget sem vitae porta.\nInteger accumsan enim enim, nec scelerisque neque iaculis vel."
             }
           },
@@ -91,9 +90,9 @@
           {
             "type": "text",
             "pos": [80, 1500],
+            "alignment": ["center"],
             "data": {
               "color": "0xFF0033FF",
-              "justify": "center",
               "wrapWidth": 160,
               "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus viverra consectetur orci. Fusce lectus odio, cursus sit amet ex ac, congue faucibus turpis. Aliquam lobortis malesuada hendrerit. Vivamus dapibus ullamcorper finibus. Donec tempus ultricies iaculis. Nam eu orci sed odio fringilla iaculis a in lacus. Cras maximus, nunc vitae pellentesque volutpat, ante eros luctus urna, ac gravida elit quam molestie augue. Phasellus eu rutrum neque, sed viverra ipsum. Curabitur mattis maximus neque rhoncus auctor. Etiam sed eros libero. Morbi non vestibulum lorem, luctus mollis tortor. Donec eros purus, fringilla ac scelerisque sit amet, lacinia sit amet arcu. Suspendisse id mauris eu sapien consectetur egestas. Morbi scelerisque erat nec gravida iaculis. Sed ullamcorper eget sem vitae porta. Integer accumsan enim enim, nec scelerisque neque iaculis vel."
             }
@@ -101,9 +100,9 @@
           {
             "type": "text",
             "pos": [160, 1800],
+            "alignment": ["right"],
             "data": {
               "color": "0xFF0066FF",
-              "justify": "right",
               "wrapWidth": 160,
               "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus viverra consectetur orci. Fusce lectus odio, cursus sit amet ex ac, congue faucibus turpis. Aliquam lobortis malesuada hendrerit. Vivamus dapibus ullamcorper finibus. Donec tempus ultricies iaculis. Nam eu orci sed odio fringilla iaculis a in lacus. Cras maximus, nunc vitae pellentesque volutpat, ante eros luctus urna, ac gravida elit quam molestie augue. Phasellus eu rutrum neque, sed viverra ipsum. Curabitur mattis maximus neque rhoncus auctor. Etiam sed eros libero. Morbi non vestibulum lorem, luctus mollis tortor. Donec eros purus, fringilla ac scelerisque sit amet, lacinia sit amet arcu. Suspendisse id mauris eu sapien consectetur egestas. Morbi scelerisque erat nec gravida iaculis. Sed ullamcorper eget sem vitae porta. Integer accumsan enim enim, nec scelerisque neque iaculis vel."
             }
@@ -111,9 +110,9 @@
           {
             "type": "text",
             "pos": [0, 2100],
+            "alignment": ["justify"],
             "data": {
               "color": "0xFF0099FF",
-              "justify": "justify",
               "wrapWidth": 160,
               "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus viverra consectetur orci. Fusce lectus odio, cursus sit amet ex ac, congue faucibus turpis. Aliquam lobortis malesuada hendrerit. Vivamus dapibus ullamcorper finibus. Donec tempus ultricies iaculis. Nam eu orci sed odio fringilla iaculis a in lacus. Cras maximus, nunc vitae pellentesque volutpat, ante eros luctus urna, ac gravida elit quam molestie augue. Phasellus eu rutrum neque, sed viverra ipsum. Curabitur mattis maximus neque rhoncus auctor. Etiam sed eros libero. Morbi non vestibulum lorem, luctus mollis tortor. Donec eros purus, fringilla ac scelerisque sit amet, lacinia sit amet arcu. Suspendisse id mauris eu sapien consectetur egestas. Morbi scelerisque erat nec gravida iaculis. Sed ullamcorper eget sem vitae porta. Integer accumsan enim enim, nec scelerisque neque iaculis vel."
             }

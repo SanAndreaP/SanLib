@@ -66,7 +66,7 @@ public class Text
 
     @Override
     public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) {
-        this.justify = inst.alignHorizontal;
+        this.justify = inst.getAlignmentH();
 
         this.colors = new HashMap<>();
         this.defaultColor = null;
@@ -158,25 +158,33 @@ public class Text
     }
 
     private void renderLine(String s, int x, int y) {
-        if( this.justify == GuiElementInst.Justify.JUSTIFY ) {
-            if( this.wrapWidth > 0 ) {
-                String[] words = s.split("\\s");
-                float spaceDist = this.wrapWidth;
-                int[] wordWidths = new int[words.length];
+        switch( this.justify ) {
+            case JUSTIFY:
+                if( this.wrapWidth > 0 ) {
+                    String[] words = s.split("\\s");
+                    float spaceDist = this.wrapWidth;
+                    int[] wordWidths = new int[words.length];
 
-                for( int i = 0; i < words.length; i++ ) {
-                    wordWidths[i] = this.fontRenderer.getStringWidth(words[i]);
-                    spaceDist -= wordWidths[i];
+                    for( int i = 0; i < words.length; i++ ) {
+                        wordWidths[i] = this.fontRenderer.getStringWidth(words[i]);
+                        spaceDist -= wordWidths[i];
+                    }
+
+                    spaceDist /= words.length - 1;
+                    for( int i = 0; i < words.length; i++ ) {
+                        this.fontRenderer.drawString(words[i], x, y, this.color, this.shadow);
+                        x += wordWidths[i] + spaceDist;
+                    }
+
+                    return;
                 }
-
-                spaceDist /= words.length - 1;
-                for( int i = 0; i < words.length; i++ ) {
-                    this.fontRenderer.drawString(words[i], x, y, this.color, this.shadow);
-                    x += wordWidths[i] + spaceDist;
-                }
-
-                return;
-            }
+            case LEFT:
+                break;
+            case CENTER:
+                x += (this.getWidth() - this.fontRenderer.getStringWidth(s)) / 2;
+                break;
+            case RIGHT:
+                x += this.getWidth() - this.fontRenderer.getStringWidth(s);
         }
 
         this.fontRenderer.drawString(s, x, y, this.color, this.shadow);

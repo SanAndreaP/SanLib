@@ -22,11 +22,10 @@ public final class GuiElementInst
     public int[] pos = new int[2];
     public JsonObject data;
     public IGuiElement element;
-    public Justify     alignHorizontal = Justify.LEFT;
-    public Justify     alignVertical   = Justify.TOP;
+    public String[] alignment;
     public boolean     firstRenderUpdate;
 
-    private boolean visible;
+    private boolean visible = true;
 
     public GuiElementInst() { }
 
@@ -69,7 +68,7 @@ public final class GuiElementInst
     }
 
     public boolean isVisible() {
-        return this.visible;
+        return this.visible && this.element != null && this.element.isVisible();
     }
 
     public void setVisible(boolean visible) {
@@ -79,6 +78,22 @@ public final class GuiElementInst
     public GuiElementInst initialize(IGui gui) {
         gui.getDefinition().initElement(this);
         return this;
+    }
+
+    public Justify getAlignmentH() {
+        if( this.alignment != null && this.alignment.length > 0 ) {
+            return Justify.fromString(this.alignment[0]);
+        }
+
+        return Justify.LEFT;
+    }
+
+    public Justify getAlignmentV() {
+        if( this.alignment != null && this.alignment.length > 1 ) {
+            return Justify.fromString(this.alignment[1]);
+        }
+
+        return Justify.TOP;
     }
 
     public enum Justify

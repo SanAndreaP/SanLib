@@ -1,6 +1,7 @@
 package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonObject;
+import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import net.minecraft.util.ResourceLocation;
 
@@ -10,11 +11,11 @@ public class RedstoneFluxText
     public static final ResourceLocation ID = new ResourceLocation("rflux_text");
 
     @Override
-    public void bakeData(IGui gui, JsonObject data) {
+    public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) {
         if( !data.has("color") ) data.addProperty("color", "0xFFFFFFFF");
         if( !data.has("shadow") ) data.addProperty("shadow", true);
 
-        super.bakeData(gui, data);
+        super.bakeData(gui, data, inst);
     }
 
     @Override

@@ -24,7 +24,7 @@ import java.util.Map;
 
 @SuppressWarnings({ "WeakerAccess", "Duplicates", "unused" })
 public class Button
-        extends ElementParent
+        extends ElementParent<String>
 {
     public static final String LABEL = "label";
 
@@ -75,8 +75,7 @@ public class Button
         }
 
         if( lblInst != null ) {
-            lblInst.alignHorizontal = GuiElementInst.Justify.fromString(JsonUtils.getStringVal(data.get("alignLabelHorizontal"), "center"));
-            lblInst.alignVertical = GuiElementInst.Justify.fromString(JsonUtils.getStringVal(data.get("alignLabelVertical"), "center"));
+            lblInst.alignment = JsonUtils.getStringArray(data.get("alignLabel"), new String[] { "center", "center" });
 
             listToBuild.put(LABEL, lblInst);
         }

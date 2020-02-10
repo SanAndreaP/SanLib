@@ -458,4 +458,8 @@ public final class JsonUtils
         for( Character i : arr ) jarr.add(i);
         jobj.add(name, jarr);
     }
+
+    public static JsonObject deepCopy(JsonObject obj) {
+        return JsonUtils.GSON.fromJson(JsonUtils.GSON.toJson(obj), JsonObject.class);
+    }
 }

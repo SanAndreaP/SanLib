@@ -4,12 +4,12 @@ import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.client.util.GuiUtils;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
+import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.input.Mouse;
@@ -17,21 +17,27 @@ import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
 
-@SuppressWarnings({"WeakerAccess", "unused"})
+@SuppressWarnings({"UnstableApiUsage", "WeakerAccess", "unused"})
 public class ScrollArea
-        implements IGuiElement
+        extends ElementParent<Object>
 {
     public static final ResourceLocation ID = new ResourceLocation("scroll_area");
 
-    public BakedData data;
+    public int[] areaSize;
+    public GuiElementInst[] scrollBtn = new GuiElementInst[2];
+    public int scrollHeight;
+    public float maxScrollDelta;
+    public boolean rasterized;
+
+    public final RangeMap<Integer, GuiElementInst> elements = TreeRangeMap.create();
+    public final Map<Range<Integer>, GuiElementInst> elementsView = this.elements.asMapOfRanges();
+
     public float scroll;
-    protected BakedData.ScrollData sData = new BakedData.ScrollData();
+    protected ScrollData sData = new ScrollData();
     protected int countAll;
     protected int countSub;
-    protected Map<Range<Integer>, GuiElementInst> renderedElements = Collections.emptyMap();
 
     public boolean prevLmbDown;
 
@@ -40,43 +46,57 @@ public class ScrollArea
     protected boolean isVisible = true;
 
     @Override
-    public void bakeData(IGui gui, JsonObject data) {
-        if( this.data == null ) {
-            this.data = new BakedData();
-            this.data.areaSize = JsonUtils.getIntArray(data.get("areaSize"), org.apache.commons.lang3.Range.is(2));
-            this.data.scrollHeight = JsonUtils.getIntVal(data.get("scrollbarHeight"), this.data.areaSize[1]);
-            this.data.rasterized = JsonUtils.getBoolVal(data.get("rasterized"), false);
-            this.data.maxScrollDelta = JsonUtils.getFloatVal(data.get("maxScrollDelta"), 1.0F);
+    public void buildChildren(IGui gui, JsonObject data, Map<Object, GuiElementInst> listToBuild) {
+        this.sData = this.getScrollData(this.scroll, this.rasterized);
 
-            this.data.scrollBtnActive = JsonUtils.GSON.fromJson(data.get("scrollButton"), GuiElementInst.class);
-            this.data.scrollBtnDeactive = JsonUtils.GSON.fromJson(data.get("scrollButtonDeactive"), GuiElementInst.class);
+        listToBuild.putAll(this.getSubRange(this.sData.minY, this.sData.maxY, false));
 
-            if( this.data.scrollBtnActive.get() instanceof Texture && this.data.scrollBtnDeactive.get() instanceof Texture) {
-                this.data.scrollBtnActive.get().bakeData(gui, this.data.scrollBtnActive.data);
-                this.data.scrollBtnDeactive.get().bakeData(gui, this.data.scrollBtnDeactive.data);
-            } else {
-                throw new JsonParseException("Scroll button must be of type \"texture\" or a subtype of it!");
-            }
+        this.countAll = this.elementsView.size();
+        this.countSub = listToBuild.size();
+    }
 
-            GuiElementInst[] elements = this.getElements(gui, data);
-            Arrays.stream(elements).forEach(e -> {
-                IGuiElement elemInst = e.get();
-                elemInst.bakeData(gui, e.data);
-                this.data.elements.put(Range.closedOpen(e.pos[1], e.pos[1] + elemInst.getHeight()), e);
-            });
+    @Override
+    public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) {
+        this.areaSize = JsonUtils.getIntArray(data.get("areaSize"), org.apache.commons.lang3.Range.is(2));
+        this.scrollHeight = JsonUtils.getIntVal(data.get("scrollbarHeight"), this.areaSize[1]);
+        this.rasterized = JsonUtils.getBoolVal(data.get("rasterized"), false);
+        this.maxScrollDelta = JsonUtils.getFloatVal(data.get("maxScrollDelta"), 1.0F);
 
-            this.scroll = 0.0F;
-        }
+        int[] scrollBarPos = JsonUtils.getIntArray(data.get("scrollbarPos"), new int[] {0, this.areaSize[1]}, org.apache.commons.lang3.Range.is(2));
+        JsonObject scrollBtnData = MiscUtils.defIfNull(data.getAsJsonObject("scrollButton"), JsonObject::new);
+        this.scrollBtn[0] = new GuiElementInst(scrollBarPos, new Texture(), scrollBtnData).initialize(gui);
+        this.scrollBtn[0].get().bakeData(gui, scrollBtnData, this.scrollBtn[0]);
+        scrollBtnData = JsonUtils.deepCopy(scrollBtnData);
+        scrollBtnData.add("uv", scrollBtnData.get("uvDisabled"));
+        this.scrollBtn[1] = new GuiElementInst(scrollBarPos, new Texture(), scrollBtnData).initialize(gui);
+        this.scrollBtn[1].get().bakeData(gui, scrollBtnData, this.scrollBtn[1]);
+//        this.scrollBtnActive = JsonUtils.GSON.fromJson(data.get("scrollButton"), GuiElementInst.class);
+//        this.scrollBtnDeactive = JsonUtils.GSON.fromJson(data.get("scrollButtonDeactive"), GuiElementInst.class);
+
+//        if( this.scrollBtnActive.get() instanceof Texture && this.scrollBtnDeactive.get() instanceof Texture) {
+//            this.scrollBtnActive.get().bakeData(gui, this.scrollBtnActive.data, this.scrollBtnActive);
+//            this.scrollBtnDeactive.get().bakeData(gui, this.scrollBtnDeactive.data, this.scrollBtnDeactive);
+//        } else {
+//            throw new JsonParseException("Scroll button must be of type \"texture\" or a subtype of it!");
+//        }
+
+        GuiElementInst[] elements = this.getElements(gui, data);
+        Arrays.stream(elements).forEach(e -> {
+            IGuiElement elemInst = e.get();
+            elemInst.bakeData(gui, e.data, e);
+            this.elements.put(Range.closedOpen(e.pos[1], e.pos[1] + elemInst.getHeight()), e);
+        });
+
+        this.scroll = 0.0F;
+
+        this.rebuildChildren(gui, data, false);
     }
 
     @Override
     public void update(IGui gui, JsonObject data) {
-        this.sData = this.data.getScrollData(this.scroll, this.data.rasterized);
-        this.renderedElements = this.data.getSubRange(this.sData.minY, this.sData.maxY, false);
-        this.countAll = this.data.elementsView.size();
-        this.countSub = this.renderedElements.size();
+        this.rebuildChildren(gui, data, false);
 
-        this.renderedElements.forEach((r, e) -> e.get().update(gui, e.data));
+        super.update(gui, data);
     }
 
     @Override
@@ -86,16 +106,15 @@ public class ScrollArea
 
         boolean isLmbDown = Mouse.isButtonDown(0);
 
-        GuiElementInst btn = this.countAll > this.countSub ? this.data.scrollBtnActive : this.data.scrollBtnDeactive;
-        Texture btnElem = (Texture) btn.get();
+        GuiElementInst btn = this.scrollBtn[this.countAll > this.countSub ? 0 : 1];
+        Texture btnElem = btn.get(Texture.class);
 
         if( this.countAll > this.countSub && isLmbDown ) {
             if( this.prevLmbDown
-                || IGuiElement.isHovering(gui, this.data.scrollBtnActive.pos[0], this.data.scrollBtnActive.pos[1], mouseX, mouseY,
-                                          btnElem.data.size[0], this.data.scrollHeight) )
+                || IGuiElement.isHovering(gui, btn.pos[0], btn.pos[1], mouseX, mouseY, btnElem.size[0], this.scrollHeight) )
             {
-                int scrollAmt = mouseY - gui.getScreenPosY() - this.data.scrollBtnActive.pos[1] - btnElem.data.size[1] / 2;
-                this.scroll = Math.max(0.0F, Math.min(1.0F, 1.0F / (this.data.scrollHeight - btnElem.data.size[1]) * scrollAmt));
+                int scrollAmt = mouseY - gui.getScreenPosY() - btn.pos[1] - btnElem.size[1] / 2;
+                this.scroll = Math.max(0.0F, Math.min(1.0F, 1.0F / (this.scrollHeight - btnElem.size[1]) * scrollAmt));
 
                 this.prevLmbDown = true;
             }
@@ -103,14 +122,14 @@ public class ScrollArea
             this.prevLmbDown = false;
         }
 
-        int scrollY = btn.pos[1] + Math.round(this.scroll * (this.data.scrollHeight - btnElem.data.size[1]));
+        int scrollY = btn.pos[1] + Math.round(this.scroll * (this.scrollHeight - btnElem.size[1]));
 
-        btn.get().render(gui, partTicks, btn.pos[0], scrollY, mouseX, mouseY, btn.data);
+        btnElem.render(gui, partTicks, btn.pos[0], scrollY, mouseX, mouseY, btn.data);
 
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        GuiUtils.glScissor(gui.getScreenPosX() + x, gui.getScreenPosY() + y, this.data.areaSize[0], this.data.areaSize[1]);
+        GuiUtils.glScissor(gui.getScreenPosX() + x, gui.getScreenPosY() + y, this.areaSize[0], this.areaSize[1]);
 
-        this.renderedElements.forEach((k, e) -> e.get().render(gui, partTicks, x + e.pos[0], y + e.pos[1] - this.sData.minY, mouseX, mouseY, e.data));
+        super.render(gui, partTicks, x, y - this.sData.minY, mouseX, mouseY, data);
 
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
     }
@@ -123,34 +142,28 @@ public class ScrollArea
 
         int dWheelDir = Mouse.getEventDWheel();
         if( dWheelDir < 0 ) {
-            if( this.data.rasterized ) {
+            if( this.rasterized ) {
                 this.scroll = this.getRasterScroll(true);
             } else {
-                this.scroll += Math.min(1.0F / this.data.elementsView.size(), this.data.maxScrollDelta);
+                this.scroll += Math.min(1.0F / this.elementsView.size(), this.maxScrollDelta);
             }
             this.clipScroll();
         } else if( dWheelDir > 0 ) {
-            if( this.data.rasterized ) {
+            if( this.rasterized ) {
                 this.scroll = this.getRasterScroll(false);
             } else {
-                this.scroll -= Math.min(1.0F / this.data.elementsView.size(), this.data.maxScrollDelta);
+                this.scroll -= Math.min(1.0F / this.elementsView.size(), this.maxScrollDelta);
             }
             this.clipScroll();
         }
 
-        for( Map.Entry<Range<Integer >, GuiElementInst > e : this.renderedElements.entrySet() ) {
-            e.getValue().get().handleMouseInput(gui);
-        }
+        super.handleMouseInput(gui);
     }
 
     @Override
     public boolean mouseClicked(IGui gui, int mouseX, int mouseY, int mouseButton) throws IOException {
-        if( IGuiElement.isHovering(gui, this.posX, this.posY, mouseX, mouseY, this.data.areaSize[0], this.data.areaSize[1]) ) {
-            for( Map.Entry<Range<Integer>, GuiElementInst> e : this.renderedElements.entrySet() ) {
-                if( e.getValue().get().mouseClicked(gui, mouseX, mouseY, mouseButton) ) {
-                    return true;
-                }
-            }
+        if( IGuiElement.isHovering(gui, this.posX, this.posY, mouseX, mouseY, this.areaSize[0], this.areaSize[1]) ) {
+            return super.mouseClicked(gui, mouseX, mouseY, mouseButton);
         }
 
         return false;
@@ -158,31 +171,16 @@ public class ScrollArea
 
     @Override
     public void mouseClickMove(IGui gui, int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-        if( IGuiElement.isHovering(gui, this.posX, this.posY, mouseX, mouseY, this.data.areaSize[0], this.data.areaSize[1]) ) {
-            for( Map.Entry<Range<Integer>, GuiElementInst> e : this.renderedElements.entrySet() ) {
-                e.getValue().get().mouseClickMove(gui, mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-            }
+        if( IGuiElement.isHovering(gui, this.posX, this.posY, mouseX, mouseY, this.areaSize[0], this.areaSize[1]) ) {
+            super.mouseClickMove(gui, mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
         }
     }
 
     @Override
     public void mouseReleased(IGui gui, int mouseX, int mouseY, int state) {
-        if( IGuiElement.isHovering(gui, this.posX, this.posY, mouseX, mouseY, this.data.areaSize[0], this.data.areaSize[1]) ) {
-            for( Map.Entry<Range<Integer>, GuiElementInst> e : this.renderedElements.entrySet() ) {
-                e.getValue().get().mouseReleased(gui, mouseX, mouseY, state);
-            }
+        if( IGuiElement.isHovering(gui, this.posX, this.posY, mouseX, mouseY, this.areaSize[0], this.areaSize[1]) ) {
+            super.mouseReleased(gui, mouseX, mouseY, state);
         }
-    }
-
-    @Override
-    public boolean keyTyped(IGui gui, char typedChar, int keyCode) throws IOException {
-        for( Map.Entry<Range<Integer >, GuiElementInst > e : this.renderedElements.entrySet() ) {
-            if( e.getValue().get().keyTyped(gui, typedChar, keyCode) ) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     public void clipScroll() {
@@ -195,8 +193,8 @@ public class ScrollArea
     }
 
     public float getRasterScroll(boolean next) {
-        BakedData.ScrollData sData = this.data.getScrollData(this.scroll, this.data.rasterized);
-        Map<Range<Integer>, GuiElementInst> sRange = this.data.getSubRange(sData.minY, sData.maxY, false);
+        ScrollData sData = this.getScrollData(this.scroll, this.rasterized);
+        Map<Range<Integer>, GuiElementInst> sRange = this.getSubRange(sData.minY, sData.maxY, false);
         Map.Entry<Range<Integer>, GuiElementInst> first = sRange.entrySet().stream().findFirst().orElse(null);
 
         if( first == null ) {
@@ -206,17 +204,17 @@ public class ScrollArea
         GuiElementInst firstVal = first.getValue();
         Map.Entry<Range<Integer>, GuiElementInst> second;
         if( next ) {
-            sRange = this.data.getSubRange(firstVal.pos[1] + firstVal.get().getHeight(), Integer.MAX_VALUE, false);
+            sRange = this.getSubRange(firstVal.pos[1] + firstVal.get().getHeight(), Integer.MAX_VALUE, false);
         } else {
-            sRange = this.data.getSubRange(0, firstVal.pos[1], true);
+            sRange = this.getSubRange(0, firstVal.pos[1], true);
         }
 
         second = sRange.entrySet().stream().findFirst().orElse(null);
         if( second == null ) {
-            return 0.0F;
+            return next ? 1.0F : 0.0F;
         }
 
-        int scrollArea = sData.totalHeight - this.data.areaSize[1];
+        int scrollArea = sData.totalHeight - this.areaSize[1];
 
         return 1.0F / scrollArea * second.getValue().pos[1];
     }
@@ -227,69 +225,44 @@ public class ScrollArea
 
     @Override
     public int getWidth() {
-        return this.data.areaSize[0];
+        return this.areaSize[0];
     }
 
     @Override
     public int getHeight() {
-        return this.data.areaSize[1];
+        return this.areaSize[1];
     }
 
-    @Override
-    public boolean isVisible() {
-        return this.isVisible;
-    }
+    public ScrollData getScrollData(float scroll, boolean rasterized) {
+        ScrollData data = new ScrollData();
 
-    @Override
-    public void setVisible(boolean visible) {
-        this.isVisible = visible;
-    }
+        data.totalHeight = this.elementsView.size() > 0 ? this.elements.span().upperEndpoint() : 0;
+        data.minY = Math.max(0, MathHelper.floor((data.totalHeight - this.areaSize[1]) * scroll));
+        data.maxY = MathHelper.ceil((data.totalHeight - this.areaSize[1]) * scroll) + this.areaSize[1];
 
-    @SuppressWarnings("UnstableApiUsage")
-    public static final class BakedData
-    {
-        public int[] areaSize;
-        public GuiElementInst scrollBtnActive;
-        public GuiElementInst scrollBtnDeactive;
-        public int scrollHeight;
-        public float maxScrollDelta;
-        public boolean rasterized;
-
-        @SuppressWarnings("UnstableApiUsage")
-        public final RangeMap<Integer, GuiElementInst> elements = TreeRangeMap.create();
-        public final Map<Range<Integer>, GuiElementInst> elementsView = this.elements.asMapOfRanges();
-
-        public ScrollData getScrollData(float scroll, boolean rasterized) {
-            ScrollData data = new ScrollData();
-
-            data.totalHeight = this.elementsView.size() > 0 ? this.elements.span().upperEndpoint() : 0;
-            data.minY = Math.max(0, MathHelper.floor((data.totalHeight - this.areaSize[1]) * scroll));
-            data.maxY = MathHelper.ceil((data.totalHeight - this.areaSize[1]) * scroll) + this.areaSize[1];
-
-            if( rasterized ) {
-                getSubRange(data.minY, data.maxY, false).entrySet().stream().findFirst().ifPresent(f -> {
-                    int heightAdj = f.getValue().get().getHeight() / 2;
-                    getSubRange(data.minY + heightAdj, data.maxY + heightAdj, false).entrySet().stream().findFirst().ifPresent(e -> {
-                        data.minY = e.getValue().pos[1];
-                        data.maxY = data.minY + this.areaSize[1];
-                    });
+        if( rasterized ) {
+            getSubRange(data.minY, data.maxY, false).entrySet().stream().findFirst().ifPresent(f -> {
+                int heightAdj = f.getValue().get().getHeight() / 2;
+                getSubRange(data.minY + heightAdj, data.maxY + heightAdj, false).entrySet().stream().findFirst().ifPresent(e -> {
+                    data.minY = e.getValue().pos[1];
+                    data.maxY = data.minY + this.areaSize[1];
                 });
-            }
-
-            return data;
+            });
         }
 
-        public Map<Range<Integer>, GuiElementInst> getSubRange(Integer lower, Integer upper, boolean desc) {
-            RangeMap<Integer, GuiElementInst> sub = this.elements.subRangeMap(Range.closedOpen(lower, upper));
+        return data;
+    }
 
-            return desc ? sub.asDescendingMapOfRanges() : sub.asMapOfRanges();
-        }
+    public Map<Range<Integer>, GuiElementInst> getSubRange(Integer lower, Integer upper, boolean desc) {
+        RangeMap<Integer, GuiElementInst> sub = this.elements.subRangeMap(Range.closedOpen(lower, upper));
 
-        public static final class ScrollData
-        {
-            public int totalHeight;
-            public int minY;
-            public int maxY;
-        }
+        return desc ? sub.asDescendingMapOfRanges() : sub.asMapOfRanges();
+    }
+
+    public static final class ScrollData
+    {
+        public int totalHeight;
+        public int minY;
+        public int maxY;
     }
 }
