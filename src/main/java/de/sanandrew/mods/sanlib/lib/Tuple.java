@@ -22,7 +22,7 @@ import java.util.function.Function;
 /**
  * A class that resembles a one-class-fits-all approach to tuples for Java using generics.
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({ "unused", "WeakerAccess", "ObjectEquality" })
 public class Tuple
         implements Serializable, Comparable<Tuple>, Iterable<Object>
 {
@@ -153,6 +153,7 @@ public class Tuple
         return Arrays.stream(this.values).map(data -> (Object)data.value).iterator();
     }
 
+    @SuppressWarnings("rawtypes")
     private static class Data<T>
             implements Serializable, Comparable<Data<?>>
     {

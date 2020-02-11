@@ -6,6 +6,7 @@
  *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.client.lexicon;
 
+import de.sanandrew.mods.sanlib.Constants;
 import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexicon;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconEntry;
@@ -25,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings({ "WeakerAccess", "deprecation" })
 @SideOnly(Side.CLIENT)
 public final class LexiconInstance
         implements ILexiconInst
@@ -36,8 +38,8 @@ public final class LexiconInstance
     private final ILexicon lexiconDef;
 
     @Deprecated
-    public static final String RENDER_ID_CRAFTING = SanLib.ID + ".crafting";
-    public static final String RENDER_ID_STANDARD = SanLib.ID + ".standard";
+    public static final String RENDER_ID_CRAFTING = Constants.ID + ".crafting";
+    public static final String RENDER_ID_STANDARD = Constants.ID + ".standard";
 
     LexiconInstance(ILexicon lexiconDef) {
         this.idToGroupMap = new HashMap<>();

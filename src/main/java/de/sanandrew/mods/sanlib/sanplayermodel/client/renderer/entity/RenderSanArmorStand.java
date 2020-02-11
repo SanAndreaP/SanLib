@@ -7,6 +7,7 @@
 package de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity;
 
 import de.sanandrew.mods.sanlib.sanplayermodel.client.model.ModelSanArmorStand;
+import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.layers.LayerArmorStandHead;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.layers.LayerSanArmor;
 import net.minecraft.client.model.ModelArmorStandArmor;
 import net.minecraft.client.renderer.entity.RenderArmorStand;
@@ -40,6 +41,7 @@ public class RenderSanArmorStand
         this.addLayer(new LayerHeldItem(this));
         this.addLayer(new LayerElytra(this));
         this.addLayer(new LayerCustomHead(this.getMainModel().bipedHead));
+        this.addLayer(new LayerArmorStandHead(this.getMainModel().bipedHead));
     }
 
     @Override

@@ -25,5 +25,8 @@ public class ModelSanArmorStand
         this.bipedBody = new ModelRenderer(this, 0, 26);
         this.bipedBody.addBox(-4.0F, 0.0F, -1.5F, 8, 3, 3, modelSize);
         this.bipedBody.setRotationPoint(0.0F, 0.0F, 0.0F);
+
+        this.bipedRightArm.setRotationPoint(-4.25F, 2.0F, 0.0F);
+        this.bipedLeftArm.setRotationPoint(4.25F, 2.0F, 0.0F);
     }
 }

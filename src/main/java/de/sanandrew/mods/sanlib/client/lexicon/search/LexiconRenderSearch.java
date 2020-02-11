@@ -8,6 +8,7 @@ package de.sanandrew.mods.sanlib.client.lexicon.search;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import de.sanandrew.mods.sanlib.Constants;
 import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.api.client.lexicon.IGuiButtonEntry;
 import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconEntry;
@@ -32,7 +33,7 @@ import java.util.regex.Pattern;
 public class LexiconRenderSearch
         implements ILexiconPageRender
 {
-    public static final String RENDER_SEARCH_ID = SanLib.ID + ":search";
+    public static final String RENDER_SEARCH_ID = Constants.ID + ":search";
 
     public static final int TYPE_TXT_HEIGHT = 12;
     public static final int GROUP_TXT_HEIGHT = 12;

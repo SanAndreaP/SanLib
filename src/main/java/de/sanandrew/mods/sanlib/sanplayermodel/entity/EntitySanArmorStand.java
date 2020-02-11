@@ -19,4 +19,9 @@ public class EntitySanArmorStand
     public EntitySanArmorStand(World worldIn, double posX, double posY, double posZ) {
         super(worldIn, posX, posY, posZ);
     }
+
+    @Override
+    public boolean getShowArms() {
+        return true;
+    }
 }

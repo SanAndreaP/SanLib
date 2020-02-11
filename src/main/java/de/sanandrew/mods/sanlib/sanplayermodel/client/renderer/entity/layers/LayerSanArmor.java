@@ -8,10 +8,10 @@ package de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.layers;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import de.sanandrew.mods.sanlib.Constants;
 import de.sanandrew.mods.sanlib.lib.client.ModelJsonLoader;
 import de.sanandrew.mods.sanlib.lib.util.ItemStackUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
-import de.sanandrew.mods.sanlib.sanplayermodel.SanPlayerModel;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.model.ModelSanPlayerArmor;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.RenderSanArmorStand;
 import net.minecraft.client.model.ModelBiped;
@@ -130,14 +130,14 @@ public class LayerSanArmor
 
     private ModelSanPlayerArmor getCustomArmorModel(@Nonnull ItemStack itemStack, EntityEquipmentSlot slot) {
         if( ItemStackUtils.isValid(itemStack) && itemStack.getItem() instanceof ItemArmor ) {
-            String key = this.getKeyForArmor((ItemArmor) itemStack.getItem());
+            String key = LayerSanArmor.getKeyForArmor((ItemArmor) itemStack.getItem());
             if( this.armorModels.contains(key, slot) ) {
                 ModelSanPlayerArmor armor = this.armorModels.get(key, slot);
                 if( armor.isModelLoaded() ) {
                     return armor;
                 }
             } else {
-                ResourceLocation resLoc = new ResourceLocation(SanPlayerModel.ID, String.format("models/entity/armor/%s_%s.json", key.replace(':', '/'), slot.getName()));
+                ResourceLocation resLoc = new ResourceLocation(Constants.PM_ID, String.format("models/entity/armor/%s_%s.json", key.replace(':', '/'), slot.getName()));
                 ModelSanPlayerArmor armor = new ModelSanPlayerArmor(0.0F, resLoc, slot);
                 this.armorModels.put(key, slot, armor);
                 if( armor.isModelLoaded() ) {
@@ -163,7 +163,7 @@ public class LayerSanArmor
     @Override
     public ResourceLocation getArmorResource(Entity entity, ItemStack stack, EntityEquipmentSlot slot, String type) {
         if( stack.getItem() instanceof ItemArmor ) {
-            String key = this.getKeyForArmor((ItemArmor) stack.getItem());
+            String key = LayerSanArmor.getKeyForArmor((ItemArmor) stack.getItem());
             if( this.armorModels.contains(key, slot) ) {
                 ModelSanPlayerArmor armor = this.armorModels.get(key, slot);
                 if( armor.isModelLoaded() ) {
@@ -175,7 +175,7 @@ public class LayerSanArmor
         return super.getArmorResource(entity, stack, slot, type);
     }
 
-    private String getKeyForArmor(ItemArmor item) {
+    private static String getKeyForArmor(ItemArmor item) {
         String texture = item.getArmorMaterial().getName();
         String domain = "minecraft";
         int idx = texture.indexOf(':');

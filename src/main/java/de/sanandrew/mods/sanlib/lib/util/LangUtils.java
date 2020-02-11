@@ -6,18 +6,18 @@
  *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.lib.util;
 
-import de.sanandrew.mods.sanlib.SanLib;
+import de.sanandrew.mods.sanlib.Constants;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({ "unused", "WeakerAccess" })
 public final class LangUtils
 {
-    public static final TranslateKey LEXICON_GROUP_NAME = new TranslateKey("%s.lexicon.%%s.%%s.name", SanLib.ID);
-    public static final TranslateKey LEXICON_ENTRY_NAME = new TranslateKey("%s.lexicon.%%s.%%s.%%s.name", SanLib.ID);
-    public static final TranslateKey LEXICON_ENTRY_TEXT = new TranslateKey("%s.lexicon.%%s.%%s.%%s.text", SanLib.ID);
-    public static final TranslateKey LEXICON_SRC_ENTRY_TITLE = new TranslateKey("%s.lexicon.%%s.search.title", SanLib.ID);
-    public static final TranslateKey LEXICON_SRC_ENTRY_TEXT = new TranslateKey("%s.lexicon.%%s.search.text", SanLib.ID);
+    public static final TranslateKey LEXICON_GROUP_NAME = new TranslateKey("%s.lexicon.%%s.%%s.name", Constants.ID);
+    public static final TranslateKey LEXICON_ENTRY_NAME = new TranslateKey("%s.lexicon.%%s.%%s.%%s.name", Constants.ID);
+    public static final TranslateKey LEXICON_ENTRY_TEXT = new TranslateKey("%s.lexicon.%%s.%%s.%%s.text", Constants.ID);
+    public static final TranslateKey LEXICON_SRC_ENTRY_TITLE = new TranslateKey("%s.lexicon.%%s.search.title", Constants.ID);
+    public static final TranslateKey LEXICON_SRC_ENTRY_TEXT = new TranslateKey("%s.lexicon.%%s.search.text", Constants.ID);
 
     public static final TranslateKey ENTITY_NAME   = new TranslateKey("entity.%s.name");
     public static final TranslateKey ENTITY_DESC   = new TranslateKey("entity.%s.desc");

@@ -17,7 +17,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-@Mod.EventBusSubscriber(modid = SanLib.ID)
+@Mod.EventBusSubscriber(modid = Constants.ID)
 public final class SLibConfig
 {
     private static final String CONFIG_VER = "2.0";
@@ -38,7 +38,7 @@ public final class SLibConfig
     }
 
     static void initConfiguration(FMLPreInitializationEvent event) {
-        config = ConfigUtils.loadConfigFile(event.getSuggestedConfigurationFile(), CONFIG_VER, SanLib.NAME);//new Configuration(event.getSuggestedConfigurationFile(), "1.0.0", true);
+        config = ConfigUtils.loadConfigFile(event.getSuggestedConfigurationFile(), CONFIG_VER, Constants.NAME);//new Configuration(event.getSuggestedConfigurationFile(), "1.0.0", true);
         synchronize();
     }
 
@@ -52,7 +52,7 @@ public final class SLibConfig
 
     @SubscribeEvent
     public static void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent eventArgs) {
-        if( eventArgs.getModID().equals(SanLib.ID) ) {
+        if( eventArgs.getModID().equals(Constants.ID) ) {
             synchronize();
         }
     }

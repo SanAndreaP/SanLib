@@ -11,13 +11,9 @@ import de.sanandrew.mods.sanlib.lib.client.ModelJsonLoader;
 import de.sanandrew.mods.sanlib.sanplayermodel.Resources;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.RenderSanPlayer;
 import net.minecraft.client.model.ModelPlayer;
-import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumHandSide;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -47,7 +43,7 @@ public class ModelSanPlayer
     public void setRotationAngles(float limbSwing, float limbSwingAmount, float rotFloat, float rotYaw, float rotPitch, float partTicks, Entity entity) {
         super.setRotationAngles(limbSwing, limbSwingAmount, rotFloat, rotYaw, rotPitch, partTicks, entity);
 
-        setSwimmingRotation(entity, this, limbSwing, limbSwingAmount);
+        setSwimmingRotation(entity, this, limbSwing);
 
         this.bipedBody.rotateAngleX *= 0.5F;
 
@@ -93,7 +89,8 @@ public class ModelSanPlayer
         }
     }
 
-    public static void setSwimmingRotation(Entity e, ModelPlayer model, float limbSwing, float limbSwingAmount) {
+    @SuppressWarnings("FloatingPointEquality")
+    static void setSwimmingRotation(Entity e, ModelPlayer model, float limbSwing) {
         if( !(e instanceof EntityPlayer) ) {
             return;
         }

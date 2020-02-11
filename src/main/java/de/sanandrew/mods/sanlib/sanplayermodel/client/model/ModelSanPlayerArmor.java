@@ -108,7 +108,7 @@ public class ModelSanPlayerArmor
                     break;
             }
         } else {
-            ModelSanPlayer.setSwimmingRotation(entity, this, limbSwing, limbSwingAmount);
+            ModelSanPlayer.setSwimmingRotation(entity, this, limbSwing);
 
             switch (this.slot) {
                 case CHEST:

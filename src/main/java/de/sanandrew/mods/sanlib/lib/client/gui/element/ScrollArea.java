@@ -70,15 +70,6 @@ public class ScrollArea
         scrollBtnData.add("uv", scrollBtnData.get("uvDisabled"));
         this.scrollBtn[1] = new GuiElementInst(scrollBarPos, new Texture(), scrollBtnData).initialize(gui);
         this.scrollBtn[1].get().bakeData(gui, scrollBtnData, this.scrollBtn[1]);
-//        this.scrollBtnActive = JsonUtils.GSON.fromJson(data.get("scrollButton"), GuiElementInst.class);
-//        this.scrollBtnDeactive = JsonUtils.GSON.fromJson(data.get("scrollButtonDeactive"), GuiElementInst.class);
-
-//        if( this.scrollBtnActive.get() instanceof Texture && this.scrollBtnDeactive.get() instanceof Texture) {
-//            this.scrollBtnActive.get().bakeData(gui, this.scrollBtnActive.data, this.scrollBtnActive);
-//            this.scrollBtnDeactive.get().bakeData(gui, this.scrollBtnDeactive.data, this.scrollBtnDeactive);
-//        } else {
-//            throw new JsonParseException("Scroll button must be of type \"texture\" or a subtype of it!");
-//        }
 
         GuiElementInst[] elements = this.getElements(gui, data);
         Arrays.stream(elements).forEach(e -> {
@@ -137,6 +128,7 @@ public class ScrollArea
     @Override
     public void handleMouseInput(IGui gui) throws IOException {
         if( this.countAll <= this.countSub ) {
+            super.handleMouseInput(gui);
             return;
         }
 

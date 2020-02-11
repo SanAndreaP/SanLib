@@ -5,6 +5,7 @@ package santest;/* *************************************************************
  *                http://creativecommons.org/licenses/by-nc-sa/4.0/
  *******************************************************************************************************************/
 
+import de.sanandrew.mods.sanlib.Constants;
 import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.lib.util.config.Category;
 import de.sanandrew.mods.sanlib.lib.util.config.ConfigUtils;
@@ -24,7 +25,7 @@ import org.apache.logging.log4j.Level;
 import java.io.File;
 
 @SuppressWarnings("all")
-@Mod(modid = "santest", dependencies = "required-after:" + SanLib.ID)
+@Mod(modid = "santest", dependencies = "required-after:" + Constants.ID)
 public class Test
 {
     @Mod.Instance("santest")

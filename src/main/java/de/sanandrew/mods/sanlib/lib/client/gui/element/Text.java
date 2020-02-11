@@ -61,7 +61,6 @@ public class Text
     protected String                 defaultColor;
     protected int                    currWidth;
     protected int                    currHeight;
-    protected boolean                isVisible = true;
     protected GuiElementInst.Justify justify;
 
     @Override
@@ -181,10 +180,10 @@ public class Text
             case LEFT:
                 break;
             case CENTER:
-                x += (this.getWidth() - this.fontRenderer.getStringWidth(s)) / 2;
+                x += (this.currWidth - this.fontRenderer.getStringWidth(s)) / 2;
                 break;
             case RIGHT:
-                x += this.getWidth() - this.fontRenderer.getStringWidth(s);
+                x += this.currWidth - this.fontRenderer.getStringWidth(s);
         }
 
         this.fontRenderer.drawString(s, x, y, this.color, this.shadow);

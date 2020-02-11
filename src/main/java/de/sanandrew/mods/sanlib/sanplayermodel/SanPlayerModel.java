@@ -7,6 +7,7 @@
 package de.sanandrew.mods.sanlib.sanplayermodel;
 
 import com.mojang.authlib.GameProfile;
+import de.sanandrew.mods.sanlib.Constants;
 import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.lib.util.UuidUtils;
 import de.sanandrew.mods.sanlib.sanplayermodel.entity.EntitySanArmorStand;
@@ -25,27 +26,23 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.UUID;
 
-@Mod(modid = SanPlayerModel.ID, version = SanPlayerModel.VERSION, name = "San's Player Model", dependencies = "after:" + SanLib.ID, acceptableRemoteVersions = "[1.0.2,)")
+@Mod(modid = Constants.PM_ID, version = Constants.PM_VERSION, name = Constants.PM_VERSION, dependencies = "after:" + Constants.ID,
+     acceptableRemoteVersions = Constants.PM_ACCEPTED_REMOTE_VER)
 public class SanPlayerModel
 {
-    public static final String ID = "sanplayermodel";
-    public static final String VERSION = "1.1.1";
 
-    public static final Logger LOG = LogManager.getLogger(ID);
+    public static final Logger LOG = LogManager.getLogger(Constants.PM_ID);
 
-    public static final String COMMON_PROXY = "de.sanandrew.mods.sanlib.sanplayermodel.CommonProxy";
-    public static final String CLIENT_PROXY = "de.sanandrew.mods.sanlib.sanplayermodel.client.ClientProxy";
-
-    @Mod.Instance(ID)
+    @Mod.Instance(Constants.PM_ID)
     public static SanPlayerModel instance;
-    @SidedProxy(clientSide = CLIENT_PROXY, serverSide = COMMON_PROXY, modId = ID)
+    @SidedProxy(clientSide = Constants.PM_CLIENT_PROXY, serverSide = Constants.PM_COMMON_PROXY, modId = Constants.PM_ID)
     public static CommonProxy proxy;
 
     public static final String[] SANPLAYER_NAMES_UUID = new String[] { "SanAndreasP", "044d980d-5c2a-4030-95cf-cbfde69ea3cb" };
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
-        EntityRegistry.registerModEntity(new ResourceLocation(ID, "sanArmorStand"), EntitySanArmorStand.class, "sanArmorStand", 0, this, 64, 1, true);
+        EntityRegistry.registerModEntity(new ResourceLocation(Constants.PM_ID, "sanArmorStand"), EntitySanArmorStand.class, "sanArmorStand", 0, this, 64, 1, true);
 
         MinecraftForge.EVENT_BUS.register(new ItemClickEvent());
 

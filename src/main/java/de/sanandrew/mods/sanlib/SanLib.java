@@ -16,26 +16,15 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(modid = SanLib.ID, version = SanLib.VERSION, name = SanLib.NAME, acceptedMinecraftVersions = SanLib.MCVER, dependencies = SanLib.DEPENDENCIES,
-     acceptableRemoteVersions = SanLib.ACCEPTED_REMOTE_VER, certificateFingerprint = SanLib.CERTIFICATE_FINGERPRINT)
+@Mod(modid = Constants.ID, version = Constants.VERSION, name = Constants.NAME, acceptedMinecraftVersions = Constants.MCVER, dependencies = Constants.DEPENDENCIES,
+     acceptableRemoteVersions = Constants.ACCEPTED_REMOTE_VER, certificateFingerprint = Constants.CERTIFICATE_FINGERPRINT)
 public class SanLib
 {
-    public static final String ID = "sanlib";
-    public static final String NAME = "San's Library";
-    public static final String CERTIFICATE_FINGERPRINT = "@FINGERPRINT@";
-    static final String VERSION = "1.6.0";
-    static final String ACCEPTED_REMOTE_VER = "[1.6.0,)";
-    static final String MCVER = "[1.12.2, 1.13)";
-    static final String DEPENDENCIES = "required-after:forge@[14.23.5.2768,]";
+    public static final Logger LOG = LogManager.getLogger(Constants.ID);
 
-    public static final Logger LOG = LogManager.getLogger(ID);
-
-    private static final String COMMON_PROXY = "de.sanandrew.mods.sanlib.CommonProxy";
-    private static final String CLIENT_PROXY = "de.sanandrew.mods.sanlib.client.ClientProxy";
-
-    @Mod.Instance(ID)
+    @Mod.Instance(Constants.ID)
     public static SanLib instance;
-    @SidedProxy(clientSide = CLIENT_PROXY, serverSide = COMMON_PROXY, modId = ID)
+    @SidedProxy(clientSide = Constants.CLIENT_PROXY, serverSide = Constants.COMMON_PROXY, modId = Constants.ID)
     public static CommonProxy proxy;
 
     @Mod.EventHandler

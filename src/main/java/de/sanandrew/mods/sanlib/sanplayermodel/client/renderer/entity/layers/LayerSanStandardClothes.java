@@ -6,7 +6,7 @@
    *******************************************************************************************************************/
 package de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.layers;
 
-import de.sanandrew.mods.sanlib.sanplayermodel.SanPlayerModel;
+import de.sanandrew.mods.sanlib.Constants;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.model.ModelSanPlayerArmor;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.RenderSanPlayer;
 import net.minecraft.client.Minecraft;
@@ -63,7 +63,7 @@ public class LayerSanStandardClothes
     }
 
     public void renderHand(EntityLivingBase entityLivingBaseIn, float scale, EnumHandSide hand) {
-        ItemStack itemstack = this.getItemStackFromSlot(entityLivingBaseIn, EntityEquipmentSlot.CHEST);
+        ItemStack itemstack = LayerSanStandardClothes.getItemStackFromSlot(entityLivingBaseIn, EntityEquipmentSlot.CHEST);
 
         if( !(itemstack.getItem() instanceof ItemArmor) || ((ItemArmor) itemstack.getItem()).getEquipmentSlot() != EntityEquipmentSlot.CHEST ) {
             ModelSanPlayerArmor t = this.getArmorModelHook(EntityEquipmentSlot.CHEST);
@@ -76,7 +76,7 @@ public class LayerSanStandardClothes
         }
     }
 
-    public static void setFPHandRotation(EntityLivingBase entity, ModelSanPlayerArmor t, float scale, EnumHandSide hand) {
+    static void setFPHandRotation(EntityLivingBase entity, ModelSanPlayerArmor t, float scale, EnumHandSide hand) {
         t.swingProgress = 0.0F;
         t.isSneak = false;
         t.setRotationAngles(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, scale, entity);
@@ -95,8 +95,8 @@ public class LayerSanStandardClothes
         }
     }
 
-    public void renderClothLayer(EntityLivingBase entityLivingBaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale, EntityEquipmentSlot slotIn) {
-        ItemStack itemstack = this.getItemStackFromSlot(entityLivingBaseIn, slotIn);
+    private void renderClothLayer(EntityLivingBase entityLivingBaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale, EntityEquipmentSlot slotIn) {
+        ItemStack itemstack = LayerSanStandardClothes.getItemStackFromSlot(entityLivingBaseIn, slotIn);
 
         if( !(itemstack.getItem() instanceof ItemArmor) || ((ItemArmor) itemstack.getItem()).getEquipmentSlot() != slotIn ) {
             ModelSanPlayerArmor t = this.getArmorModelHook(slotIn);
@@ -113,9 +113,9 @@ public class LayerSanStandardClothes
         }
     }
 
-    protected ModelSanPlayerArmor getArmorModelHook(final EntityEquipmentSlot slot) {
+    private ModelSanPlayerArmor getArmorModelHook(final EntityEquipmentSlot slot) {
         Supplier<ModelSanPlayerArmor> modelSupply = () -> {
-            ResourceLocation resLoc = new ResourceLocation(SanPlayerModel.ID, String.format("models/entity/sanplayer_noarmor_%s.json", slot.getName()));
+            ResourceLocation resLoc = new ResourceLocation(Constants.PM_ID, String.format("models/entity/sanplayer_noarmor_%s.json", slot.getName()));
             ModelSanPlayerArmor armor = new ModelSanPlayerArmor(0.0F, resLoc, slot);
             LayerSanStandardClothes.this.armorModels.put(slot, armor);
             return armor;
@@ -149,7 +149,7 @@ public class LayerSanStandardClothes
     }
 
     @Nonnull
-    public ItemStack getItemStackFromSlot(EntityLivingBase living, EntityEquipmentSlot slotIn) {
+    private static ItemStack getItemStackFromSlot(EntityLivingBase living, EntityEquipmentSlot slotIn) {
         return living.getItemStackFromSlot(slotIn);
     }
 }

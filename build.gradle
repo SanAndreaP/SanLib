@@ -17,10 +17,19 @@ buildscript {
     }
 }
 
+Object grabConstant = { String name ->
+    name = name.toUpperCase(Locale.ROOT);
+    def f = new File("src/main/java/de/sanandrew/mods/sanlib/Constants.java").text
+    def m = f =~ name + /\s*=\s*"(.*?)"/
+    if( m.find() ) {
+        return m.group(1)
+    } else {
+        throw new IllegalArgumentException("Cannot grab constant " + name + "!")
+    }
+}
+
 apply plugin: "com.wynprice.cursemaven"
-
 apply plugin: 'net.minecraftforge.gradle.forge'
-
 apply plugin: 'idea'
 idea {
     module {
@@ -28,7 +37,7 @@ idea {
     }
 }
 
-version = "1.12.2-1.6.0"
+version = grabConstant("BUILD_MCVER") + '-' + grabConstant("VERSION")
 group = "de.sanandrew.mods"
 archivesBaseName = "SanLib"
 
@@ -40,12 +49,12 @@ compileJava {
 }
 
 minecraft {
-    version = "1.12.2-14.23.5.2811"
-    version = "1.12.2-14.23.5.2811"
+    version = grabConstant("BUILD_FORGEVER")
     runDir = "run"
-    mappings = "snapshot_20180814"
+    mappings = grabConstant("BUILD_MAPPINGS")
+
     replace '@FINGERPRINT@', project.findProperty('signSHA1')
-    replaceIn "SanLib.java"
+    replaceIn "Constants.java"
 }
 
 repositories {
@@ -94,13 +103,11 @@ build.finalizedBy signJar
 build.finalizedBy uploadArchives
 
 processResources {
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
 
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
 
-        expand 'version':project.version, 'mcversion':project.minecraft.version
+        expand 'version':project.version, 'mcversion':grabConstant("BUILD_MCVER"), 'pmversion':grabConstant("PM_VERSION")
     }
 
     from(sourceSets.main.resources.srcDirs) {
@@ -108,13 +115,14 @@ processResources {
     }
     
 	rename '(.+_at.cfg)', 'META-INF/$1'
-    exclude 'assets/test'
 }
 
 jar {
 	manifest {
 		attributes 'FMLAT': 'sanlib_at.cfg'
 	}
+    exclude 'santest/**'
+    exclude 'assets/santest/**'
 }
 
 artifacts {
