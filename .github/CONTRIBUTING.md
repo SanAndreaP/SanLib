@@ -1,6 +1,6 @@
-##Issue submission
+## Issue submission
 Hey there. Looks like you want to contribute with an issue. Great. Here's what you have to do:
-* Have a look through the [Issues tab](/issues), to see if your issue has been reported/solved already.
+* Have a look through the [Issues tab](https://github.com/SanAndreasP/SanLib/issues), to see if your issue has been reported/solved already.
 * Read through "[How to write a bug report](https://chase-seibert.github.io/blog/2016/02/26/QA-101-How-to-write-a-bug-report.html)" (You may skip this if you're already familiar with reporting issues, but it's good for newcomers).
 * Note the following points:
   * Issues regarding "Bukkit+Forge" servers that are not reproducible with forge only are **not accepted**.
@@ -14,10 +14,10 @@ The following "bugs" are not accepted:
   * This mod alters the Minecraft window title; to prevent this, there is a configuration option called `setSplashTitle`.
 * Not a SanLib problem/Not fixable
 
-[Report the Issue](/issues/new)!
+[Report the Issue](https://github.com/SanAndreasP/SanLib/issues/new)!
 
 ---
-##Pull Requests
+## Pull Requests
 If you want to make a Pull Request, here are the steps:
   1. Fork this repository.
   2. Download your fork with a git client of your choice.
@@ -39,4 +39,4 @@ If you want to make a Pull Request, here are the steps:
 &nbsp;  
 &nbsp;  
 &nbsp;  
-######This text was provided by [Botania](https://github.com/Vazkii/Botania/blob/master/.github/CONTRIBUTING.md), made by Vazkii, and altered by SanAndreasP
+###### This text was provided by [Botania](https://github.com/Vazkii/Botania/blob/master/.github/CONTRIBUTING.md), made by Vazkii, and altered by SanAndreasP

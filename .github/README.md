@@ -6,12 +6,12 @@
 ***
 Welcome to the SanLib repository. This is a [Minecraft](https://minecraft.net) mod used as a library by most of my mods.
 ***
-##For Players
+## For Players
 * If you have any suggestion or bug / issue to report, use the [Issue Tracker](https://github.com/SanAndreasP/SanLib/issues) for that  
   Please consult the [CONTRIBUTING.md](CONTRIBUTING.md) on the contribution guidelines.
 * To get the compiled, ready-to-use version of this mod for your Minecraft version, go to the [CurseForge listing][sanlib]
 
-##For Developers
+## For Developers
 * *Improving this mod* - For suggestions, bugs and issues, see **For Players**. If you want to change something within the code of this mod, create a [Pull Request](https://github.com/SanAndreasP/SanLib/pulls).  
   Please consult the [CONTRIBUTING.md](CONTRIBUTING.md) on the contribution guidelines and how to do a Pull Request.
 * *Using a part of this mod* - If you feel like your mod only needs a part of what this has to offer, copy that part **to a new package / path** to prevent any potential conflicts occurring. **Please respect the aforementioned license**.

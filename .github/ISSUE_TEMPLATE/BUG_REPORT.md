@@ -7,13 +7,13 @@ assignees: ''
 
 ---
 
-####Process attempted
+#### Process attempted
 <!-- e.g. trying to launch Minecraft, break a block, etc. -->
 
-####What happened
+#### What happened
 <!-- describe the faulty behavior you've been experiencing, e.g. the game crashed -->
 
-####More info
+#### More info
 * *Minecraft Forge version*: <!-- your MinecraftForge version, e.g. 1.12.2-14.23.5.2811 -->
 * *SanLib version*: <!-- your version of SanLib, e.g. 1.12.2-1.6.0 -->
 * *latest.log file*: <!-- a link to a gist of your latest.log from your .minecraft/logs or server directory, e.g. https://gist.github.com/SanAndreasP/3ee93b2294746d1e5611c21294eec98a -->
