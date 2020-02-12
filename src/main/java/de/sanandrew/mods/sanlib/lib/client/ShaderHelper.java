@@ -1,11 +1,8 @@
-/*
- * ****************************************************************************************************************
- * Authors:   Vazkii, modified by SanAndreasP
- * Copyright: Vazkii, SanAndreasP
- * License:   Botania License
- * http://botaniamod.net/license.php
- * *****************************************************************************************************************
- */
+////////////////////////////////////////////////////////////////////////////////
+// This file is subject to the terms and conditions defined in the             /
+// file '.github/LICENSE.md', which is part of this source code package.       /
+////////////////////////////////////////////////////////////////////////////////
+
 package de.sanandrew.mods.sanlib.lib.client;
 
 import de.sanandrew.mods.sanlib.SLibConfig;

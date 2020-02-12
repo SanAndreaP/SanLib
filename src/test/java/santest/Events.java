@@ -1,9 +1,9 @@
-package santest;/* ******************************************************************************************************************
- * Authors:   SanAndreasP
- * Copyright: SanAndreasP
- * License:   Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
- *                http://creativecommons.org/licenses/by-nc-sa/4.0/
- *******************************************************************************************************************/
+////////////////////////////////////////////////////////////////////////////////
+// This file is subject to the terms and conditions defined in the             /
+// file '.github/LICENSE.md', which is part of this source code package.       /
+////////////////////////////////////////////////////////////////////////////////
+
+package santest;
 
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.Mod;
