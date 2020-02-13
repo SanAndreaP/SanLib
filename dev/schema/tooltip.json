@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/SanAndreasP/SanLib/1.12/dev/schema/tooltip.json",
+  "definitions": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "size":              { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" } },
+        "backgroundColor":   { "$ref": "../sanlib-gui-schema.json#/definitions/color", "default": "0xF0100010" },
+        "borderTopColor":    { "$ref": "../sanlib-gui-schema.json#/definitions/color", "default": "0x505000FF" },
+        "borderBottomColor": { "$ref": "../sanlib-gui-schema.json#/definitions/color", "default": "0x5028007F" },
+        "padding": { "type": "array",
+          "minItems": 0,
+          "maxItems": 4,
+          "items": { "type": "integer" },
+          "default": []
+        },
+        "for": { "type": "string", "default": "" }
+      },
+      "required": ["size"]
+    }
+  }
+}

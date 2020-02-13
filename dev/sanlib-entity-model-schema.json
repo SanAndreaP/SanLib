@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/SanAndreasP/SanLib/1.12/sanlib-entity-model-schema.json",
+  "$id": "https://raw.githubusercontent.com/SanAndreasP/SanLib/1.12/dev/sanlib-entity-model-schema.json",
   "type": "object",
   "properties": {
     "texture": { "type": "string", "default": null },

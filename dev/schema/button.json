@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/SanAndreasP/SanLib/1.12/dev/schema/button.json",
+  "definitions": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "useVanillaTexture":    { "type": "boolean", "default": true },
+        "texture":              { "type": "string", "default": null },
+        "size":                 { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" } },
+        "uvSize":               { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" }, "default": [200, 20] },
+        "uvEnabled":            { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" }, "default": [0, 66] },
+        "uvHover":              { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" }, "default": [0, 86] },
+        "uvDisabled":           { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" }, "default": [0, 106] },
+        "centralTextureWidth":  { "type": "integer", "default": 190 },
+        "centralTextureHeight": { "type": "integer", "default": 14 },
+        "textureSize":          { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" }, "default": [256, 256] },
+        "buttonFunction":       { "type": "integer" },
+        "label":  {
+          "$ref": "../sanlib-gui-schema.json#/definitions/element"
+        },
+        "labelText": {
+          "oneOf": [
+            { "$ref": "text.json#/definitions/data" },
+            { "type": "string" }
+          ]
+        }
+      },
+      "oneOf": [
+        { "required": ["label"] },
+        { "required": ["labelText"] }
+      ],
+      "required": ["size", "buttonFunction"]
+    }
+  }
+}

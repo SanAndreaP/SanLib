@@ -87,10 +87,10 @@ public class Text
                 this.colors.put(this.defaultColor, clr);
                 this.color = clr;
             } else {
-                this.defaultColor = "default";
-                this.colors.put(this.defaultColor, 0xFF000000);
-                this.color = 0xFF000000;
+                this.bakeDefaultColor();
             }
+        } else {
+            this.bakeDefaultColor();
         }
 
         this.text = getBakedText(gui, data);
@@ -112,6 +112,12 @@ public class Text
         if( this.shadow ) {
             this.currHeight += 1;
         }
+    }
+
+    private void bakeDefaultColor() {
+        this.defaultColor = "default";
+        this.colors.put(this.defaultColor, 0xFF000000);
+        this.color = 0xFF000000;
     }
 
     public String getBakedText(IGui gui, JsonObject data) {

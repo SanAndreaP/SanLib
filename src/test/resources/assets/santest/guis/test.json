@@ -16,8 +16,17 @@
       "pos": [80, 0],
       "data": {
         "size": [50, 60],
-        "labelText": "testing\ntesting2",
-        "buttonFunction": 0
+        "buttonFunction": 0,
+        "labelText": "testing\ntesting2"
+      }
+    },
+    {
+      "type": "group_box",
+      "data": {
+        "size": [80, 80],
+        "title": {
+          "text": "test"
+        }
       }
     }
   ],
@@ -43,6 +52,16 @@
             "uvDisabled": [244, 0]
         },
         "elements": [
+          {
+            "type": "item",
+            "alignment": ["right"],
+            "data": {
+              "item": {
+                "item": "minecraft:command_block"
+              },
+              "scale": 2.0
+            }
+          },
           {
             "type": "text",
             "pos": [0, 0],

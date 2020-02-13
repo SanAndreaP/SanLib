@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/SanAndreasP/SanLib/1.12/dev/schema/scroll_area.json",
+  "definitions": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "areaSize":        { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" } },
+        "scrollbarHeight": { "type": "integer" },
+        "rasterized":      { "type": "boolean", "default": false },
+        "maxScrollDelta":  { "type": "number", "default": 1.0 },
+        "scrollbarPos":    { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" } },
+        "scrollButton": {
+          "allOf": [
+            { "$ref": "texture.json#/definitions/data" },
+            {
+              "properties": { "uvDisabled": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" } } },
+              "required": ["uvDisabled"]
+            }
+          ]
+        },
+        "elements": { "$ref": "../sanlib-gui-schema.json#/definitions/elements" }
+      },
+      "required": ["areaSize", "elements"]
+    }
+  }
+}

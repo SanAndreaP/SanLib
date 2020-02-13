@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/SanAndreasP/SanLib/1.12/dev/schema/group_box.json",
+  "definitions": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "size":           { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" } },
+        "frameColor":     { "$ref": "../sanlib-gui-schema.json#/definitions/color", "default": "0x30000000" },
+        "frameThickness": { "type": "integer", "minimum": 0, "default": 1 },
+        "title":          { "$ref": "text.json#/definitions/data" }
+      },
+      "required": ["size", "title"]
+    }
+  }
+}

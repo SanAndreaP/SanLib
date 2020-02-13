@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/SanAndreasP/SanLib/1.12/dev/schema/rectangle.json",
+  "definitions": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "size":       { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" } },
+        "color":      { "type": "array", "minItems": 1, "maxItems": 2, "items": { "$ref": "../sanlib-gui-schema.json#/definitions/color" }, "default": "0xFFFFFFFF" },
+        "horizontal": { "type": "boolean", "default": false }
+      },
+      "required": ["size"]
+    }
+  }
+}

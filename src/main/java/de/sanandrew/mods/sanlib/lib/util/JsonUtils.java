@@ -259,7 +259,7 @@ public final class JsonUtils
     }
 
     private static ItemStack getStack(JsonObject jsonObj) {
-        String itemName = net.minecraft.util.JsonUtils.getString(jsonObj, "item");
+        String itemName = getStringVal(jsonObj.get("item"));
         Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName));
 
         if( item == null ) {
@@ -281,12 +281,12 @@ public final class JsonUtils
 
             tmp.setTag("tag", nbt);
             tmp.setString("id", itemName);
-            tmp.setInteger("Count", net.minecraft.util.JsonUtils.getInt(jsonObj, "count", 1));
-            tmp.setInteger("Damage", net.minecraft.util.JsonUtils.getInt(jsonObj, "data", 0));
+            tmp.setInteger("Count", getIntVal(jsonObj.get("count"), 1));
+            tmp.setInteger("Damage", getIntVal(jsonObj.get("data"), 0));
 
             stack = new ItemStack(tmp);
         } else {
-            stack = new ItemStack(item, net.minecraft.util.JsonUtils.getInt(jsonObj, "count", 1), net.minecraft.util.JsonUtils.getInt(jsonObj, "data", 0));
+            stack = new ItemStack(item, getIntVal(jsonObj.get("count"), 1), getIntVal(jsonObj.get("data"), 0));
         }
 
         if( !ItemStackUtils.isValid(stack) ) {

@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/SanAndreasP/SanLib/1.12/dev/schema/textfield.json",
+  "definitions": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "size":              { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" } },
+        "text":              { "type": "string", "default": "" },
+        "placeholderText":   { "type": "string", "default": "" },
+        "shadow":            { "type": "boolean", "default": false },
+        "canLoseFocus":      { "type": "boolean", "default": true },
+        "drawBackground":    { "type": "boolean", "default": true },
+        "textColor":         { "$ref": "../sanlib-gui-schema.json#/definitions/color", "default": "0xFFE0E0E0" },
+        "placeholderColor":  { "$ref": "../sanlib-gui-schema.json#/definitions/color", "default": "0xFF707070" },
+        "disabledTextColor": { "$ref": "../sanlib-gui-schema.json#/definitions/color", "default": "0xFF707070" },
+        "font":              { "$ref": "text.json#/definitions/font" }
+      },
+      "required": ["size"]
+    }
+  }
+}

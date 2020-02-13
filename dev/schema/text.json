@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/SanAndreasP/SanLib/1.12/dev/schema/text.json",
+  "definitions": {
+    "font": {
+      "type": "object",
+      "properties": {
+        "texture":       { "type": "string" },
+        "unicode":       { "type": "boolean" },
+        "bidirectional": { "type": "boolean" }
+      },
+      "required": ["texture"],
+      "default": null
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "color": {
+          "oneOf": [
+            { "$ref": "../sanlib-gui-schema.json#/definitions/color" },
+            { "type": "object", "patternProperties": { ".": { "$ref": "../sanlib-gui-schema.json#/definitions/color" } } }
+          ],
+          "default": "0xFF000000"
+        },
+        "text":       { "type": "string" },
+        "shadow":     { "type": "boolean", "default": false },
+        "wrapWidth":  { "type": "integer", "default": 0, "minimum": 0 },
+        "lineHeight": { "type": "integer", "default": 9 },
+        "font":       { "$ref": "#/definitions/font" }
+      },
+      "required": ["text"]
+    }
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/SanAndreasP/SanLib/1.12/dev/sanlib-gui-schema.json",
+  "definitions": {
+    "color": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{8}$"
+    },
+    "item": {
+      "type": "object",
+      "properties": {
+        "item":  { "type": "string" },
+        "count": { "type": "integer", "minimum": 1, "default": 1 },
+        "data":  { "type": "integer", "minimum": 0, "maximum": 65535, "default": 0 },
+        "nbt":   { "type": "object", "default": null }
+      },
+      "required": ["item"]
+    },
+    "element": {
+      "type": "object",
+      "properties": {
+        "type":      { "type": "string" },
+        "id":        { "type": "string", "default": null },
+        "pos":       { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" }, "default": [0, 0] },
+        "alignment": { "type": "array", "minItems": 1, "maxItems": 2, "items": { "type": "string", "enum": ["left", "center", "right", "justify", "top", "bottom"] }, "default": ["left", "top"] }
+      },
+      "allOf": [
+        {
+          "if":   { "properties": { "type": { "const": "button" } } },
+          "then": { "properties": { "data": { "$ref": "schema/button.json#/definitions/data" } } }
+        },
+        {
+          "if":   { "properties": { "type": { "pattern": "^(dynamic_text|container_name|rflux_text)$" } } },
+          "then": { "properties": { "data": { "$ref": "schema/text_dyn.json#/definitions/data"} } }
+        },
+        {
+          "if":   { "properties": { "type": { "const": "group_box" } } },
+          "then": { "properties": { "data": { "$ref": "schema/group_box.json#/definitions/data"} } }
+        },
+        {
+          "if":   { "properties": { "type": { "const": "item" } } },
+          "then": { "properties": { "data": { "$ref": "schema/item.json#/definitions/data"} } }
+        },
+        {
+          "if":   { "properties": { "type": { "const": "rectangle" } } },
+          "then": { "properties": { "data": { "$ref": "schema/rectangle.json#/definitions/data"} } }
+        },
+        {
+          "if":   { "properties": { "type": { "const": "scroll_area" } } },
+          "then": { "properties": { "data": { "$ref": "schema/scroll_area.json#/definitions/data"} } }
+        },
+        {
+          "if":   { "properties": { "type": { "const": "text" } } },
+          "then": { "properties": { "data": { "$ref": "schema/text.json#/definitions/data" } } }
+        },
+        {
+          "if":   { "properties": { "type": { "const": "textfield" } } },
+          "then": { "properties": { "data": { "$ref": "schema/textfield.json#/definitions/data" } } }
+        },
+        {
+          "if":   { "properties": { "type": { "pattern": "^(texture|rflux_bar)$" } } },
+          "then": { "properties": { "data": { "$ref": "schema/texture.json#/definitions/data" } } }
+        },
+        {
+          "if":   { "properties": { "type": { "const": "tooltip" } } },
+          "then": { "properties": { "data": { "$ref": "schema/texture.json#/definitions/data" } } },
+          "else": { "properties": { "data": { "type": "object", "default": {} } } }
+        }
+      ],
+      "required": ["type"]
+    },
+    "elements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/element"
+      }
+    }
+  },
+  "type": "object",
+  "properties": {
+    "width":   { "type": "integer", "minimum": 0, "default": 0 },
+    "height":  { "type": "integer", "minimum": 0, "default": 0 },
+    "texture": { "type": "string", "default": null },
+    "parent":  { "type": "string", "default": null },
+    "backgroundElements":   { "$ref": "#/definitions/elements" },
+    "foregroundElements":   { "$ref": "#/definitions/elements" }
+  },
+  "required": ["backgroundElements", "foregroundElements"]
+}

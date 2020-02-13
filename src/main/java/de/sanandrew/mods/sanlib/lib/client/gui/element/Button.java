@@ -31,9 +31,9 @@ import java.util.Map;
 public class Button
         extends ElementParent<String>
 {
-    public static final String LABEL = "label";
-
     public static final ResourceLocation ID = new ResourceLocation("button");
+
+    public static final String LABEL = "label";
 
     public ResourceLocation texture;
     public int[]            size;
@@ -42,8 +42,8 @@ public class Button
     public int[]            uvHover;
     public int[]            uvDisabled;
     public int[]            uvSize;
-    public int              ctHorizontal;
-    public int              ctVertical;
+    public int              centralTextureWidth;
+    public int              centralTextureHeight;
     public int              buttonFunction;
 
     protected GuiButton buttonDelegate;
@@ -61,7 +61,7 @@ public class Button
         } else {
             lbl = data.get("labelText");
             if( lbl != null ) {
-                int[] lblPos = new int[] { this.size[0] / 2, this.size[1] / 2};
+                int[] lblPos = new int[] { this.size[0] / 2, this.size[1] / 2 };
                 if( lbl.isJsonPrimitive() ) {
                     JsonObject colors = new JsonObject();
                     colors.addProperty("default", "0xFFFFFFFF");
@@ -98,8 +98,8 @@ public class Button
         this.uvEnabled = JsonUtils.getIntArray(data.get("uvEnabled"), new int[] { 0, 66 }, Range.is(2));
         this.uvHover = JsonUtils.getIntArray(data.get("uvHover"), new int[] { this.uvEnabled[0], this.uvEnabled[1] + this.uvSize[1] }, Range.is(2));
         this.uvDisabled = JsonUtils.getIntArray(data.get("uvDisabled"), new int[] { this.uvEnabled[0], this.uvEnabled[1] - this.uvSize[1] }, Range.is(2));
-        this.ctHorizontal = JsonUtils.getIntVal(data.get("ctHorizontal"), 190);
-        this.ctVertical = JsonUtils.getIntVal(data.get("ctVertical"), 14);
+        this.centralTextureWidth = JsonUtils.getIntVal(data.get("centralTextureWidth"), 190);
+        this.centralTextureHeight = JsonUtils.getIntVal(data.get("centralTextureHeight"), 14);
         this.buttonFunction = JsonUtils.getIntVal(data.get("buttonFunction"));
         this.textureSize = JsonUtils.getIntArray(data.get("textureSize"), new int[] { 256, 256 }, Range.is(2));
 
@@ -178,8 +178,8 @@ public class Button
         if( this.uvSize[0] == this.size[0] && this.uvSize[1] == this.size[1] ) {
             Gui.drawModalRectWithCustomSizedTexture(0, 0, uv[0], uv[1], this.size[0], this.size[1], this.textureSize[0], this.textureSize[1]);
         } else {
-            int cornerWidth = (this.uvSize[0] - this.ctHorizontal) / 2;
-            int cornerHeight = (this.uvSize[1] - this.ctVertical) / 2;
+            int cornerWidth = (this.uvSize[0] - this.centralTextureWidth) / 2;
+            int cornerHeight = (this.uvSize[1] - this.centralTextureHeight) / 2;
 
             Gui.drawModalRectWithCustomSizedTexture(0, 0,
                                                     uv[0], uv[1],
