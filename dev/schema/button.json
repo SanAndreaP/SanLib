@@ -26,10 +26,6 @@
           ]
         }
       },
-      "oneOf": [
-        { "required": ["label"] },
-        { "required": ["labelText"] }
-      ],
       "required": ["size", "buttonFunction"]
     }
   }
