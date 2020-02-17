@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Unexpected or broken behavior of SanLib
+about: new features or methods exposable by SanLib
 title: ''
 labels: enhancement
 assignees: ''
