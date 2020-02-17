@@ -49,10 +49,10 @@ public class Tooltip
 
     @Override
     public void buildChildren(IGui gui, JsonObject data, Map<String, GuiElementInst> listToBuild) {
-        listToBuild.put(CONTENT, getContent(gui, data));
+        listToBuild.put(CONTENT, this.getContent(gui, data));
     }
 
-    public static GuiElementInst getContent(IGui gui, JsonObject data) {
+    public GuiElementInst getContent(IGui gui, JsonObject data) {
         GuiElementInst lbl;
         if( data.has("content") ) {
             lbl = JsonUtils.GSON.fromJson(data.get("content"), GuiElementInst.class);
