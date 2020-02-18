@@ -9,6 +9,7 @@ import com.google.gson.JsonObject;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
+import de.sanandrew.mods.sanlib.lib.util.LangUtils;
 import net.minecraft.util.ResourceLocation;
 
 @SuppressWarnings("WeakerAccess")
@@ -26,6 +27,11 @@ public class DynamicText
         if( this.key == null ) {
             this.key = JsonUtils.getStringVal(data.get("key"));
         }
+    }
+
+    @Override
+    public String getBakedText(IGui gui, JsonObject data) {
+        return data.has("text") ? LangUtils.translate(JsonUtils.getStringVal(data.get("text"))) : "";
     }
 
     @Override
