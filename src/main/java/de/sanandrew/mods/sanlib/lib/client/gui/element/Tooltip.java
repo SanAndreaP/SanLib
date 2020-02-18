@@ -99,7 +99,7 @@ public class Tooltip
             Gui.drawRect(xPos - 3, yPos - 3,          xPos + width + 3, yPos - 2,          this.borderTopColor);
             Gui.drawRect(xPos - 3, yPos + height + 2, xPos + width + 3, yPos + height + 3, this.borderBottomColor);
 
-            super.render(gui, partTicks, x + this.padding[3], y + this.padding[0], mouseX, mouseY, data);
+            super.render(gui, partTicks, xPos + this.padding[3], yPos + this.padding[0], mouseX, mouseY, data);
 
             GlStateManager.enableDepth();
         }
