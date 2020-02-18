@@ -5,6 +5,13 @@
 
 package de.sanandrew.mods.sanlib;
 
+import de.sanandrew.mods.sanlib.lib.IngredientNBTSanLib;
+import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
+import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.crafting.CraftingHelper;
+import net.minecraftforge.common.crafting.IIngredientFactory;
+import net.minecraftforge.common.crafting.IngredientNBT;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLFingerprintViolationEvent;
@@ -29,6 +36,9 @@ public class SanLib
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         SLibConfig.initConfiguration(event);
+
+        CraftingHelper.register(new ResourceLocation(Constants.ID, "item_nbt"),
+                                (IIngredientFactory) (context, json) -> new IngredientNBTSanLib(JsonUtils.getItemStack(json)));
 
         proxy.loadModLexica(event.getAsmData());
 
