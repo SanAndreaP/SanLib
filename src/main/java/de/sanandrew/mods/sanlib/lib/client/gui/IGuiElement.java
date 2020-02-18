@@ -42,6 +42,8 @@ public interface IGuiElement
 
     default boolean keyTyped(IGui gui, char typedChar, int keyCode) throws IOException { return false; }
 
+    default boolean forceRenderUpdate(IGui gui) { return false; }
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
     @interface Priorities

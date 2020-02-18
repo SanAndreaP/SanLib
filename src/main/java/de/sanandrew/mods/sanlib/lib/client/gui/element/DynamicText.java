@@ -21,10 +21,6 @@ public class DynamicText
 
     @Override
     public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) {
-        if( !(gui instanceof IGuiDynamicText) ) {
-            throw new RuntimeException("Cannot use dynamic_text on a GUI which doesn't implement IGuiDynamicText");
-        }
-
         super.bakeData(gui, data, inst);
 
         if( this.key == null ) {

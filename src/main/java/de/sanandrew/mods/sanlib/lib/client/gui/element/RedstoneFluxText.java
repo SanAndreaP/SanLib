@@ -8,6 +8,7 @@ package de.sanandrew.mods.sanlib.lib.client.gui.element;
 import com.google.gson.JsonObject;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
+import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 
 public class RedstoneFluxText
@@ -17,8 +18,8 @@ public class RedstoneFluxText
 
     @Override
     public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) {
-        if( !data.has("color") ) data.addProperty("color", "0xFFFFFFFF");
-        if( !data.has("shadow") ) data.addProperty("shadow", true);
+        JsonUtils.addDefaultJsonProperty(data, "color", "0xFFFFFFFF");
+        JsonUtils.addDefaultJsonProperty(data, "shadow", true);
 
         super.bakeData(gui, data, inst);
     }
@@ -26,11 +27,6 @@ public class RedstoneFluxText
     @Override
     public String getBakedText(IGui gui, JsonObject data) {
         return "";
-    }
-
-    @Override
-    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
-        super.render(gui, partTicks, x, y, mouseX, mouseY, data);
     }
 
     @Override

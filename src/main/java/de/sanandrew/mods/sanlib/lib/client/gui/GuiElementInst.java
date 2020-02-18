@@ -16,12 +16,12 @@ import java.util.function.Supplier;
 @SuppressWarnings({"WeakerAccess", "unused"})
 public final class GuiElementInst
 {
-    public String type;
-    public String id;
-    public int[] pos = new int[2];
-    public JsonObject data;
+    public String      type;
+    public String      id;
+    public int[]       pos = new int[2];
+    public JsonObject  data;
     public IGuiElement element;
-    public String[] alignment;
+    public String[]    alignment;
     public boolean     firstRenderUpdate;
 
     private boolean visible = true;

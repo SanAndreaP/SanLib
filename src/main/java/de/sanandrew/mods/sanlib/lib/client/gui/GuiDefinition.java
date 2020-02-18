@@ -173,7 +173,7 @@ public class GuiDefinition
     public static void renderElement(IGui gui, int x, int y, int mouseX, int mouseY, float partialTicks, GuiElementInst e) {
         IGuiElement ie = e.get();
         if( e.isVisible() ) {
-            if( !e.firstRenderUpdate ) {
+            if( !e.firstRenderUpdate || ie.forceRenderUpdate(gui) ) {
                 e.firstRenderUpdate = true;
                 ie.update(gui, e.data);
             }

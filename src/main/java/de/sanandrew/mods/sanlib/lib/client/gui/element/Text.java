@@ -62,6 +62,8 @@ public class Text
     protected int                    currHeight;
     protected GuiElementInst.Justify justify;
 
+    private String  prevTxt;
+
     @Override
     public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) {
         this.justify = inst.getAlignmentH();
@@ -257,4 +259,15 @@ public class Text
         }
     }
 
+    @Override
+    public boolean forceRenderUpdate(IGui gui) {
+        String s = this.getDynamicText(gui, this.text);
+
+        if( !s.equals(this.prevTxt) ) {
+            this.prevTxt = s;
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
