@@ -63,7 +63,7 @@
         },
         {
           "if":   { "properties": { "type": { "const": "tooltip" } } },
-          "then": { "properties": { "data": { "$ref": "schema/texture.json#/definitions/data" } } },
+          "then": { "properties": { "data": { "$ref": "schema/tooltip.json#/definitions/data" } } },
           "else": { "properties": { "data": { "type": "object", "default": {} } } }
         }
       ],

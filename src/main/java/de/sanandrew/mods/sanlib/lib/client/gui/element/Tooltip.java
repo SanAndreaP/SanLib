@@ -45,6 +45,8 @@ public class Tooltip
         this.setPadding(JsonUtils.getIntArray(data.get("padding"), new int[0], Range.between(0, 4)));
 
         this.visibleFor = gui.getDefinition().getElementById(JsonUtils.getStringVal(data.get("for"), ""));
+
+        super.bakeData(gui, data, inst);
     }
 
     @Override
