@@ -22,11 +22,11 @@ public class DynamicText
 
     @Override
     public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) {
-        super.bakeData(gui, data, inst);
-
         if( this.key == null ) {
             this.key = JsonUtils.getStringVal(data.get("key"));
         }
+
+        super.bakeData(gui, data, inst);
     }
 
     @Override
