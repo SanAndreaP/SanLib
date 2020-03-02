@@ -76,16 +76,29 @@ public class ScrollArea
         this.scrollBtn[1] = new GuiElementInst(scrollBarPos, new Texture(), scrollBtnData).initialize(gui);
         this.scrollBtn[1].get().bakeData(gui, scrollBtnData, this.scrollBtn[1]);
 
-        GuiElementInst[] elements = this.getElements(gui, data);
-        Arrays.stream(elements).forEach(e -> {
-            IGuiElement elemInst = e.get();
-            elemInst.bakeData(gui, e.data, e);
-            this.elements.put(Range.closedOpen(e.pos[1], e.pos[1] + elemInst.getHeight()), e);
-        });
+        this.rebuildElements(gui, data);
 
         this.scroll = 0.0F;
 
         this.rebuildChildren(gui, data, false);
+    }
+
+    public boolean bakeElements() {
+        return true;
+    }
+
+    public void rebuildElements(IGui gui, JsonObject data) {
+        GuiElementInst[] elements = this.getElements(gui, data);
+        boolean bake = this.bakeElements();
+
+        this.elements.clear();
+        Arrays.stream(elements).forEach(e -> {
+            IGuiElement elemInst = e.get();
+            if( bake ) {
+                elemInst.bakeData(gui, e.data, e);
+            }
+            this.elements.put(Range.closedOpen(e.pos[1], e.pos[1] + elemInst.getHeight()), e);
+        });
     }
 
     @Override
