@@ -13,7 +13,7 @@ buildscript {
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-        classpath "com.wynprice.cursemaven:CurseMaven:2.1.1"
+        classpath "com.wynprice.cursemaven:CurseMaven:2.1.0"
     }
 }
 
@@ -71,7 +71,7 @@ repositories {
 dependencies {
     deobfCompile "cofh:RedstoneFlux:1.12-2.0.2.3:universal"
     deobfCompile "net.darkhax.tesla:Tesla-1.12.2:1.0.63"
-    compile "curse.maven:ido:2818003"
+    deobfCompile "curse.maven:ido:2818003"
 }
 
 apply plugin: 'maven'

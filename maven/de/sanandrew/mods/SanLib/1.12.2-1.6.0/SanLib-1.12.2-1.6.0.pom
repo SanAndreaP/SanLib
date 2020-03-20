@@ -5,12 +5,4 @@
   <groupId>de.sanandrew.mods</groupId>
   <artifactId>SanLib</artifactId>
   <version>1.12.2-1.6.0</version>
-  <dependencies>
-    <dependency>
-      <groupId>curse.maven</groupId>
-      <artifactId>ido</artifactId>
-      <version>2818003</version>
-      <scope>compile</scope>
-    </dependency>
-  </dependencies>
 </project>
