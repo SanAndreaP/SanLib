@@ -88,7 +88,7 @@ public final class RenderUtils
     }
 
     /**
-     * Renders an ItemStack into the world.
+     * Renders an ItemStack into the world with a <tt>FIXED</tt> transform type.
      * @param stack The ItemStack to be rendered.
      * @param posX The X coordinate in the world.
      * @param posY The Y coordinate in the world.
@@ -99,6 +99,24 @@ public final class RenderUtils
      * @param scale The scaling factor for the rendering. 1.0F is normal size.
      */
     public static void renderStackInWorld(ItemStack stack, double posX, double posY, double posZ, float rotateX, float rotateY, float rotateZ, double scale) {
+        renderStackInWorld(stack, posX, posY, posZ, rotateX, rotateY, rotateZ, scale, ItemCameraTransforms.TransformType.FIXED);
+    }
+
+        /**
+         * Renders an ItemStack into the world.
+         * @param stack The ItemStack to be rendered.
+         * @param posX The X coordinate in the world.
+         * @param posY The Y coordinate in the world.
+         * @param posZ The Y coordinate in the world.
+         * @param rotateX The rotation (in degrees) along the X axis.
+         * @param rotateY The rotation (in degrees) along the Y axis.
+         * @param rotateZ The rotation (in degrees) along the Z axis.
+         * @param scale The scaling factor for the rendering. 1.0F is normal size.
+         * @param transformType The transform type of the render.
+         */
+    public static void renderStackInWorld(ItemStack stack, double posX, double posY, double posZ, float rotateX, float rotateY, float rotateZ, double scale,
+                                          ItemCameraTransforms.TransformType transformType)
+    {
         if( renderItem == null ) {
             renderItem = Minecraft.getMinecraft().getRenderItem();
         }
@@ -111,7 +129,7 @@ public final class RenderUtils
         GlStateManager.rotate(rotateZ, 0.0F, 0.0F, 1.0F);
         GlStateManager.scale(scale, scale, scale);
 
-        renderItem.renderItem(stack, ItemCameraTransforms.TransformType.FIXED);
+        renderItem.renderItem(stack, transformType);
 
         GlStateManager.popMatrix();
     }
