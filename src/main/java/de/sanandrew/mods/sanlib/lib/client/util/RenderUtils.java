@@ -10,8 +10,13 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.RenderItem;
+import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHandSide;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -99,7 +104,7 @@ public final class RenderUtils
      * @param scale The scaling factor for the rendering. 1.0F is normal size.
      */
     public static void renderStackInWorld(ItemStack stack, double posX, double posY, double posZ, float rotateX, float rotateY, float rotateZ, double scale) {
-        renderStackInWorld(stack, posX, posY, posZ, rotateX, rotateY, rotateZ, scale, ItemCameraTransforms.TransformType.FIXED);
+        renderStackInWorld(stack, posX, posY, posZ, rotateX, rotateY, rotateZ, scale, ItemCameraTransforms.TransformType.FIXED, null);
     }
 
         /**
@@ -117,6 +122,13 @@ public final class RenderUtils
     public static void renderStackInWorld(ItemStack stack, double posX, double posY, double posZ, float rotateX, float rotateY, float rotateZ, double scale,
                                           ItemCameraTransforms.TransformType transformType)
     {
+        renderStackInWorld(stack, posX, posY, posZ, rotateX, rotateY, rotateZ, scale, transformType, null);
+    }
+
+
+    public static void renderStackInWorld(ItemStack stack, double posX, double posY, double posZ, float rotateX, float rotateY, float rotateZ, double scale,
+                                          ItemCameraTransforms.TransformType transformType, EntityLivingBase entity)
+    {
         if( renderItem == null ) {
             renderItem = Minecraft.getMinecraft().getRenderItem();
         }
@@ -129,7 +141,11 @@ public final class RenderUtils
         GlStateManager.rotate(rotateZ, 0.0F, 0.0F, 1.0F);
         GlStateManager.scale(scale, scale, scale);
 
-        renderItem.renderItem(stack, transformType);
+        if( entity != null ) {
+            renderItem.renderItem(stack, entity, transformType, entity.getPrimaryHand() == EnumHandSide.LEFT);
+        } else {
+            renderItem.renderItem(stack, transformType);
+        }
 
         GlStateManager.popMatrix();
     }
