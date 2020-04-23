@@ -30,7 +30,6 @@ import net.minecraft.client.renderer.block.model.SanLibDeserializers;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.EnumFacing;
@@ -40,10 +39,8 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.animation.ModelBlockAnimation;
 import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad;
 import net.minecraftforge.client.model.pipeline.VertexLighterFlat;
-import net.minecraftforge.common.ForgeModContainer;
 import net.minecraftforge.common.model.IModelState;
 import net.minecraftforge.common.model.ITransformation;
-import net.minecraftforge.fml.client.FMLClientHandler;
 import org.apache.logging.log4j.Level;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -56,6 +53,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 
 @SuppressWarnings("deprecation")
@@ -93,7 +91,7 @@ public class EmissiveModel
             SanLib.LOG.log(Level.ERROR, "Cannot deserialize model JSON", e);
         }
 
-        this.parent = getVanillaModelWrapper(loader, location, model, animation );
+        this.parent = getVanillaModelWrapper(loader, location, model, animation);
     }
 
     @Override
@@ -127,7 +125,7 @@ public class EmissiveModel
 
     private static <M extends IModel> M getVanillaModelWrapper(ModelLoader modelLoader, ResourceLocation location, ModelBlock model, ModelBlockAnimation animation) {
         Object vmw = ReflectionUtils.getNew("net.minecraftforge.client.model.ModelLoader$VanillaModelWrapper",
-                                            new Class[] {ResourceLocation.class, ModelBlock.class, boolean.class, ModelBlockAnimation.class},
+                                            new Class[] {ModelLoader.class, ResourceLocation.class, ModelBlock.class, boolean.class, ModelBlockAnimation.class},
                                             modelLoader, location, model, false, animation);
 
         return ReflectionUtils.getCasted(vmw);
@@ -142,7 +140,7 @@ public class EmissiveModel
         public BlockPart deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             BlockPart part = this.parent.deserialize(json, typeOfT, context);
 
-            part.mapFaces.forEach((face, partFace) -> EmissiveModel.this.emissiveFlags.put(partFace, JsonUtils.getBoolVal(json.getAsJsonObject().get("emissive"))));
+            part.mapFaces.forEach((face, partFace) -> EmissiveModel.this.emissiveFlags.put(partFace, JsonUtils.getBoolVal(json.getAsJsonObject().get("emissive"), false)));
 
             return part;
         }
@@ -188,10 +186,6 @@ public class EmissiveModel
                                                         lightmap[0] = 0.007F;
                                                         lightmap[1] = 0.007F;
                                                     }
-//                                                    @Override
-//                                                    public void setQuadTint( int tint ) {
-//                                                        // Tint requires a block state which we don't have at this point
-//                                                    }
                                                 };
 
                 vlf.setParent( builder );
@@ -211,7 +205,7 @@ public class EmissiveModel
     private static final VertexFormat ITEM_FORMAT_WITH_LIGHTMAP = new VertexFormat(DefaultVertexFormats.ITEM).addElement(DefaultVertexFormats.TEX_2S);
     @SuppressWarnings("ObjectEquality")
     private static VertexFormat getFormatWithLightMap(VertexFormat format) {
-        if( isLightMapDisabled() ) {
+        if( !EmissiveModelLoader.isLightMapEnabled() ) {
             return format;
         }
 
@@ -220,17 +214,14 @@ public class EmissiveModel
         } else if( format == DefaultVertexFormats.ITEM ) {
             return ITEM_FORMAT_WITH_LIGHTMAP;
         } else if( !format.hasUvOffset(1) ) {
-            VertexFormat result = new VertexFormat(format);
-
-            result.addElement(DefaultVertexFormats.TEX_2S);
-
-            return result;
+            return new VertexFormat(format).addElement(DefaultVertexFormats.TEX_2S);
         }
 
         return format;
     }
 
-    private static boolean isLightMapDisabled() {
-        return FMLClientHandler.instance().hasOptifine() || !ForgeModContainer.forgeLightPipelineEnabled;
+    @Override
+    public Optional<ModelBlock> asVanillaModel() {
+        return this.parent.asVanillaModel();
     }
 }

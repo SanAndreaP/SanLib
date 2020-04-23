@@ -13,6 +13,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.ICustomModelLoader;
 import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.client.model.SanLibVanillaLoaderGetter;
+import net.minecraftforge.common.ForgeModContainer;
+import net.minecraftforge.fml.client.FMLClientHandler;
 
 import java.io.InputStreamReader;
 
@@ -43,10 +45,13 @@ public class EmissiveModelLoader
     }
 
     @Override
-    public IModel loadModel(ResourceLocation modelLocation) throws Exception {
+    public IModel loadModel(ResourceLocation modelLocation) {
         return new EmissiveModel(modelLocation, this.resourceManager, SanLibVanillaLoaderGetter.get());
     }
 
+    public static boolean isLightMapEnabled() {
+        return !FMLClientHandler.instance().hasOptifine() && ForgeModContainer.forgeLightPipelineEnabled;
+    }
 
     @SuppressWarnings({ "WeakerAccess", "FieldNamingConvention" })
     static class EmissiveMarker
