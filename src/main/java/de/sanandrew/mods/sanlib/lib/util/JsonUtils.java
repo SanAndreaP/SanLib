@@ -23,6 +23,7 @@ import net.minecraftforge.oredict.OreDictionary;
 import org.apache.commons.lang3.Range;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Arrays;
@@ -460,5 +461,10 @@ public final class JsonUtils
 
     public static JsonObject deepCopy(JsonObject obj) {
         return JsonUtils.GSON.fromJson(JsonUtils.GSON.toJson(obj), JsonObject.class);
+    }
+
+    @Nullable
+    public static <T> T gsonDeserialize(Gson gsonIn, Reader readerIn, Class<T> adapter, boolean lenient) {
+        return net.minecraft.util.JsonUtils.gsonDeserialize(gsonIn, readerIn, adapter, lenient);
     }
 }

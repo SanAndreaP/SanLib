@@ -6,9 +6,13 @@
 package de.sanandrew.mods.sanlib.lib.util;
 
 import com.google.common.collect.Maps;
+import org.objectweb.asm.Type;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -21,13 +25,19 @@ public final class ReflectionUtils
      * A map of cached Methods, used to make reflection more efficient. The key is the class
      * name, followed by the SRG method name and an underscore in between.
      */
-    private static Map<String, Method> cachedMethods = Maps.newHashMap();
+    private static final Map<String, Method> CACHED_METHODS = Maps.newHashMap();
     
     /**
      * A map of cached Fields, used to make reflection more efficient. Tke key is the class
      * name, followed by the SRG field name and an underscore in between.
      */
-    private static Map<String, Field> cachedFields = Maps.newHashMap();
+    private static final Map<String, Field> CACHED_FIELDS = Maps.newHashMap();
+
+    /**
+     * A map of cached Constructors, used to make reflection more efficient. Tke key is the class
+     * name, followed by the argument types with underscores in between.
+     */
+    private static final Map<String, Constructor<?>> CACHED_CTOR = Maps.newHashMap();
     
     /**
      * A simple check to see if a class exists without initializing it.
@@ -129,8 +139,8 @@ public final class ReflectionUtils
     public static Field getCachedField(Class<?> classToAccess, String mcpName, String srgName) {
         String key = classToAccess.getCanonicalName() + '_' + srgName;
         
-        if( cachedFields.containsKey(key) ) {
-            return cachedFields.get(key);
+        if( CACHED_FIELDS.containsKey(key) ) {
+            return CACHED_FIELDS.get(key);
         }
             
         return cacheAccessedField(classToAccess, mcpName, srgName);
@@ -152,13 +162,13 @@ public final class ReflectionUtils
         try {
             method = classToAccess.getDeclaredField(srgName);
             method.setAccessible(true);
-            cachedFields.put(key, method);
+            CACHED_FIELDS.put(key, method);
             return method;
         } catch (Throwable ex1) {
             try {
                 method = classToAccess.getDeclaredField(mcpName);
                 method.setAccessible(true);
-                cachedFields.put(key, method);
+                CACHED_FIELDS.put(key, method);
                 return method;
             } catch( Throwable ex2 ) {
                 throw new UnableToFindFieldException(ex2);
@@ -179,8 +189,8 @@ public final class ReflectionUtils
     public static Method getCachedMethod(Class<?> classToAccess, String mcpName, String srgName, Class<?>... parameterTypes) {
         String key = classToAccess.getCanonicalName() + '_' + srgName;
         
-        if( cachedMethods.containsKey(key) ) {
-            return cachedMethods.get(key);
+        if( CACHED_METHODS.containsKey(key) ) {
+            return CACHED_METHODS.get(key);
         }
             
         return cacheAccessedMethod(classToAccess, mcpName, srgName, parameterTypes);
@@ -203,17 +213,65 @@ public final class ReflectionUtils
         try {
             method = classToAccess.getDeclaredMethod(srgName, parameterTypes);
             method.setAccessible(true);
-            cachedMethods.put(key, method);
+            CACHED_METHODS.put(key, method);
             return method;
         } catch( Throwable ex1 ) {
             try {
                 method = classToAccess.getDeclaredMethod(mcpName, parameterTypes);
                 method.setAccessible(true);
-                cachedMethods.put(key, method);
+                CACHED_METHODS.put(key, method);
                 return method;
             } catch( Throwable ex2 ) {
                 throw new UnableToFindMethodException(ex2);
             }
+        }
+    }
+
+    /**
+     * Retrieves a new instance of a given class by invoking its constructor from the constructor cache. This is used to instanciate private classes
+     * or non-private classes with private constructors.
+     *
+     * @param classToAccess: The Class that needs to be instanciated.
+     * @param parameterTypes: The parameters that are used by the method.
+     * @return A Method object which represents the method being found.
+     */
+    public static Object getNew(String classToAccess, Class<?>[] parameterTypes, Object... parameters) {
+        String key = classToAccess + '_' + String.join("", Arrays.stream(parameterTypes).map(Type::getDescriptor).toArray(String[]::new));
+        Constructor<?> c;
+
+        if( CACHED_CTOR.containsKey(key) ) {
+            c = CACHED_CTOR.get(key);
+        } else {
+            c = cacheAccessedConstructor(classToAccess, parameterTypes);
+        }
+
+        try {
+            return c.newInstance(parameters);
+        } catch( InstantiationException | IllegalAccessException | InvocationTargetException e ) {
+            throw new UnableToInstantiateException(e);
+        }
+    }
+
+    /**
+     * Caches a constructor accessed through reflection to a cache. This makes it easier and more
+     * efficient to access the constructor more than once. For internal use only.
+     *
+     * @param classToAccess: The Class that contains the method being accessed.
+     * @param parameterTypes: The parameters that are used by this constructor.
+     * @return A Constructor object which represents the newly cached constructor.
+     */
+    private static Constructor<?> cacheAccessedConstructor(String classToAccess, Class<?>... parameterTypes) {
+        Constructor<?> ctor;
+        String key = classToAccess + '_' + String.join("", Arrays.stream(parameterTypes).map(Type::getDescriptor).toArray(String[]::new));
+
+        try {
+            Class<?> clazz = Class.forName(classToAccess);
+            ctor = clazz.getDeclaredConstructor(parameterTypes);
+            ctor.setAccessible(true);
+            CACHED_CTOR.put(key, ctor);
+            return ctor;
+        } catch( Throwable ex ) {
+            throw new UnableToAccessCtorException(ex);
         }
     }
     
@@ -302,6 +360,36 @@ public final class ReflectionUtils
          * @param exception: An instance of the exception being thrown.
          */
         public UnableToFindFieldException(Throwable exception) {
+            super(exception);
+        }
+    }
+
+    public static class UnableToAccessCtorException
+            extends RuntimeException
+    {
+        private static final long serialVersionUID = -8782108462439942148L;
+
+        /**
+         * An exception thrown when an attempt to access a constructor is made, but it failed to do so.
+         *
+         * @param exception: An instance of the exception being thrown.
+         */
+        public UnableToAccessCtorException(Throwable exception) {
+            super(exception);
+        }
+    }
+
+    public static class UnableToInstantiateException
+            extends RuntimeException
+    {
+        private static final long serialVersionUID = -8782108462439942148L;
+
+        /**
+         * An exception thrown when an attempt to instantiate a class via constructor is made, but it failed to do so.
+         *
+         * @param exception: An instance of the exception being thrown.
+         */
+        public UnableToInstantiateException(Throwable exception) {
             super(exception);
         }
     }
