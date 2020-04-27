@@ -18,8 +18,10 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ResourceLocation;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -62,7 +64,8 @@ public class Text
     protected int                    currHeight;
     protected GuiElementInst.Justify justify;
 
-    private String  prevTxt;
+    private String       prevTxt;
+    private List<String> renderedLines = new ArrayList<>();
 
     @Override
     public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) {
@@ -145,7 +148,8 @@ public class Text
     }
 
     @Override
-    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
+    public void update(IGui gui, JsonObject data) {
+        this.renderedLines.clear();
         String s = this.getDynamicText(gui, this.text);
 
         this.currWidth = this.getTextWidth(gui);
@@ -157,7 +161,12 @@ public class Text
         }
         this.currHeight = ln.length * this.lineHeight;
 
-        for( String sln : ln ) {
+        this.renderedLines.addAll(Arrays.asList(ln));
+    }
+
+    @Override
+    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
+        for( String sln : this.renderedLines ) {
             this.renderLine(sln, x, y);
             y += this.lineHeight;
         }
