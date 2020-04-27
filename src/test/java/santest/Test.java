@@ -33,13 +33,13 @@ public class Test
 
     @Mod.EventHandler
     public void onPreInit(FMLPreInitializationEvent event) {
-//        testConfig(event.getSuggestedConfigurationFile());
-//        testTickFormat();
+        testConfig(event.getSuggestedConfigurationFile());
+        testTickFormat();
     }
 
     @Mod.EventHandler
     public void onPostInit(FMLPostInitializationEvent event) {
-//        testNbtMethods();
+        testNbtMethods();
     }
 
     private static void testTickFormat() {
