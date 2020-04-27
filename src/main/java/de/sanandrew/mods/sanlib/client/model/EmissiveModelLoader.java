@@ -5,6 +5,7 @@
 
 package de.sanandrew.mods.sanlib.client.model;
 
+import de.sanandrew.mods.sanlib.SLibConfig;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResource;
@@ -31,6 +32,10 @@ public class EmissiveModelLoader
 
     @Override
     public boolean accepts(ResourceLocation modelLocation) {
+        if( !SLibConfig.Client.enableEmissiveTextures ) {
+            return false;
+        }
+
         try( IResource resource = Minecraft.getMinecraft()
                                            .getResourceManager()
                                            .getResource(new ResourceLocation(modelLocation.getNamespace(), modelLocation.getPath() + ".json"));

@@ -53,7 +53,7 @@ public class ClientProxy
     public void preInit(FMLPreInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new ClientTickHandler());
 
-        if( EmissiveModelLoader.isLightMapEnabled() ) {
+        if( SLibConfig.Client.enableEmissiveTextures && EmissiveModelLoader.isLightMapEnabled() ) {
             ModelLoaderRegistry.registerLoader(new EmissiveModelLoader());
         }
 

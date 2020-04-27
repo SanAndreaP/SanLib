@@ -110,6 +110,7 @@ public class EmissiveModel
         this.loader.faceBakery = new EmissiveFaceBakery();
         IBakedModel model = this.parent.bake( state, format, bakedTextureGetter );
         this.loader.faceBakery = prevBakery;
+
         return model;
     }
 
@@ -145,28 +146,6 @@ public class EmissiveModel
             return part;
         }
     }
-
-//    @SideOnly(Side.CLIENT)
-//    static class EmissiveBlockPartFaceDeserializer
-//            implements JsonDeserializer<BlockPartFace>
-//    {
-//        @Override
-//        public BlockPartFace deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-//            JsonObject  jObj = json.getAsJsonObject();
-//            EnumFacing  cullFace = parseCullFace(jObj);
-//            int         tintIndex = JsonUtils.getInt(jObj, "tintindex", -1);
-//            String      texture = JsonUtils.getString(jObj, "texture");
-//            BlockFaceUV faceUV = context.deserialize(jObj, BlockFaceUV.class);
-//
-//            return new BlockPartFace(cullFace, tintIndex, texture, faceUV);
-//        }
-//
-//        @Nullable
-//        private static EnumFacing parseCullFace(JsonObject object) {
-//            String s = JsonUtils.getString(object, "cullface", "");
-//            return EnumFacing.byName(s);
-//        }
-//    }
 
     public class EmissiveFaceBakery
            extends FaceBakery

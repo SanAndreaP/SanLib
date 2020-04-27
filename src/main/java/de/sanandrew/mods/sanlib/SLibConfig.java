@@ -32,6 +32,8 @@ public final class SLibConfig
         public static boolean allowCustomSanModel = true;
         @Value(comment = "Whether or not to allow splash text to be written into the window title.", reqMcRestart = true)
         public static boolean setSplashTitle = true;
+        @Value(comment = "Whether or not to allow emissive textures on supported models. This is managed by Optifine instead, if installed and depends on the resource pack.", reqMcRestart = true)
+        public static boolean enableEmissiveTextures = true;
     }
 
     static void initConfiguration(FMLPreInitializationEvent event) {
