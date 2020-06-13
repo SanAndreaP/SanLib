@@ -150,4 +150,15 @@ public abstract class ElementParent<K>
         }
         return h;
     }
+
+    @Override
+    public boolean forceRenderUpdate(IGui gui) {
+        for( GuiElementInst inst : this.getChildren() ) {
+            if( inst.isVisible() && inst.get().forceRenderUpdate(gui) ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
