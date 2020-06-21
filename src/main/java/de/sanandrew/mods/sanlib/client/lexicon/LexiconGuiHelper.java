@@ -52,6 +52,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+@Deprecated
 public class LexiconGuiHelper
         implements ILexiconGuiHelper
 {

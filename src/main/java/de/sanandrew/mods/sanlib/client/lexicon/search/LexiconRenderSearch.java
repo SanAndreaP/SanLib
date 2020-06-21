@@ -29,6 +29,7 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 @SideOnly(Side.CLIENT)
+@Deprecated
 public class LexiconRenderSearch
         implements ILexiconPageRender
 {

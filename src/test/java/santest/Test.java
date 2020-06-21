@@ -7,6 +7,7 @@ package santest;
 
 import de.sanandrew.mods.sanlib.Constants;
 import de.sanandrew.mods.sanlib.SanLib;
+import de.sanandrew.mods.sanlib.client.lexicon2.GuiLexicon;
 import de.sanandrew.mods.sanlib.lib.util.config.Category;
 import de.sanandrew.mods.sanlib.lib.util.config.ConfigUtils;
 import de.sanandrew.mods.sanlib.lib.util.config.EnumExclude;
@@ -16,6 +17,7 @@ import de.sanandrew.mods.sanlib.lib.util.config.Value;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -31,10 +33,14 @@ public class Test
     @Mod.Instance("santest")
     public static Test instance;
 
+    public static int lexiconId;
+
     @Mod.EventHandler
     public void onPreInit(FMLPreInitializationEvent event) {
         testConfig(event.getSuggestedConfigurationFile());
         testTickFormat();
+
+        lexiconId = GuiLexicon.register(new ResourceLocation("santest", "lexicon"));
     }
 
     @Mod.EventHandler

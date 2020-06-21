@@ -16,6 +16,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.List;
 
 @SideOnly(Side.CLIENT)
+@Deprecated
 public class LexiconRenderStandard
         implements ILexiconPageRender
 {

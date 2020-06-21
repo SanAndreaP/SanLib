@@ -122,6 +122,42 @@ public final class JsonUtils
         return json.getAsBoolean();
     }
 
+    public static ResourceLocation getLocation(JsonElement json) {
+        if( json != null && json.isJsonObject() ) {
+            JsonObject jObj = json.getAsJsonObject();
+            String namespace = getStringVal(jObj.get("namespace"), "minecraft");
+            String path = getStringVal(jObj.get("path"), null);
+            if( path != null ) {
+                return new ResourceLocation(namespace, path);
+            } else {
+                throw new JsonSyntaxException("JSON-Object needs at least an element named \"path\" for a Resource Location");
+            }
+        }
+
+        requirePrimitive(json);
+
+        return new ResourceLocation(json.getAsString());
+    }
+
+    public static ResourceLocation getLocation(JsonElement json, ResourceLocation defVal) {
+        if( json != null && json.isJsonObject() ) {
+            JsonObject jObj = json.getAsJsonObject();
+            String namespace = getStringVal(jObj.get("namespace"), "minecraft");
+            String path = getStringVal(jObj.get("path"), null);
+            if( path != null ) {
+                return new ResourceLocation(namespace, path);
+            } else {
+                return defVal;
+            }
+        }
+
+        if( json == null || !json.isJsonPrimitive() ) {
+            return defVal;
+        }
+
+        return new ResourceLocation(json.getAsString());
+    }
+
     private static void requirePrimitive(JsonElement json) {
         if( json == null || json.isJsonNull() ) {
             throw new JsonSyntaxException("Json cannot be null");

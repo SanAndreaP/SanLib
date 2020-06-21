@@ -26,6 +26,7 @@ import org.lwjgl.opengl.ARBShaderObjects;
 import org.lwjgl.opengl.GL11;
 
 @SideOnly(Side.CLIENT)
+@Deprecated
 public class GuiButtonGroup
         extends GuiButton
 {

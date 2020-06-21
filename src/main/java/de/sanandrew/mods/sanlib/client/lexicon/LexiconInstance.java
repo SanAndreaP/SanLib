@@ -27,6 +27,7 @@ import java.util.Map;
 
 @SuppressWarnings({ "WeakerAccess", "deprecation" })
 @SideOnly(Side.CLIENT)
+@Deprecated
 public final class LexiconInstance
         implements ILexiconInst
 {

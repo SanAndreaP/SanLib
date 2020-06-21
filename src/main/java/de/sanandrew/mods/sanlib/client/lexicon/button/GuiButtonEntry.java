@@ -22,6 +22,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nonnull;
 
 @SideOnly(Side.CLIENT)
+@Deprecated
 public class GuiButtonEntry
         extends GuiButton
         implements IGuiButtonEntry

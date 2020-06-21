@@ -11,6 +11,7 @@ import net.minecraft.item.ItemStack;
 
 import javax.annotation.Nonnull;
 
+@Deprecated
 public final class LexiconEntrySearch
         implements ILexiconEntry
 {

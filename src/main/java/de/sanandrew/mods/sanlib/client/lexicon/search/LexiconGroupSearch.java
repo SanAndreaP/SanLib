@@ -10,6 +10,7 @@ import de.sanandrew.mods.sanlib.api.client.lexicon.ILexiconInst;
 import de.sanandrew.mods.sanlib.api.client.lexicon.LexiconGroup;
 import net.minecraft.util.ResourceLocation;
 
+@Deprecated
 public final class LexiconGroupSearch
         extends LexiconGroup
 {

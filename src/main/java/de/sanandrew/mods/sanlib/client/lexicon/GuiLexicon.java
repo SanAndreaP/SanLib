@@ -42,6 +42,7 @@ import java.util.Deque;
 import java.util.List;
 
 @SideOnly(Side.CLIENT)
+@Deprecated
 public class GuiLexicon
         extends GuiScreen
         implements GuiYesNoCallback

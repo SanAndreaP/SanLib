@@ -12,6 +12,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.util.text.TextFormatting;
 
+@Deprecated
 public class GuiButtonLink
         extends GuiButton
         implements IGuiButtonLink

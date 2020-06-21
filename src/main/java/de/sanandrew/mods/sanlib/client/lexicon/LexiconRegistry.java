@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
+@Deprecated
 public class LexiconRegistry
         implements ILexiconRegistry, ISelectiveResourceReloadListener
 {
