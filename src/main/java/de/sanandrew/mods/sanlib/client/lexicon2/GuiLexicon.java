@@ -1,6 +1,9 @@
 package de.sanandrew.mods.sanlib.client.lexicon2;
 
+import com.google.common.collect.Lists;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import de.sanandrew.mods.sanlib.Constants;
 import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiDefinition;
@@ -9,21 +12,36 @@ import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.ScrollArea;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
+import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.resources.IResource;
+import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import org.apache.logging.log4j.Level;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.InvalidObjectException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class GuiLexicon
         extends GuiScreen
         implements IGui
 {
-    private static final List<ResourceLocation> LEXICA = new ArrayList<>();
+    private static final List<Registry> LEXICA = new ArrayList<>();
 
     private final GuiDefinition guiDef;
 
@@ -37,7 +55,7 @@ public class GuiLexicon
     }
 
     public GuiLexicon(int lexiconId) throws IOException {
-        this.guiDef = GuiDefinition.getNewDefinition(getResource(LEXICA.get(lexiconId), "lexicon.json"));
+        this.guiDef = LEXICA.get(lexiconId).load();
 
         this.contentPane = this.guiDef.getElementById("contentPane");
         if( this.contentPane == null ) {
@@ -139,9 +157,10 @@ public class GuiLexicon
     }
 
     public static int register(ResourceLocation lexiconFolder) {
-        LEXICA.add(lexiconFolder);
+        Registry reg = new Registry(lexiconFolder);
+        LEXICA.add(reg);
 
-        return LEXICA.indexOf(lexiconFolder);
+        return LEXICA.indexOf(reg);
     }
 
     private static ResourceLocation getResource(ResourceLocation folder, String path) {
@@ -176,6 +195,57 @@ public class GuiLexicon
             } else {
                 this.globalElements = null;
             }
+        }
+    }
+
+    private static class Registry
+    {
+        private final ResourceLocation path;
+        private final Map<ResourceLocation, Page> pages = new HashMap<>();
+
+        Registry(ResourceLocation path) {
+            this.path = path;
+        }
+
+        private GuiDefinition load() throws IOException {
+            IResourceManager resourceManager = Minecraft.getMinecraft().getResourceManager();
+            Set<ResourceLocation> pages = new HashSet<>();
+            GuiDefinition         def   = GuiDefinition.getNewDefinition(getResource(this.path, "lexicon.json"));
+
+            List<IResource> pagesDefs = null;
+            try
+            {
+                pagesDefs = Lists.reverse(resourceManager.getAllResources(getResource(this.path, "pages.json")));
+                for( IResource r : pagesDefs ) {
+                    try( InputStreamReader reader = new InputStreamReader(r.getInputStream(), StandardCharsets.UTF_8) ) {
+                        JsonElement json = new JsonParser().parse(reader);
+                        if( json.isJsonArray() ) {
+                            Arrays.stream(JsonUtils.getStringArray(json)).forEach(s -> {
+                                ResourceLocation pageLocation = new ResourceLocation(s);
+                                try( IResource rs = resourceManager.getResource(pageLocation);
+                                     InputStream is = rs.getInputStream();
+                                     InputStreamReader isr = new InputStreamReader(is) )
+                                {
+                                    JsonObject jObj = JsonUtils.GSON.fromJson(isr, JsonObject.class);
+                                    this.pages.computeIfAbsent(pageLocation, rp -> new Page(jObj));
+                                } catch( IOException e ) {
+                                    SanLib.LOG.log(Level.ERROR, "Cannot load page", e);
+                                }
+                            });
+                        }
+                    }
+                }
+            } finally {
+                if( pagesDefs != null ) {
+                    for( IResource r : pagesDefs ) {
+                        r.close();
+                    }
+                }
+            }
+
+
+
+            return def;
         }
     }
 }

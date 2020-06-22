@@ -80,21 +80,25 @@ public class GuiDefinition
     EnumMap<IGuiElement.PriorityTarget, GuiElementInst[]> prioritizedFgElements = new EnumMap<>(IGuiElement.PriorityTarget.class);
     EnumMap<IGuiElement.PriorityTarget, GuiElementInst[]> prioritizedBgElements = new EnumMap<>(IGuiElement.PriorityTarget.class);
 
-    private Map<String, GuiElementInst> idToElementMap;
-
-    private Map<Integer, Button> buttons;
+    private final Map<String, GuiElementInst> idToElementMap = new HashMap<>();
 
     private final ResourceLocation data;
+    private final Consumer<JsonObject> loadProcessor;
 
-    private GuiDefinition(ResourceLocation data) throws IOException {
+    private GuiDefinition(ResourceLocation data, Consumer<JsonObject> loadProcessor) throws IOException {
         this.data = data;
-        this.idToElementMap = new HashMap<>();
+        this.loadProcessor = loadProcessor;
+
         ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(this);
         this.reloadDefinition();
     }
 
     public static GuiDefinition getNewDefinition(ResourceLocation data) throws IOException {
-        return new GuiDefinition(data);
+        return new GuiDefinition(data, null);
+    }
+
+    public static GuiDefinition getNewDefinition(ResourceLocation data, Consumer<JsonObject> loadProcessor) throws IOException {
+        return new GuiDefinition(data, loadProcessor);
     }
 
     private void reloadDefinition() throws IOException {
@@ -139,6 +143,10 @@ public class GuiDefinition
 
             bgElem.addAll(Arrays.asList(JsonUtils.GSON.fromJson(jObj.get("backgroundElements"), GuiElementInst[].class)));
             fgElem.addAll(Arrays.asList(JsonUtils.GSON.fromJson(jObj.get("foregroundElements"), GuiElementInst[].class)));
+
+            if( this.loadProcessor != null ) {
+                this.loadProcessor.accept(jObj);
+            }
         }
     }
 

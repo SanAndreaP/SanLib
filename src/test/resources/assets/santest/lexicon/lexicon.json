@@ -10,7 +10,8 @@
         "size": [195, 136],
         "uv": [0, 0]
       }
-    },{
+    },
+    {
       "type": "scroll_area",
       "pos": [9, 18],
 	  "id": "contentPane",
