@@ -1,6 +1,4 @@
 {
-  "width": 195,
-  "height": 136,
   "texture": "santest:lexicon/test.png",
   "backgroundElements": [
     {
@@ -12,7 +10,7 @@
       }
     },
     {
-      "type": "scroll_area",
+      "type": "sanlib:lexicon_content_area",
       "pos": [9, 18],
 	  "id": "contentPane",
       "data": {
@@ -23,8 +21,7 @@
             "size": [12, 15],
             "uv": [232, 0],
             "uvDisabled": [244, 0]
-        },
-        "elements": []
+        }
       }
     }
   ],

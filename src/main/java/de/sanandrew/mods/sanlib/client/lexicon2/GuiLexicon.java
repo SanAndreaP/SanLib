@@ -12,7 +12,6 @@ import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.ScrollArea;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
-import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
@@ -22,8 +21,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import org.apache.logging.log4j.Level;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -41,7 +38,7 @@ public class GuiLexicon
         extends GuiScreen
         implements IGui
 {
-    private static final List<Registry> LEXICA = new ArrayList<>();
+    private static final List<Lexicon> LEXICA = new ArrayList<>();
 
     private final GuiDefinition guiDef;
 
@@ -58,7 +55,7 @@ public class GuiLexicon
         this.guiDef = LEXICA.get(lexiconId).load();
 
         this.contentPane = this.guiDef.getElementById("contentPane");
-        if( this.contentPane == null ) {
+        if( this.contentPane == null || !(this.contentPane.get() instanceof ContentPane) ) {
             throw new InvalidObjectException(String.format("There must be an element with the ID \"contentPane\" of type or a subclass of %s", ContentPane.class));
         }
     }
@@ -157,7 +154,7 @@ public class GuiLexicon
     }
 
     public static int register(ResourceLocation lexiconFolder) {
-        Registry reg = new Registry(lexiconFolder);
+        Lexicon reg = new Lexicon(lexiconFolder);
         LEXICA.add(reg);
 
         return LEXICA.indexOf(reg);
@@ -170,9 +167,11 @@ public class GuiLexicon
     public static class ContentPane
             extends ScrollArea
     {
+        private GuiElementInst[] elements = new GuiElementInst[0];
+
         @Override
         public GuiElementInst[] getElements(IGui gui, JsonObject elementData) {
-            return super.getElements(gui, elementData);
+            return elements;
         }
     }
 
@@ -198,12 +197,14 @@ public class GuiLexicon
         }
     }
 
-    private static class Registry
+    private static class Lexicon
     {
         private final ResourceLocation path;
         private final Map<ResourceLocation, Page> pages = new HashMap<>();
 
-        Registry(ResourceLocation path) {
+        private Page currentPage;
+
+        Lexicon(ResourceLocation path) {
             this.path = path;
         }
 
@@ -211,6 +212,9 @@ public class GuiLexicon
             IResourceManager resourceManager = Minecraft.getMinecraft().getResourceManager();
             Set<ResourceLocation> pages = new HashSet<>();
             GuiDefinition         def   = GuiDefinition.getNewDefinition(getResource(this.path, "lexicon.json"));
+
+            def.width = 192;
+            def.height = 236;
 
             List<IResource> pagesDefs = null;
             try
