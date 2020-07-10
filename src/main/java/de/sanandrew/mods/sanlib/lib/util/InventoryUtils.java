@@ -156,12 +156,12 @@ public final class InventoryUtils
             end = Math.min(end, handler.getSlots());
 
             for( int i = begin; i < end; i++ ) {
-                ItemStack maxStack = is.copy();
-                maxStack.setCount(maxStackSize);
-                maxStack = handler.insertItem(i, maxStack, simulate);
-                if( !ItemStackUtils.isValid(maxStack) ) {
-                    is.setCount(is.getCount() - maxStackSize);
-                }
+                ItemStack remain = is.copy();
+                remain.setCount(maxStackSize);
+                remain = handler.insertItem(i, remain, simulate);
+
+                is.setCount(is.getCount() - maxStackSize + (ItemStackUtils.isValid(remain) ? remain.getCount() : 0));
+
                 if( is.getCount() <= 0 ) {
                     return ItemStackUtils.getEmpty();
                 }
