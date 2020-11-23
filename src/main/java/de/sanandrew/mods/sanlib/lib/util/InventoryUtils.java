@@ -16,6 +16,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 @SuppressWarnings("unused")
 public final class InventoryUtils
@@ -149,8 +150,7 @@ public final class InventoryUtils
     @Nonnull
     public static ItemStack addStackToCapability(@Nonnull ItemStack is, ICapabilityProvider provider, EnumFacing facing, boolean simulate, int maxStackSize, int begin, int end) {
         if( ItemStackUtils.isValid(is) && provider.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing) ) {
-            IItemHandler handler = provider.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing);
-            assert handler != null;
+            IItemHandler handler = Objects.requireNonNull(provider.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing));
 
             maxStackSize = Math.min(maxStackSize, is.getCount());
             end = Math.min(end, handler.getSlots());
@@ -161,6 +161,7 @@ public final class InventoryUtils
                 remain = handler.insertItem(i, remain, simulate);
 
                 is.setCount(is.getCount() - maxStackSize + (ItemStackUtils.isValid(remain) ? remain.getCount() : 0));
+                maxStackSize = Math.min(maxStackSize, is.getCount());
 
                 if( is.getCount() <= 0 ) {
                     return ItemStackUtils.getEmpty();
