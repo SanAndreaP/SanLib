@@ -10,6 +10,8 @@ import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.EntityAITasks;
 import net.minecraft.world.World;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -23,7 +25,7 @@ public final class EntityUtils
     public static final int RISE_SUM_WITH_PERC_VAL = 2;
 
     public static Entity getEntityByUUID(World worldObj, UUID uuid) {
-        return worldObj.loadedEntityList.stream().filter(entity -> entity.getUniqueID().equals(uuid)).findFirst().orElse(null);
+        return new ArrayList<>(worldObj.loadedEntityList).stream().filter(entity -> entity.getUniqueID().equals(uuid)).findFirst().orElse(null);
     }
 
     public static <T extends Entity> List<T> getPassengersOfClass(Entity e, Class<T> psgClass) {
