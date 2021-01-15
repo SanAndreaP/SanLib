@@ -222,3 +222,6 @@ classes/
 run/
 src/main/java/santest
 src/main/resources/assets/santest
+out/
+SanLib12.ipr
+SanLib12.iws

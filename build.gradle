@@ -63,8 +63,8 @@ repositories {
         url = "http://maven.covers1624.net"
     }
 	maven {
-        name = "MC Moddev Maven"
-        url = "http://maven.mcmoddev.com"
+        name = "Jared Maven"
+        url = "https://mmdmaven.blamejared.com/"
     }
 }
 
