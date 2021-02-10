@@ -6,8 +6,12 @@
 package de.sanandrew.mods.sanlib.lib.util;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.EntityAITasks;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.IAttribute;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -36,5 +40,49 @@ public final class EntityUtils
     public static <T extends EntityAIBase> List<T> getAisFromTaskList(Set<EntityAITasks.EntityAITaskEntry> taskList, Class<T> cls) {
         //noinspection unchecked
         return taskList.stream().filter(task -> cls.equals(task.action.getClass())).map(task -> (T) task.action).collect(Collectors.toList());
+    }
+
+    public static boolean tryApplyModifier(EntityLivingBase e, IAttribute attribute, AttributeModifier modifier) {
+        IAttributeInstance attrib = e.getEntityAttribute(attribute);
+        if( !attrib.hasModifier(modifier) ) {
+            attrib.applyModifier(modifier);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public static boolean tryApplyModifier(EntityLivingBase e, String attributeName, AttributeModifier modifier) {
+        IAttributeInstance attrib = e.getAttributeMap().getAttributeInstanceByName(attributeName);
+        if( attrib != null && !attrib.hasModifier(modifier) ) {
+            attrib.applyModifier(modifier);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public static boolean tryRemoveModifier(EntityLivingBase e, IAttribute attribute, AttributeModifier modifier) {
+        IAttributeInstance attrib = e.getEntityAttribute(attribute);
+        if( attrib.hasModifier(modifier) ) {
+            attrib.removeModifier(modifier);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public static boolean tryRemoveModifier(EntityLivingBase e, String attributeName, AttributeModifier modifier) {
+        IAttributeInstance attrib = e.getAttributeMap().getAttributeInstanceByName(attributeName);
+        if( attrib != null && attrib.hasModifier(modifier) ) {
+            attrib.removeModifier(modifier);
+
+            return true;
+        }
+
+        return false;
     }
 }

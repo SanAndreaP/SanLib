@@ -6,11 +6,15 @@
 package de.sanandrew.mods.sanlib.lib.util;
 
 import de.sanandrew.mods.sanlib.lib.Tuple;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
@@ -170,5 +174,108 @@ public final class InventoryUtils
         }
 
         return is;
+    }
+
+    public static boolean mergeItemStack(Container container, @Nonnull ItemStack stack, int beginSlot, int endSlot, boolean reverse) {
+        boolean slotChanged = false;
+        int start = beginSlot;
+
+        if( reverse ) {
+            start = endSlot - 1;
+        }
+
+        Slot      slot;
+        ItemStack slotStack;
+
+        if( stack.isStackable() ) {
+            while( stack.getCount() > 0 && (!reverse && start < endSlot || reverse && start >= beginSlot) ) {
+                slot = container.inventorySlots.get(start);
+                slotStack = slot.getStack();
+
+                if( ItemStackUtils.areEqual(slotStack, stack) && slot.isItemValid(stack) ) {
+                    int combStackSize = slotStack.getCount() + stack.getCount();
+                    int maxStackSize = Math.min(stack.getMaxStackSize(), slot.getItemStackLimit(stack));
+
+                    if( combStackSize <= maxStackSize ) {
+                        stack.setCount(0);
+                        slotStack.setCount(combStackSize);
+                        slot.onSlotChanged();
+                        slotChanged = true;
+                    } else if( slotStack.getCount() < maxStackSize ) {
+                        stack.shrink(maxStackSize - slotStack.getCount());
+                        slotStack.setCount(maxStackSize);
+                        slot.onSlotChanged();
+                        slotChanged = true;
+                    }
+                }
+
+                if( reverse ) {
+                    start--;
+                } else {
+                    start++;
+                }
+            }
+        }
+
+        if( stack.getCount() > 0 ) {
+            if( reverse ) {
+                start = endSlot - 1;
+            } else {
+                start = beginSlot;
+            }
+
+            while( stack.getCount() > 0 && (!reverse && start < endSlot || reverse && start >= beginSlot) ) {
+                slot = container.inventorySlots.get(start);
+
+                if( !ItemStackUtils.isValid(slot.getStack()) && slot.isItemValid(stack) ) {
+                    int maxStackSize = Math.min(stack.getMaxStackSize(), slot.getItemStackLimit(stack));
+                    if( stack.getCount() > maxStackSize ) {
+                        ItemStack newSlotStack = stack.copy();
+
+                        stack.shrink(maxStackSize);
+                        newSlotStack.setCount(maxStackSize);
+                        slot.putStack(newSlotStack);
+                        slot.onSlotChanged();
+                        slotChanged = true;
+                    } else {
+                        slot.putStack(stack.copy());
+                        slot.onSlotChanged();
+                        stack.setCount(0);
+                        slotChanged = true;
+                        break;
+                    }
+                }
+
+                if( reverse ) {
+                    start--;
+                } else {
+                    start++;
+                }
+            }
+        }
+
+        return slotChanged;
+    }
+
+    public static boolean finishTransfer(EntityPlayer player, ItemStack origStack, Slot slot, ItemStack slotStack) {
+        if( slotStack.getCount() == 0 ) { // if stackSize of slot got to 0
+            slot.putStack(ItemStack.EMPTY);
+        } else { // update changed slot stack state
+            slot.onSlotChanged();
+        }
+
+        if( slotStack.getCount() == origStack.getCount() ) { // if nothing changed stackSize-wise
+            return true;
+        }
+
+        slot.onTake(player, slotStack);
+
+        return false;
+    }
+
+    public static void dropBlockItems(IInventory inv, World world, BlockPos pos) {
+        for( int i = 0, max = inv.getSizeInventory(); i < max; i++ ) {
+            ItemStackUtils.dropBlockItem(inv.getStackInSlot(i), world, pos);
+        }
     }
 }

@@ -5,25 +5,40 @@
 
 package de.sanandrew.mods.sanlib.lib.util;
 
+import com.google.common.collect.ImmutableMap;
 import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.lib.XorShiftRandom;
+import net.minecraft.block.Block;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagDouble;
 import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.fml.common.ModContainer;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.Level;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Iterator;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -427,5 +442,128 @@ public final class MiscUtils
 
     private static boolean isNbtDouble(NBTBase base) {
         return base instanceof NBTTagDouble || base instanceof NBTTagFloat;
+    }
+
+    public static float wrap360(float angle) {
+        return angle >= 360.0F ? wrap360(angle - 360.0F) : angle < 0 ? wrap360(angle + 360.0F) : angle;
+    }
+
+    public static <T, R> R applyNonNull(T nullableObj, Function<T, R> onNonNull, R defReturn) {
+        if( nullableObj != null ) {
+            return onNonNull.apply(nullableObj);
+        }
+
+        return defReturn;
+    }
+
+    public static BlockStateContainer buildCustomBlockStateContainer(Block block,
+                                                                     BiFunction<Block, ImmutableMap<IProperty<?>, Comparable<?>>, BlockStateContainer.StateImplementation> stateImplCtor,
+                                                                     IProperty<?>... properties)
+    {
+        return new BlockStateContainer(block, properties) {
+            @Override
+            @Nonnull
+            protected StateImplementation createState(@Nonnull Block block, @Nonnull ImmutableMap<IProperty<?>, Comparable<?>> properties,
+                                                      @Nullable ImmutableMap<IUnlistedProperty<?>, Optional<?>> unlistedProperties)
+            {
+                return stateImplCtor.apply(block, properties);
+            }
+        };
+    }
+
+
+
+    public static BufferedReader getFile(ModContainer mod, String file) {
+        File source = mod.getSource();
+
+        try {
+            if( source.isFile() ) {
+                try( FileSystem fs = FileSystems.newFileSystem(source.toPath(), null) ) {
+                    return Files.newBufferedReader(fs.getPath('/' + file), StandardCharsets.UTF_8);
+                }
+            } else if( source.isDirectory() ) {
+                return Files.newBufferedReader(source.toPath().resolve(file), StandardCharsets.UTF_8);
+            }
+        } catch( IOException e ) {
+            SanLib.LOG.log(Level.ERROR, "Error loading file: ", e);
+            return null;
+        }
+
+        return null;
+    }
+
+    public static Integer getInteger(String s) {
+        try {
+            s = s.startsWith("#") ? s.substring(1) : s;
+            s = s.startsWith("0x") ? s : "0x" + s;
+
+            long l = Long.decode(s);
+
+            return (int) (l & 0xFFFFFFFFL);
+        } catch( NumberFormatException ex ) {
+            return null;
+        }
+    }
+
+    public static NumberFormat getNumberFormat(int numFract, boolean grouping, String langCode) {
+        NumberFormat nf;
+
+        if( numFract == 0 ) {
+            nf = NumberFormat.getIntegerInstance(Locale.forLanguageTag(langCode));
+        } else {
+            nf = NumberFormat.getNumberInstance(Locale.forLanguageTag(langCode));
+            nf.setMaximumFractionDigits(numFract);
+            nf.setMinimumFractionDigits(numFract);
+        }
+
+        nf.setGroupingUsed(grouping);
+
+        return nf;
+    }
+
+    private enum SiPrefixes {
+        YOTTA("Y", 24),
+        ZETTA("Z", 21),
+        EXA  ("E", 18),
+        PETA ("P", 15),
+        TERA ("T", 12),
+        GIGA ("G", 9),
+        MEGA ("M", 6),
+        KILO ("k", 3),
+        NONE ("", 0),
+        MILLI("m", -3),
+        MICRO("μ", -6),
+        NANO ("n", -9),
+        PICO ("p", -12),
+        FEMTO("f", -15),
+        ATTO ("a", -18),
+        ZEPTO("z", -21),
+        YOCTO("y", -24);
+
+        public final int exp;
+        public final String prefix;
+
+        public static final SiPrefixes[] VALUES = values();
+
+        SiPrefixes(String prefix, int exp) {
+            this.prefix = prefix;
+            this.exp = exp;
+        }
+    }
+    public static String getNumberSiPrefixed(double number, int precision, String langCode) {
+        for( SiPrefixes prefix : SiPrefixes.VALUES ) {
+            double scaledNum = number / Math.pow(10, prefix.exp);
+            if( scaledNum >= 1.0 ) {
+                return getNumberFormat(precision, false, langCode).format(scaledNum) + ' ' + prefix.prefix;
+            }
+        }
+
+        return getNumberFormat(precision, false, langCode).format(number) + ' ';
+    }
+
+    public static ResourceLocation getPathedRL(String domain, Path root, Path file) {
+        Path filePath = Paths.get(FilenameUtils.getPathNoEndSeparator(root.relativize(file).toString()),
+                                  FilenameUtils.removeExtension(file.getFileName().toString()));
+        return new ResourceLocation(domain, FilenameUtils.separatorsToUnix(filePath.toString()));
     }
 }

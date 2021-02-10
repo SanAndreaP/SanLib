@@ -7,6 +7,8 @@ package de.sanandrew.mods.sanlib.lib.util;
 
 import de.sanandrew.mods.sanlib.SanLib;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 
 @SuppressWarnings("unused")
 public final class PlayerUtils
@@ -17,5 +19,14 @@ public final class PlayerUtils
      */
     public static EntityPlayer getClientPlayer() {
         return SanLib.proxy.getClientPlayer();
+    }
+
+    public static ItemStack getHeldItemOfType(EntityPlayer player, Item type) {
+        ItemStack heldStack = player.getHeldItemMainhand();
+        if( !ItemStackUtils.isItem(heldStack, type) ) {
+            return player.getHeldItemOffhand();
+        }
+
+        return heldStack;
     }
 }
