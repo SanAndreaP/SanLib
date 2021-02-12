@@ -3,7 +3,7 @@
 // file '.github/LICENSE.md', which is part of this source code package.       /
 ////////////////////////////////////////////////////////////////////////////////
 
-package de.sanandrew.mods.sanlib.sanplayermodel.entity;
+package de.sanandrew.mods.sanlib.sanplayermodel.old.entity;
 
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.world.World;

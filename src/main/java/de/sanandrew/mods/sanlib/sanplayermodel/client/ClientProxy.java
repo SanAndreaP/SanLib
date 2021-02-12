@@ -1,27 +1,39 @@
-////////////////////////////////////////////////////////////////////////////////
-// This file is subject to the terms and conditions defined in the             /
-// file '.github/LICENSE.md', which is part of this source code package.       /
-////////////////////////////////////////////////////////////////////////////////
-
 package de.sanandrew.mods.sanlib.sanplayermodel.client;
 
 import de.sanandrew.mods.sanlib.sanplayermodel.CommonProxy;
-import de.sanandrew.mods.sanlib.sanplayermodel.client.event.RenderPlayerEventHandler;
-import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.RenderSanArmorStand;
-import de.sanandrew.mods.sanlib.sanplayermodel.entity.EntitySanArmorStand;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.registry.RenderingRegistry;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.RenderSanPlayer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.AbstractClientPlayer;
+import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.minecraftforge.fml.common.Loader;
 
-@SideOnly(Side.CLIENT)
 public class ClientProxy
         extends CommonProxy
 {
     @Override
     public void registerRenderStuff() {
-        MinecraftForge.EVENT_BUS.register(new RenderPlayerEventHandler());
+        RenderManager rm = Minecraft.getMinecraft().getRenderManager();
+        rm.skinMap.put("slim_san", new RenderSanPlayer(rm));
+    }
 
-        RenderingRegistry.registerEntityRenderingHandler(EntitySanArmorStand.class, RenderSanArmorStand::new);
+    public static void renderIdoSwimming(RenderPlayerEvent.Pre event) {
+        if( Loader.isModLoaded("ido") ) {
+            EntityPlayer player = event.getEntityPlayer();
+            if (!player.noClip) {
+                boolean type = false;
+                if (player.isInWater() && player.isSprinting() || player.height == 0.6F) {
+                    event.setCanceled(true);
+                    if (Minecraft.getMinecraft().getRenderViewEntity() instanceof AbstractClientPlayer ) {
+                        AbstractClientPlayer client = (AbstractClientPlayer) Minecraft.getMinecraft().getRenderViewEntity();
+                        type = client.getSkinType().contains("slim");
+                    }
+
+                    xyz.kaydax.ido.legacy.RenderPlayerSwiming sp = new xyz.kaydax.ido.legacy.RenderPlayerSwiming(event.getRenderer().getRenderManager(), type);
+                    sp.doRender((AbstractClientPlayer) event.getEntity(), event.getX(), event.getY(), event.getZ(), event.getEntity().rotationYaw, event.getPartialRenderTick());
+                }
+            }
+        }
     }
 }

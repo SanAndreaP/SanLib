@@ -3,11 +3,11 @@
 // file '.github/LICENSE.md', which is part of this source code package.       /
 ////////////////////////////////////////////////////////////////////////////////
 
-package de.sanandrew.mods.sanlib.sanplayermodel.client.event;
+package de.sanandrew.mods.sanlib.sanplayermodel.old.client.event;
 
 import de.sanandrew.mods.sanlib.SLibConfig;
 import de.sanandrew.mods.sanlib.sanplayermodel.SanPlayerModel;
-import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.RenderSanPlayer;
+import de.sanandrew.mods.sanlib.sanplayermodel.old.client.renderer.entity.RenderSanPlayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.Render;
@@ -41,7 +41,7 @@ public class RenderPlayerEventHandler
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
+//    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onPlayerRender(RenderPlayerEvent.Pre event) {
         if( SLibConfig.Client.allowCustomSanModel && SanPlayerModel.isSanPlayer(event.getEntityPlayer()) ) {
             this.lazyLoad();
@@ -50,7 +50,7 @@ public class RenderPlayerEventHandler
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
+//    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onLivingRender(Pre event) {
         if( SLibConfig.Client.allowCustomSanModel && event.getEntity() instanceof EntityPlayer && SanPlayerModel.isSanPlayer((EntityPlayer) event.getEntity())  ) {
             this.lazyLoad();
@@ -62,7 +62,7 @@ public class RenderPlayerEventHandler
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
+//    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onHandRender(RenderHandEvent event) {
         Minecraft mc = Minecraft.getMinecraft();
         if( SLibConfig.Client.allowCustomSanModel && SanPlayerModel.isSanPlayer(mc.player) ) {

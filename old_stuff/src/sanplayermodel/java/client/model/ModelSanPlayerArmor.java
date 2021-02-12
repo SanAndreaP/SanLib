@@ -3,13 +3,13 @@
 // file '.github/LICENSE.md', which is part of this source code package.       /
 ////////////////////////////////////////////////////////////////////////////////
 
-package de.sanandrew.mods.sanlib.sanplayermodel.client.model;
+package de.sanandrew.mods.sanlib.sanplayermodel.old.client.model;
 
 import de.sanandrew.mods.sanlib.lib.client.ModelJsonHandler;
 import de.sanandrew.mods.sanlib.lib.client.ModelJsonLoader;
-import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.RenderSanPlayer;
-import de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.layers.LayerSanArmor;
-import de.sanandrew.mods.sanlib.sanplayermodel.entity.EntitySanArmorStand;
+import de.sanandrew.mods.sanlib.sanplayermodel.old.client.renderer.entity.RenderSanPlayer;
+import de.sanandrew.mods.sanlib.sanplayermodel.old.client.renderer.entity.layers.LayerSanArmor;
+import de.sanandrew.mods.sanlib.sanplayermodel.old.entity.EntitySanArmorStand;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.renderer.GlStateManager;

@@ -1,4 +1,4 @@
-import org.codehaus.groovy.runtime.GStringImpl
+//import org.codehaus.groovy.runtime.GStringImpl
 
 buildscript {
     repositories {
@@ -26,7 +26,7 @@ Object grabConstant = { String name ->
     } else {
         throw new IllegalArgumentException("Cannot grab constant " + name + "!")
     }
-}
+} as Object
 
 apply plugin: "com.wynprice.cursemaven"
 apply plugin: 'net.minecraftforge.gradle.forge'
@@ -40,6 +40,7 @@ idea {
 version = grabConstant("BUILD_MCVER") + '-' + grabConstant("VERSION")
 group = "de.sanandrew.mods"
 archivesBaseName = "SanLib"
+String[] excludes = ["**/*.psd", "**/*.bbmodel", "**/*.ps1", "santest/**", "assets/santest/**"];
 
 sourceCompatibility = targetCompatibility = "1.8" // Need this here so eclipse task generates correctly.
 compileJava {
@@ -76,7 +77,7 @@ dependencies {
 
 apply plugin: 'maven'
 project.ext {
-    releaseRepoUrl = "file://${project(':').projectDir}/maven/" as GStringImpl
+    releaseRepoUrl = "file://${project(':').projectDir}/maven/"// as GStringImpl
 }
 
 uploadArchives {
@@ -103,7 +104,6 @@ build.finalizedBy signJar
 build.finalizedBy uploadArchives
 
 processResources {
-
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
 
@@ -118,11 +118,10 @@ processResources {
 }
 
 jar {
+    exclude(excludes)
 	manifest {
 		attributes 'FMLAT': 'sanlib_at.cfg'
 	}
-    exclude 'santest/**'
-    exclude 'assets/santest/**'
 }
 
 artifacts {

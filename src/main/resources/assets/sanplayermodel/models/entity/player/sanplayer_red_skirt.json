@@ -1,0 +1,31 @@
+{
+  "texture": "sanplayermodel:textures/entity/player/sanplayer_red_skirt.png",
+  "cubes": [
+    {
+      "boxName": "skirt1",
+      "sizeX": 10,
+      "sizeY": 3,
+      "sizeZ": 6,
+      "textureX": 0,
+      "textureY": 0,
+      "textureWidth": 64,
+      "textureHeight": 64,
+      "offsetX": -5,
+      "offsetY": 10,
+      "offsetZ": -3
+    },
+    {
+      "boxName": "skirt2",
+      "sizeX": 12,
+      "sizeY": 3,
+      "sizeZ": 8,
+      "textureX": 0,
+      "textureY": 9,
+      "textureWidth": 64,
+      "textureHeight": 64,
+      "offsetX": -6,
+      "offsetY": 13,
+      "offsetZ": -4
+    }
+  ]
+}

@@ -3,7 +3,7 @@
 // file '.github/LICENSE.md', which is part of this source code package.       /
 ////////////////////////////////////////////////////////////////////////////////
 
-package de.sanandrew.mods.sanlib.sanplayermodel.client.model;
+package de.sanandrew.mods.sanlib.sanplayermodel.old.client.model;
 
 import net.minecraft.client.model.ModelArmorStand;
 import net.minecraft.client.model.ModelRenderer;

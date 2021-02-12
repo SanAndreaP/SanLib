@@ -3,11 +3,11 @@
 // file '.github/LICENSE.md', which is part of this source code package.       /
 ////////////////////////////////////////////////////////////////////////////////
 
-package de.sanandrew.mods.sanlib.sanplayermodel.event;
+package de.sanandrew.mods.sanlib.sanplayermodel.old.event;
 
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import de.sanandrew.mods.sanlib.sanplayermodel.SanPlayerModel;
-import de.sanandrew.mods.sanlib.sanplayermodel.entity.EntitySanArmorStand;
+import de.sanandrew.mods.sanlib.sanplayermodel.old.entity.EntitySanArmorStand;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;

@@ -7,19 +7,13 @@ package de.sanandrew.mods.sanlib.sanplayermodel;
 
 import com.mojang.authlib.GameProfile;
 import de.sanandrew.mods.sanlib.Constants;
-import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.lib.util.UuidUtils;
-import de.sanandrew.mods.sanlib.sanplayermodel.entity.EntitySanArmorStand;
-import de.sanandrew.mods.sanlib.sanplayermodel.event.ItemClickEvent;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.registry.EntityRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -41,21 +35,19 @@ public class SanPlayerModel
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
-        EntityRegistry.registerModEntity(new ResourceLocation(Constants.PM_ID, "sanArmorStand"), EntitySanArmorStand.class, "sanArmorStand", 0, this, 64, 1, true);
+//        EntityRegistry.registerModEntity(new ResourceLocation(Constants.PM_ID, "sanArmorStand"), EntitySanArmorStand.class, "sanArmorStand", 0, this, 64, 1, true);
 
-        MinecraftForge.EVENT_BUS.register(new ItemClickEvent());
+//        MinecraftForge.EVENT_BUS.register(new ItemClickEvent());
 
-        proxy.registerRenderStuff();
     }
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent evt) {
-
+        proxy.registerRenderStuff();
     }
 
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent evt) {
-
     }
 
     public static boolean isSanPlayer(EntityPlayer e) {
