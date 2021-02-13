@@ -470,26 +470,26 @@ public final class MiscUtils
             }
         };
     }
-
-
-
-    public static BufferedReader getFile(ModContainer mod, String file) {
+    public static void readFile(ModContainer mod, String file, Consumer<BufferedReader> c) {
+//    public static BufferedReader getFile(ModContainer mod, String file) {
         File source = mod.getSource();
 
         try {
             if( source.isFile() ) {
                 try( FileSystem fs = FileSystems.newFileSystem(source.toPath(), null) ) {
-                    return Files.newBufferedReader(fs.getPath('/' + file), StandardCharsets.UTF_8);
+                    c.accept(Files.newBufferedReader(fs.getPath('/' + file), StandardCharsets.UTF_8));
+//                    return ;
                 }
             } else if( source.isDirectory() ) {
-                return Files.newBufferedReader(source.toPath().resolve(file), StandardCharsets.UTF_8);
+                c.accept(Files.newBufferedReader(source.toPath().resolve(file), StandardCharsets.UTF_8));
+//                return ;
             }
         } catch( IOException e ) {
             SanLib.LOG.log(Level.ERROR, "Error loading file: ", e);
-            return null;
+//            return null;
         }
 
-        return null;
+//        return null;
     }
 
     public static Integer getInteger(String s) {

@@ -91,6 +91,10 @@ public class EmissiveModel
             SanLib.LOG.log(Level.ERROR, "Cannot deserialize model JSON", e);
         }
 
+//        this.parent = new ItemLayerModel(model);
+//        this.parent = ReflectionUtils.invokeCachedMethod(ModelLoader.class, this.loader, "loadModel", "loadModel", new Class[] {
+//                            ResourceLocation.class
+//                      }, new Object[] { location });
         this.parent = getVanillaModelWrapper(loader, location, model, animation);
     }
 
@@ -125,7 +129,7 @@ public class EmissiveModel
     }
 
     private static <M extends IModel> M getVanillaModelWrapper(ModelLoader modelLoader, ResourceLocation location, ModelBlock model, ModelBlockAnimation animation) {
-        Object vmw = ReflectionUtils.getNew("net.minecraftforge.client.model.ModelLoader$VanillaModelWrapper",
+        Object vmw = ReflectionUtils.getNew(ModelLoader.class.getName() + "$VanillaModelWrapper",
                                             new Class[] {ModelLoader.class, ResourceLocation.class, ModelBlock.class, boolean.class, ModelBlockAnimation.class},
                                             modelLoader, location, model, false, animation);
 
