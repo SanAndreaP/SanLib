@@ -14,7 +14,7 @@ public class Constants
     static final        String VERSION                 = "1.6.0";
     static final        String ACCEPTED_REMOTE_VER     = "[1.6.0,)";
     static final        String MCVER                   = "[1.12.2, 1.13)";
-    static final        String DEPENDENCIES            = "required-after:forge@[14.23.5.2768,]";
+    static final        String DEPENDENCIES            = "required-after:forge@[14.23.5.2831,]";
 
     static final String BUILD_MCVER    = "1.12.2";
     static final String BUILD_FORGEVER = "1.12.2-14.23.5.2831";

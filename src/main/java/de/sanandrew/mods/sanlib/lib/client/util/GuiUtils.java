@@ -122,7 +122,6 @@ public final class GuiUtils
      * @param color2 the ending color; vertically this is the right, horizontally the bottom color
      * @param isHorizontal whether this gradient will be horizontal (<tt>true</tt>) or vertical (<tt>false</tt>)
      */
-    @SuppressWarnings("Duplicates")
     public static void drawGradientRect(int x, int y, int width, int height, int color1, int color2, boolean isHorizontal) {
         ColorObj startColor = new ColorObj(color1);
         ColorObj endColor = new ColorObj(color2);
@@ -136,20 +135,31 @@ public final class GuiUtils
         BufferBuilder bufferbuilder = tessellator.getBuffer();
         bufferbuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
         if( isHorizontal ) {
-            bufferbuilder.pos(x + width, y, 0).color(startColor.fRed(), startColor.fGreen(), startColor.fBlue(), startColor.fAlpha()).endVertex();
-            bufferbuilder.pos(x, y, 0).color(startColor.fRed(), startColor.fGreen(), startColor.fBlue(), startColor.fAlpha()).endVertex();
-            bufferbuilder.pos(x, y + height, 0).color(endColor.fRed(), endColor.fGreen(), endColor.fBlue(), endColor.fAlpha()).endVertex();
-            bufferbuilder.pos(x + width, y + height, 0).color(endColor.fRed(), endColor.fGreen(), endColor.fBlue(), endColor.fAlpha()).endVertex();
+            buildColoredQuad(bufferbuilder, x, y, width, height, startColor, endColor);
         } else {
-            bufferbuilder.pos(x + width, y, 0).color(endColor.fRed(), endColor.fGreen(), endColor.fBlue(), endColor.fAlpha()).endVertex();
-            bufferbuilder.pos(x, y, 0).color(startColor.fRed(), startColor.fGreen(), startColor.fBlue(), startColor.fAlpha()).endVertex();
-            bufferbuilder.pos(x, y + height, 0).color(startColor.fRed(), startColor.fGreen(), startColor.fBlue(), startColor.fAlpha()).endVertex();
-            bufferbuilder.pos(x + width, y + height, 0).color(endColor.fRed(), endColor.fGreen(), endColor.fBlue(), endColor.fAlpha()).endVertex();
+            buildColoredQuad(bufferbuilder, x, y, width, height, endColor, startColor, startColor, endColor);
         }
         tessellator.draw();
         GlStateManager.shadeModel(GL11.GL_FLAT);
         GlStateManager.disableBlend();
         GlStateManager.enableAlpha();
         GlStateManager.enableTexture2D();
+    }
+
+    public static void buildColoredQuad(BufferBuilder bb, int x, int y, int width, int height, ColorObj... colors) {
+        if( colors == null || colors.length < 1 ) {
+            return;
+        }
+
+        switch( colors.length ) {
+            case 1: colors = new ColorObj[] {colors[0], colors[0], colors[0], colors[0]}; break;
+            case 2: colors = new ColorObj[] {colors[0], colors[0], colors[1], colors[1]}; break;
+            case 3: colors = new ColorObj[] {colors[0], colors[1], colors[2], colors[2]}; break;
+        }
+
+        bb.pos(x + width, y, 0).color(colors[0].fRed(), colors[0].fGreen(), colors[0].fBlue(), colors[0].fAlpha()).endVertex();
+        bb.pos(x, y, 0).color(colors[1].fRed(), colors[1].fGreen(), colors[1].fBlue(), colors[1].fAlpha()).endVertex();
+        bb.pos(x, y + height, 0).color(colors[2].fRed(), colors[2].fGreen(), colors[2].fBlue(), colors[2].fAlpha()).endVertex();
+        bb.pos(x + width, y + height, 0).color(colors[3].fRed(), colors[3].fGreen(), colors[3].fBlue(), colors[3].fAlpha()).endVertex();
     }
 }
