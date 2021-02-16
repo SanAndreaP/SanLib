@@ -11,8 +11,8 @@ public class Constants
     public static final String ID                      = "sanlib";
     static final        String NAME                    = "San's Library";
     static final        String CERTIFICATE_FINGERPRINT = "@FINGERPRINT@";
-    static final        String VERSION                 = "1.6.0";
-    static final        String ACCEPTED_REMOTE_VER     = "[1.6.0,)";
+    static final        String VERSION                 = "1.6.1";
+    static final        String ACCEPTED_REMOTE_VER     = "[1.6.1,)";
     static final        String MCVER                   = "[1.12.2, 1.13)";
     static final        String DEPENDENCIES            = "required-after:forge@[14.23.5.2831,]";
 

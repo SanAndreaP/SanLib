@@ -269,6 +269,10 @@ public final class ItemStackUtils
     }
 
     public static NonNullList<ItemStack> getCompactItems(NonNullList<ItemStack> items, int maxInvStackSize) {
+        return getCompactItems(items, maxInvStackSize, null);
+    }
+
+    public static NonNullList<ItemStack> getCompactItems(NonNullList<ItemStack> items, int maxInvStackSize, Integer maxStackSize) {
         NonNullList<ItemStack> cmpItems = NonNullList.create();
 
         items.sort((i1, i2) -> ItemStackUtils.areEqual(i1, i2, false, true, true) ? 0 : i1.getTranslationKey().compareTo(i2.getTranslationKey()));
@@ -279,7 +283,7 @@ public final class ItemStackUtils
             } else {
                 ItemStack cs = cmpItems.get(cmpSize - 1);
                 if( ItemStackUtils.areEqual(cs, v, false, true, true) ) {
-                    int rest = Math.min(cs.getMaxStackSize(), maxInvStackSize) - cs.getCount();
+                    int rest = Math.min(MiscUtils.defIfNull(maxStackSize, cs::getMaxStackSize), maxInvStackSize) - cs.getCount();
                     if( rest >= v.getCount() ) {
                         cs.grow(v.getCount());
                     } else {
