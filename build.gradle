@@ -72,7 +72,8 @@ repositories {
 dependencies {
     deobfCompile "cofh:RedstoneFlux:1.12-2.0.2.3:universal"
     deobfCompile "net.darkhax.tesla:Tesla-1.12.2:1.0.63"
-    deobfCompile "curse.maven:ido:2818003"
+    deobfCompile "curse.maven:obfuscate:2916310"
+    deobfCompile "curse.maven:ido:3096693"
 }
 
 apply plugin: 'maven'

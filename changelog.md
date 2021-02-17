@@ -1,9 +1,13 @@
+**1.6.2**
+- **requires Forge 14.23.5.2831 or higher**
+- fixes crash with Ido and my player model hack
+
 **1.6.1**
-- **requires Forge 14.23.5.2831**
+- **requires Forge 14.23.5.2831 or higher**
 - added `ItemStackUtils.getCompactItems(NonNullList<ItemStack>, int, Integer)`, allowing to override the stack size check with a custom value
 
 **1.6.0**
-- **requires Forge 14.23.5.2831**
+- **requires Forge 14.23.5.2831 or higher**
 - added API for data-driven GUIs based on the JSON format
 - added emissive block/item model
 - deprecated Lexicon API in favor of *Patchouli*
