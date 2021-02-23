@@ -19,8 +19,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHandSide;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
 
@@ -28,7 +28,7 @@ import javax.annotation.Nonnull;
  * An utility class for rendering related stuff.
  */
 @SuppressWarnings("unused")
-@SideOnly(Side.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public final class RenderUtils
 {
     private static RenderItem renderItem;
@@ -71,7 +71,7 @@ public final class RenderUtils
      */
     public static void renderStackInGui(@Nonnull ItemStack stack, int posX, int posY, double scale, FontRenderer fontRenderer, String customTxt, boolean doOverlay) {
         if( renderItem == null ) {
-            renderItem = Minecraft.getMinecraft().getRenderItem();
+            renderItem = Minecraft.getInstance().getRenderItem();
         }
 
         renderItem.zLevel -= 50.0F;
@@ -86,7 +86,7 @@ public final class RenderUtils
                 renderItem.renderItemOverlayIntoGUI(fontRenderer, stack, 0, 0, customTxt);
                 GlStateManager.disableLighting();
             } else {
-                renderItem.renderItemOverlayIntoGUI(Minecraft.getMinecraft().fontRenderer, stack, 0, 0, "");
+                renderItem.renderItemOverlayIntoGUI(Minecraft.getInstance().fontRenderer, stack, 0, 0, "");
                 GlStateManager.disableLighting();
             }
         }
@@ -132,7 +132,7 @@ public final class RenderUtils
                                           ItemCameraTransforms.TransformType transformType, EntityLivingBase entity)
     {
         if( renderItem == null ) {
-            renderItem = Minecraft.getMinecraft().getRenderItem();
+            renderItem = Minecraft.getInstance().getRenderItem();
         }
 
         GlStateManager.pushMatrix();

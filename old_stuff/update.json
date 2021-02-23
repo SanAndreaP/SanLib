@@ -1,9 +1,0 @@
-{
-  "version": "2.4.1",
-  "downloadUrl": "http://minecraft.curseforge.com/mc-mods/226994-sanandreasps-manager-pack/files/2228438/download",
-  "description": "very minor update, fixing some logging errors.",
-  "changelog": [
-    "fixed some logging errors",
-    "some changes to my player model (irrelevant for others)"
-  ]
-}

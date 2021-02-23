@@ -1,0 +1,130 @@
+//import org.codehaus.groovy.runtime.GStringImpl
+
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            name = "forge"
+            url = "http://files.minecraftforge.net/maven"
+        }
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath "com.wynprice.cursemaven:CurseMaven:2.1.0"
+    }
+}
+
+Object grabConstant = { String name ->
+    name = name.toUpperCase(Locale.ROOT);
+    def f = new File("src/main/java/de/sanandrew/mods/sanlib/Constants.java").text
+    def m = f =~ name + /\s*=\s*"(.*?)"/
+    if( m.find() ) {
+        return m.group(1)
+    } else {
+        throw new IllegalArgumentException("Cannot grab constant " + name + "!")
+    }
+} as Object
+
+apply plugin: "com.wynprice.cursemaven"
+apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'idea'
+idea {
+    module {
+        inheritOutputDirs = true
+    }
+}
+
+version = grabConstant("BUILD_MCVER") + '-' + grabConstant("VERSION")
+group = "de.sanandrew.mods"
+archivesBaseName = "SanLib"
+String[] excludes = ["**/*.psd", "**/*.bbmodel", "**/*.ps1", "santest/**", "assets/santest/**"];
+
+sourceCompatibility = targetCompatibility = "1.8" // Need this here so eclipse task generates correctly.
+compileJava {
+    sourceCompatibility = targetCompatibility = "1.8"
+    options.debug = true
+    options.debugOptions.debugLevel = "source,lines,vars"
+}
+
+minecraft {
+    version = grabConstant("BUILD_FORGEVER")
+    runDir = "run"
+    mappings = grabConstant("BUILD_MAPPINGS")
+
+    replace '@FINGERPRINT@', project.findProperty('signSHA1')
+    replaceIn "Constants.java"
+}
+
+repositories {
+    maven {
+        name = "CoFH Maven"
+        url = "http://maven.covers1624.net"
+    }
+	maven {
+        name = "Jared Maven"
+        url = "https://mmdmaven.blamejared.com/"
+    }
+}
+
+dependencies {
+    deobfCompile "cofh:RedstoneFlux:1.12-2.0.2.3:universal"
+    deobfCompile "net.darkhax.tesla:Tesla-1.12.2:1.0.63"
+    deobfCompile "curse.maven:obfuscate:2916310"
+    deobfCompile "curse.maven:ido:3096693"
+}
+
+apply plugin: 'maven'
+project.ext {
+    releaseRepoUrl = "file://${project(':').projectDir}/maven/"// as GStringImpl
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        pom.artifactId = project.archivesBaseName
+        pom.version = project.version
+        repository(url: project.releaseRepoUrl)
+    }
+}
+
+task signJar(type: SignJar, dependsOn: reobfJar) {
+    onlyIf {
+        project.hasProperty('keyStore')
+    }
+    keyStore = project.findProperty('keyStore')
+    alias = project.findProperty('keyStoreAlias')
+    storePass = project.findProperty('keyStorePass')
+    keyPass = project.findProperty('keyStoreKeyPass')
+    inputFile = jar.archivePath
+    outputFile = jar.archivePath
+}
+
+build.finalizedBy signJar
+build.finalizedBy uploadArchives
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+
+        expand 'version':project.version, 'mcversion':grabConstant("BUILD_MCVER"), 'pmversion':grabConstant("PM_VERSION")
+    }
+
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+    
+	rename '(.+_at.cfg)', 'META-INF/$1'
+}
+
+jar {
+    exclude(excludes)
+	manifest {
+		attributes 'FMLAT': 'sanlib_at.cfg'
+	}
+}
+
+artifacts {
+    archives jar
+}

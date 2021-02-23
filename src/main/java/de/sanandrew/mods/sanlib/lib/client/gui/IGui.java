@@ -5,12 +5,12 @@
 
 package de.sanandrew.mods.sanlib.lib.client.gui;
 
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.screen.Screen;
 
 @SuppressWarnings("UnusedReturnValue")
 public interface IGui
 {
-    GuiScreen get();
+    Screen get();
 
     GuiDefinition getDefinition();
 

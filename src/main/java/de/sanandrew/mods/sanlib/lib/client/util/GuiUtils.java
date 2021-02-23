@@ -14,8 +14,8 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
@@ -27,7 +27,7 @@ import java.util.List;
  * An utility class for GUIs and GUI related stuff.
  */
 @SuppressWarnings("unused")
-@SideOnly(Side.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public final class GuiUtils
 {
     /**
@@ -39,7 +39,7 @@ public final class GuiUtils
      * @param height The height of the scissor box.
      */
     public static void glScissor(int x, int y, int width, int height) {
-        Minecraft mc = Minecraft.getMinecraft();
+        Minecraft mc = Minecraft.getInstance();
         int scaleFactor = 1;
         int guiScale = mc.gameSettings.guiScale;
 
@@ -65,7 +65,7 @@ public final class GuiUtils
         byte rShift = keyDownBuffer.get(Keyboard.KEY_RSHIFT);
         keyDownBuffer.put(Keyboard.KEY_LSHIFT, (byte) 0);
         keyDownBuffer.put(Keyboard.KEY_RSHIFT, (byte) 0);
-        List<?> tooltip = stack.getTooltip(Minecraft.getMinecraft().player, ITooltipFlag.TooltipFlags.NORMAL);
+        List<?> tooltip = stack.getTooltip(Minecraft.getInstance().player, ITooltipFlag.TooltipFlags.NORMAL);
         keyDownBuffer.put(Keyboard.KEY_LSHIFT, lShift);
         keyDownBuffer.put(Keyboard.KEY_RSHIFT, rShift);
 

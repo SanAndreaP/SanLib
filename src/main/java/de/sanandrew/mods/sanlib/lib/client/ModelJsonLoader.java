@@ -19,8 +19,8 @@ import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.resource.IResourceType;
 import net.minecraftforge.client.resource.ISelectiveResourceReloadListener;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.logging.log4j.Level;
 
 import java.io.BufferedReader;
@@ -46,7 +46,7 @@ import static net.minecraftforge.client.resource.VanillaResourceType.TEXTURES;
  * @param <T> The type of the ModelBase class loading and handling the boxes/cubes.
  * @param <U> The type of a ModelJson.
  */
-@SideOnly(Side.CLIENT)
+@OnlyIn(Dist.CLIENT)
 @SuppressWarnings("unused")
 public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U extends ModelJsonLoader.ModelJson>
         implements ISelectiveResourceReloadListener, IResourceType
@@ -105,8 +105,8 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
         this.loaded = false;
         this.jsonClass = jsonClass;
 
-        if( Minecraft.getMinecraft().getResourceManager() instanceof SimpleReloadableResourceManager ) {
-            ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(this);
+        if( Minecraft.getInstance().getResourceManager() instanceof SimpleReloadableResourceManager ) {
+            ((SimpleReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(this);
         }
 
         REGISTERED_JSON_LOADERS.add(this);
@@ -120,8 +120,8 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
      * Removes this loader from the Resource Manager reload listener list.
      */
     public void unregister() {
-        if( Minecraft.getMinecraft().getResourceManager() instanceof SimpleReloadableResourceManager ) {
-            ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).reloadListeners.remove(this);
+        if( Minecraft.getInstance().getResourceManager() instanceof SimpleReloadableResourceManager ) {
+            ((SimpleReloadableResourceManager) Minecraft.getInstance().getResourceManager()).reloadListeners.remove(this);
         }
 
         REGISTERED_JSON_LOADERS.remove(this);
@@ -136,7 +136,7 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
     private void loadJson(ResourceLocation resource, boolean isMain, Map<String, Boolean> mandatoryChecklist, Map<String, ChildCube> children, Map<String, ModelRenderer> mainBoxesList)
             throws IOException, JsonIOException, JsonSyntaxException
     {
-        try( IResource res = Minecraft.getMinecraft().getResourceManager().getResource(resource);
+        try( IResource res = Minecraft.getInstance().getResourceManager().getResource(resource);
              BufferedReader in = new BufferedReader(new InputStreamReader(res.getInputStream())) )
         {
             U json = new Gson().fromJson(in, this.jsonClass);

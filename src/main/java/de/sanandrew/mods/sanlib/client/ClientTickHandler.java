@@ -5,14 +5,17 @@
 
 package de.sanandrew.mods.sanlib.client;
 
+import de.sanandrew.mods.sanlib.Constants;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
-@SideOnly(Side.CLIENT)
+@OnlyIn(Dist.CLIENT)
+@Mod.EventBusSubscriber(value = Dist.CLIENT, modid = Constants.ID)
 public class ClientTickHandler
 {
     public static int ticksInGame;
@@ -20,8 +23,8 @@ public class ClientTickHandler
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
         if( event.phase == TickEvent.Phase.END ) {
-            GuiScreen gui = Minecraft.getMinecraft().currentScreen;
-            if( gui == null || !gui.doesGuiPauseGame() ) {
+            Screen gui = Minecraft.getInstance().currentScreen;
+            if( gui == null || !gui.isPauseScreen() ) {
                 ticksInGame++;
             }
         }

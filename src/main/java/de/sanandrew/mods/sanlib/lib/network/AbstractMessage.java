@@ -11,8 +11,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * An abstract implementation of {@link IMessageHandler} and {@link IMessage}.<br>
@@ -35,7 +35,7 @@ public abstract class AbstractMessage<M extends AbstractMessage>
     @SuppressWarnings("MethodCallSideOnly")
     public IMessage onMessage(M message, MessageContext ctx) {
         if( ctx.side.isClient() ) {
-            Minecraft.getMinecraft().addScheduledTask(() -> handleClientMessage(message, PlayerUtils.getClientPlayer()));
+            Minecraft.getInstance().addScheduledTask(() -> handleClientMessage(message, PlayerUtils.getClientPlayer()));
         } else if( ctx.getServerHandler().player.getServer() != null ) {
             ctx.getServerHandler().player.getServer().addScheduledTask(() -> handleServerMessage(message, ctx.getServerHandler().player));
         }
@@ -48,7 +48,7 @@ public abstract class AbstractMessage<M extends AbstractMessage>
      * @param packet The packet received.
      * @param player The player receiving the packet.
      */
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public abstract void handleClientMessage(M packet, EntityPlayer player);
 
     /**

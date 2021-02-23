@@ -71,7 +71,7 @@ public class LayerSanSkirt
                 if( rl != null ) {
                     try {
                         if( test ) {
-                            Minecraft.getMinecraft().getResourceManager().getResource(rl);
+                            Minecraft.getInstance().getResourceManager().getResource(rl);
                         }
 
                         this.skirtArmor.setTexture(rl);

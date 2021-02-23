@@ -89,7 +89,7 @@ public class GuiDefinition
         this.data = data;
         this.loadProcessor = loadProcessor;
 
-        ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(this);
+        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(this);
         this.reloadDefinition();
     }
 
@@ -122,7 +122,7 @@ public class GuiDefinition
     }
 
     private void loadFile(ResourceLocation location, List<GuiElementInst> bgElem, List<GuiElementInst> fgElem) throws IOException {
-        try( IResource r = Minecraft.getMinecraft().getResourceManager().getResource(location);
+        try( IResource r = Minecraft.getInstance().getResourceManager().getResource(location);
              InputStreamReader reader = new InputStreamReader(r.getInputStream(), StandardCharsets.UTF_8) )
         {
             JsonElement json = new JsonParser().parse(reader);

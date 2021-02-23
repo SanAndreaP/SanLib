@@ -11,12 +11,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.api.distmarker.Dist;
 
 import java.util.Objects;
 
-@Mod.EventBusSubscriber(value = { Side.CLIENT}, modid = Constants.PM_ID)
+@Mod.EventBusSubscriber(value = { Dist.CLIENT}, modid = Constants.PM_ID)
 public class RenderPlayerEvent
 {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -31,7 +31,7 @@ public class RenderPlayerEvent
     public static void onRenderPost(RenderLivingEvent.Post<?> event) {
         Entity e = event.getEntity();
         if( e instanceof EntityPlayer && SanPlayerModel.isSanPlayer((EntityPlayer) e) ) {
-            NetworkPlayerInfo npi = Objects.requireNonNull(Minecraft.getMinecraft().getConnection()).getPlayerInfo(e.getUniqueID());
+            NetworkPlayerInfo npi = Objects.requireNonNull(Minecraft.getInstance().getConnection()).getPlayerInfo(e.getUniqueID());
 
             ReflectionUtils.setCachedFieldValue(NetworkPlayerInfo.class, npi, "skinType", "field_178863_g", "slim_san");
         }

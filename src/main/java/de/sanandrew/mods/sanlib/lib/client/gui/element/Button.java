@@ -7,6 +7,7 @@ package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.platform.GlStateManager;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiDefinition;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
@@ -15,6 +16,7 @@ import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.GuiScreenEvent;
@@ -46,7 +48,7 @@ public class Button
     public int              centralTextureHeight;
     public int              buttonFunction;
 
-    protected GuiButton buttonDelegate;
+    protected net.minecraft.client.gui.widget.button.Button buttonDelegate;
 
     protected int     currMouseX;
     protected int     currMouseY;
@@ -103,7 +105,7 @@ public class Button
         this.buttonFunction = JsonUtils.getIntVal(data.get("buttonFunction"));
         this.textureSize = JsonUtils.getIntArray(data.get("textureSize"), new int[] { 256, 256 }, Range.is(2));
 
-        this.buttonDelegate = new GuiButton(this.buttonFunction, 0, 0, "");
+        this.buttonDelegate = new net.minecraft.client.gui.widget.button.Button(0, 0, "");
 
         super.bakeData(gui, data, inst);
     }
@@ -116,12 +118,12 @@ public class Button
         this.isCurrHovering = isHovering(gui, x, y, mouseX, mouseY);
         boolean isEnabled = this.isEnabled();
 
-        gui.get().mc.renderEngine.bindTexture(this.texture);
+        gui.get().getMinecraft().getTextureManager().bindTexture(this.texture);
         GlStateManager.pushMatrix();
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        GlStateManager.translate(x, y, 0.0D);
+        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA.param, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA.param);
+        GlStateManager.translated(x, y, 0.0D);
         drawRect(isEnabled, this.isCurrHovering);
         GlStateManager.popMatrix();
 
@@ -145,17 +147,12 @@ public class Button
     @Override
     public boolean mouseClicked(IGui gui, int mouseX, int mouseY, int mouseButton) throws IOException {
         if( mouseButton == 0 && this.isEnabled() && this.isCurrHovering ) {
-            GuiScreen gs = gui.get();
-            GuiButton btn = this.buttonDelegate;
-            List<GuiButton> btnList = new ArrayList<>(Collections.singletonList(this.buttonDelegate));
-            GuiScreenEvent.ActionPerformedEvent.Pre event = new GuiScreenEvent.ActionPerformedEvent.Pre(gs, btn, btnList);
-            if( MinecraftForge.EVENT_BUS.post(event) ) {
-                return true;
-            }
-            btn = event.getButton();
+            Screen                                        gs      = gui.get();
+            net.minecraft.client.gui.widget.button.Button       btn     = this.buttonDelegate;
+            List<net.minecraft.client.gui.widget.button.Button> btnList = new ArrayList<>(Collections.singletonList(this.buttonDelegate));
 
-            btn.playPressSound(gs.mc.getSoundHandler());
-            this.performAction(gui, btn.id);
+            btn.playDownSound(gs.getMinecraft().getSoundHandler());
+            this.performAction(gui, btn);
             if( gs.equals(gs.mc.currentScreen) ) {
                 MinecraftForge.EVENT_BUS.post(new GuiScreenEvent.ActionPerformedEvent.Post(gs, btn, btnList));
             }

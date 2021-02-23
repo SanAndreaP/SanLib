@@ -18,7 +18,7 @@ public class ClientProxy
 
     @Override
     public void registerRenderStuff() {
-        RenderManager rm = Minecraft.getMinecraft().getRenderManager();
+        RenderManager rm = Minecraft.getInstance().getRenderManager();
         rm.skinMap.put("slim_san", new RenderSanPlayer(rm));
     }
 
@@ -29,8 +29,8 @@ public class ClientProxy
                 boolean type = false;
                 if (player.isInWater() && player.isSprinting() || player.height == 0.6F) {
                     event.setCanceled(true);
-                    if( Minecraft.getMinecraft().getRenderViewEntity() instanceof AbstractClientPlayer ) {
-                        AbstractClientPlayer client = (AbstractClientPlayer) Minecraft.getMinecraft().getRenderViewEntity();
+                    if( Minecraft.getInstance().getRenderViewEntity() instanceof AbstractClientPlayer ) {
+                        AbstractClientPlayer client = (AbstractClientPlayer) Minecraft.getInstance().getRenderViewEntity();
                         type = client.getSkinType().contains("slim");
                     }
 

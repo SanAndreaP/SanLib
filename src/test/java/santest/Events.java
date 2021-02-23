@@ -8,25 +8,25 @@ package santest;
 import de.sanandrew.mods.sanlib.client.lexicon2.GuiLexicon;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent;
-import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.event.InputEvent;
+import net.minecraftforge.api.distmarker.Dist;
 import org.lwjgl.input.Keyboard;
 
 import java.io.IOException;
 
-@Mod.EventBusSubscriber(modid = "santest", value = Side.CLIENT)
+@Mod.EventBusSubscriber(modid = "santest", value = Dist.CLIENT)
 public class Events
 {
     @SubscribeEvent
     public static void onKeyPress(InputEvent.KeyInputEvent event) {
         // when up_arrow is pressed...
-        if( Keyboard.isKeyDown(Keyboard.KEY_UP) && Minecraft.getMinecraft().currentScreen == null ) {
-            Minecraft.getMinecraft().displayGuiScreen(new TestGui());
+        if( Keyboard.isKeyDown(Keyboard.KEY_UP) && Minecraft.getInstance().currentScreen == null ) {
+            Minecraft.getInstance().displayGuiScreen(new TestGui());
         }
-        if( Keyboard.isKeyDown(Keyboard.KEY_DOWN) && Minecraft.getMinecraft().currentScreen == null ) {
+        if( Keyboard.isKeyDown(Keyboard.KEY_DOWN) && Minecraft.getInstance().currentScreen == null ) {
             try {
-                Minecraft.getMinecraft().displayGuiScreen(new GuiLexicon(Test.lexiconId));
+                Minecraft.getInstance().displayGuiScreen(new GuiLexicon(Test.lexiconId));
             } catch( IOException e ) {
                 e.printStackTrace();
             }

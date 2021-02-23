@@ -11,14 +11,15 @@ public class Constants
     public static final String ID                      = "sanlib";
     static final        String NAME                    = "San's Library";
     static final        String CERTIFICATE_FINGERPRINT = "@FINGERPRINT@";
-    static final        String VERSION                 = "1.6.2";
-    static final        String ACCEPTED_REMOTE_VER     = "[1.6.1,)";
-    static final        String MCVER                   = "[1.12.2, 1.13)";
-    static final        String DEPENDENCIES            = "required-after:forge@[14.23.5.2831,]";
+    static final        String VERSION                 = "2.0.0";
+    static final        String ACCEPTED_REMOTE_VER     = "[2.0.0,)";
+    static final        String MCVER                   = "[1.16.4, 1.17)";
+    static final        String DEPENDENCIES            = "required-after:forge@[35.1.4,]";
 
-    static final String BUILD_MCVER    = "1.12.2";
-    static final String BUILD_FORGEVER = "1.12.2-14.23.5.2831";
-    static final String BUILD_MAPPINGS = "snapshot_20180814";
+    static final String BUILD_MCVER    = "1.16.4";
+    static final String BUILD_FORGEVER = "1.16.4-35.1.4";
+    static final String BUILD_MAPPINGS_CHANNEL = "snapshot";
+    static final String BUILD_MAPPINGS_VERSION = "20201028-1.16.3";
 
     static final String COMMON_PROXY = "de.sanandrew.mods.sanlib.CommonProxy";
     static final String CLIENT_PROXY = "de.sanandrew.mods.sanlib.client.ClientProxy";
