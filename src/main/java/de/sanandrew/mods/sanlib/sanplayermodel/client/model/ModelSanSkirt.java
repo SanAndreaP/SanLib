@@ -15,10 +15,10 @@ import java.util.Arrays;
 
 public class ModelSanSkirt
         extends ModelBase
-        implements ModelJsonHandler<ModelSanSkirt, ModelJsonLoader.ModelJson>
+        implements ModelJsonHandler<ModelSanSkirt, ModelJsonLoader.JsonBase>
 {
-    private final ModelJsonLoader<ModelSanSkirt, ModelJsonLoader.ModelJson> modelJson;
-    private final float scale;
+    private final ModelJsonLoader<ModelSanSkirt, ModelJsonLoader.JsonBase> modelJson;
+    private final float                                                    scale;
 
     private ResourceLocation texture;
     private boolean isSneak;
@@ -78,7 +78,7 @@ public class ModelSanSkirt
     }
 
     @Override
-    public void onReload(IResourceManager resourceManager, ModelJsonLoader<ModelSanSkirt, ModelJsonLoader.ModelJson> loader) {
+    public void onReload(IResourceManager resourceManager, ModelJsonLoader<ModelSanSkirt, ModelJsonLoader.JsonBase> loader) {
         loader.load();
 
         if( loader.isLoaded() ) {

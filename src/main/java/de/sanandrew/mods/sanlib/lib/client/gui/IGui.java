@@ -6,6 +6,7 @@
 package de.sanandrew.mods.sanlib.lib.client.gui;
 
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.button.Button;
 
 @SuppressWarnings("UnusedReturnValue")
 public interface IGui
@@ -17,6 +18,4 @@ public interface IGui
     int getScreenPosX();
 
     int getScreenPosY();
-
-    default boolean performAction(IGuiElement element, int action) { return false; }
 }

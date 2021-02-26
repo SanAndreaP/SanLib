@@ -6,8 +6,8 @@
 package de.sanandrew.mods.sanlib.lib.util;
 
 import de.sanandrew.mods.sanlib.Constants;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EntityType;
+import net.minecraft.util.text.LanguageMap;
 
 @SuppressWarnings({ "unused", "WeakerAccess" })
 public final class LangUtils
@@ -19,58 +19,44 @@ public final class LangUtils
     public static final TranslateKey LEXICON_SRC_ENTRY_TEXT = new TranslateKey("%s.lexicon.%%s.search.text", Constants.ID);
 
     public static final TranslateKey ENTITY_NAME   = new TranslateKey("entity.%s.name");
-    public static final TranslateKey ENTITY_DESC   = new TranslateKey("entity.%s.desc");
     public static final TranslateKey CONTAINER_INV = new TranslateKey("container.inventory");
 
     /**
-     * Wrapper method to {@link net.minecraft.util.text.translation.I18n#canTranslate(String)} for abbreviation.
-     * <s>Also tries to translate with [NONE] to en_US if the translation fails</s>
+     * translates the language key to a string and formats it with the specified arguments, if any.
      * @param langKey language key to be translated
      * @return translated key or langKey, if translation fails
      */
-    @SuppressWarnings("deprecation")
     public static String translate(String langKey, Object... args) {
-        final String s;
-        if( net.minecraft.util.text.translation.I18n.canTranslate(langKey) ) {
-            s = args == null || args.length < 1
-                ? net.minecraft.util.text.translation.I18n.translateToLocal(langKey)
-                : net.minecraft.util.text.translation.I18n.translateToLocalFormatted(langKey, args);
-        } else {
-            s = langKey;
-        }
-
-        return s.replace("\\n", "\n");
+        return translateOrDefault(langKey, langKey, args);
     }
 
     public static String translate(TranslateKey langKey, Object... args) {
         return translate(langKey.key, args);
     }
 
-    @SuppressWarnings("deprecation")
-    public static String translateOrDefault(String langKey, String defaultVal) {
-        return net.minecraft.util.text.translation.I18n.canTranslate(langKey) ? translate(langKey) : defaultVal;
+    public static String translateOrDefault(String langKey, String defaultVal, Object... args) {
+        final String s;
+        if( LanguageMap.getInstance().func_230506_b_(langKey) ) {
+            s = args == null || args.length < 1
+                ? LanguageMap.getInstance().func_230503_a_(langKey)
+                : String.format(LanguageMap.getInstance().func_230503_a_(langKey), args);
+        } else {
+            s = defaultVal;
+        }
+
+        return s.replace("\\n", "\n");
     }
 
     public static String translateOrDefault(TranslateKey langKey, String defaultVal) {
         return translateOrDefault(langKey.key, defaultVal);
     }
 
-    public static String translateEntityCls(Class<? extends Entity> eClass) {
-        String namedEntry = EntityList.getTranslationName(EntityList.getKey(eClass));
-        if( namedEntry != null ) {
-            return translate(ENTITY_NAME.get(namedEntry));
-        }
-
-        return "[UNKNOWN] " + eClass.getName();
-    }
-
-    public static String translateEntityClsDesc(Class<? extends Entity> eClass) {
-        String namedEntry = EntityList.getTranslationName(EntityList.getKey(eClass));
-        if( namedEntry != null ) {
-            return translate(ENTITY_DESC.get(namedEntry));
-        }
-
-        return "";
+    /**
+     * @deprecated Use {@link EntityType#getName()} instead whenever possible
+     */
+    @Deprecated
+    public static String translateEntityCls(EntityType<?> type) {
+        return translate(type.getTranslationKey());
     }
 
     public static final class TranslateKey

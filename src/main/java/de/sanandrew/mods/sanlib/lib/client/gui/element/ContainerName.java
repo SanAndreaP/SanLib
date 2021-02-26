@@ -16,11 +16,12 @@ public class ContainerName
 
     @Override
     public String getBakedText(IGui gui, JsonObject data) {
-        if( gui instanceof IContainerName ) {
-            return ((IContainerName) gui).getContainerName();
-        } else {
-            throw new RuntimeException("Cannot use container_name on a GUI which doesn't implement IContainerName");
-        }
+        return gui.get().getTitle().getString();
+//        if( gui instanceof IContainerName ) {
+//            return ((IContainerName) gui).getContainerName();
+//        } else {
+//            throw new RuntimeException("Cannot use container_name on a GUI which doesn't implement IContainerName");
+//        }
     }
 
     public interface IContainerName

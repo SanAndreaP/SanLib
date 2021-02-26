@@ -1,5 +1,7 @@
 package de.sanandrew.mods.sanlib.lib;
 
+@SuppressWarnings("unused")
+@Deprecated
 public class ElementNullException
         extends Exception
 {

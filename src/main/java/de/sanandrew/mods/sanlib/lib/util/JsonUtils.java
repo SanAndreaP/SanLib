@@ -15,19 +15,16 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import net.minecraftforge.oredict.OreDictionary;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.Range;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
@@ -212,6 +209,28 @@ public final class JsonUtils
         return GSON.fromJson(json, double[].class);
     }
 
+    public static float[] getFloatArray(JsonElement json) {
+        return getFloatArray(json, FULL_ARRAY_RANGE);
+    }
+
+    public static float[] getFloatArray(JsonElement json, Range<Integer> requiredSize) {
+        requirePrimitiveArray(json, requiredSize);
+
+        return GSON.fromJson(json, float[].class);
+    }
+
+    public static float[] getFloatArray(JsonElement json, float[] defVal) {
+        return getFloatArray(json, defVal, FULL_ARRAY_RANGE);
+    }
+
+    public static float[] getFloatArray(JsonElement json, float[] defVal, Range<Integer> requiredSize) {
+        if( isNotPrimitiveArray(json, requiredSize) ) {
+            return defVal;
+        }
+
+        return GSON.fromJson(json, float[].class);
+    }
+
     public static String[] getStringArray(JsonElement json) {
         return getStringArray(json, FULL_ARRAY_RANGE);
     }
@@ -303,27 +322,23 @@ public final class JsonUtils
             throw new JsonParseException(String.format("Unknown item '%s'", itemName));
         }
 
-        if( item.getHasSubtypes() && !jsonObj.has("data") ) {
-            throw new JsonParseException(String.format("Missing data for item '%s'", itemName));
-        }
-
         ItemStack stack;
         if( jsonObj.has("nbt") ) {
-            NBTTagCompound nbt = JsonNbtReader.getTagFromJson(jsonObj.get("nbt"));
-            NBTTagCompound tmp = new NBTTagCompound();
-            if( nbt.hasKey("ForgeCaps") ) {
-                tmp.setTag("ForgeCaps", nbt.getTag("ForgeCaps"));
-                nbt.removeTag("ForgeCaps");
+            CompoundNBT    nbt = JsonNbtReader.getTagFromJson(jsonObj.get("nbt"));
+            CompoundNBT tmp = new CompoundNBT();
+            if( nbt.contains("ForgeCaps") ) {
+                tmp.put("ForgeCaps", nbt.getCompound("ForgeCaps"));
+                nbt.remove("ForgeCaps");
             }
 
-            tmp.setTag("tag", nbt);
-            tmp.setString("id", itemName);
-            tmp.setInteger("Count", getIntVal(jsonObj.get("count"), 1));
-            tmp.setInteger("Damage", getIntVal(jsonObj.get("data"), 0));
+            tmp.put("tag", nbt);
+            tmp.putString("id", itemName);
+            tmp.putInt("Count", getIntVal(jsonObj.get("count"), 1));
+            tmp.putInt("Damage", getIntVal(jsonObj.get("data"), 0));
 
-            stack = new ItemStack(tmp);
+            stack = ItemStack.read(tmp);
         } else {
-            stack = new ItemStack(item, getIntVal(jsonObj.get("count"), 1), getIntVal(jsonObj.get("data"), 0));
+            stack = new ItemStack(item, getIntVal(jsonObj.get("count"), 1));
         }
 
         if( !ItemStackUtils.isValid(stack) ) {
@@ -351,12 +366,13 @@ public final class JsonUtils
         } else if( json.isJsonObject() ) {
             JsonObject jsonObj = json.getAsJsonObject();
 
-            if( jsonObj.has("type") && MiscUtils.defIfNull(jsonObj.get("type").getAsString(), "").equals("forge:ore_dict") ) {
-                String oredictName = jsonObj.get("ore").getAsString();
-                items.addAll(OreDictionary.getOres(oredictName).stream().map(ItemStack::copy).collect(Collectors.toList()));
-            } else {
+            //TODO: use new tag system
+//            if( jsonObj.has("type") && MiscUtils.defIfNull(jsonObj.get("type").getAsString(), "").equals("forge:ore_dict") ) {
+//                String oredictName = jsonObj.get("ore").getAsString();
+//                items.addAll(OreDictionary.getOres(oredictName).stream().map(ItemStack::copy).collect(Collectors.toList()));
+//            } else {
                 items.add(getStack(jsonObj));
-            }
+//            }
         } else {
             throw new JsonSyntaxException("Expected stack(s) to be an object or an array of objects");
         }
@@ -499,8 +515,9 @@ public final class JsonUtils
         return JsonUtils.GSON.fromJson(JsonUtils.GSON.toJson(obj), JsonObject.class);
     }
 
-    @Nullable
-    public static <T> T gsonDeserialize(Gson gsonIn, Reader readerIn, Class<T> adapter, boolean lenient) {
-        return net.minecraft.util.JsonUtils.gsonDeserialize(gsonIn, readerIn, adapter, lenient);
-    }
+    //todo: ???????????????????????
+//    @Nullable
+//    public static <T> T gsonDeserialize(Gson gsonIn, Reader readerIn, Class<T> adapter, boolean lenient) {
+//        return net.minecraft.util.JSONUtils.deserializeClass(gsonIn, readerIn, adapter, lenient);
+//    }
 }

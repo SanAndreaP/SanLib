@@ -6,6 +6,7 @@
 package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
@@ -20,20 +21,20 @@ public class Item
 {
     public static final ResourceLocation ID = new ResourceLocation("item");
 
-    public ItemStack stack = ItemStack.EMPTY;
-    public double    scale;
+    public ItemStack item = ItemStack.EMPTY;
+    public float     scale;
     public int       size;
 
     @Override
     public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) {
-        this.stack = this.getBakedStack(gui, data);
-        this.scale = JsonUtils.getDoubleVal(data.get("scale"), 1.0D);
+        this.item = this.getBakedItem(gui, data);
+        this.scale = JsonUtils.getFloatVal(data.get("scale"), 1.0F);
         this.size = (int) Math.round(16.0D * this.scale);
     }
 
     @Override
-    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
-        RenderUtils.renderStackInGui(this.getDynamicStack(gui), x, y, this.scale);
+    public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data) {
+        RenderUtils.renderStackInGui(this.getDynamicStack(gui), stack, x, y, this.scale);
     }
 
     @Override
@@ -46,11 +47,11 @@ public class Item
         return this.size;
     }
 
-    protected ItemStack getBakedStack(IGui gui, JsonObject data) {
+    protected ItemStack getBakedItem(IGui gui, JsonObject data) {
         return JsonUtils.getItemStack(data.get("item"));
     }
 
     protected ItemStack getDynamicStack(IGui gui) {
-        return this.stack;
+        return this.item;
     }
 }

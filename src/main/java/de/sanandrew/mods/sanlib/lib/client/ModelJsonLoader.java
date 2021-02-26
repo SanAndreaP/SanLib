@@ -8,24 +8,28 @@ package de.sanandrew.mods.sanlib.lib.client;
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
+import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import de.sanandrew.mods.sanlib.sanplayermodel.SanPlayerModel;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.ModelBase;
-import net.minecraft.client.model.ModelRenderer;
-import net.minecraft.client.resources.IResource;
-import net.minecraft.client.resources.IResourceManager;
-import net.minecraft.client.resources.SimpleReloadableResourceManager;
+import net.minecraft.client.renderer.model.Model;
+import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.resources.IResource;
+import net.minecraft.resources.IResourceManager;
+import net.minecraft.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.resource.IResourceType;
-import net.minecraftforge.client.resource.ISelectiveResourceReloadListener;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.resource.IResourceType;
+import net.minecraftforge.resource.ISelectiveResourceReloadListener;
+import net.minecraftforge.resource.VanillaResourceType;
 import org.apache.logging.log4j.Level;
 
+import javax.annotation.Nonnull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,8 +37,6 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import static net.minecraftforge.client.resource.VanillaResourceType.TEXTURES;
 
 /**
  * This class loads a JSON file as a model to be used with entities and TESRs.<br>
@@ -48,48 +50,53 @@ import static net.minecraftforge.client.resource.VanillaResourceType.TEXTURES;
  */
 @OnlyIn(Dist.CLIENT)
 @SuppressWarnings("unused")
-public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U extends ModelJsonLoader.ModelJson>
+public class ModelJsonLoader<T extends Model & ModelJsonHandler<T, U>, U extends ModelJsonLoader.JsonBase>
         implements ISelectiveResourceReloadListener, IResourceType
 {
-    private T modelBase;
+    private final T                          modelBase;
+    private final Map<String, ModelRenderer> nameToBoxList;
+    private final Map<ModelRenderer, String>                  boxToNameList;
+    private final Map<String, Class<? extends ModelRenderer>> cstBoxRenderer;
+    private final ResourceLocation                            modelLocation;
+    private final String[]                   mandatoryNames;
+    private final Class<U>                   jsonClass;
+
     private ModelRenderer[] mainBoxes;
-    private Map<String, ModelRenderer> nameToBoxList;
-    private Map<ModelRenderer, String> boxToNameList;
-    private Map<String, Class<? extends ModelRenderer>> cstBoxRenderer;
-    private ResourceLocation resLoc;
-    private String[] mandatNames;
-    private boolean loaded;
-    private Class<U> jsonClass;
-    private U jsonInst;
+    private boolean         loaded;
+    private U               jsonInst;
 
     public static final Queue<ModelJsonLoader<?, ?>> REGISTERED_JSON_LOADERS = new ConcurrentLinkedQueue<>();
 
     /**
-     * Creates a new instance of the loader. This uses the default {@link ModelJson} class to parse the JSON values.
-     * @param modelBase The base model class
-     * @param location The location of the model
+     * Creates a new instance of the loader. This uses the default {@link JsonBase} class to parse the JSON values.
+     *
+     * @param modelBase      The base model class
+     * @param location       The location of the model
      * @param mandatoryNames An optional list of names that are required to exist in the model
-     * @param <T> the type of the base model class
+     * @param <T>            the type of the base model class
+     *
      * @return a new instance of the JSON model loader.
      */
-    public static <T extends ModelBase & ModelJsonHandler<T, ModelJson>> ModelJsonLoader<T, ModelJson>
-            create(T modelBase, ResourceLocation location, String... mandatoryNames)
+    public static <T extends Model & ModelJsonHandler<T, JsonBase>> ModelJsonLoader<T, JsonBase>
+    create(T modelBase, ResourceLocation location, String... mandatoryNames)
     {
-        return new ModelJsonLoader<>(modelBase, ModelJson.class, location, mandatoryNames);
+        return new ModelJsonLoader<>(modelBase, JsonBase.class, location, mandatoryNames);
     }
 
     /**
      * Creates a new instance of the loader.
-     * @param modelBase The base model class
-     * @param jsonClass A custom class to be used by the loader to parse the JSON
-     * @param location The location of the model
+     *
+     * @param modelBase      The base model class
+     * @param jsonClass      A custom class to be used by the loader to parse the JSON
+     * @param location       The location of the model
      * @param mandatoryNames An optional list of names that are required to exist in the model
-     * @param <T> the type of the base model class
-     * @param <U> the type of the custom parsed class
+     * @param <T>            the type of the base model class
+     * @param <U>            the type of the custom parsed class
+     *
      * @return a new instance of the JSON model loader.
      */
-    public static <T extends ModelBase & ModelJsonHandler<T, U>, U extends ModelJsonLoader.ModelJson> ModelJsonLoader<T, U>
-            create(T modelBase, Class<U> jsonClass, ResourceLocation location, String... mandatoryNames)
+    public static <T extends Model & ModelJsonHandler<T, U>, U extends JsonBase> ModelJsonLoader<T, U>
+    create(T modelBase, Class<U> jsonClass, ResourceLocation location, String... mandatoryNames)
     {
         return new ModelJsonLoader<>(modelBase, jsonClass, location, mandatoryNames);
     }
@@ -100,13 +107,13 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
         this.nameToBoxList = new HashMap<>();
         this.boxToNameList = new HashMap<>();
         this.cstBoxRenderer = new HashMap<>();
-        this.mandatNames = mandatoryNames.clone();
-        this.resLoc = location;
+        this.mandatoryNames = mandatoryNames.clone();
+        this.modelLocation = location;
         this.loaded = false;
         this.jsonClass = jsonClass;
 
         if( Minecraft.getInstance().getResourceManager() instanceof SimpleReloadableResourceManager ) {
-            ((SimpleReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(this);
+            ((SimpleReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(this);
         }
 
         REGISTERED_JSON_LOADERS.add(this);
@@ -146,7 +153,7 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
 
             if( json.cubes != null ) {
                 for( Cube cb : json.cubes ) {
-                    float baseScale = this.modelBase.getBaseScale();
+                    float  baseScale = this.modelBase.getBaseScale();
                     Double scaling;
                     if( cb.scaling != null ) {
                         scaling = MiscUtils.calcFormula(cb.scaling.replace("x", Float.toString(baseScale)));
@@ -157,18 +164,32 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
                         scaling = (double) baseScale;
                     }
 
-                    Class<? extends ModelRenderer> mrCls = MiscUtils.defIfNull(this.cstBoxRenderer.get(cb.boxName), ModelRenderer.class);
-                    ModelRenderer box = ModelBoxBuilder.newBuilder(this.modelBase, cb.boxName, mrCls)
-                            .setTexture(cb.textureX, cb.textureY, cb.mirror, cb.textureWidth, cb.textureHeight)
-                            .setLocation(cb.rotationPointX, cb.rotationPointY, cb.rotationPointZ)
-                            .setRotation(cb.rotateAngleX, cb.rotateAngleY, cb.rotateAngleZ)
-                            .getBox(cb.offsetX, cb.offsetY, cb.offsetZ, cb.sizeX, cb.sizeY, cb.sizeZ, scaling.floatValue());
-                    box.isHidden = cb.isHidden;
+                    ModelBoxBuilder<ModelRenderer> builder;
+                    if( this.cstBoxRenderer.containsKey(cb.boxName) ) {
+                        final Class<?> mrCls = this.cstBoxRenderer.get(cb.boxName);
+                        builder = ModelBoxBuilder.newBuilder(this.modelBase, (m) -> {
+                            try {
+                                return (ModelRenderer) mrCls.getConstructor(Model.class).newInstance(m);
+                            } catch( InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e ) {
+                                SanLib.LOG.log(Level.ERROR, "Cannot instanciate custom model renderer, falling back to standard", e);
+                                return new ModelBoxBuilder.NamedModelRenderer(m);
+                            }
+                        });
+                    } else {
+                        builder = ModelBoxBuilder.newBuilder(this.modelBase);
+                    }
+
+                    ModelRenderer box = builder.setName(cb.boxName)
+                                               .setTexture(cb.textureX, cb.textureY, cb.mirror, cb.textureWidth, cb.textureHeight)
+                                               .setLocation(cb.rotationPointX, cb.rotationPointY, cb.rotationPointZ)
+                                               .setRotation(cb.rotateAngleX, cb.rotateAngleY, cb.rotateAngleZ)
+                                               .getBox(cb.offsetX, cb.offsetY, cb.offsetZ, cb.sizeX, cb.sizeY, cb.sizeZ, scaling.floatValue());
+                    box.showModel = !cb.isHidden;
 
                     if( cb.parentBox != null && !cb.parentBox.isEmpty() ) {
-                        children.put(box.boxName, new ChildCube(box, cb.parentBox));
+                        children.put(cb.boxName, new ChildCube(box, cb.parentBox));
                     } else {
-                        mainBoxesList.put(box.boxName, box);
+                        mainBoxesList.put(cb.boxName, box);
                     }
 
                     mandatoryChecklist.put(cb.boxName, true);
@@ -181,8 +202,8 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
 
             if( isMain ) {
                 if( mandatoryChecklist.containsValue(false) ) {
-                    SanPlayerModel.LOG.printf(Level.WARN, "Model %s has not all mandatory boxes! Missing %s", this.resLoc.toString(),
-                            String.join(", ", mandatoryChecklist.keySet().stream().filter((name) -> !mandatoryChecklist.get(name)).collect(Collectors.toList())));
+                    SanPlayerModel.LOG.printf(Level.WARN, "Model %s has not all mandatory boxes! Missing %s", this.modelLocation.toString(),
+                                              mandatoryChecklist.keySet().stream().filter((name) -> !mandatoryChecklist.get(name)).collect(Collectors.joining(", ")));
                     this.nameToBoxList.clear();
                     this.boxToNameList.clear();
                     this.mainBoxes = new ModelRenderer[0];
@@ -203,11 +224,13 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
                     if( this.nameToBoxList.containsKey(child.parentName) ) {
                         this.nameToBoxList.get(child.parentName).addChild(child.box);
                     } else {
-                        this.modelBase.boxList.stream().filter((box) -> box.boxName != null && box.boxName.equals(child.parentName)).forEach((box) -> box.addChild(child.box));
+                        this.modelBase.getBoxes().stream()
+                                      .filter((box) -> box instanceof ModelBoxBuilder.INamedModelRenderer && ((ModelBoxBuilder.INamedModelRenderer) box).getName().equals(child.parentName))
+                                      .forEach((box) -> box.addChild(child.box));
                     }
                 });
 
-                this.mainBoxes = mainBoxesList.values().toArray(new ModelRenderer[mainBoxesList.size()]);
+                this.mainBoxes = mainBoxesList.values().toArray(new ModelRenderer[0]);
 
                 this.jsonInst = json;
                 this.loaded = true;
@@ -225,17 +248,17 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
 
         try {
             Map<String, Boolean> mandatoryChecklist = new HashMap<>();
-            Arrays.asList(this.mandatNames).forEach((name) -> mandatoryChecklist.put(name, false));
-            loadJson(this.resLoc, mandatoryChecklist);
-        } catch( IOException ex) {
-            SanPlayerModel.LOG.log(Level.WARN, String.format("Can't load model location %s!", this.resLoc.toString()));
+            Arrays.asList(this.mandatoryNames).forEach((name) -> mandatoryChecklist.put(name, false));
+            loadJson(this.modelLocation, mandatoryChecklist);
+        } catch( IOException ex ) {
+            SanPlayerModel.LOG.log(Level.WARN, String.format("Can't load model location %s!", this.modelLocation.toString()));
             this.nameToBoxList.clear();
             this.boxToNameList.clear();
             this.mainBoxes = new ModelRenderer[0];
             this.jsonInst = null;
             this.loaded = false;
         } catch( JsonSyntaxException | JsonIOException ex ) {
-            SanPlayerModel.LOG.log(Level.WARN, String.format("Can't load model location %s!", this.resLoc.toString()), ex);
+            SanPlayerModel.LOG.log(Level.WARN, String.format("Can't load model location %s!", this.modelLocation.toString()), ex);
             this.nameToBoxList.clear();
             this.boxToNameList.clear();
             this.mainBoxes = new ModelRenderer[0];
@@ -246,7 +269,9 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
 
     /**
      * gets a box from the loaders box list
+     *
      * @param name the name of a box
+     *
      * @return A box matching the name
      */
     public ModelRenderer getBox(String name) {
@@ -255,7 +280,9 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
 
     /**
      * gets the name from the box specified
+     *
      * @param box the box
+     *
      * @return the name of the box
      */
     @SuppressWarnings("unused")
@@ -265,6 +292,7 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
 
     /**
      * gets all main boxes (boxes with no parent). Useful for rendering the model.
+     *
      * @return An array of all main boxes
      */
     public ModelRenderer[] getMainBoxes() {
@@ -272,22 +300,24 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
     }
 
     /**
-     * Gets the parsed instance of the {@link ModelJson} class
-     * @return A parsed {@link ModelJson} instance
+     * Gets the parsed instance of the {@link JsonBase} class
+     *
+     * @return A parsed {@link JsonBase} instance
      */
-    public U getModelJsonInstance() {
+    public U getJsonBaseInstance() {
         return this.jsonInst;
     }
 
     @Override
-    public void onResourceManagerReload(IResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) {
-        if( resourcePredicate.test(this) || resourcePredicate.test(TEXTURES) ) {
+    public void onResourceManagerReload(@Nonnull IResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) {
+        if( resourcePredicate.test(this) || resourcePredicate.test(VanillaResourceType.TEXTURES) ) {
             this.modelBase.onReload(resourceManager, this);
         }
     }
 
     /**
      * Wether or not this model is loaded
+     *
      * @return true, if model is loaded, false otherwise
      */
     public boolean isLoaded() {
@@ -295,20 +325,20 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
     }
 
     /**
-     * The default class, which holds all values of the parsed JSON model.
-     * Extend this class and use {@link ModelJsonLoader#create(ModelBase, Class, ResourceLocation, String...)} to load custom properties.
+     * The default class, which holds all values of the parsed JSON model. Extend this class and use {@link ModelJsonLoader#create(Model, Class, ResourceLocation, String...)}
+     * to load custom properties.
      */
-    public static class ModelJson
+    public static class JsonBase
     {
-        public String texture;
-        public String parent;
+        public    String texture;
+        public    String parent;
         protected Cube[] cubes;
     }
 
     private static class ChildCube
     {
         private final ModelRenderer box;
-        private final String parentName;
+        private final String        parentName;
 
         private ChildCube(ModelRenderer box, String parentName) {
             this.box = box;
@@ -319,26 +349,26 @@ public class ModelJsonLoader<T extends ModelBase & ModelJsonHandler<T, U>, U ext
     @SuppressWarnings("WeakerAccess")
     private static class Cube
     {
-        public String boxName;
-        public int sizeX;
-        public int sizeY;
-        public int sizeZ;
-        public int textureX;
-        public int textureY;
-        public float textureWidth = 64.0F;
-        public float textureHeight = 32.0F;
-        public boolean mirror = false;
-        public float rotationPointX = 0.0F;
-        public float rotationPointY = 0.0F;
-        public float rotationPointZ = 0.0F;
-        public float rotateAngleX = 0.0F;
-        public float rotateAngleY = 0.0F;
-        public float rotateAngleZ = 0.0F;
-        public boolean isHidden = false;
-        public float offsetX;
-        public float offsetY;
-        public float offsetZ;
-        public String parentBox;
-        public String scaling;
+        public String  boxName;
+        public int     sizeX;
+        public int     sizeY;
+        public int     sizeZ;
+        public int     textureX;
+        public int     textureY;
+        public int     textureWidth   = 64;
+        public int     textureHeight  = 32;
+        public boolean mirror         = false;
+        public float   rotationPointX = 0.0F;
+        public float   rotationPointY = 0.0F;
+        public float   rotationPointZ = 0.0F;
+        public float   rotateAngleX   = 0.0F;
+        public float   rotateAngleY   = 0.0F;
+        public float   rotateAngleZ   = 0.0F;
+        public boolean isHidden       = false;
+        public float   offsetX;
+        public float   offsetY;
+        public float   offsetZ;
+        public String  parentBox;
+        public String  scaling;
     }
 }

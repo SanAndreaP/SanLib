@@ -7,15 +7,20 @@ package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
-import de.sanandrew.mods.sanlib.lib.util.LangUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextProperties;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TranslationTextComponent;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -51,8 +56,8 @@ public class Text
 {
     public static final ResourceLocation ID = new ResourceLocation("text");
     
-    public String               text;
-    public int                  color;
+    public String text;
+    public int            color;
     public Map<String, Integer> colors;
     public boolean              shadow;
     public int                  wrapWidth;
@@ -64,8 +69,8 @@ public class Text
     protected int                    currHeight;
     protected GuiElementInst.Justify justify;
 
-    private String       prevTxt;
-    private List<String> renderedLines = new ArrayList<>();
+    private       String       prevTxt;
+    private final List<String> renderedLines = new ArrayList<>();
 
     @Override
     public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) {
@@ -111,9 +116,8 @@ public class Text
         }
 
         this.currWidth = this.getTextWidth(gui);
-        this.currHeight = this.wrapWidth <= 0
-                          ? this.text.split("\n").length * this.lineHeight
-                          : this.fontRenderer.listFormattedStringToWidth(this.text, this.wrapWidth).size() * this.lineHeight;
+        this.currHeight = this.fontRenderer.getCharacterManager().func_238365_g_(this.text, this.wrapWidth <= 0 ? Integer.MAX_VALUE : this.wrapWidth, Style.EMPTY).size()
+                          * this.lineHeight;
         if( this.shadow ) {
             this.currHeight += 1;
         }
@@ -126,7 +130,7 @@ public class Text
     }
 
     public String getBakedText(IGui gui, JsonObject data) {
-        return LangUtils.translate(JsonUtils.getStringVal(data.get("text")));
+        return new TranslationTextComponent(data.get("text").getAsString()).getString();
     }
 
     public String getDynamicText(IGui gui, String originalText) {
@@ -138,8 +142,8 @@ public class Text
             if( this.justify == GuiElementInst.Justify.JUSTIFY ) {
                 return this.wrapWidth;
             } else {
-                return this.fontRenderer.listFormattedStringToWidth(this.getDynamicText(gui, this.text), this.wrapWidth)
-                                             .stream().map(s -> this.fontRenderer.getStringWidth(s)).reduce(0, Math::max, Math::max);
+                return this.fontRenderer.getCharacterManager().func_238365_g_(this.text, this.wrapWidth, Style.EMPTY)
+                                        .stream().map(tp -> MathHelper.ceil(this.fontRenderer.getCharacterManager().func_238356_a_(tp))).reduce(Integer::max).orElse(0);
             }
         }
 
@@ -155,7 +159,8 @@ public class Text
         this.currWidth = this.getTextWidth(gui);
         String[] ln;
         if( this.wrapWidth > 0 ) {
-            ln = this.fontRenderer.listFormattedStringToWidth(s, this.wrapWidth).toArray(new String[0]);
+            ln = this.fontRenderer.getCharacterManager().func_238365_g_(s, this.wrapWidth, Style.EMPTY)
+                                  .stream().map(ITextProperties::getString).toArray(String[]::new);
         } else {
             ln = s.split("\n");
         }
@@ -165,14 +170,14 @@ public class Text
     }
 
     @Override
-    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
+    public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data) {
         for( String sln : this.renderedLines ) {
-            this.renderLine(sln, x, y);
+            this.renderLine(stack, sln, x, y);
             y += this.lineHeight;
         }
     }
 
-    private void renderLine(String s, int x, int y) {
+    private void renderLine(MatrixStack stack, String s, int x, int y) {
         switch( this.justify ) {
             case JUSTIFY:
                 if( this.wrapWidth > 0 ) {
@@ -187,7 +192,11 @@ public class Text
 
                     spaceDist /= words.length - 1;
                     for( int i = 0; i < words.length; i++ ) {
-                        this.fontRenderer.drawString(words[i], x, y, this.color, this.shadow);
+                        if( this.shadow ) {
+                            this.fontRenderer.drawStringWithShadow(stack, words[i], x, y, this.color);
+                        } else {
+                            this.fontRenderer.drawString(stack, words[i], x, y, this.color);
+                        }
                         x += wordWidths[i] + spaceDist;
                     }
 
@@ -202,7 +211,11 @@ public class Text
                 x += this.currWidth - this.fontRenderer.getStringWidth(s);
         }
 
-        this.fontRenderer.drawString(s, x, y, this.color, this.shadow);
+        if( this.shadow ) {
+            this.fontRenderer.drawStringWithShadow(stack, s, x, y, this.color);
+        } else {
+            this.fontRenderer.drawString(stack, s, x, y, this.color);
+        }
     }
 
     @Override
@@ -228,9 +241,10 @@ public class Text
     {
         public String texture;
         public Boolean unicode;
-        public Boolean bidirectional;
 
         public WeakReference<FontRenderer> frInst;
+
+        private static FontRenderer frGalactic;
 
         @SuppressWarnings("unused")
         public Font() { }
@@ -239,32 +253,35 @@ public class Text
             this.texture = tx;
         }
 
-        public FontRenderer get(GuiScreen gui) {
+        public FontRenderer get(Screen gui) {
             if( "standard".equals(this.texture) ) {
-                return gui.mc.fontRenderer;
+                return gui.getMinecraft().fontRenderer;
             } else if( "galactic".equals(this.texture) ) {
-                return gui.mc.standardGalacticFontRenderer;
+                if( frGalactic == null ) {
+                    net.minecraft.client.gui.fonts.Font f = getMcFont(gui.getMinecraft(), Minecraft.standardGalacticFontRenderer);
+                    frGalactic = new FontRenderer(r -> f);
+                }
+
+                return frGalactic;
             } else {
                 FontRenderer fr = this.frInst == null ? null : this.frInst.get();
                 if( fr == null ) {
-                    this.frInst = new WeakReference<>(new FontRenderer(gui.mc.gameSettings, new ResourceLocation(this.texture), gui.mc.renderEngine,
-                                                                       this.unicode != null ? this.unicode : gui.mc.gameSettings.language != null && gui.mc.isUnicode()));
-                    fr = Objects.requireNonNull(this.frInst.get());
-                    if( this.bidirectional != null ) {
-                        fr.setBidiFlag(this.bidirectional);
-                    } else if( gui.mc.gameSettings.language != null ) {
-                        fr.setBidiFlag(gui.mc.getLanguageManager().isCurrentLanguageBidirectional());
-                    }
+                    net.minecraft.client.gui.fonts.Font f = getMcFont(gui.getMinecraft(), new ResourceLocation(this.texture));
+                    this.frInst = new WeakReference<>(new FontRenderer(r -> f));
                 }
 
                 return fr;
             }
         }
 
+        private static net.minecraft.client.gui.fonts.Font getMcFont(Minecraft mc, ResourceLocation rl) {
+            return new net.minecraft.client.gui.fonts.Font(mc.textureManager, rl);
+        }
+
         @Override
         @SuppressWarnings("NonFinalFieldReferencedInHashCode")
         public int hashCode() {
-            return Objects.hash(this.texture, this.unicode, this.bidirectional);
+            return Objects.hash(this.texture, this.unicode);
         }
     }
 

@@ -7,30 +7,25 @@ package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiDefinition;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.event.GuiScreenEvent;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraft.util.text.StringTextComponent;
 import org.apache.commons.lang3.Range;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings({ "WeakerAccess", "Duplicates", "unused" })
-public class Button
+public class ButtonSL
         extends ElementParent<String>
 {
     public static final ResourceLocation ID = new ResourceLocation("button");
@@ -46,12 +41,12 @@ public class Button
     public int[]            uvSize;
     public int              centralTextureWidth;
     public int              centralTextureHeight;
-    public int              buttonFunction;
+    public Button.IPressable buttonFunction = btn -> {};
 
-    protected net.minecraft.client.gui.widget.button.Button buttonDelegate;
+    protected Button buttonDelegate;
 
-    protected int     currMouseX;
-    protected int     currMouseY;
+    protected double     currMouseX;
+    protected double     currMouseY;
     protected boolean isCurrHovering;
 
     @Override
@@ -102,60 +97,60 @@ public class Button
         this.uvDisabled = JsonUtils.getIntArray(data.get("uvDisabled"), new int[] { this.uvEnabled[0], this.uvEnabled[1] - this.uvSize[1] }, Range.is(2));
         this.centralTextureWidth = JsonUtils.getIntVal(data.get("centralTextureWidth"), 190);
         this.centralTextureHeight = JsonUtils.getIntVal(data.get("centralTextureHeight"), 14);
-        this.buttonFunction = JsonUtils.getIntVal(data.get("buttonFunction"));
         this.textureSize = JsonUtils.getIntArray(data.get("textureSize"), new int[] { 256, 256 }, Range.is(2));
 
-        this.buttonDelegate = new net.minecraft.client.gui.widget.button.Button(0, 0, "");
+        this.buttonDelegate = new Button(0, 0, 0, 0, new StringTextComponent(""), btn -> buttonFunction.onPress(btn));
 
         super.bakeData(gui, data, inst);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
+    public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data) {
         this.currMouseX = mouseX;
         this.currMouseY = mouseY;
 
         this.isCurrHovering = isHovering(gui, x, y, mouseX, mouseY);
-        boolean isEnabled = this.isEnabled();
+        boolean isActive = this.isActive();
 
         gui.get().getMinecraft().getTextureManager().bindTexture(this.texture);
-        GlStateManager.pushMatrix();
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        stack.push();
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.enableBlend();
         GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA.param, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA.param);
-        GlStateManager.translated(x, y, 0.0D);
-        drawRect(isEnabled, this.isCurrHovering);
-        GlStateManager.popMatrix();
+        stack.translate(x, y, 0.0D);
+        drawRect(stack, isActive, this.isCurrHovering);
+        stack.pop();
 
         GuiElementInst label = this.getChild(LABEL);
         if( label != null ) {
             IGuiElement e = label.get();
             if( e instanceof Text ) {
-                ((Text) e).setColor(isEnabled ? this.isCurrHovering ? "hover"
-                                                                    : "default"
-                                              : "disabled");
+                ((Text) e).setColor(isActive ? this.isCurrHovering ? "hover"
+                                                                   : "default"
+                                             : "disabled");
             }
 
-            GuiDefinition.renderElement(gui, x + label.pos[0], y + label.pos[1], mouseX, mouseY, partTicks, label);
+            GuiDefinition.renderElement(gui, stack, x + label.pos[0], y + label.pos[1], mouseX, mouseY, partTicks, label);
         }
     }
 
-    public boolean isHovering(IGui gui, int x, int y, int mouseX, int mouseY) {
+    public void setFunction(Button.IPressable func) {
+        this.buttonFunction = func;
+    }
+
+    public boolean isHovering(IGui gui, int x, int y, double mouseX, double mouseY) {
         return IGuiElement.isHovering(gui, x, y, mouseX, mouseY, this.size[0], this.size[1]);
     }
 
     @Override
-    public boolean mouseClicked(IGui gui, int mouseX, int mouseY, int mouseButton) throws IOException {
-        if( mouseButton == 0 && this.isEnabled() && this.isCurrHovering ) {
-            Screen                                        gs      = gui.get();
-            net.minecraft.client.gui.widget.button.Button       btn     = this.buttonDelegate;
-            List<net.minecraft.client.gui.widget.button.Button> btnList = new ArrayList<>(Collections.singletonList(this.buttonDelegate));
+    public boolean mouseClicked(IGui gui, double mouseX, double mouseY, int mouseButton) {
+        if( mouseButton == 0 && this.isActive() && this.isCurrHovering ) {
+            Screen gs  = gui.get();
+            Button btn = this.buttonDelegate;
 
             btn.playDownSound(gs.getMinecraft().getSoundHandler());
-            this.performAction(gui, btn);
-            if( gs.equals(gs.mc.currentScreen) ) {
-                MinecraftForge.EVENT_BUS.post(new GuiScreenEvent.ActionPerformedEvent.Post(gs, btn, btnList));
-            }
+            this.buttonFunction.onPress(this.buttonDelegate);
 
             return true;
         }
@@ -163,60 +158,56 @@ public class Button
         return super.mouseClicked(gui, mouseX, mouseY, mouseButton);
     }
 
-    public void performAction(IGui gui, int id) {
-        gui.performAction(this, id);
-    }
-
-    protected void drawRect(boolean enabled, boolean hovered) {
+    protected void drawRect(MatrixStack stack, boolean enabled, boolean hovered) {
         int[] uv = enabled
                    ? (hovered ? this.uvHover : this.uvEnabled)
                    : this.uvDisabled;
 
         if( this.uvSize[0] == this.size[0] && this.uvSize[1] == this.size[1] ) {
-            Gui.drawModalRectWithCustomSizedTexture(0, 0, uv[0], uv[1], this.size[0], this.size[1], this.textureSize[0], this.textureSize[1]);
+            AbstractGui.blit(stack, 0, 0, uv[0], uv[1], this.size[0], this.size[1], this.textureSize[0], this.textureSize[1]);
         } else {
             int cornerWidth = (this.uvSize[0] - this.centralTextureWidth) / 2;
             int cornerHeight = (this.uvSize[1] - this.centralTextureHeight) / 2;
 
-            Gui.drawModalRectWithCustomSizedTexture(0, 0,
+            AbstractGui.blit(stack, 0, 0,
                                                     uv[0], uv[1],
                                                     cornerWidth, cornerHeight,
                                                     this.textureSize[0], this.textureSize[1]);
-            Gui.drawModalRectWithCustomSizedTexture(0, this.size[1] - cornerHeight,
+            AbstractGui.blit(stack, 0, this.size[1] - cornerHeight,
                                                     uv[0], uv[1] + this.uvSize[1] - cornerHeight,
                                                     cornerWidth, cornerHeight,
                                                     this.textureSize[0], this.textureSize[1]);
-            Gui.drawModalRectWithCustomSizedTexture(this.size[0] - cornerWidth, 0,
+            AbstractGui.blit(stack, this.size[0] - cornerWidth, 0,
                                                     uv[0] + this.uvSize[0] - cornerWidth, uv[1],
                                                     cornerWidth, cornerHeight,
                                                     this.textureSize[0], this.textureSize[1]);
-            Gui.drawModalRectWithCustomSizedTexture(this.size[0] - cornerWidth, this.size[1] - cornerHeight,
+            AbstractGui.blit(stack, this.size[0] - cornerWidth, this.size[1] - cornerHeight,
                                                     uv[0] + this.uvSize[0] - cornerWidth, uv[1] + this.uvSize[1] - cornerHeight,
                                                     cornerWidth, cornerHeight,
                                                     this.textureSize[0], this.textureSize[1]);
 
-            drawTiledTexture(0, cornerHeight,
+            drawTiledTexture(stack, 0, cornerHeight,
                              uv[0], uv[1] + cornerHeight,
                              cornerWidth, this.uvSize[1] - cornerHeight * 2,
                              cornerWidth, this.size[1] - cornerHeight * 2,
                              this.textureSize[0], this.textureSize[1]);
-            drawTiledTexture(cornerWidth, 0,
+            drawTiledTexture(stack, cornerWidth, 0,
                              uv[0] + cornerWidth, uv[1],
                              this.uvSize[0] - cornerWidth * 2, cornerHeight,
                              this.size[0] - cornerWidth * 2, cornerHeight,
                              this.textureSize[0], this.textureSize[1]);
-            drawTiledTexture(this.size[0] - cornerWidth, cornerHeight,
+            drawTiledTexture(stack, this.size[0] - cornerWidth, cornerHeight,
                              uv[0] + this.uvSize[0] - cornerWidth, uv[1] + cornerHeight,
                              cornerWidth, this.uvSize[1] - cornerHeight * 2,
                              cornerWidth, this.size[1] - cornerHeight * 2,
                              this.textureSize[0], this.textureSize[1]);
-            drawTiledTexture(cornerWidth, this.size[1] - cornerHeight,
+            drawTiledTexture(stack, cornerWidth, this.size[1] - cornerHeight,
                              uv[0] + cornerWidth, uv[1] + this.uvSize[1] - cornerHeight,
                              this.uvSize[0] - cornerWidth * 2, cornerHeight,
                              this.size[0] - cornerWidth * 2, cornerHeight,
                              this.textureSize[0], this.textureSize[1]);
 
-            drawTiledTexture(cornerWidth, cornerHeight,
+            drawTiledTexture(stack, cornerWidth, cornerHeight,
                              uv[0] + cornerWidth, uv[1] + cornerHeight,
                              this.uvSize[0] - cornerWidth * 2, this.uvSize[1] - cornerHeight * 2,
                              this.size[0] - cornerWidth * 2, this.size[1] - cornerHeight * 2,
@@ -224,14 +215,14 @@ public class Button
         }
     }
 
-    protected static void drawTiledTexture(int x, int y, float u, float v, int uWidth, int vHeight, int width, int height, int sheetWidth, int sheetHeight) {
+    protected static void drawTiledTexture(MatrixStack stack, int x, int y, float u, float v, int uWidth, int vHeight, int width, int height, int sheetWidth, int sheetHeight) {
         int txWidth = width;
         int txHeight = height;
         int uvX = Math.min(uWidth, width);
         int uvY = Math.min(vHeight, height);
         while( uvX > 0 ) {
             while( uvY > 0 ) {
-                Gui.drawModalRectWithCustomSizedTexture(x + txWidth - width, y + txHeight - height, u, v, uvX, uvY, sheetWidth, sheetHeight);
+                AbstractGui.blit(stack, x + txWidth - width, y + txHeight - height, u, v, uvX, uvY, sheetWidth, sheetHeight);
 
                 height -= vHeight;
                 uvY = Math.min(vHeight, height);
@@ -255,11 +246,11 @@ public class Button
         return this.size[1];
     }
 
-    public void setEnabled(boolean enabled) {
-        this.buttonDelegate.enabled = enabled;
+    public void setActive(boolean active) {
+        this.buttonDelegate.active = active;
     }
 
-    public boolean isEnabled() {
-        return this.buttonDelegate.enabled;
+    public boolean isActive() {
+        return this.buttonDelegate.active;
     }
 }

@@ -5,10 +5,11 @@
 
 package de.sanandrew.mods.sanlib.lib.client;
 
-import net.minecraft.client.model.ModelBase;
-import net.minecraft.client.model.ModelRenderer;
+import net.minecraft.client.renderer.model.Model;
+import net.minecraft.client.renderer.model.ModelRenderer;
 
-import java.lang.reflect.InvocationTargetException;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * A builder class to easily instantiate a ModelRenderer box for a Model without having to deal with multi-line method calls and field assignments.
@@ -22,56 +23,32 @@ public final class ModelBoxBuilder<T extends ModelRenderer>
      * @param model The model instance
      * @return A new instance of the ModelBoxBuilder.
      */
-    public static ModelBoxBuilder<ModelRenderer> newBuilder(final ModelBase model) {
-        return newBuilder(model, null, ModelRenderer.class);
-    }
-
-    /**
-     * Creates a new Model Box Builder with a custom box name.
-     * @param model The model instance
-     * @return A new instance of the ModelBoxBuilder.
-     */
-    public static ModelBoxBuilder<ModelRenderer> newBuilder(final ModelBase model, String name) {
-        return newBuilder(model, name, ModelRenderer.class);
+    public static ModelBoxBuilder<ModelRenderer> newBuilder(final Model model) {
+        return newBuilder(model, ModelRenderer::new);
     }
 
     /**
      * Creates a new Model Box Builder with a custom box class.
      * @param model    The model instance
-     * @param boxClass The custom box class. Note: It MUST be a child of the {@link net.minecraft.client.model.ModelRenderer} class and override the
-     *                 {@link net.minecraft.client.model.ModelRenderer#ModelRenderer(net.minecraft.client.model.ModelBase)} parent constructor!
+     * @param mrCtor The custom box constructor reference. Note: It MUST be a child of {@link ModelRenderer}!
      * @return A new instance of the ModelBoxBuilder.
      */
-    public static <T extends ModelRenderer> ModelBoxBuilder<T> newBuilder(final ModelBase model, Class<T> boxClass) {
-        return newBuilder(model, null, boxClass);
+    public static <T extends ModelRenderer> ModelBoxBuilder<T> newBuilder(final Model model, Function<Model, T> mrCtor) {
+        return new ModelBoxBuilder<>(model, mrCtor);
     }
 
-    /**
-     * Creates a new Model Box Builder with a custom box class and name.
-     * @param model    The model instance
-     * @param name     A name for the box
-     * @param boxClass The custom box class. Note: It MUST be a child of the {@link net.minecraft.client.model.ModelRenderer} class and override the
-     *                 {@link net.minecraft.client.model.ModelRenderer#ModelRenderer(net.minecraft.client.model.ModelBase, java.lang.String)} parent constructor!
-     * @return A new instance of the ModelBoxBuilder.
-     */
-    public static <T extends ModelRenderer> ModelBoxBuilder<T> newBuilder(final ModelBase model, String name, Class<T> boxClass) {
-        return new ModelBoxBuilder<>(model, name, boxClass);
+    private final T      box;
+
+    private ModelBoxBuilder(Model model, Function<Model, T> mrCtor) {
+        this.box = mrCtor.apply(model);
     }
 
-    private T box;
-
-    private ModelBoxBuilder(ModelBase model, String name, Class<T> boxClass) {
-        try {
-            if( name != null ) {
-                this.box = boxClass.getConstructor(ModelBase.class, String.class).newInstance(model, name);
-            } else {
-                this.box = boxClass.getConstructor(ModelBase.class).newInstance(model);
-            }
-            this.box.textureWidth = model.textureWidth;
-            this.box.textureHeight = model.textureHeight;
-        } catch( InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e ) {
-            throw new RuntimeException("Unable to build Model box! Check your inheritance or constructors of your ModelRenderer subclass if you've provided one!", e);
+    public ModelBoxBuilder<T> setName(String name) {
+        if( this.box instanceof INamedModelRenderer ) {
+            ((INamedModelRenderer) this.box).setName(name);
         }
+
+        return this;
     }
 
     /**
@@ -97,9 +74,8 @@ public final class ModelBoxBuilder<T extends ModelRenderer>
      * @param height The height of the texture
      * @return The ModelBoxBuilder instance calling this method.
      */
-    public ModelBoxBuilder<T> setTexture(int x, int y, boolean mirror, float width, float height) {
-        this.box.textureWidth = width;
-        this.box.textureHeight = height;
+    public ModelBoxBuilder<T> setTexture(int x, int y, boolean mirror, int width, int height) {
+        this.box.setTextureSize(width, height);
         this.box.setTextureOffset(x, y);
         this.box.mirror = mirror;
 
@@ -151,5 +127,40 @@ public final class ModelBoxBuilder<T extends ModelRenderer>
         this.box.addBox(xOffset, yOffset, zOffset, xSize, ySize, zSize, scale);
 
         return this.box;
+    }
+
+    public static class NamedModelRenderer
+            extends ModelRenderer
+            implements INamedModelRenderer
+    {
+        private String name;
+
+        public NamedModelRenderer(Model p_i1173_1_) {
+            super(p_i1173_1_);
+        }
+
+        public NamedModelRenderer(Model p_i46358_1_, int p_i46358_2_, int p_i46358_3_) {
+            super(p_i46358_1_, p_i46358_2_, p_i46358_3_);
+        }
+
+        public NamedModelRenderer(int p_i225949_1_, int p_i225949_2_, int p_i225949_3_, int p_i225949_4_) {
+            super(p_i225949_1_, p_i225949_2_, p_i225949_3_, p_i225949_4_);
+        }
+
+        @Override
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getName() {
+            return this.name;
+        }
+    }
+
+    public interface INamedModelRenderer
+    {
+        void setName(String name);
+        String getName();
     }
 }

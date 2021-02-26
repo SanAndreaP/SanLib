@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Level;
 import java.util.Locale;
 import java.util.function.Supplier;
 
-@SuppressWarnings({"WeakerAccess", "unused"})
+@SuppressWarnings("unused")
 public final class GuiElementInst
 {
     public String      type;

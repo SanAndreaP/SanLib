@@ -14,10 +14,10 @@ public class Constants
     static final        String VERSION                 = "2.0.0";
     static final        String ACCEPTED_REMOTE_VER     = "[2.0.0,)";
     static final        String MCVER                   = "[1.16.4, 1.17)";
-    static final        String DEPENDENCIES            = "required-after:forge@[35.1.4,]";
+    static final        String DEPENDENCIES            = "required-after:forge@[35.1.37,]";
 
     static final String BUILD_MCVER    = "1.16.4";
-    static final String BUILD_FORGEVER = "1.16.4-35.1.4";
+    static final String BUILD_FORGEVER = "1.16.4-35.1.37";
     static final String BUILD_MAPPINGS_CHANNEL = "snapshot";
     static final String BUILD_MAPPINGS_VERSION = "20201028-1.16.3";
 

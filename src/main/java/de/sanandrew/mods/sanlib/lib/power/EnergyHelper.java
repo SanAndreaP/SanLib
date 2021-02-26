@@ -5,45 +5,21 @@
 
 package de.sanandrew.mods.sanlib.lib.power;
 
-import de.sanandrew.mods.sanlib.lib.util.ReflectionUtils;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "ConstantConditions"})
 public final class EnergyHelper
 {
-    private static final boolean COFH_EXISTS  = ReflectionUtils.doesClassExist("cofh.redstobeflux.api.IEnergyHandler");
-    private static final boolean TESLA_EXISTS = ReflectionUtils.doesClassExist("net.darkhax.tesla.capability.TeslaCapabilities");
-
-    public static boolean canConnectEnergy(TileEntity te, EnumFacing facing) {
-        if( COFH_EXISTS && te instanceof cofh.redstoneflux.api.IEnergyConnection ) {
-            return ((cofh.redstoneflux.api.IEnergyConnection) te).canConnectEnergy(facing);
-        }
-        if( TESLA_EXISTS ) {
-            if( te.getCapability(net.darkhax.tesla.capability.TeslaCapabilities.CAPABILITY_CONSUMER, facing) != null ) {
-                return true;
-            }
-            if( te.getCapability(net.darkhax.tesla.capability.TeslaCapabilities.CAPABILITY_PRODUCER, facing) != null ) {
-                return true;
-            }
-        }
-        IEnergyStorage stg = te.getCapability(CapabilityEnergy.ENERGY, facing);
+    public static boolean canConnectEnergy(TileEntity te, Direction facing) {
+        IEnergyStorage stg = te.getCapability(CapabilityEnergy.ENERGY, facing).orElse(null);
         return stg != null && (stg.canExtract() || stg.canReceive());
     }
 
-    public static long receiveEnergy(TileEntity te, EnumFacing facing, long amount, boolean simulate) {
-        if( COFH_EXISTS && te instanceof cofh.redstoneflux.api.IEnergyReceiver ) {
-            return ((cofh.redstoneflux.api.IEnergyReceiver) te).receiveEnergy(facing, (int) amount, simulate);
-        }
-        if( TESLA_EXISTS ) {
-            net.darkhax.tesla.api.ITeslaConsumer consumer = te.getCapability(net.darkhax.tesla.capability.TeslaCapabilities.CAPABILITY_CONSUMER, facing);
-            if( consumer != null ) {
-                return consumer.givePower(amount, simulate);
-            }
-        }
-        IEnergyStorage consumer = te.getCapability(CapabilityEnergy.ENERGY, facing);
+    public static long receiveEnergy(TileEntity te, Direction facing, long amount, boolean simulate) {
+        IEnergyStorage consumer = te.getCapability(CapabilityEnergy.ENERGY, facing).orElse(null);
         if( consumer != null ) {
             return consumer.receiveEnergy((int) amount, simulate);
         }
@@ -51,17 +27,8 @@ public final class EnergyHelper
         return 0;
     }
 
-    public static long extractEnergy(TileEntity te, EnumFacing facing, long amount, boolean simulate) {
-        if( COFH_EXISTS && te instanceof cofh.redstoneflux.api.IEnergyProvider ) {
-            return ((cofh.redstoneflux.api.IEnergyProvider) te).extractEnergy(facing, (int) amount, simulate);
-        }
-        if( TESLA_EXISTS ) {
-            net.darkhax.tesla.api.ITeslaProducer producer = te.getCapability(net.darkhax.tesla.capability.TeslaCapabilities.CAPABILITY_PRODUCER, facing);
-            if( producer != null ) {
-                return producer.takePower(amount, simulate);
-            }
-        }
-        IEnergyStorage provider = te.getCapability(CapabilityEnergy.ENERGY, facing);
+    public static long extractEnergy(TileEntity te, Direction facing, long amount, boolean simulate) {
+        IEnergyStorage provider = te.getCapability(CapabilityEnergy.ENERGY, facing).orElse(null);
         if( provider != null ) {
             return provider.extractEnergy((int) amount, simulate);
         }

@@ -9,29 +9,30 @@ import com.google.common.base.Strings;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import de.sanandrew.mods.sanlib.SanLib;
-import de.sanandrew.mods.sanlib.lib.client.gui.element.Button;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.ButtonSL;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.ContainerName;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.DynamicText;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.GroupBox;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.Item;
-import de.sanandrew.mods.sanlib.lib.client.gui.element.Tooltip;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.Rectangle;
-import de.sanandrew.mods.sanlib.lib.client.gui.element.RedstoneFluxBar;
-import de.sanandrew.mods.sanlib.lib.client.gui.element.RedstoneFluxText;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.EnergyStorageBar;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.EnergyStorageText;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.ScrollArea;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.Text;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.TextField;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.Texture;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.Tooltip;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.IReloadableResourceManager;
-import net.minecraft.client.resources.IResource;
-import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.resources.IReloadableResourceManager;
+import net.minecraft.resources.IResource;
+import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.resource.IResourceType;
-import net.minecraftforge.client.resource.ISelectiveResourceReloadListener;
-import net.minecraftforge.fml.common.eventhandler.EventPriority;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.resource.IResourceType;
+import net.minecraftforge.resource.ISelectiveResourceReloadListener;
 import org.apache.logging.log4j.Level;
 
 import javax.annotation.Nonnull;
@@ -46,12 +47,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-@SuppressWarnings({ "unused", "WeakerAccess", "MismatchedQueryAndUpdateOfCollection", "UnusedReturnValue" })
+@SuppressWarnings("unused")
 public class GuiDefinition
-        implements ISelectiveResourceReloadListener
+        implements ISelectiveResourceReloadListener, IGuiReference
 {
     public static final Map<ResourceLocation, Supplier<IGuiElement>> TYPES = new HashMap<>();
     static {
@@ -61,10 +63,10 @@ public class GuiDefinition
         TYPES.put(ScrollArea.ID, ScrollArea::new);
         TYPES.put(ContainerName.ID, ContainerName::new);
         TYPES.put(Tooltip.ID, Tooltip::new);
-        TYPES.put(RedstoneFluxBar.ID, RedstoneFluxBar::new);
-        TYPES.put(RedstoneFluxText.ID, RedstoneFluxText::new);
+        TYPES.put(EnergyStorageBar.ID, EnergyStorageBar::new);
+        TYPES.put(EnergyStorageText.ID, EnergyStorageText::new);
         TYPES.put(DynamicText.ID, DynamicText::new);
-        TYPES.put(Button.ID, Button::new);
+        TYPES.put(ButtonSL.ID, ButtonSL::new);
         TYPES.put(TextField.ID, TextField::new);
         TYPES.put(Item.ID, Item::new);
         TYPES.put(GroupBox.ID, GroupBox::new);
@@ -89,7 +91,7 @@ public class GuiDefinition
         this.data = data;
         this.loadProcessor = loadProcessor;
 
-        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(this);
+        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(this);
         this.reloadDefinition();
     }
 
@@ -174,11 +176,11 @@ public class GuiDefinition
         Arrays.stream(this.foregroundElements).forEach(f);
     }
 
-    public static void renderElement(IGui gui, int mouseX, int mouseY, float partialTicks, GuiElementInst e) {
-        renderElement(gui, e.pos[0], e.pos[1], mouseX, mouseY, partialTicks, e);
+    public static void renderElement(IGui gui, MatrixStack stack, int mouseX, int mouseY, float partialTicks, GuiElementInst e) {
+        renderElement(gui, stack, e.pos[0], e.pos[1], mouseX, mouseY, partialTicks, e);
     }
 
-    public static void renderElement(IGui gui, int x, int y, int mouseX, int mouseY, float partialTicks, GuiElementInst e) {
+    public static void renderElement(IGui gui, MatrixStack stack, int x, int y, double mouseX, double mouseY, float partialTicks, GuiElementInst e) {
         IGuiElement ie = e.get();
         if( e.isVisible() ) {
             if( !e.firstRenderUpdate || ie.forceRenderUpdate(gui) ) {
@@ -195,100 +197,86 @@ public class GuiDefinition
                 case CENTER: y -= ie.getHeight() / 2; break;
             }
 
-            ie.render(gui, partialTicks, x, y, mouseX, mouseY, e.data);
+            ie.render(gui, stack, partialTicks, x, y, mouseX, mouseY, e.data);
         }
     }
 
-    public void drawBackground(IGui gui, int mouseX, int mouseY, float partialTicks) {
-        Arrays.stream(this.backgroundElements).forEach(e -> renderElement(gui, mouseX, mouseY, partialTicks, e));
+    public void drawBackground(IGui gui, MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+        Arrays.stream(this.backgroundElements).forEach(e -> renderElement(gui, stack, mouseX, mouseY, partialTicks, e));
     }
 
-    public void drawForeground(IGui gui, int mouseX, int mouseY, float partialTicks) {
-        Arrays.stream(this.foregroundElements).forEach(e -> renderElement(gui, mouseX, mouseY, partialTicks, e));
+    public void drawForeground(IGui gui, MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+        Arrays.stream(this.foregroundElements).forEach(e -> renderElement(gui, stack, mouseX, mouseY, partialTicks, e));
     }
 
     private static GuiElementInst[] getPrioritizedElements(GuiElementInst[] elements, IGuiElement.PriorityTarget target) {
         return Arrays.stream(elements).sorted(Comparator.comparing(e -> getPriority(e, target))).toArray(GuiElementInst[]::new);
     }
 
-    public void handleMouseInput(IGui gui) throws IOException {
-        for( GuiElementInst e : this.prioritizedBgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
-            if( e.isVisible() ) {
-                e.get().handleMouseInput(gui);
-            }
-        }
-        for( GuiElementInst e : this.prioritizedFgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
-            if( e.isVisible() ) {
-                e.get().handleMouseInput(gui);
-            }
-        }
+    @Override
+    public boolean mouseClicked(IGui gui, double mouseX, double mouseY, int mouseButton) {
+        return doWorkB(e -> e.mouseClicked(gui, mouseX, mouseY, mouseButton), IGuiElement.PriorityTarget.MOUSE_INPUT);
     }
 
-    public boolean mouseClicked(IGui gui, int mouseX, int mouseY, int mouseButton) throws IOException {
-        for( GuiElementInst e : this.prioritizedBgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
-            if( e.isVisible() && e.get().mouseClicked(gui, mouseX, mouseY, mouseButton) ) {
-                return true;
-            }
-        }
-        for( GuiElementInst e : this.prioritizedFgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
-            if( e.isVisible() && e.get().mouseClicked(gui, mouseX, mouseY, mouseButton) ) {
-                return true;
-            }
-        }
-
-        return false;
+    @Override
+    public boolean mouseScrolled(IGui gui, double mouseX, double mouseY, double mouseScroll) {
+        return doWorkB(e -> e.mouseScrolled(gui, mouseX, mouseY, mouseScroll), IGuiElement.PriorityTarget.MOUSE_INPUT);
     }
 
-    public void mouseReleased(IGui gui, int mouseX, int mouseY, int state) {
-        for( GuiElementInst e : this.prioritizedBgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
-            if( e.isVisible() ) {
-                e.get().mouseReleased(gui, mouseX, mouseY, state);
-            }
-        }
-        for( GuiElementInst e : this.prioritizedFgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
-            if( e.isVisible() ) {
-                e.get().mouseReleased(gui, mouseX, mouseY, state);
-            }
-        }
+    @Override
+    public boolean mouseReleased(IGui gui, double mouseX, double mouseY, int state) {
+        return doWorkB(e -> e.mouseReleased(gui, mouseX, mouseY, state), IGuiElement.PriorityTarget.MOUSE_INPUT);
     }
 
-    public void mouseClickMove(IGui gui, int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-        for( GuiElementInst e : this.prioritizedBgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
-            if( e.isVisible() ) {
-                e.get().mouseClickMove(gui, mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-            }
-        }
-        for( GuiElementInst e : this.prioritizedFgElements.get(IGuiElement.PriorityTarget.MOUSE_INPUT) ) {
-            if( e.isVisible() ) {
-                e.get().mouseClickMove(gui, mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-            }
-        }
+    @Override
+    public boolean mouseDragged(IGui gui, double mouseX, double mouseY, int clickedMouseButton, double offsetX, double offsetY) {
+        return doWorkB(e -> e.mouseDragged(gui, mouseX, mouseY, clickedMouseButton, offsetX, offsetY), IGuiElement.PriorityTarget.MOUSE_INPUT);
     }
 
-    public boolean keyTyped(IGui gui, char typedChar, int keyCode) throws IOException {
-        for( GuiElementInst e : this.prioritizedBgElements.get(IGuiElement.PriorityTarget.KEY_INPUT) ) {
-            if( e.isVisible() && e.get().keyTyped(gui, typedChar, keyCode) ) {
-                return true;
-            }
-        }
-        for( GuiElementInst e : this.prioritizedFgElements.get(IGuiElement.PriorityTarget.KEY_INPUT) ) {
-            if( e.isVisible() && e.get().keyTyped(gui, typedChar, keyCode) ) {
-                return true;
-            }
-        }
-
-        return false;
+    @Override
+    public boolean keyPressed(IGui gui, int keyCode, int unknown1, int unknown2) {
+        return doWorkB(e -> e.keyPressed(gui, keyCode, unknown1, unknown2), IGuiElement.PriorityTarget.KEY_INPUT);
     }
 
+    @Override
+    public boolean keyReleased(IGui gui, int keyCode, int unknown1, int unknown2) {
+        return doWorkB(e -> e.keyReleased(gui, keyCode, unknown1, unknown2), IGuiElement.PriorityTarget.KEY_INPUT);
+    }
+
+    @Override
+    public boolean charTyped(IGui gui, char typedChar, int keyCode) {
+        return doWorkB(e -> e.charTyped(gui, typedChar, keyCode), IGuiElement.PriorityTarget.KEY_INPUT);
+    }
+
+    @Override
     public void guiClosed(IGui gui) {
+        doWorkV(e -> e.guiClosed(gui));
+    }
+
+    private boolean doWorkB(Function<IGuiElement, Boolean> execElem, IGuiElement.PriorityTarget target) {
+        for( GuiElementInst e : (target != null ? this.prioritizedBgElements.get(target) : this.backgroundElements) ) {
+            if( e.isVisible() && execElem.apply(e.get()) ) {
+                return true;
+            }
+        }
+        for( GuiElementInst e : (target != null ? this.prioritizedFgElements.get(target) : this.foregroundElements) ) {
+            if( e.isVisible() && execElem.apply(e.get()) ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void doWorkV(Consumer<IGuiElement> execElem) {
         for( GuiElementInst e : this.backgroundElements ) {
             if( e.isVisible() ) {
-                e.get().guiClosed(gui);
+                execElem.accept(e.get());
             }
         }
         for( GuiElementInst e : this.foregroundElements ) {
             if( e.isVisible() ) {
-                e.get().guiClosed(gui);
+                execElem.accept(e.get());
             }
         }
     }

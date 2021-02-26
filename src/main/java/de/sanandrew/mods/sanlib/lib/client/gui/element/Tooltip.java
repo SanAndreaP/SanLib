@@ -7,14 +7,15 @@ package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.client.util.GuiUtils;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.Range;
 
@@ -72,36 +73,36 @@ public class Tooltip
     }
 
     @Override
-    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
+    public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data) {
         if( IGuiElement.isHovering(gui, x, y, mouseX, mouseY, this.size[0], this.size[1]) ) {
-            int locMouseX = mouseX - gui.getScreenPosX();
-            int locMouseY = mouseY - gui.getScreenPosY();
+            double locMouseX = mouseX - gui.getScreenPosX();
+            double locMouseY = mouseY - gui.getScreenPosY();
 
             IGuiElement contentElem = this.getChild(CONTENT).get();
             int width = contentElem.getWidth() + this.padding[1] + this.padding[3];
             int height = contentElem.getHeight() + this.padding[0] + this.padding[2];
-            int xPos = locMouseX + 12;
-            int yPos = locMouseY - 12;
+            int xPos = (int) locMouseX + 12;
+            int yPos = (int) locMouseY - 12;
 
             if( mouseX + width + 16 > gui.get().width ) {
                 xPos -= width + 28;
             }
 
-            GlStateManager.disableDepth();
-            Gui.drawRect(xPos - 3,         yPos - 4,          xPos + width + 3, yPos - 3,          this.backgroundColor);
-            Gui.drawRect(xPos - 3,         yPos + height + 3, xPos + width + 3, yPos + height + 4, this.backgroundColor);
-            Gui.drawRect(xPos - 3,         yPos - 3,          xPos + width + 3, yPos + height + 3, this.backgroundColor);
-            Gui.drawRect(xPos - 4,         yPos - 3,          xPos - 3,         yPos + height + 3, this.backgroundColor);
-            Gui.drawRect(xPos + width + 3, yPos - 3,          xPos + width + 4, yPos + height + 3, this.backgroundColor);
+            RenderSystem.disableDepthTest();
+            AbstractGui.fill(stack, xPos - 3, yPos - 4, xPos + width + 3, yPos - 3, this.backgroundColor);
+            AbstractGui.fill(stack, xPos - 3,         yPos + height + 3, xPos + width + 3, yPos + height + 4, this.backgroundColor);
+            AbstractGui.fill(stack, xPos - 3,         yPos - 3,          xPos + width + 3, yPos + height + 3, this.backgroundColor);
+            AbstractGui.fill(stack, xPos - 4,         yPos - 3,          xPos - 3,         yPos + height + 3, this.backgroundColor);
+            AbstractGui.fill(stack, xPos + width + 3, yPos - 3,          xPos + width + 4, yPos + height + 3, this.backgroundColor);
 
-            GuiUtils.drawGradientRect(xPos - 3,         yPos - 2, 1, height + 4, this.borderTopColor, this.borderBottomColor, true);
-            GuiUtils.drawGradientRect(xPos + width + 2, yPos - 2, 1, height + 4, this.borderTopColor, this.borderBottomColor, true);
-            Gui.drawRect(xPos - 3, yPos - 3,          xPos + width + 3, yPos - 2,          this.borderTopColor);
-            Gui.drawRect(xPos - 3, yPos + height + 2, xPos + width + 3, yPos + height + 3, this.borderBottomColor);
+            GuiUtils.drawGradient(stack, xPos - 3, yPos - 2, 1, height + 4, this.borderTopColor, this.borderBottomColor, true);
+            GuiUtils.drawGradient(stack, xPos + width + 2, yPos - 2, 1, height + 4, this.borderTopColor, this.borderBottomColor, true);
+            AbstractGui.fill(stack, xPos - 3, yPos - 3,          xPos + width + 3, yPos - 2,          this.borderTopColor);
+            AbstractGui.fill(stack, xPos - 3, yPos + height + 2, xPos + width + 3, yPos + height + 3, this.borderBottomColor);
 
-            super.render(gui, partTicks, xPos + this.padding[3], yPos + this.padding[0], mouseX, mouseY, data);
+            super.render(gui, stack, partTicks, xPos + this.padding[3], yPos + this.padding[0], mouseX, mouseY, data);
 
-            GlStateManager.enableDepth();
+            RenderSystem.enableDepthTest();
         }
     }
 

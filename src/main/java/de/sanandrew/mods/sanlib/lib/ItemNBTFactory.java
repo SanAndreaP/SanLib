@@ -5,31 +5,23 @@
 
 package de.sanandrew.mods.sanlib.lib;
 
-import com.google.gson.JsonObject;
-import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraftforge.common.crafting.IIngredientFactory;
-import net.minecraftforge.common.crafting.IngredientNBT;
-import net.minecraftforge.common.crafting.JsonContext;
-
-import javax.annotation.Nonnull;
-
 @SuppressWarnings("unused")
+@Deprecated
+//TODO: probably not needed anymore???
 public class ItemNBTFactory
-        implements IIngredientFactory
+//        implements IIngredientSerializer<Ingredient>
 {
-    @Nonnull
-    @Override
-    public Ingredient parse(JsonContext context, JsonObject json) {
-        return new IngredientNBTSanLib(JsonUtils.getItemStack(json));
-    }
-
-    private static class IngredientNBTSanLib
-            extends IngredientNBT
-    {
-        private IngredientNBTSanLib(ItemStack stack) {
-            super(stack);
-        }
-    }
+//    @Nonnull
+////    @Override
+//    public Ingredient parse(JsonContext context, JsonObject json) {
+////        return new IngredientNBTSanLib(JsonUtils.getItemStack(json));
+//    }
+//
+//    private static class IngredientNBTSanLib
+////            extends IngredientNBT
+//    {
+//        private IngredientNBTSanLib(ItemStack stack) {
+////            super(stack);
+//        }
+//    }
 }

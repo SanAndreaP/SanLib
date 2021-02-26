@@ -5,8 +5,6 @@
 
 package de.sanandrew.mods.sanlib.lib;
 
-import net.minecraft.util.math.MathHelper;
-
 /**
  * A class that contains color values
  */
@@ -58,10 +56,10 @@ public final class ColorObj
      * @param alpha The value for the alpha color component (transparency)
      */
     public ColorObj(int red, int green, int blue, int alpha) {
-        this.r = red < 0 ? 0 : red > 255 ? 255 : red;
-        this.g = green < 0 ? 0 : green > 255 ? 255 : green;
-        this.b = blue < 0 ? 0 : blue > 255 ? 255 : blue;
-        this.a = alpha < 0 ? 0 : alpha > 255 ? 255 : alpha;
+        this.setRed(red);
+        this.setGreen(green);
+        this.setBlue(blue);
+        this.setAlpha(alpha);
     }
 
     /**
@@ -159,7 +157,7 @@ public final class ColorObj
      * @param red The red color value
      */
     public void setRed(int red) {
-        this.r = red < 0 ? 0 : red > 255 ? 255 : red;
+        this.r = Math.max(0, Math.min(red, 255));
     }
 
     /**
@@ -167,7 +165,7 @@ public final class ColorObj
      * @param green The green color value
      */
     public void setGreen(int green) {
-        this.g = green < 0 ? 0 : green > 255 ? 255 : green;
+        this.g = Math.max(0, Math.min(green, 255));
     }
 
     /**
@@ -175,7 +173,7 @@ public final class ColorObj
      * @param blue The blue color value
      */
     public void setBlue(int blue) {
-        this.b = blue < 0 ? 0 : blue > 255 ? 255 : blue;
+        this.b = Math.max(0, Math.min(blue, 255));
     }
 
     /**
@@ -183,7 +181,7 @@ public final class ColorObj
      * @param alpha The alpha value
      */
     public void setAlpha(int alpha) {
-        this.a = alpha < 0 ? 0 : alpha > 255 ? 255 : alpha;
+        this.a = Math.max(0, Math.min(alpha, 255));
     }
 
     /**

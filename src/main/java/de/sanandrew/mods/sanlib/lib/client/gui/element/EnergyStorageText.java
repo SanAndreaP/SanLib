@@ -11,7 +11,7 @@ import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 
-public class RedstoneFluxText
+public class EnergyStorageText
         extends Text
 {
     public static final ResourceLocation ID = new ResourceLocation("rflux_text");
@@ -36,7 +36,7 @@ public class RedstoneFluxText
 
     @Override
     public String getDynamicText(IGui gui, String originalText) {
-        RedstoneFluxBar.IGuiEnergyContainer gec = (RedstoneFluxBar.IGuiEnergyContainer) gui;
+        EnergyStorageBar.IGuiEnergyContainer gec = (EnergyStorageBar.IGuiEnergyContainer) gui;
         return String.format("%d / %d RF", gec.getEnergy(), gec.getMaxEnergy());
     }
 }

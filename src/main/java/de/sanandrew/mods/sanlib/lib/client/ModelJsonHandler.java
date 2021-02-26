@@ -5,15 +5,18 @@
 
 package de.sanandrew.mods.sanlib.lib.client;
 
-import net.minecraft.client.model.ModelBase;
-import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.client.renderer.model.Model;
+import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.resources.IResourceManager;
+
+import java.util.List;
 
 /**
  * An object that handles events during the loading of JSON-Models via the {@link ModelJsonLoader}.
- * @param <T> The type of the object itself. Must extend ModelBase and must implement {@link ModelJsonHandler}.
- * @param <U> The type of a {@link ModelJsonLoader.ModelJson} implementation.
+ * @param <T> The type of the object itself. Must extend Model and must implement {@link ModelJsonHandler}.
+ * @param <U> The type of a {@link ModelJsonLoader.JsonBase} implementation.
  */
-public interface ModelJsonHandler<T extends ModelBase & ModelJsonHandler<T, U>, U extends ModelJsonLoader.ModelJson>
+public interface ModelJsonHandler<T extends Model & ModelJsonHandler<T, U>, U extends ModelJsonLoader.JsonBase>
 {
     /**
      * Called when Minecraft (re)loads all resources (e.g. when the texture pack changes)
@@ -29,9 +32,11 @@ public interface ModelJsonHandler<T extends ModelBase & ModelJsonHandler<T, U>, 
     void setTexture(String textureStr);
 
     /**
-     * Returns the scaling value for the {@link net.minecraft.client.model.ModelRenderer ModelRenderer} cubes to be used.
+     * Returns the scaling value for the {@link net.minecraft.client.renderer.model.ModelRenderer} cubes to be used.
      * Default implementation returns {@code 0.0F}
      * @return the scaling value
      */
     default float getBaseScale() { return 0.0F; }
+
+    List<ModelRenderer> getBoxes();
 }

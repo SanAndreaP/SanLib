@@ -6,16 +6,18 @@
 package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiDefinition;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 @SuppressWarnings({ "WeakerAccess", "unused" })
 public abstract class ElementParent<K>
@@ -57,76 +59,76 @@ public abstract class ElementParent<K>
 
     @Override
     public void update(IGui gui, JsonObject data) {
+        doWorkVI(e -> e.get().update(gui, e.data));
+    }
+
+    @Override
+    public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data) {
         for( GuiElementInst inst : this.getChildren() ) {
-            if( inst.isVisible() ) {
-                inst.get().update(gui, inst.data);
-            }
+            GuiDefinition.renderElement(gui, stack, x + inst.pos[0], y + inst.pos[1], mouseX, mouseY, partTicks, inst);
         }
     }
 
     @Override
-    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
-        for( GuiElementInst inst : this.getChildren() ) {
-            GuiDefinition.renderElement(gui, x + inst.pos[0], y + inst.pos[1], mouseX, mouseY, partTicks, inst);
-        }
+    public boolean mouseScrolled(IGui gui, double mouseX, double mouseY, double mouseScroll) {
+        return doWorkB(e -> e.mouseScrolled(gui, mouseX, mouseY, mouseScroll));
     }
 
     @Override
-    public void handleMouseInput(IGui gui) throws IOException {
-        for( GuiElementInst inst : this.getChildren() ) {
-            if( inst.isVisible() ) {
-                inst.get().handleMouseInput(gui);
-            }
-        }
+    public boolean mouseDragged(IGui gui, double mouseX, double mouseY, int clickedMouseButton, double offsetX, double offsetY) {
+        return doWorkB(e -> e.mouseDragged(gui, mouseX, mouseY, clickedMouseButton, offsetX, offsetY));
     }
 
     @Override
-    public boolean mouseClicked(IGui gui, int mouseX, int mouseY, int mouseButton) throws IOException {
-        for( GuiElementInst inst : this.getChildren() ) {
-            if( inst.isVisible() && inst.get().mouseClicked(gui, mouseX, mouseY, mouseButton) ) {
-                return true;
-            }
-        }
-
-        return false;
+    public boolean mouseClicked(IGui gui, double mouseX, double mouseY, int mouseButton) {
+        return doWorkB(e -> mouseReleased(gui, mouseX, mouseY, mouseButton));
     }
 
     @Override
-    public void mouseReleased(IGui gui, int mouseX, int mouseY, int state) {
-        for( GuiElementInst inst : this.getChildren() ) {
-            if( inst.isVisible() ) {
-                inst.get().mouseReleased(gui, mouseX, mouseY, state);
-            }
-        }
-    }
-
-    @Override
-    public void mouseClickMove(IGui gui, int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-        for( GuiElementInst inst : this.getChildren() ) {
-            if( inst.isVisible() ) {
-                inst.get().mouseClickMove(gui, mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-            }
-        }
+    public boolean mouseReleased(IGui gui, double mouseX, double mouseY, int state) {
+        return doWorkB(e -> mouseReleased(gui, mouseX, mouseY, state));
     }
 
     @Override
     public void guiClosed(IGui gui) {
-        for( GuiElementInst inst : this.getChildren() ) {
-            if( inst.isVisible() ) {
-                inst.get().guiClosed(gui);
-            }
-        }
+        doWorkV(e -> e.guiClosed(gui));
     }
 
     @Override
-    public boolean keyTyped(IGui gui, char typedChar, int keyCode) throws IOException {
+    public boolean charTyped(IGui gui, char typedChar, int keyCode) {
+        return doWorkB(e -> e.charTyped(gui, typedChar, keyCode));
+    }
+
+    @Override
+    public boolean keyPressed(IGui gui, int keyCode, int unknown1, int unknown2) {
+        return doWorkB(e -> e.keyPressed(gui, keyCode, unknown1, unknown2));
+    }
+
+    @Override
+    public boolean keyReleased(IGui gui, int keyCode, int unknown1, int unknown2) {
+        return doWorkB(e -> e.keyReleased(gui, keyCode, unknown1, unknown2));
+    }
+
+    protected boolean doWorkB(Function<IGuiElement, Boolean> execElem) {
         for( GuiElementInst inst : this.getChildren() ) {
-            if( inst.isVisible() && inst.get().keyTyped(gui, typedChar, keyCode) ) {
+            if( inst.isVisible() && execElem.apply(inst.get()) ) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    protected void doWorkV(Consumer<IGuiElement> execElem) {
+        this.doWorkVI(e -> execElem.accept(e.get()));
+    }
+
+    protected void doWorkVI(Consumer<GuiElementInst> execElem) {
+        for( GuiElementInst inst : this.getChildren() ) {
+            if( inst.isVisible() ) {
+                execElem.accept(inst);
+            }
+        }
     }
 
     @Override
@@ -153,12 +155,6 @@ public abstract class ElementParent<K>
 
     @Override
     public boolean forceRenderUpdate(IGui gui) {
-        for( GuiElementInst inst : this.getChildren() ) {
-            if( inst.isVisible() && inst.get().forceRenderUpdate(gui) ) {
-                return true;
-            }
-        }
-
-        return false;
+        return doWorkB(e -> e.forceRenderUpdate(gui));
     }
 }

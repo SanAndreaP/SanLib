@@ -6,14 +6,15 @@
 package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.platform.GlStateManager;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.client.util.GuiUtils;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.Range;
 
@@ -36,16 +37,16 @@ public class Rectangle
     }
 
     @Override
-    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(x, y, 0.0D);
+    public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data) {
+        stack.push();
+        stack.translate(x, y, 0.0D);
         if( this.color[0] != this.color[1] ) {
-            GuiUtils.drawGradientRect(0, 0, this.size[0], this.size[1], this.color[0], this.color[1], this.horizontal);
+            GuiUtils.drawGradient(stack, 0, 0, this.size[0], this.size[1], this.color[0], this.color[1], this.horizontal);
         } else {
-            Gui.drawRect(0, 0, this.size[0], this.size[1], this.color[0]);
+            AbstractGui.fill(stack, 0, 0, this.size[0], this.size[1], this.color[0]);
         }
         GlStateManager.enableBlend();
-        GlStateManager.popMatrix();
+        stack.pop();
     }
 
     @Override

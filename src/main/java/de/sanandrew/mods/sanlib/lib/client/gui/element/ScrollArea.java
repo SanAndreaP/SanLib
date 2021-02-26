@@ -9,18 +9,18 @@ import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.client.util.GuiUtils;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -39,7 +39,7 @@ public class ScrollArea
     public final RangeMap<Integer, GuiElementInst> elements = TreeRangeMap.create();
     public final Map<Range<Integer>, GuiElementInst> elementsView = this.elements.asMapOfRanges();
 
-    public float scroll;
+    public double scroll;
     protected ScrollData sData = new ScrollData();
     protected int countAll;
     protected int countSub;
@@ -109,11 +109,11 @@ public class ScrollArea
     }
 
     @Override
-    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
+    public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data) {
         this.posX = x;
         this.posY = y;
 
-        boolean isLmbDown = Mouse.isButtonDown(0);
+        boolean isLmbDown = Minecraft.getInstance().mouseHelper.isLeftDown();
 
         GuiElementInst btn = this.scrollBtn[this.countAll > this.countSub ? 0 : 1];
         Texture btnElem = btn.get(Texture.class);
@@ -122,7 +122,7 @@ public class ScrollArea
             if( this.prevLmbDown
                 || IGuiElement.isHovering(gui, btn.pos[0], btn.pos[1], mouseX, mouseY, btnElem.size[0], this.scrollHeight) )
             {
-                int scrollAmt = mouseY - gui.getScreenPosY() - btn.pos[1] - btnElem.size[1] / 2;
+                double scrollAmt = mouseY - gui.getScreenPosY() - btn.pos[1] - btnElem.size[1] / 2.0D;
                 this.scroll = Math.max(0.0F, Math.min(1.0F, 1.0F / (this.scrollHeight - btnElem.size[1]) * scrollAmt));
 
                 this.prevLmbDown = true;
@@ -131,34 +131,32 @@ public class ScrollArea
             this.prevLmbDown = false;
         }
 
-        int scrollY = btn.pos[1] + Math.round(this.scroll * (this.scrollHeight - btnElem.size[1]));
+        int scrollY = btn.pos[1] + (int) Math.round(this.scroll * (this.scrollHeight - btnElem.size[1]));
 
-        btnElem.render(gui, partTicks, btn.pos[0], scrollY, mouseX, mouseY, btn.data);
+        btnElem.render(gui, stack, partTicks, btn.pos[0], scrollY, mouseX, mouseY, btn.data);
 
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         GuiUtils.glScissor(gui.getScreenPosX() + x, gui.getScreenPosY() + y, this.areaSize[0], this.areaSize[1]);
 
-        super.render(gui, partTicks, x, y - this.sData.minY, mouseX, mouseY, data);
+        super.render(gui, stack, partTicks, x, y - this.sData.minY, mouseX, mouseY, data);
 
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
     }
 
     @Override
-    public void handleMouseInput(IGui gui) throws IOException {
+    public boolean mouseScrolled(IGui gui, double mouseX, double mouseY, double mouseScroll) {
         if( this.countAll <= this.countSub ) {
-            super.handleMouseInput(gui);
-            return;
+            return super.mouseScrolled(gui, mouseX, mouseY, mouseScroll);
         }
 
-        int dWheelDir = Mouse.getEventDWheel();
-        if( dWheelDir < 0 ) {
+        if( mouseScroll < 0 ) {
             if( this.rasterized ) {
                 this.scroll = this.getRasterScroll(true);
             } else {
                 this.scroll += Math.min(1.0F / this.elementsView.size(), this.maxScrollDelta);
             }
             this.clipScroll();
-        } else if( dWheelDir > 0 ) {
+        } else if( mouseScroll > 0 ) {
             if( this.rasterized ) {
                 this.scroll = this.getRasterScroll(false);
             } else {
@@ -167,11 +165,11 @@ public class ScrollArea
             this.clipScroll();
         }
 
-        super.handleMouseInput(gui);
+        return super.mouseScrolled(gui, mouseX, mouseY, mouseScroll);
     }
 
     @Override
-    public boolean mouseClicked(IGui gui, int mouseX, int mouseY, int mouseButton) throws IOException {
+    public boolean mouseClicked(IGui gui, double mouseX, double mouseY, int mouseButton) {
         if( IGuiElement.isHovering(gui, this.posX, this.posY, mouseX, mouseY, this.areaSize[0], this.areaSize[1]) ) {
             return super.mouseClicked(gui, mouseX, mouseY, mouseButton);
         }
@@ -180,17 +178,21 @@ public class ScrollArea
     }
 
     @Override
-    public void mouseClickMove(IGui gui, int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+    public boolean mouseDragged(IGui gui, double mouseX, double mouseY, int clickedMouseButton, double offsetX, double offsetY) {
         if( IGuiElement.isHovering(gui, this.posX, this.posY, mouseX, mouseY, this.areaSize[0], this.areaSize[1]) ) {
-            super.mouseClickMove(gui, mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+            return super.mouseDragged(gui, mouseX, mouseY, clickedMouseButton, offsetX, offsetY);
         }
+
+        return false;
     }
 
     @Override
-    public void mouseReleased(IGui gui, int mouseX, int mouseY, int state) {
+    public boolean mouseReleased(IGui gui, double mouseX, double mouseY, int state) {
         if( IGuiElement.isHovering(gui, this.posX, this.posY, mouseX, mouseY, this.areaSize[0], this.areaSize[1]) ) {
-            super.mouseReleased(gui, mouseX, mouseY, state);
+            return super.mouseReleased(gui, mouseX, mouseY, state);
         }
+
+        return false;
     }
 
     public void clipScroll() {
@@ -243,7 +245,7 @@ public class ScrollArea
         return this.areaSize[1];
     }
 
-    public ScrollData getScrollData(float scroll, boolean rasterized) {
+    public ScrollData getScrollData(double scroll, boolean rasterized) {
         ScrollData data = new ScrollData();
 
         data.totalHeight = this.elementsView.size() > 0 ? this.elements.span().upperEndpoint() : 0;

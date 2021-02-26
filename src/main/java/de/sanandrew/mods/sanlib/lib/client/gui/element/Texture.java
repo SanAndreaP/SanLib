@@ -6,14 +6,16 @@
 package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import de.sanandrew.mods.sanlib.lib.ColorObj;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.Range;
 
@@ -45,7 +47,7 @@ public class Texture
     public int[] size;
     public int[] textureSize;
     public int[] uv;
-    public double[] scale;
+    public float[] scale;
     public ColorObj color;
 
     @Override
@@ -54,25 +56,26 @@ public class Texture
         this.size = JsonUtils.getIntArray(data.get("size"), Range.is(2));
         this.uv = JsonUtils.getIntArray(data.get("uv"), Range.is(2));
         this.textureSize = JsonUtils.getIntArray(data.get("textureSize"), new int[] {256, 256}, Range.is(2));
-        this.scale = JsonUtils.getDoubleArray(data.get("scale"), new double[] {1.0D, 1.0D}, Range.is(2));
+        this.scale = JsonUtils.getFloatArray(data.get("scale"), new float[] {1.0F, 1.0F}, Range.is(2));
         this.color = new ColorObj(MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("color"), "0xFFFFFFFF")));
     }
 
     @Override
-    public void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data) {
-        gui.get().mc.renderEngine.bindTexture(this.texture);
-        GlStateManager.pushMatrix();
+    @SuppressWarnings("deprecation")
+    public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data) {
+        gui.get().getMinecraft().getTextureManager().bindTexture(this.texture);
+        stack.push();
         GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        GlStateManager.translate(x, y, 0.0D);
-        GlStateManager.scale(this.scale[0], this.scale[1], 1.0D);
-        GlStateManager.color(this.color.fRed(), this.color.fGreen(), this.color.fBlue(), this.color.fAlpha());
-        drawRect(gui);
-        GlStateManager.popMatrix();
+        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA.param, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA.param);
+        stack.translate(x, y, 0.0D);
+        stack.scale(this.scale[0], this.scale[1], 1.0F);
+        RenderSystem.color4f(this.color.fRed(), this.color.fGreen(), this.color.fBlue(), this.color.fAlpha());
+        drawRect(gui, stack);
+        stack.pop();
     }
 
-    protected void drawRect(IGui gui) {
-        Gui.drawModalRectWithCustomSizedTexture(0, 0, this.uv[0], this.uv[1], this.size[0], this.size[1], this.textureSize[0], this.textureSize[1]);
+    protected void drawRect(IGui gui, MatrixStack stack) {
+        AbstractGui.blit(stack, 0, 0, this.uv[0], this.uv[1], this.size[0], this.size[1], this.textureSize[0], this.textureSize[1]);
     }
 
     @Override

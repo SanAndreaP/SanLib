@@ -10,6 +10,7 @@ import io.netty.handler.codec.serialization.ObjectDecoderInputStream;
 import io.netty.handler.codec.serialization.ObjectEncoderOutputStream;
 import org.apache.logging.log4j.Level;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -123,7 +124,7 @@ public class Tuple
      * @see Comparable#compareTo(Object)
      */
     @Override
-    public int compareTo(Tuple o) {
+    public int compareTo(@Nonnull Tuple o) {
         if( o == this ) {
             return 0;
         }
@@ -148,6 +149,7 @@ public class Tuple
      * @see Iterable#iterator()
      */
     @Override
+    @Nonnull
     public Iterator<Object> iterator() {
         return Arrays.stream(this.values).map(data -> (Object)data.value).iterator();
     }
@@ -166,7 +168,7 @@ public class Tuple
 
         @Override
         @SuppressWarnings("unchecked")
-        public int compareTo(Data<?> o) {
+        public int compareTo(@Nonnull Data<?> o) {
             if( o == this ) {
                 return 0;
             }

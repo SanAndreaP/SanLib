@@ -6,41 +6,30 @@
 package de.sanandrew.mods.sanlib.lib.client.gui;
 
 import com.google.gson.JsonObject;
-import net.minecraftforge.fml.common.eventhandler.EventPriority;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraftforge.eventbus.api.EventPriority;
 
-import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@SuppressWarnings({ "RedundantThrows", "unused" })
+@SuppressWarnings("unused")
 public interface IGuiElement
+        extends IGuiReference
 {
     void bakeData(IGui gui, JsonObject data, GuiElementInst inst);
 
     default void update(IGui gui, JsonObject data) {}
 
-    void render(IGui gui, float partTicks, int x, int y, int mouseX, int mouseY, JsonObject data);
-
-    default void handleMouseInput(IGui gui) throws IOException { }
-
-    default boolean mouseClicked(IGui gui, int mouseX, int mouseY, int mouseButton) throws IOException { return false; }
-
-    default void mouseReleased(IGui gui, int mouseX, int mouseY, int state) { }
-
-    default void mouseClickMove(IGui gui, int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) { }
-
-    default void guiClosed(IGui gui) {}
+    void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data);
 
     int getWidth();
 
     int getHeight();
 
     default boolean isVisible() { return true; }
-
-    default boolean keyTyped(IGui gui, char typedChar, int keyCode) throws IOException { return false; }
 
     default boolean forceRenderUpdate(IGui gui) { return false; }
 
@@ -68,7 +57,7 @@ public interface IGuiElement
         public static final PriorityTarget[] VALUES = values();
     }
 
-    static boolean isHovering(IGui gui, int x, int y, int mouseX, int mouseY, int width, int height) {
+    static boolean isHovering(IGui gui, int x, int y, double mouseX, double mouseY, int width, int height) {
         mouseX -= gui.getScreenPosX();
         mouseY -= gui.getScreenPosY();
         return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
