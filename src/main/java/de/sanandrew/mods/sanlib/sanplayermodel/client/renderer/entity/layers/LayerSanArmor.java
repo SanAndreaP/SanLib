@@ -1,40 +1,34 @@
 package de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.layers;
 
 import de.sanandrew.mods.sanlib.sanplayermodel.client.model.ModelSanPlayer;
-import net.minecraft.client.model.ModelBiped;
-import net.minecraft.client.renderer.entity.RenderLivingBase;
-import net.minecraft.client.renderer.entity.layers.LayerBipedArmor;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.renderer.entity.IEntityRenderer;
+import net.minecraft.client.renderer.entity.layers.BipedArmorLayer;
+import net.minecraft.client.renderer.entity.model.BipedModel;
+import net.minecraft.entity.LivingEntity;
 
-public class LayerSanArmor
-        extends LayerBipedArmor
+import javax.annotation.Nonnull;
+
+public class LayerSanArmor<T extends LivingEntity, M extends BipedModel<T>, A extends BipedModel<T>>
+        extends BipedArmorLayer<T, M, A>
 {
-    public LayerSanArmor(RenderLivingBase<?> rendererIn) {
-        super(rendererIn);
+    public LayerSanArmor(IEntityRenderer<T, M> renderer, A leggingsModel, A armorModel) {
+        super(renderer, leggingsModel, armorModel);
     }
 
-    @Override
-    protected void initArmor() {
-        this.modelLeggings = new ModelSanBiped(0.4F);
-        this.modelArmor = new ModelSanBiped(0.9F);
-    }
-
-    private static final class ModelSanBiped
-            extends ModelBiped
+    public static final class ModelSanBiped<T extends LivingEntity>
+            extends BipedModel<T>
     {
-        ModelSanBiped(float scale) {
+        public ModelSanBiped(float scale) {
             super(scale);
         }
 
         @Override
-        public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn) {
-            super.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scaleFactor, entityIn);
+        public void setRotationAngles(@Nonnull T entityIn, float limbSwing, float limbSwingAmount, float ageInTicks,
+                                      float netHeadYaw, float headPitch)
+        {
+            super.setRotationAngles(entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
 
-            this.bipedRightArm.rotateAngleZ += 0.2F;
-            this.bipedLeftArm.rotateAngleZ -= 0.2F;
-
-            this.bipedLeftLeg.rotateAngleX /= 3.5F;
-            this.bipedRightLeg.rotateAngleX /= 3.5F;
+            ModelSanPlayer.setLimbRotations(this);
         }
     }
 }

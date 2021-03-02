@@ -6,13 +6,13 @@
 package de.sanandrew.mods.sanlib.lib.util;
 
 import de.sanandrew.mods.sanlib.lib.Tuple;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Container;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Slot;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -20,7 +20,6 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
 
 @SuppressWarnings("unused")
 public final class InventoryUtils
@@ -64,7 +63,7 @@ public final class InventoryUtils
      * @return
      */
     public static boolean canStackFitInInventory(@Nonnull ItemStack is, IInventory inv, boolean checkNBT, int maxStackSize) {
-        return canStackFitInInventory(is, inv, checkNBT, maxStackSize, 0, inv.getSizeInventory() - (inv instanceof InventoryPlayer ? 4 : 0));
+        return canStackFitInInventory(is, inv, checkNBT, maxStackSize, 0, inv.getSizeInventory() - (inv instanceof PlayerInventory ? 4 : 0));
     }
 
     public static boolean canStackFitInInventory(@Nonnull ItemStack is, IInventory inv, boolean checkNBT, int maxStackSize, int begin, int end) {
@@ -94,15 +93,15 @@ public final class InventoryUtils
     }
 
     public static ItemStack addStackToInventory(@Nonnull ItemStack is, IInventory inv) {
-        return addStackToInventory(is, inv, true, inv.getInventoryStackLimit(), 0, inv.getSizeInventory() - (inv instanceof InventoryPlayer ? 4 : 0));
+        return addStackToInventory(is, inv, true, inv.getInventoryStackLimit(), 0, inv.getSizeInventory() - (inv instanceof PlayerInventory ? 4 : 0));
     }
 
     public static ItemStack addStackToInventory(@Nonnull ItemStack is, IInventory inv, boolean checkNBT) {
-        return addStackToInventory(is, inv, checkNBT, inv.getInventoryStackLimit(), 0, inv.getSizeInventory() - (inv instanceof InventoryPlayer ? 4 : 0));
+        return addStackToInventory(is, inv, checkNBT, inv.getInventoryStackLimit(), 0, inv.getSizeInventory() - (inv instanceof PlayerInventory ? 4 : 0));
     }
 
     public static ItemStack addStackToInventory(@Nonnull ItemStack is, IInventory inv, boolean checkNBT, int maxStackSize) {
-        return addStackToInventory(is, inv, checkNBT, maxStackSize, 0, inv.getSizeInventory() - (inv instanceof InventoryPlayer ? 4 : 0));
+        return addStackToInventory(is, inv, checkNBT, maxStackSize, 0, inv.getSizeInventory() - (inv instanceof PlayerInventory ? 4 : 0));
     }
 
     @Nonnull
@@ -142,33 +141,37 @@ public final class InventoryUtils
     }
 
     @Nonnull
-    public static ItemStack addStackToCapability(@Nonnull ItemStack is, ICapabilityProvider provider, EnumFacing facing, boolean simulate) {
+    public static ItemStack addStackToCapability(@Nonnull ItemStack is, ICapabilityProvider provider, Direction facing, boolean simulate) {
         return addStackToCapability(is, provider, facing, simulate, Integer.MAX_VALUE, 0, Integer.MAX_VALUE);
     }
 
     @Nonnull
-    public static ItemStack addStackToCapability(@Nonnull ItemStack is, ICapabilityProvider provider, EnumFacing facing, boolean simulate, int maxStackSize) {
+    public static ItemStack addStackToCapability(@Nonnull ItemStack is, ICapabilityProvider provider, Direction facing, boolean simulate, int maxStackSize) {
         return addStackToCapability(is, provider, facing, simulate, maxStackSize, 0, Integer.MAX_VALUE);
     }
 
     @Nonnull
-    public static ItemStack addStackToCapability(@Nonnull ItemStack is, ICapabilityProvider provider, EnumFacing facing, boolean simulate, int maxStackSize, int begin, int end) {
-        if( ItemStackUtils.isValid(is) && provider.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing) ) {
-            IItemHandler handler = Objects.requireNonNull(provider.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing));
-
-            maxStackSize = Math.min(maxStackSize, is.getCount());
-            end = Math.min(end, handler.getSlots());
-
-            for( int i = begin; i < end; i++ ) {
-                ItemStack remain = is.copy();
-                remain.setCount(maxStackSize);
-                remain = handler.insertItem(i, remain, simulate);
-
-                is.setCount(is.getCount() - maxStackSize + (ItemStackUtils.isValid(remain) ? remain.getCount() : 0));
+    @SuppressWarnings("ConstantConditions")
+    public static ItemStack addStackToCapability(@Nonnull ItemStack is, ICapabilityProvider provider, Direction facing, boolean simulate, int maxStackSize, int begin, int end) {
+        if( ItemStackUtils.isValid(is) ) {
+//            LazyOptional<IItemHandler> handlerLO = provider.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing);
+//            if( handlerLO. )
+            IItemHandler handler = provider.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing).orElse(null);
+            if( handler != null ) {
                 maxStackSize = Math.min(maxStackSize, is.getCount());
+                end = Math.min(end, handler.getSlots());
 
-                if( is.getCount() <= 0 ) {
-                    return ItemStackUtils.getEmpty();
+                for( int i = begin; i < end; i++ ) {
+                    ItemStack remain = is.copy();
+                    remain.setCount(maxStackSize);
+                    remain = handler.insertItem(i, remain, simulate);
+
+                    is.setCount(is.getCount() - maxStackSize + (ItemStackUtils.isValid(remain) ? remain.getCount() : 0));
+                    maxStackSize = Math.min(maxStackSize, is.getCount());
+
+                    if( is.getCount() <= 0 ) {
+                        return ItemStackUtils.getEmpty();
+                    }
                 }
             }
         }
@@ -257,7 +260,7 @@ public final class InventoryUtils
         return slotChanged;
     }
 
-    public static boolean finishTransfer(EntityPlayer player, ItemStack origStack, Slot slot, ItemStack slotStack) {
+    public static boolean finishTransfer(PlayerEntity player, ItemStack origStack, Slot slot, ItemStack slotStack) {
         if( slotStack.getCount() == 0 ) { // if stackSize of slot got to 0
             slot.putStack(ItemStack.EMPTY);
         } else { // update changed slot stack state

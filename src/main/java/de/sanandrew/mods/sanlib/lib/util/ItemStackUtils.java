@@ -6,17 +6,14 @@
 package de.sanandrew.mods.sanlib.lib.util;
 
 import net.minecraft.block.Block;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.init.Blocks;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTPrimitive;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
@@ -36,7 +33,7 @@ public final class ItemStackUtils
      * <ul>
      *     <li>the stack is not {@code null}</li>
      *     <li>the item of the stack is not {@code null}</li>
-     *     <li>the item is not {@link Blocks#AIR}</li>
+     *     <li>the item is not {@link net.minecraft.block.Blocks#AIR}</li>
      *     <li>the stack size is &gt; 0</li>
      * </ul>
      * </p>
@@ -59,6 +56,7 @@ public final class ItemStackUtils
      * @return {@code true}, if the stack is valid and contains the specified item, {@code false} otherwise
      * @see #isValid(ItemStack)
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean isItem(@Nonnull ItemStack stack, Item item) {
         return isValid(stack) && stack.getItem() == item;
     }
@@ -81,7 +79,7 @@ public final class ItemStackUtils
      * @return {@code true}, if the stacks are considered equal, {@code false} otherwise
      */
     public static boolean areEqual(@Nonnull ItemStack is1, @Nonnull ItemStack is2) {
-        return areEqual(is1, is2, false, true, true);
+        return areEqual(is1, is2, false, true);
     }
 
     /**
@@ -92,13 +90,11 @@ public final class ItemStackUtils
      * @return {@code true}, if the stacks are considered equal, {@code false} otherwise
      */
     public static boolean areEqual(@Nonnull ItemStack is1, @Nonnull ItemStack is2, boolean checkNbt) {
-        return areEqual(is1, is2, false, checkNbt, true);
+        return areEqual(is1, is2, false, checkNbt);
     }
 
     /**
      * Checks wether or not 2 ItemStacks are equal.
-     * If one of the ItemStacks has a damage value equal to {@link OreDictionary#WILDCARD_VALUE}, their damage value isn't checked against eachother,
-     * otherwise it'll check if both are equal.
      * @param is1 The first ItemStack
      * @param is2 The second ItemStack
      * @param checkStackSize A flag to determine wether or not to compare stack sizes
@@ -106,23 +102,19 @@ public final class ItemStackUtils
      * @return {@code true}, if the stacks are considered equal, {@code false} otherwise
      */
     public static boolean areEqual(@Nonnull ItemStack is1, @Nonnull ItemStack is2, boolean checkStackSize, boolean checkNbt) {
-        return areEqual(is1, is2, checkStackSize, checkNbt, true);
+        return areEqualBase(is1, is2, checkStackSize) && (!checkNbt || Objects.equals(is1.getTag(), is2.getTag()));
     }
 
-    public static boolean areEqual(@Nonnull ItemStack is1, @Nonnull ItemStack is2, boolean checkStackSize, boolean checkNbt, boolean checkDmg) {
-        return areEqualBase(is1, is2, checkStackSize, checkDmg) && (!checkNbt || Objects.equals(is1.getTagCompound(), is2.getTagCompound()));
+    public static boolean areEqualNbtFit(@Nonnull ItemStack mainIS, @Nonnull ItemStack otherIS, boolean checkStackSize) {
+        return areEqualNbtFit(mainIS, otherIS, checkStackSize, true);
     }
 
-    public static boolean areEqualNbtFit(@Nonnull ItemStack mainIS, @Nonnull ItemStack otherIS, boolean checkStackSize, boolean checkDmg) {
-        return areEqualNbtFit(mainIS, otherIS, checkStackSize, checkDmg, true);
+    public static boolean areEqualNbtFit(@Nonnull ItemStack mainIS, @Nonnull ItemStack otherIS, boolean checkStackSize, boolean strict) {
+        return areEqualBase(mainIS, otherIS, checkStackSize)
+               && ( !otherIS.hasTag() || (mainIS.hasTag() && MiscUtils.doesNbtContainOther(mainIS.getTag(), otherIS.getTag(), strict)) );
     }
 
-    public static boolean areEqualNbtFit(@Nonnull ItemStack mainIS, @Nonnull ItemStack otherIS, boolean checkStackSize, boolean checkDmg, boolean strict) {
-        return areEqualBase(mainIS, otherIS, checkStackSize, checkDmg)
-               && ( !otherIS.hasTagCompound() || (mainIS.hasTagCompound() && MiscUtils.doesNbtContainOther(mainIS.getTagCompound(), otherIS.getTagCompound(), strict)) );
-    }
-
-    private static boolean areEqualBase(@Nonnull ItemStack is1, @Nonnull ItemStack is2, boolean checkStackSize, boolean checkDmg) {
+    private static boolean areEqualBase(@Nonnull ItemStack is1, @Nonnull ItemStack is2, boolean checkStackSize) {
         if( !isValid(is1) && !isValid(is2) ) {
             return true;
         }
@@ -131,8 +123,7 @@ public final class ItemStackUtils
             return false;
         }
 
-        //noinspection SimplifiableIfStatement
-        if( checkDmg && is1.getItemDamage() != OreDictionary.WILDCARD_VALUE && is2.getItemDamage() != OreDictionary.WILDCARD_VALUE && is1.getItemDamage() != is2.getItemDamage() ) {
+        if( is1.getDamage() != is2.getDamage() ) {
             return false;
         }
 
@@ -145,10 +136,10 @@ public final class ItemStackUtils
      * @param tag The NBTTagCompound to be written.
      * @param tagName The key for the tag.
      */
-    public static void writeStackToTag(@Nonnull ItemStack stack, NBTTagCompound tag, String tagName) {
-        NBTTagCompound stackTag = new NBTTagCompound();
-        stack.writeToNBT(stackTag);
-        tag.setTag(tagName, stackTag);
+    public static void writeStackToTag(@Nonnull ItemStack stack, CompoundNBT tag, String tagName) {
+        CompoundNBT stackTag = new CompoundNBT();
+        stack.write(stackTag);
+        tag.put(tagName, stackTag);
     }
 
     /**
@@ -167,89 +158,92 @@ public final class ItemStackUtils
 
     public static boolean canStack(@Nonnull ItemStack stack1, @Nonnull ItemStack stack2, boolean consumeAll) {
         return !isValid(stack1) || !isValid(stack2)
-                || (stack1.isStackable() && areEqual(stack1, stack2, false, true, !stack2.getHasSubtypes())
+                || (stack1.isStackable() && areEqual(stack1, stack2, false, true)
                     && (!consumeAll || stack1.getCount() + stack2.getCount() <= stack1.getMaxStackSize()));
     }
 
-    public static NBTTagList writeItemStacksToTag(ItemStack[] items, int maxQuantity) {
+    public static ListNBT writeItemStacksToTag(ItemStack[] items, int maxQuantity) {
         return writeItemStacksToTag(Arrays.asList(items), maxQuantity, null);
     }
 
-    public static NBTTagList writeItemStacksToTag(ItemStack[] items, int maxQuantity, BiConsumer<ItemStack, NBTTagCompound> callbackMethod) {
+    public static ListNBT writeItemStacksToTag(ItemStack[] items, int maxQuantity, BiConsumer<ItemStack, CompoundNBT> callbackMethod) {
         return writeItemStacksToTag(Arrays.asList(items), maxQuantity, callbackMethod);
     }
 
-    public static NBTTagList writeItemStacksToTag(List<ItemStack> items, int maxQuantity) {
+    public static ListNBT writeItemStacksToTag(List<ItemStack> items, int maxQuantity) {
         return writeItemStacksToTag(items, maxQuantity, null);
     }
 
-    public static NBTTagList writeItemStacksToTag(List<ItemStack> items, int maxQuantity, BiConsumer<ItemStack, NBTTagCompound> callbackMethod) {
-        NBTTagList tagList = new NBTTagList();
+    public static ListNBT writeItemStacksToTag(List<ItemStack> items, int maxQuantity, BiConsumer<ItemStack, CompoundNBT> callbackMethod) {
+        ListNBT tagList = new ListNBT();
 
         for( int i = 0, max = items.size(); i < max; i++ ) {
-            ItemStack stack = items.get(i);
+            ItemStack stack = items.get(i).copy();
             if( isValid(stack) ) {
-                NBTTagCompound tag = new NBTTagCompound();
-                tag.setShort("Slot", (short) i);
-                stack.writeToNBT(tag);
+                stack.setCount(Math.min(stack.getCount(), maxQuantity));
 
-                if( maxQuantity > Short.MAX_VALUE ) {
-                    tag.setInteger("Quantity", Math.min(stack.getCount(), maxQuantity));
-                } else if( maxQuantity > Byte.MAX_VALUE ) {
-                    tag.setShort("Quantity", (short) Math.min(stack.getCount(), maxQuantity));
-                } else {
-                    tag.setByte("Quantity", (byte) Math.min(stack.getCount(), maxQuantity));
-                }
+                CompoundNBT tag = new CompoundNBT();
+                tag.putShort("Slot", (short) i);
+                stack.write(tag);
+
+//                if( maxQuantity > Short.MAX_VALUE ) {
+//                    tag.putInt("Count", Math.min(stack.getCount(), maxQuantity));
+//                } else if( maxQuantity > Byte.MAX_VALUE ) {
+//                    tag.putInt("Count", (short) Math.min(stack.getCount(), maxQuantity));
+//                } else {
+//                    tag.putInt("Count", (byte) Math.min(stack.getCount(), maxQuantity));
+//                }
 
                 if( callbackMethod != null ) {
-                    NBTTagCompound stackNbt = new NBTTagCompound();
+                    CompoundNBT stackNbt = new CompoundNBT();
                     callbackMethod.accept(stack, stackNbt);
-                    tag.setTag("StackNBT", stackNbt);
+                    tag.put("StackNBT", stackNbt);
                 }
 
-                tagList.appendTag(tag);
+                tagList.add(tag);
             }
         }
 
         return tagList;
     }
 
-    public static void readItemStacksFromTag(ItemStack[] items, NBTTagList tagList) {
+    public static void readItemStacksFromTag(ItemStack[] items, ListNBT tagList) {
         readItemStacksFromTag(items, tagList, null);
     }
 
-    public static void readItemStacksFromTag(ItemStack[] items, NBTTagList tagList, BiConsumer<ItemStack, NBTTagCompound> callbackMethod) {
-        for( int i = 0; i < tagList.tagCount(); i++ ) {
-            NBTTagCompound tag = tagList.getCompoundTagAt(i);
+    public static void readItemStacksFromTag(ItemStack[] items, ListNBT tagList, BiConsumer<ItemStack, CompoundNBT> callbackMethod) {
+        for( int i = 0; i < tagList.size(); i++ ) {
+            CompoundNBT tag = tagList.getCompound(i);
             short slot = tag.getShort("Slot");
-            items[slot] = new ItemStack(tag);
-            if( tag.hasKey("Quantity") ) {
-                items[slot].setCount(((NBTPrimitive) tag.getTag("Quantity")).getInt());
-            }
+            items[slot] = ItemStack.read(tag);
+//            if( tag.hasKey("Quantity") ) {
+//                items[slot].setCount(((NBTPrimitive) tag.getTag("Quantity")).getInt());
+//            }
 
-            if( callbackMethod != null && tag.hasKey("StackNBT") ) {
-                callbackMethod.accept(items[slot], (NBTTagCompound) tag.getTag("StackNBT"));
+            if( callbackMethod != null && tag.contains("StackNBT") ) {
+                callbackMethod.accept(items[slot], tag.getCompound("StackNBT"));
             }
         }
     }
 
-    public static void readItemStacksFromTag(List<ItemStack> items, NBTTagList tagList) {
+    public static void readItemStacksFromTag(List<ItemStack> items, ListNBT tagList) {
         readItemStacksFromTag(items, tagList, null);
     }
 
-    public static void readItemStacksFromTag(List<ItemStack> items, NBTTagList tagList, BiConsumer<ItemStack, NBTTagCompound> callbackMethod) {
-        for( int i = 0; i < tagList.tagCount(); i++ ) {
-            NBTTagCompound tag = tagList.getCompoundTagAt(i);
-            short slot = tag.getShort("Slot");
-            items.set(slot, new ItemStack(tag));
-            if( tag.hasKey("Quantity") ) {
-                items.get(slot).setCount(((NBTPrimitive) tag.getTag("Quantity")).getInt());
-            }
-
-            if( callbackMethod != null && tag.hasKey("StackNBT") ) {
-                callbackMethod.accept(items.get(slot), (NBTTagCompound) tag.getTag("StackNBT"));
-            }
-        }
+    public static void readItemStacksFromTag(List<ItemStack> items, ListNBT tagList, BiConsumer<ItemStack, CompoundNBT> callbackMethod) {
+        readItemStacksFromTag(items.toArray(new ItemStack[0]), tagList, callbackMethod);
+//        for( int i = 0; i < tagList.tagCount(); i++ ) {
+//            NBTTagCompound tag = tagList.getCompoundTagAt(i);
+//            short slot = tag.getShort("Slot");
+//            items.set(slot, new ItemStack(tag));
+//            if( tag.hasKey("Quantity") ) {
+//                items.get(slot).setCount(((NBTPrimitive) tag.getTag("Quantity")).getInt());
+//            }
+//
+//            if( callbackMethod != null && tag.hasKey("StackNBT") ) {
+//                callbackMethod.accept(items.get(slot), (NBTTagCompound) tag.getTag("StackNBT"));
+//            }
+//        }
     }
 
     public static void dropBlockItem(ItemStack stack, World world, BlockPos pos) {
@@ -258,13 +252,13 @@ public final class ItemStackUtils
             float yOff = MiscUtils.RNG.randomFloat() * 0.8F + 0.1F;
             float zOff = MiscUtils.RNG.randomFloat() * 0.8F + 0.1F;
 
-            EntityItem item = new EntityItem(world, (pos.getX() + xOff), (pos.getY() + yOff), (pos.getZ() + zOff), stack.copy());
+            ItemEntity item = new ItemEntity(world, (pos.getX() + xOff), (pos.getY() + yOff), (pos.getZ() + zOff), stack.copy());
 
             final float motionSpeed = 0.05F;
-            item.motionX = ((float) MiscUtils.RNG.randomGaussian() * motionSpeed);
-            item.motionY = ((float) MiscUtils.RNG.randomGaussian() * motionSpeed + 0.2F);
-            item.motionZ = ((float) MiscUtils.RNG.randomGaussian() * motionSpeed);
-            world.spawnEntity(item);
+            item.setMotion(((float) MiscUtils.RNG.randomGaussian() * motionSpeed),
+                           ((float) MiscUtils.RNG.randomGaussian() * motionSpeed + 0.2F),
+                           ((float) MiscUtils.RNG.randomGaussian() * motionSpeed));
+            world.addEntity(item);
         }
     }
 
@@ -275,14 +269,14 @@ public final class ItemStackUtils
     public static NonNullList<ItemStack> getCompactItems(NonNullList<ItemStack> items, int maxInvStackSize, Integer maxStackSize) {
         NonNullList<ItemStack> cmpItems = NonNullList.create();
 
-        items.sort((i1, i2) -> ItemStackUtils.areEqual(i1, i2, false, true, true) ? 0 : i1.getTranslationKey().compareTo(i2.getTranslationKey()));
+        items.sort((i1, i2) -> ItemStackUtils.areEqual(i1, i2, false, true) ? 0 : i1.getTranslationKey().compareTo(i2.getTranslationKey()));
         items.forEach(v -> {
             int cmpSize = cmpItems.size();
             if( cmpSize < 1 ) {
                 cmpItems.add(v.copy());
             } else {
                 ItemStack cs = cmpItems.get(cmpSize - 1);
-                if( ItemStackUtils.areEqual(cs, v, false, true, true) ) {
+                if( ItemStackUtils.areEqual(cs, v, false, true) ) {
                     int rest = Math.min(MiscUtils.defIfNull(maxStackSize, cs::getMaxStackSize), maxInvStackSize) - cs.getCount();
                     if( rest >= v.getCount() ) {
                         cs.grow(v.getCount());

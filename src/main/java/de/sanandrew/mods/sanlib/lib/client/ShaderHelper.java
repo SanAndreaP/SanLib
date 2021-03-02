@@ -5,12 +5,11 @@
 
 package de.sanandrew.mods.sanlib.lib.client;
 
-import de.sanandrew.mods.sanlib.SLibConfig;
+import de.sanandrew.mods.sanlib.SanLibConfig;
 import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.client.ClientTickHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.resources.IResource;
+import net.minecraft.resources.IResource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -24,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
 @OnlyIn(Dist.CLIENT)
@@ -56,11 +56,12 @@ public final class ShaderHelper
     }
 
     public static boolean areShadersEnabled() {
-        return OpenGlHelper.shadersSupported && SLibConfig.Client.useShaders;
+        //TODO: figure out if shaders are supported on the machine or if MC thinks it should always be supported
+        return /*OpenGlHelper.shadersSupported &&*/ SanLibConfig.Client.useShaders.get();
     }
 
     public static int getSecondaryTextureUnit() {
-        return SLibConfig.Client.glSecondaryTextureUnit;
+        return SanLibConfig.Client.glSecondaryTextureUnit.get();
     }
 
     // Most of the code taken from the LWJGL wiki
@@ -134,7 +135,7 @@ public final class ShaderHelper
     private static String readFileAsString(ResourceLocation file) throws IOException {
         StringBuilder source = new StringBuilder();
         try( IResource res = Minecraft.getInstance().getResourceManager().getResource(file); InputStream in = res.getInputStream() ) {
-            try( BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8")) ) {
+            try( BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8)) ) {
                 String line;
                 while( (line = reader.readLine()) != null ) {
                     source.append(line).append('\n');

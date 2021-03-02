@@ -5,32 +5,20 @@
 
 package de.sanandrew.mods.sanlib.lib.util;
 
-import com.google.common.collect.ImmutableMap;
 import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.lib.XorShiftRandom;
-import net.minecraft.block.Block;
-import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTPrimitive;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagDouble;
-import net.minecraft.nbt.NBTTagFloat;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.DoubleNBT;
+import net.minecraft.nbt.FloatNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.NumberNBT;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.property.IUnlistedProperty;
-import net.minecraftforge.fml.common.ModContainer;
+import net.minecraftforge.fml.ModContainer;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.Level;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,7 +26,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Iterator;
 import java.util.Locale;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -331,32 +319,33 @@ public final class MiscUtils
         return obj != null ? onNonNull.apply(obj) : null;
     }
 
-    /**
-     * Looks inside a directory (outside and inside of classpath) and calls the processor for each file found
-     * @param mod The mod container to be looked in (Use {@link net.minecraftforge.fml.common.Loader} to get one)
-     * @param base The path of the directory to be scanned
-     * @param preprocessor A functional reference that gets called before the files are scanned. Its parameter is the path to the directory.
-     *                     It should return true if successful, false otherwise (which also cancels further operations)
-     * @param processor A functional reference that gets called on each file found. Its parameters are the path to the directory the file is in and the path of the file itself.
-     *                  It should return true if the processing was successful, false otherwise (which also cancels further operations)
-     * @return true if both the preprocessor (for the directory) and the processor (for each file) return true, false otherwise.
-     */
-    public static boolean findFiles(ModContainer mod, String base, Function<Path, Boolean> preprocessor, BiFunction<Path, Path, Boolean> processor) {
-        File source = mod.getSource();
-
-        if( source.isFile() ) {
-            try( FileSystem fs = FileSystems.newFileSystem(source.toPath(), null) ) {
-                return findFilesIntrn(fs.getPath('/' + base), mod, preprocessor, processor);
-            } catch( IOException e ) {
-                SanLib.LOG.log(Level.ERROR, "Error loading FileSystem from jar: ", e);
-                return false;
-            }
-        } else if( source.isDirectory() ) {
-            return findFilesIntrn(source.toPath().resolve(base), mod, preprocessor, processor);
-        }
-
-        return false;
-    }
+    //// USE DATAPACK DATA FOR THESE NOW!!!
+//    /**
+//     * Looks inside a directory (outside and inside of classpath) and calls the processor for each file found
+//     * @param mod The mod container to be looked in (Use {@link net.minecraftforge.fml.common.Loader} to get one)
+//     * @param base The path of the directory to be scanned
+//     * @param preprocessor A functional reference that gets called before the files are scanned. Its parameter is the path to the directory.
+//     *                     It should return true if successful, false otherwise (which also cancels further operations)
+//     * @param processor A functional reference that gets called on each file found. Its parameters are the path to the directory the file is in and the path of the file itself.
+//     *                  It should return true if the processing was successful, false otherwise (which also cancels further operations)
+//     * @return true if both the preprocessor (for the directory) and the processor (for each file) return true, false otherwise.
+//     */
+//    public static boolean findFiles(ModContainer mod, String base, Function<Path, Boolean> preprocessor, BiFunction<Path, Path, Boolean> processor) {
+//        File source = mod.getSource();
+//
+//        if( source.isFile() ) {
+//            try( FileSystem fs = FileSystems.newFileSystem(source.toPath(), null) ) {
+//                return findFilesIntrn(fs.getPath('/' + base), mod, preprocessor, processor);
+//            } catch( IOException e ) {
+//                SanLib.LOG.log(Level.ERROR, "Error loading FileSystem from jar: ", e);
+//                return false;
+//            }
+//        } else if( source.isDirectory() ) {
+//            return findFilesIntrn(source.toPath().resolve(base), mod, preprocessor, processor);
+//        }
+//
+//        return false;
+//    }
 
     private static boolean findFilesIntrn(Path root, ModContainer mod, Function<Path, Boolean> preprocessor, BiFunction<Path, Path, Boolean> processor) {
         if( root == null || !Files.exists(root) ) {
@@ -386,18 +375,18 @@ public final class MiscUtils
         return true;
     }
 
-    public static boolean doesNbtContainOther(NBTTagCompound mainNBT, NBTTagCompound otherNBT) {
+    public static boolean doesNbtContainOther(CompoundNBT mainNBT, CompoundNBT otherNBT) {
         return doesNbtContainOther(mainNBT, otherNBT, true);
     }
 
-    public static boolean doesNbtContainOther(final NBTTagCompound mainNBT, final NBTTagCompound otherNBT, boolean strict) {
+    public static boolean doesNbtContainOther(final CompoundNBT mainNBT, final CompoundNBT otherNBT, boolean strict) {
         return otherNBT == null
-               || (mainNBT != null && otherNBT.getKeySet().stream().allMatch(key -> {
-                        if( mainNBT.hasKey(key) ) {
+               || (mainNBT != null && otherNBT.keySet().stream().allMatch(key -> {
+                        if( mainNBT.contains(key) ) {
                             if( strict ) {
-                                return mainNBT.getTagId(key) == otherNBT.getTagId(key) && mainNBT.getTag(key).equals(otherNBT.getTag(key));
+                                return mainNBT.getTagId(key) == otherNBT.getTagId(key) && Objects.equals(mainNBT.get(key), otherNBT.get(key));
                             } else {
-                                return compareNBTBase(mainNBT.getTag(key), otherNBT.getTag(key));
+                                return compareNBTBase(mainNBT.get(key), otherNBT.get(key));
                             }
                         }
 
@@ -406,42 +395,42 @@ public final class MiscUtils
                );
     }
 
-    private static boolean compareNBTBase(NBTBase main, NBTBase other) {
-        if( main instanceof NBTPrimitive && other instanceof NBTPrimitive ) {
-            NBTPrimitive mainBase = ((NBTPrimitive) main);
-            NBTPrimitive otherBase = ((NBTPrimitive) other);
+    private static boolean compareNBTBase(INBT main, INBT other) {
+        if( main instanceof NumberNBT && other instanceof NumberNBT ) {
+            NumberNBT mainBase = ((NumberNBT) main);
+            NumberNBT otherBase = ((NumberNBT) other);
 
             long mainNb = isNbtDouble(mainBase) ? Double.doubleToLongBits(mainBase.getDouble()) : mainBase.getLong();
             long otherNb = isNbtDouble(otherBase) ? Double.doubleToLongBits(otherBase.getDouble()) : otherBase.getLong();
 
             return mainNb == otherNb;
-        } else if( main instanceof NBTTagList && other instanceof NBTTagList ) {
-            NBTTagList mainList = (NBTTagList) main;
-            NBTTagList otherList = (NBTTagList) other.copy();
+        } else if( main instanceof ListNBT && other instanceof ListNBT ) {
+            ListNBT mainList = (ListNBT) main;
+            ListNBT otherList = (ListNBT) other.copy();
 
             if( mainList.getTagType() == otherList.getTagType() ) {
-                for( int i = mainList.tagCount() - 1; i >= 0 && otherList.tagCount() > 0; i-- ) {
-                    for( int j = otherList.tagCount() - 1; j >= 0; j-- ) {
+                for( int i = mainList.size() - 1; i >= 0 && otherList.size() > 0; i-- ) {
+                    for( int j = otherList.size() - 1; j >= 0; j-- ) {
                         if( compareNBTBase(mainList.get(i), otherList.get(j)) ) {
-                            otherList.removeTag(j);
+                            otherList.remove(j);
                             break;
                         }
                     }
                 }
 
-                return otherList.tagCount() == 0;
+                return otherList.size() == 0;
             }
 
             return false;
-        } else if( main instanceof NBTTagCompound && other instanceof NBTTagCompound ) {
-            return doesNbtContainOther((NBTTagCompound) main, (NBTTagCompound) other, false);
+        } else if( main instanceof CompoundNBT && other instanceof CompoundNBT ) {
+            return doesNbtContainOther((CompoundNBT) main, (CompoundNBT) other, false);
         } else {
             return main.equals(other);
         }
     }
 
-    private static boolean isNbtDouble(NBTBase base) {
-        return base instanceof NBTTagDouble || base instanceof NBTTagFloat;
+    private static boolean isNbtDouble(INBT base) {
+        return base instanceof DoubleNBT || base instanceof FloatNBT;
     }
 
     public static float wrap360(float angle) {
@@ -456,41 +445,45 @@ public final class MiscUtils
         return defReturn;
     }
 
-    public static BlockStateContainer buildCustomBlockStateContainer(Block block,
-                                                                     BiFunction<Block, ImmutableMap<IProperty<?>, Comparable<?>>, BlockStateContainer.StateImplementation> stateImplCtor,
-                                                                     IProperty<?>... properties)
-    {
-        return new BlockStateContainer(block, properties) {
-            @Override
-            @Nonnull
-            protected StateImplementation createState(@Nonnull Block block, @Nonnull ImmutableMap<IProperty<?>, Comparable<?>> properties,
-                                                      @Nullable ImmutableMap<IUnlistedProperty<?>, Optional<?>> unlistedProperties)
-            {
-                return stateImplCtor.apply(block, properties);
-            }
-        };
-    }
-    public static void readFile(ModContainer mod, String file, Consumer<BufferedReader> c) {
-//    public static BufferedReader getFile(ModContainer mod, String file) {
-        File source = mod.getSource();
+    //TODO: figure out when and why and if, how this is used
+//    public static StateContainer buildCustomBlockStateContainer(Block block,
+//                                                                BiFunction<Block, ImmutableMap<IProperty<?>, Comparable<?>>, BlockStateContainer.StateImplementation> stateImplCtor,
+//                                                                IProperty<?>... properties)
+//    {
+//        return new StateContainer(block, properties) {
+//            @Override
+//            @Nonnull
+//            protected StateImplementation createState(@Nonnull Block block, @Nonnull ImmutableMap<IProperty<?>, Comparable<?>> properties,
+//                                                      @Nullable ImmutableMap<IUnlistedProperty<?>, Optional<?>> unlistedProperties)
+//            {
+//                return stateImplCtor.apply(block, properties);
+//            }
+//        };
+//    }
 
-        try {
-            if( source.isFile() ) {
-                try( FileSystem fs = FileSystems.newFileSystem(source.toPath(), null) ) {
-                    c.accept(Files.newBufferedReader(fs.getPath('/' + file), StandardCharsets.UTF_8));
-//                    return ;
-                }
-            } else if( source.isDirectory() ) {
-                c.accept(Files.newBufferedReader(source.toPath().resolve(file), StandardCharsets.UTF_8));
-//                return ;
-            }
-        } catch( IOException e ) {
-            SanLib.LOG.log(Level.ERROR, "Error loading file: ", e);
-//            return null;
-        }
 
-//        return null;
-    }
+    //// USE DATAPACK DATA FOR THESE NOW!!!
+//    public static void readFile(ModContainer mod, String file, Consumer<BufferedReader> c) {
+////    public static BufferedReader getFile(ModContainer mod, String file) {
+//        File source = mod.getSource();
+//
+//        try {
+//            if( source.isFile() ) {
+//                try( FileSystem fs = FileSystems.newFileSystem(source.toPath(), null) ) {
+//                    c.accept(Files.newBufferedReader(fs.getPath('/' + file), StandardCharsets.UTF_8));
+////                    return ;
+//                }
+//            } else if( source.isDirectory() ) {
+//                c.accept(Files.newBufferedReader(source.toPath().resolve(file), StandardCharsets.UTF_8));
+////                return ;
+//            }
+//        } catch( IOException e ) {
+//            SanLib.LOG.log(Level.ERROR, "Error loading file: ", e);
+////            return null;
+//        }
+//
+////        return null;
+//    }
 
     public static Integer getInteger(String s) {
         try {

@@ -5,8 +5,7 @@
 
 package de.sanandrew.mods.sanlib.lib.util;
 
-import de.sanandrew.mods.sanlib.SanLib;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
@@ -17,11 +16,11 @@ public final class PlayerUtils
      * Returns the clientside player. On a server, this returns {@code null}.
      * @return the clientside player
      */
-    public static EntityPlayer getClientPlayer() {
-        return SanLib.proxy.getClientPlayer();
-    }
+//    public static EntityPlayer getClientPlayer() {
+//        return SanLib.proxy.getClientPlayer();
+//    }
 
-    public static ItemStack getHeldItemOfType(EntityPlayer player, Item type) {
+    public static ItemStack getHeldItemOfType(PlayerEntity player, Item type) {
         ItemStack heldStack = player.getHeldItemMainhand();
         if( !ItemStackUtils.isItem(heldStack, type) ) {
             return player.getHeldItemOffhand();

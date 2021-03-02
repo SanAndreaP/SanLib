@@ -1,19 +1,25 @@
 package de.sanandrew.mods.sanlib.sanplayermodel.client.renderer.entity.layers;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import de.sanandrew.mods.sanlib.Constants;
 import de.sanandrew.mods.sanlib.lib.util.ItemStackUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import de.sanandrew.mods.sanlib.sanplayermodel.SanPlayerModel;
 import de.sanandrew.mods.sanlib.sanplayermodel.client.model.ModelSanSkirt;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.entity.RenderPlayer;
-import net.minecraft.client.renderer.entity.layers.LayerArmorBase;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.IEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.IDyeableArmorItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import org.apache.logging.log4j.Level;
@@ -23,29 +29,33 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LayerSanSkirt
-        implements LayerRenderer<EntityPlayer>
+public class LayerSanSkirt<T extends PlayerEntity, M extends PlayerModel<T>>
+        extends LayerRenderer<T, M>
 {
-    protected final RenderPlayer renderPlayer;
-    private final ModelSanSkirt skirt = new ModelSanSkirt(0.0F);
-    private final ModelSanSkirt skirtArmor = new ModelSanSkirt(0.5F);
+    private final ModelSanSkirt<T> skirt      = new ModelSanSkirt<>(0.0F);
+    private final ModelSanSkirt<T> skirtArmor = new ModelSanSkirt<>(0.5F);
 
     private final Map<Item, ResourceLocation> skirtArmorList     = new HashMap<>();
     private final Map<Item, ResourceLocation> skirtArmorOverlays = new HashMap<>();
 
-    public LayerSanSkirt(RenderPlayer renderPlayer) {
-        this.renderPlayer = renderPlayer;
+    public LayerSanSkirt(IEntityRenderer<T, M> renderPlayer) {
+        super(renderPlayer);
     }
 
     @Override
-    public void doRenderLayer(@Nonnull EntityPlayer player, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
-        if ( SanPlayerModel.isSanPlayer(player) ) {
-            ItemStack pants = player.getItemStackFromSlot(EntityEquipmentSlot.LEGS);
+    public void render(@Nonnull MatrixStack matrixStackIn, @Nonnull IRenderTypeBuffer bufferIn, int packedLightIn, @Nonnull T player,
+                       float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch)
+    {
+        if( SanPlayerModel.isSanPlayer(player) ) {
+            ItemStack pants = player.getItemStackFromSlot(EquipmentSlotType.LEGS);
             boolean hasPants = ItemStackUtils.isValid(pants);
 
+            PlayerModel<T> pm = this.getEntityModel();
+
             if( !hasPants || hasSkirtArmor(pants) ) {
-                renderSkirt(this.skirt, this.renderPlayer, false, null,
-                            player, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale);
+                pm.setModelAttributes(this.skirt);
+                renderSkirt(matrixStackIn, bufferIn, packedLightIn, this.skirt, pm.bipedBody, false, null,
+                            player, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
             }
 
             if( hasPants ) {
@@ -53,8 +63,8 @@ public class LayerSanSkirt
                 boolean test = false;
                 Integer overlay = null;
 
-                if( pantsItem instanceof ItemArmor && ((ItemArmor) pantsItem).hasOverlay(pants) ) {
-                    overlay = ((ItemArmor) pantsItem).getColor(pants);
+                if( pantsItem instanceof IDyeableArmorItem && ((IDyeableArmorItem) pantsItem).hasColor(pants) ) {
+                    overlay = ((IDyeableArmorItem) pantsItem).getColor(pants);
                 }
 
                 if( !this.skirtArmorList.containsKey(pantsItem) ) {
@@ -74,14 +84,15 @@ public class LayerSanSkirt
                             Minecraft.getInstance().getResourceManager().getResource(rl);
                         }
 
+                        pm.setModelAttributes(this.skirtArmor);
                         this.skirtArmor.setTexture(rl);
-                        renderSkirt(this.skirtArmor, this.renderPlayer, pants.isItemEnchanted(), overlay,
-                                    player, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale);
+                        renderSkirt(matrixStackIn, bufferIn, packedLightIn, this.skirtArmor, pm.bipedBody, pants.hasEffect(), overlay,
+                                    player, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
 
                         if( this.skirtArmorOverlays.containsKey(pantsItem) ) {
                             this.skirtArmor.setTexture(this.skirtArmorOverlays.get(pantsItem));
-                            renderSkirt(this.skirtArmor, this.renderPlayer, pants.isItemEnchanted(), null,
-                                        player, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale);
+                            renderSkirt(matrixStackIn, bufferIn, packedLightIn, this.skirtArmor, pm.bipedBody, pants.hasEffect(), null,
+                                        player, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
                         }
                     } catch( IOException ex ) {
                         SanPlayerModel.LOG.log(Level.WARN, String.format("Cannot find texture for %s", rl));
@@ -96,38 +107,26 @@ public class LayerSanSkirt
         return this.skirtArmorList.get(pants.getItem()) != null;
     }
 
-    private static void renderSkirt(ModelSanSkirt skirt, RenderPlayer renderPlayer, boolean glint, Integer overlay, EntityPlayer player, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
-        skirt.setModelAttributes(renderPlayer.getMainModel());
+    private static void renderSkirt(MatrixStack stack, IRenderTypeBuffer bufferIn, int packedLightIn, ModelSanSkirt<?> skirt, ModelRenderer body,
+                                    boolean glint, Integer overlay, PlayerEntity player, float limbSwing, float limbSwingAmount,
+                                    float ageInTicks, float netHeadYaw, float headPitch)
+    {
+        float red   = 1.0F;
+        float green = 1.0F;
+        float blue  = 1.0F;
 
         if( overlay != null ) {
-            float red = (float) (overlay >> 16 & 255) / 255.0F;
-            float green = (float) (overlay >> 8 & 255) / 255.0F;
-            float blue = (float) (overlay & 255) / 255.0F;
-
-            GlStateManager.color(red, green, blue, 1.0F);
-        } else {
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        }
-        renderPlayer.bindTexture(skirt.getTexture());
-
-        GlStateManager.pushMatrix();
-        if (player.isSneaking())
-        {
-            GlStateManager.translate(0.0F, 0.2F, 0.0F);
+            red = (float) (overlay >> 16 & 255) / 255.0F;
+            green = (float) (overlay >> 8 & 255) / 255.0F;
+            blue = (float) (overlay & 255) / 255.0F;
         }
 
-        renderPlayer.getMainModel().bipedBody.postRender(0.0625F);
-        skirt.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale, player);
-        skirt.render(player, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
+        IVertexBuilder ivertexbuilder = ItemRenderer.getArmorVertexBuilder(bufferIn, RenderType.getArmorCutoutNoCull(skirt.getTexture()), false, glint);
 
-        if( glint ) {
-            LayerArmorBase.renderEnchantedGlint(renderPlayer, player, skirt, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale);
-        }
-        GlStateManager.popMatrix();
-    }
-
-    @Override
-    public boolean shouldCombineTextures() {
-        return false;
+        stack.push();
+        body.translateRotate(stack);
+        skirt.setRotationAngles(player, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+        skirt.render(stack, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, red, green, blue, 1.0F);
+        stack.pop();
     }
 }

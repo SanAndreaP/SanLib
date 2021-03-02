@@ -53,21 +53,21 @@ public class ConfigUtils
 
     private static final Map<String, Object> DEFAULTS = new HashMap<>();
 
-    public static Configuration loadConfigFile(File cfgFile, String version, String modName) {
-        Configuration config = new Configuration(cfgFile, version, true);
-        String loadedVer = config.getLoadedConfigVersion();
-        if( loadedVer != null && Integer.parseInt(loadedVer.split("\\.")[0]) < Integer.parseInt(version.split("\\.")[0]) ) {
-            try {
-                FileUtils.copyFile(cfgFile, new File(cfgFile.getAbsoluteFile() + ".old"));
-                config.getCategoryNames().forEach(cat -> config.removeCategory(config.getCategory(cat)));
-                SanLib.LOG.log(Level.WARN, String.format("%s config file is too outdated! Config will be overwritten - the old config file can be found at %s.old", modName, cfgFile.getAbsoluteFile()));
-            } catch( IOException ex ) {
-                SanLib.LOG.log(Level.ERROR, String.format("%s config file is too outdated but cannot be updated! This will cause errors! Please copy the old config somewhere and remove it from the config folder!", modName), ex);
-            }
-        }
-
-        return config;
-    }
+//    public static Configuration loadConfigFile(File cfgFile, String version, String modName) {
+//        Configuration config = new Configuration(cfgFile, version, true);
+//        String loadedVer = config.getLoadedConfigVersion();
+//        if( loadedVer != null && Integer.parseInt(loadedVer.split("\\.")[0]) < Integer.parseInt(version.split("\\.")[0]) ) {
+//            try {
+//                FileUtils.copyFile(cfgFile, new File(cfgFile.getAbsoluteFile() + ".old"));
+//                config.getCategoryNames().forEach(cat -> config.removeCategory(config.getCategory(cat)));
+//                SanLib.LOG.log(Level.WARN, String.format("%s config file is too outdated! Config will be overwritten - the old config file can be found at %s.old", modName, cfgFile.getAbsoluteFile()));
+//            } catch( IOException ex ) {
+//                SanLib.LOG.log(Level.ERROR, String.format("%s config file is too outdated but cannot be updated! This will cause errors! Please copy the old config somewhere and remove it from the config folder!", modName), ex);
+//            }
+//        }
+//
+//        return config;
+//    }
 
     public static void loadCategories(Configuration config, Class<?> base) {
         invokeInit(base, Init.Stage.PRE);

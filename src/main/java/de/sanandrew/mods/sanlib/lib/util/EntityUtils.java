@@ -6,16 +6,15 @@
 package de.sanandrew.mods.sanlib.lib.util;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.ai.EntityAITasks;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.IAttribute;
-import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
+import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -29,7 +28,7 @@ public final class EntityUtils
     public static final int RISE_SUM_WITH_PERC_VAL = 2;
 
     public static Entity getEntityByUUID(World worldObj, UUID uuid) {
-        return new ArrayList<>(worldObj.loadedEntityList).stream().filter(entity -> entity.getUniqueID().equals(uuid)).findFirst().orElse(null);
+        return (worldObj instanceof ServerWorld ? ((ServerWorld) worldObj).getEntityByUuid(uuid) : null);//new ArrayList<>(worldObj.getLoadedEntitiesWithinAABB()).stream().filter(entity -> entity.getUniqueID().equals(uuid)).findFirst().orElse(null);
     }
 
     public static <T extends Entity> List<T> getPassengersOfClass(Entity e, Class<T> psgClass) {
@@ -37,26 +36,19 @@ public final class EntityUtils
         return e.getPassengers().stream().filter(psgClass::isInstance).map(entity -> (T) entity).collect(Collectors.toList());
     }
 
-    public static <T extends EntityAIBase> List<T> getAisFromTaskList(Set<EntityAITasks.EntityAITaskEntry> taskList, Class<T> cls) {
+    public static <T extends Goal> List<T> getAisFromTaskList(Set<PrioritizedGoal> taskList, Class<T> cls) {
         //noinspection unchecked
-        return taskList.stream().filter(task -> cls.equals(task.action.getClass())).map(task -> (T) task.action).collect(Collectors.toList());
+        return taskList.stream().filter(task -> cls.equals(task.getGoal().getClass())).map(task -> (T) task.getGoal()).collect(Collectors.toList());
     }
 
-    public static boolean tryApplyModifier(EntityLivingBase e, IAttribute attribute, AttributeModifier modifier) {
-        IAttributeInstance attrib = e.getEntityAttribute(attribute);
-        if( !attrib.hasModifier(modifier) ) {
-            attrib.applyModifier(modifier);
-
-            return true;
-        }
-
-        return false;
-    }
-
-    public static boolean tryApplyModifier(EntityLivingBase e, String attributeName, AttributeModifier modifier) {
-        IAttributeInstance attrib = e.getAttributeMap().getAttributeInstanceByName(attributeName);
+    public static boolean tryApplyModifier(LivingEntity e, Attribute attribute, AttributeModifier modifier, boolean persist) {
+        ModifiableAttributeInstance attrib = e.getAttribute(attribute);
         if( attrib != null && !attrib.hasModifier(modifier) ) {
-            attrib.applyModifier(modifier);
+            if( persist ) {
+                attrib.applyPersistentModifier(modifier);
+            } else {
+                attrib.applyNonPersistentModifier(modifier);
+            }
 
             return true;
         }
@@ -64,19 +56,19 @@ public final class EntityUtils
         return false;
     }
 
-    public static boolean tryRemoveModifier(EntityLivingBase e, IAttribute attribute, AttributeModifier modifier) {
-        IAttributeInstance attrib = e.getEntityAttribute(attribute);
-        if( attrib.hasModifier(modifier) ) {
-            attrib.removeModifier(modifier);
+//    public static boolean tryApplyModifier(LivingEntity e, String attributeName, AttributeModifier modifier) {
+//        ModifiableAttributeInstance attrib = e.getAttributeManager(attributeName);
+//        if( attrib != null && !attrib.hasModifier(modifier) ) {
+//            attrib.applyModifier(modifier);
+//
+//            return true;
+//        }
+//
+//        return false;
+//    }
 
-            return true;
-        }
-
-        return false;
-    }
-
-    public static boolean tryRemoveModifier(EntityLivingBase e, String attributeName, AttributeModifier modifier) {
-        IAttributeInstance attrib = e.getAttributeMap().getAttributeInstanceByName(attributeName);
+    public static boolean tryRemoveModifier(LivingEntity e, Attribute attribute, AttributeModifier modifier) {
+        ModifiableAttributeInstance attrib = e.getAttribute(attribute);
         if( attrib != null && attrib.hasModifier(modifier) ) {
             attrib.removeModifier(modifier);
 
@@ -85,4 +77,15 @@ public final class EntityUtils
 
         return false;
     }
+
+//    public static boolean tryRemoveModifier(LivingEntity e, String attributeName, AttributeModifier modifier) {
+//        ModifiableAttributeInstance attrib = e.getAttributeMap().getAttributeInstanceByName(attributeName);
+//        if( attrib != null && attrib.hasModifier(modifier) ) {
+//            attrib.removeModifier(modifier);
+//
+//            return true;
+//        }
+//
+//        return false;
+//    }
 }

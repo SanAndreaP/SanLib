@@ -1,32 +1,34 @@
 package de.sanandrew.mods.sanlib.sanplayermodel.client.model;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import de.sanandrew.mods.sanlib.lib.client.ModelJsonHandler;
 import de.sanandrew.mods.sanlib.lib.client.ModelJsonLoader;
 import de.sanandrew.mods.sanlib.sanplayermodel.Resources;
-import net.minecraft.client.model.ModelBase;
-import net.minecraft.client.model.ModelBiped;
-import net.minecraft.client.model.ModelRenderer;
-import net.minecraft.client.resources.IResourceManager;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.renderer.entity.model.BipedModel;
+import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
+import java.util.List;
 
-public class ModelSanSkirt
-        extends ModelBase
-        implements ModelJsonHandler<ModelSanSkirt, ModelJsonLoader.JsonBase>
+public class ModelSanSkirt<T extends PlayerEntity>
+        extends BipedModel<T>
+        implements ModelJsonHandler<ModelSanSkirt<T>, ModelJsonLoader.JsonBase>
 {
-    private final ModelJsonLoader<ModelSanSkirt, ModelJsonLoader.JsonBase> modelJson;
-    private final float                                                    scale;
+    private final ModelJsonLoader<ModelSanSkirt<T>, ModelJsonLoader.JsonBase> modelJson;
+
+    private final float scale;
 
     private ResourceLocation texture;
-    private boolean isSneak;
-
-    private ModelRenderer skirt1;
-    private ModelRenderer skirt2;
+    private ModelRenderer    skirt1;
+    private ModelRenderer    skirt2;
 
     public ModelSanSkirt(float scale) {
+        super(scale);
         this.scale = scale;
 
         this.modelJson = ModelJsonLoader.create(this, Resources.SKIRT_MODEL, "skirt1", "skirt2");
@@ -38,27 +40,25 @@ public class ModelSanSkirt
     }
 
     @Override
-    public void render(@Nonnull Entity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
+    public List<ModelRenderer> getBoxes() {
+        return null;
+    }
+
+    @Override
+    public void render(@Nonnull MatrixStack matrixStackIn, @Nonnull IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn,
+                       float red, float green, float blue, float alpha)
+    {
         if( this.modelJson != null && this.modelJson.isLoaded() ) {
-            Arrays.asList(this.modelJson.getMainBoxes()).forEach((box) -> box.render(scale));
+            Arrays.asList(this.modelJson.getMainBoxes()).forEach(
+                    (box) -> box.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha)
+            );
         }
     }
 
     @Override
-    public void setModelAttributes(ModelBase model) {
-        super.setModelAttributes(model);
-
-        if (model instanceof ModelBiped )
-        {
-            ModelBiped modelbiped = (ModelBiped)model;
-            this.isSneak = modelbiped.isSneak;
-        }
-    }
-
-    @Override
-    public void setRotationAngles(float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scaleFactor, Entity entityIn) {
-        super.setRotationAngles(limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scaleFactor, entityIn);
-
+    public void setRotationAngles(@Nonnull PlayerEntity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks,
+                                  float netHeadYaw, float headPitch)
+    {
         if( this.isSneak ) {
             this.skirt1.rotationPointZ = 3.0F;
             this.skirt1.rotationPointY = -0.6F;
@@ -78,7 +78,7 @@ public class ModelSanSkirt
     }
 
     @Override
-    public void onReload(IResourceManager resourceManager, ModelJsonLoader<ModelSanSkirt, ModelJsonLoader.JsonBase> loader) {
+    public void onReload(IResourceManager resourceManager, ModelJsonLoader<ModelSanSkirt<T>, ModelJsonLoader.JsonBase> loader) {
         loader.load();
 
         if( loader.isLoaded() ) {

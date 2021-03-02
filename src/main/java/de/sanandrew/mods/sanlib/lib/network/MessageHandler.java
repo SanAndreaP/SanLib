@@ -23,7 +23,6 @@ import java.util.function.Supplier;
 public final class MessageHandler
 {
     public final SimpleChannel channel;
-    private int discriminatorId = 0;
 
     public MessageHandler(String modId, String protocolVersion) {
         this.channel = NetworkRegistry.newSimpleChannel(new ResourceLocation(modId, "main"),
@@ -32,8 +31,8 @@ public final class MessageHandler
                                                         protocolVersion::equals);
     }
 
-    public <T extends SimpleMessage> void registerMessage(Class<T> msgClass, Function<PacketBuffer, T> ctor) {
-        this.channel.registerMessage(this.discriminatorId++, msgClass, T::encode, ctor, MessageHandler::handle);
+    public <T extends SimpleMessage> void registerMessage(int index, Class<T> msgClass, Function<PacketBuffer, T> ctor) {
+        this.channel.registerMessage(index, msgClass, T::encode, ctor, MessageHandler::handle);
     }
 
     public void sendToServer(SimpleMessage msg) {
@@ -66,5 +65,6 @@ public final class MessageHandler
         } else {
             msg.handle(context);
         }
+        context.get().setPacketHandled(true);
     }
 }

@@ -1,0 +1,4 @@
+{
+  "commands.sanlib.errorArgs": "Not enough arguments provided!",
+  "commands.sanlib.reloadModels.success": "JSON-Models reloaded."
+}

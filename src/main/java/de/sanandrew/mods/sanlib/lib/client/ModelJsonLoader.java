@@ -112,11 +112,13 @@ public class ModelJsonLoader<T extends Model & ModelJsonHandler<T, U>, U extends
         this.loaded = false;
         this.jsonClass = jsonClass;
 
+        REGISTERED_JSON_LOADERS.add(this);
+
         if( Minecraft.getInstance().getResourceManager() instanceof SimpleReloadableResourceManager ) {
             ((SimpleReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(this);
         }
 
-        REGISTERED_JSON_LOADERS.add(this);
+        this.reload(null);
     }
 
     public void addCustomModelRenderer(String boxName, Class<? extends ModelRenderer> rendererClass) {
@@ -308,10 +310,14 @@ public class ModelJsonLoader<T extends Model & ModelJsonHandler<T, U>, U extends
         return this.jsonInst;
     }
 
+    public void reload(IResourceManager resourceManager) {
+        this.modelBase.onReload(MiscUtils.defIfNull(resourceManager, () -> Minecraft.getInstance().getResourceManager()), this);
+    }
+
     @Override
     public void onResourceManagerReload(@Nonnull IResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) {
         if( resourcePredicate.test(this) || resourcePredicate.test(VanillaResourceType.TEXTURES) ) {
-            this.modelBase.onReload(resourceManager, this);
+            this.reload(resourceManager);
         }
     }
 
