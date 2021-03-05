@@ -95,13 +95,13 @@ public class TextField
     }
 
     @Override
-    public boolean mouseClicked(IGui gui, double mouseX, double mouseY, int mouseButton) {
-        return this.textfield.mouseClicked(mouseX - gui.getScreenPosX(), mouseY - gui.getScreenPosY(), mouseButton);
+    public boolean mouseClicked(IGui gui, double mouseX, double mouseY, int button) {
+        return this.textfield.mouseClicked(mouseX - gui.getScreenPosX(), mouseY - gui.getScreenPosY(), button);
     }
 
     @Override
-    public boolean keyPressed(IGui gui, int keyCode, int u1, int u2) {
-        return this.textfield.keyPressed(keyCode, u1, u2);
+    public boolean keyPressed(IGui gui, int keyCode, int scanCode, int modifiers) {
+        return this.textfield.keyPressed(keyCode, scanCode, modifiers);
     }
 
     public void setText(String text) {

@@ -28,31 +28,21 @@ import org.lwjgl.opengl.GL11;
 public final class GuiUtils
 {
     /**
-     * A wrapper method for {@link GL11#glScissor(int, int, int, int)} that corrects position and respects the GUI scaling of Minecraft.<br>
+     * A wrapper method for {@link RenderSystem#enableScissor(int, int, int, int)} that corrects position and respects the GUI scaling of Minecraft.<br>
      * Unlike glScissor, the starting position of the scissor box is the top left corner instead of the bottom left corner.
      * @param x The X coordinate of the starting position for the scissor box.
      * @param y The Y coordinate of the starting position for the scissor box.
      * @param width The width of the scissor box.
      * @param height The height of the scissor box.
      */
-    public static void glScissor(int x, int y, int width, int height) {
+    public static void enableScissor(int x, int y, int width, int height) {
         Minecraft mc = Minecraft.getInstance();
-//        int scaleFactor = 1;
-//        int guiScale = mc.gameSettings.guiScale;
-//
-//        if( guiScale == 0 ) {
-//            guiScale = 1000;
-//        }
-//
-//        while( scaleFactor < guiScale && mc.getMainWindow().getWidth() / (scaleFactor + 1) >= 320 && mc.displayHeight / (scaleFactor + 1) >= 240 ) {
-//            ++scaleFactor;
-//        }
+
         MainWindow window = mc.getMainWindow();
         double scaleFactor = window.getGuiScaleFactor();
 
-        RenderSystem.enableScissor(x, y + height, width, height);
-//        GL11.glScissor((int) (x * scaleFactor), (int) (window.getHeight() - (y + height) * scaleFactor),
-//                       (int) (width * scaleFactor), (int) (height * scaleFactor));
+        RenderSystem.enableScissor((int) (x * scaleFactor), (int) (window.getHeight() - (y + height) * scaleFactor),
+                                   (int) (width * scaleFactor), (int) (height * scaleFactor));
     }
 
 //    /**
@@ -110,6 +100,7 @@ public final class GuiUtils
         buffer.pos(matrix, xPos + width, yPos + height, z).tex((u + width) * resScaleX, (v + height) * resScaleY).endVertex();
         buffer.pos(matrix, xPos + width, yPos, z).tex((u + width) * resScaleX, v * resScaleY).endVertex();
         buffer.pos(matrix, xPos, yPos, z).tex(u * resScaleX, v * resScaleY).endVertex();
+        buffer.finishDrawing();
         RenderSystem.enableAlphaTest();
         WorldVertexBufferUploader.draw(buffer);
     }
@@ -131,13 +122,13 @@ public final class GuiUtils
         Matrix4f      matrix = stack.getLast().getMatrix();
         BufferBuilder buffer = Tessellator.getInstance().getBuffer();
 
-
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
         if( isHorizontal ) {
             buildColoredQuad(matrix, buffer, x, y, width, height, startColor, endColor);
         } else {
             buildColoredQuad(matrix, buffer, x, y, width, height, endColor, startColor, startColor, endColor);
         }
+        buffer.finishDrawing();
 
         RenderSystem.disableTexture();
         RenderSystem.enableBlend();

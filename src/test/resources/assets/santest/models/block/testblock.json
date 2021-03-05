@@ -1,0 +1,29 @@
+{
+  "parent": "minecraft:block/cube",
+  "loader": "sanlib:emissive",
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 16, 16],
+      "shade": false,
+      "emissive": true,
+      "faces": {
+        "north": {"uv": [0, 0, 16, 16], "texture": "north"},
+        "south": {"uv": [0, 0, 16, 16], "texture": "south"},
+        "east": {"uv": [0, 0, 16, 16], "texture": "east"},
+        "west": {"uv": [0, 0, 16, 16], "texture": "west"},
+        "up": {"uv": [0, 0, 16, 16], "texture": "up"},
+        "down": {"uv": [0, 0, 16, 16], "texture": "down"}
+      }
+    }
+  ],
+  "textures": {
+    "particle": "minecraft:block/oak_planks",
+    "north": "minecraft:block/spruce_planks",
+    "south": "minecraft:block/acacia_planks",
+    "east": "minecraft:block/jungle_planks",
+    "west": "minecraft:block/dark_oak_planks",
+    "up": "minecraft:block/birch_planks",
+    "down": "minecraft:block/oak_planks"
+  }
+}

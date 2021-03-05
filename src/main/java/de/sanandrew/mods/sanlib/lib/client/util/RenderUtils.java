@@ -6,12 +6,11 @@
 package de.sanandrew.mods.sanlib.lib.client.util;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
@@ -76,18 +75,21 @@ public final class RenderUtils
         itemRenderer.zLevel -= 50.0F;
         matrixStack.push();
         matrixStack.translate(posX, posY, 0.0F);
-        matrixStack.scale(scale, scale, 1.0F);
-        RenderHelper.enableStandardItemLighting();
+        matrixStack.scale(scale, scale, scale);
+        RenderSystem.pushMatrix();
+        RenderSystem.multMatrix(matrixStack.getLast().getMatrix());
+
         itemRenderer.renderItemIntoGUI(stack, 0, 0);
-        RenderHelper.disableStandardItemLighting();
+
         if( doOverlay ) {
             if( fontRenderer != null ) {
                 itemRenderer.renderItemOverlayIntoGUI(fontRenderer, stack, 0, 0, customTxt);
             } else {
                 itemRenderer.renderItemOverlayIntoGUI(Minecraft.getInstance().fontRenderer, stack, 0, 0, "");
             }
-            GlStateManager.disableLighting();
         }
+
+        RenderSystem.popMatrix();
         matrixStack.pop();
         itemRenderer.zLevel += 50.0F;
     }

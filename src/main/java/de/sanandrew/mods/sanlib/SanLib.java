@@ -34,10 +34,6 @@ public class SanLib
     }
 
     private void clientSetup(FMLClientSetupEvent event) {
-        //TODO: figure out what AE2 does
-//        if( SLibConfig.Client.enableEmissiveTextures && EmissiveModelLoader.isLightMapEnabled() ) {
-//            ModelLoaderRegistry.registerLoader(new EmissiveModelLoader());
-//        }
     }
 
     //TODO: FMLFingerprintViolationEvent is deprecated???

@@ -144,8 +144,8 @@ public class ButtonSL
     }
 
     @Override
-    public boolean mouseClicked(IGui gui, double mouseX, double mouseY, int mouseButton) {
-        if( mouseButton == 0 && this.isActive() && this.isCurrHovering ) {
+    public boolean mouseClicked(IGui gui, double mouseX, double mouseY, int button) {
+        if( button == 0 && this.isActive() && this.isCurrHovering ) {
             Screen gs  = gui.get();
             Button btn = this.buttonDelegate;
 
@@ -155,7 +155,7 @@ public class ButtonSL
             return true;
         }
 
-        return super.mouseClicked(gui, mouseX, mouseY, mouseButton);
+        return super.mouseClicked(gui, mouseX, mouseY, button);
     }
 
     protected void drawRect(MatrixStack stack, boolean enabled, boolean hovered) {

@@ -10,6 +10,7 @@ import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
@@ -19,7 +20,6 @@ import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
-import org.lwjgl.opengl.GL11;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -114,33 +114,14 @@ public class ScrollArea
         this.posY = y;
 
         boolean isLmbDown = Minecraft.getInstance().mouseHelper.isLeftDown();
-
         GuiElementInst btn = this.scrollBtn[this.countAll > this.countSub ? 0 : 1];
-        Texture btnElem = btn.get(Texture.class);
+        int scrollY = btn.pos[1] + (int) Math.round(this.scroll * (this.scrollHeight - btn.get(Texture.class).size[1]));
 
-        if( this.countAll > this.countSub && isLmbDown ) {
-            if( this.prevLmbDown
-                || IGuiElement.isHovering(gui, btn.pos[0], btn.pos[1], mouseX, mouseY, btnElem.size[0], this.scrollHeight) )
-            {
-                double scrollAmt = mouseY - gui.getScreenPosY() - btn.pos[1] - btnElem.size[1] / 2.0D;
-                this.scroll = Math.max(0.0F, Math.min(1.0F, 1.0F / (this.scrollHeight - btnElem.size[1]) * scrollAmt));
+        btn.get().render(gui, stack, partTicks, btn.pos[0], scrollY, mouseX, mouseY, btn.data);
 
-                this.prevLmbDown = true;
-            }
-        } else {
-            this.prevLmbDown = false;
-        }
-
-        int scrollY = btn.pos[1] + (int) Math.round(this.scroll * (this.scrollHeight - btnElem.size[1]));
-
-        btnElem.render(gui, stack, partTicks, btn.pos[0], scrollY, mouseX, mouseY, btn.data);
-
-        GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        GuiUtils.glScissor(gui.getScreenPosX() + x, gui.getScreenPosY() + y, this.areaSize[0], this.areaSize[1]);
-
+        GuiUtils.enableScissor(gui.getScreenPosX() + x, gui.getScreenPosY() + y, this.areaSize[0], this.areaSize[1]);
         super.render(gui, stack, partTicks, x, y - this.sData.minY, mouseX, mouseY, data);
-
-        GL11.glDisable(GL11.GL_SCISSOR_TEST);
+        RenderSystem.disableScissor();
     }
 
     @Override
@@ -169,27 +150,38 @@ public class ScrollArea
     }
 
     @Override
-    public boolean mouseClicked(IGui gui, double mouseX, double mouseY, int mouseButton) {
+    public boolean mouseClicked(IGui gui, double mouseX, double mouseY, int button) {
         if( IGuiElement.isHovering(gui, this.posX, this.posY, mouseX, mouseY, this.areaSize[0], this.areaSize[1]) ) {
-            return super.mouseClicked(gui, mouseX, mouseY, mouseButton);
+            return super.mouseClicked(gui, mouseX, mouseY, button);
         }
 
         return false;
     }
 
     @Override
-    public boolean mouseDragged(IGui gui, double mouseX, double mouseY, int clickedMouseButton, double offsetX, double offsetY) {
+    public boolean mouseDragged(IGui gui, double mouseX, double mouseY, int button, double dragX, double dragY) {
+        GuiElementInst btn = this.scrollBtn[this.countAll > this.countSub ? 0 : 1];
+        Texture btnElem = btn.get(Texture.class);
+
+        if( this.prevLmbDown || IGuiElement.isHovering(gui, btn.pos[0], btn.pos[1], mouseX, mouseY, btnElem.size[0], this.scrollHeight) ) {
+            double scrollAmt = mouseY - gui.getScreenPosY() - btn.pos[1] - btnElem.size[1] / 2.0D;
+            this.scroll = Math.max(0.0F, Math.min(1.0F, 1.0F / (this.scrollHeight - btnElem.size[1]) * scrollAmt));
+            this.prevLmbDown = true;
+        } else {
+            this.prevLmbDown = false;
+        }
+
         if( IGuiElement.isHovering(gui, this.posX, this.posY, mouseX, mouseY, this.areaSize[0], this.areaSize[1]) ) {
-            return super.mouseDragged(gui, mouseX, mouseY, clickedMouseButton, offsetX, offsetY);
+            return super.mouseDragged(gui, mouseX, mouseY, button, dragX, dragY);
         }
 
         return false;
     }
 
     @Override
-    public boolean mouseReleased(IGui gui, double mouseX, double mouseY, int state) {
+    public boolean mouseReleased(IGui gui, double mouseX, double mouseY, int button) {
         if( IGuiElement.isHovering(gui, this.posX, this.posY, mouseX, mouseY, this.areaSize[0], this.areaSize[1]) ) {
-            return super.mouseReleased(gui, mouseX, mouseY, state);
+            return super.mouseReleased(gui, mouseX, mouseY, button);
         }
 
         return false;

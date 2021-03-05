@@ -75,23 +75,23 @@ public abstract class ElementParent<K>
     }
 
     @Override
-    public boolean mouseDragged(IGui gui, double mouseX, double mouseY, int clickedMouseButton, double offsetX, double offsetY) {
-        return doWorkB(e -> e.mouseDragged(gui, mouseX, mouseY, clickedMouseButton, offsetX, offsetY));
+    public boolean mouseDragged(IGui gui, double mouseX, double mouseY, int button, double dragX, double dragY) {
+        return doWorkB(e -> e.mouseDragged(gui, mouseX, mouseY, button, dragX, dragY));
     }
 
     @Override
-    public boolean mouseClicked(IGui gui, double mouseX, double mouseY, int mouseButton) {
-        return doWorkB(e -> mouseReleased(gui, mouseX, mouseY, mouseButton));
+    public boolean mouseClicked(IGui gui, double mouseX, double mouseY, int button) {
+        return doWorkB(e -> e.mouseReleased(gui, mouseX, mouseY, button));
     }
 
     @Override
-    public boolean mouseReleased(IGui gui, double mouseX, double mouseY, int state) {
-        return doWorkB(e -> mouseReleased(gui, mouseX, mouseY, state));
+    public boolean mouseReleased(IGui gui, double mouseX, double mouseY, int button) {
+        return doWorkB(e -> e.mouseReleased(gui, mouseX, mouseY, button));
     }
 
     @Override
-    public void guiClosed(IGui gui) {
-        doWorkV(e -> e.guiClosed(gui));
+    public void onClose(IGui gui) {
+        doWorkV(e -> e.onClose(gui));
     }
 
     @Override
@@ -100,13 +100,13 @@ public abstract class ElementParent<K>
     }
 
     @Override
-    public boolean keyPressed(IGui gui, int keyCode, int unknown1, int unknown2) {
-        return doWorkB(e -> e.keyPressed(gui, keyCode, unknown1, unknown2));
+    public boolean keyPressed(IGui gui, int keyCode, int scanCode, int modifiers) {
+        return doWorkB(e -> e.keyPressed(gui, keyCode, scanCode, modifiers));
     }
 
     @Override
-    public boolean keyReleased(IGui gui, int keyCode, int unknown1, int unknown2) {
-        return doWorkB(e -> e.keyReleased(gui, keyCode, unknown1, unknown2));
+    public boolean keyReleased(IGui gui, int keyCode, int scanCode, int modifiers) {
+        return doWorkB(e -> e.keyReleased(gui, keyCode, scanCode, modifiers));
     }
 
     protected boolean doWorkB(Function<IGuiElement, Boolean> execElem) {

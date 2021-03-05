@@ -214,33 +214,33 @@ public class GuiDefinition
     }
 
     @Override
-    public boolean mouseClicked(IGui gui, double mouseX, double mouseY, int mouseButton) {
-        return doWorkB(e -> e.mouseClicked(gui, mouseX, mouseY, mouseButton), IGuiElement.PriorityTarget.MOUSE_INPUT);
+    public boolean mouseClicked(IGui gui, double mouseX, double mouseY, int button) {
+        return doWorkB(e -> e.mouseClicked(gui, mouseX, mouseY, button), IGuiElement.PriorityTarget.MOUSE_INPUT);
     }
 
     @Override
-    public boolean mouseScrolled(IGui gui, double mouseX, double mouseY, double mouseScroll) {
-        return doWorkB(e -> e.mouseScrolled(gui, mouseX, mouseY, mouseScroll), IGuiElement.PriorityTarget.MOUSE_INPUT);
+    public boolean mouseScrolled(IGui gui, double mouseX, double mouseY, double scroll) {
+        return doWorkB(e -> e.mouseScrolled(gui, mouseX, mouseY, scroll), IGuiElement.PriorityTarget.MOUSE_INPUT);
     }
 
     @Override
-    public boolean mouseReleased(IGui gui, double mouseX, double mouseY, int state) {
-        return doWorkB(e -> e.mouseReleased(gui, mouseX, mouseY, state), IGuiElement.PriorityTarget.MOUSE_INPUT);
+    public boolean mouseReleased(IGui gui, double mouseX, double mouseY, int button) {
+        return doWorkB(e -> e.mouseReleased(gui, mouseX, mouseY, button), IGuiElement.PriorityTarget.MOUSE_INPUT);
     }
 
     @Override
-    public boolean mouseDragged(IGui gui, double mouseX, double mouseY, int clickedMouseButton, double offsetX, double offsetY) {
-        return doWorkB(e -> e.mouseDragged(gui, mouseX, mouseY, clickedMouseButton, offsetX, offsetY), IGuiElement.PriorityTarget.MOUSE_INPUT);
+    public boolean mouseDragged(IGui gui, double mouseX, double mouseY, int button, double dragX, double dragY) {
+        return doWorkB(e -> e.mouseDragged(gui, mouseX, mouseY, button, dragX, dragY), IGuiElement.PriorityTarget.MOUSE_INPUT);
     }
 
     @Override
-    public boolean keyPressed(IGui gui, int keyCode, int unknown1, int unknown2) {
-        return doWorkB(e -> e.keyPressed(gui, keyCode, unknown1, unknown2), IGuiElement.PriorityTarget.KEY_INPUT);
+    public boolean keyPressed(IGui gui, int keyCode, int scanCode, int modifiers) {
+        return doWorkB(e -> e.keyPressed(gui, keyCode, scanCode, modifiers), IGuiElement.PriorityTarget.KEY_INPUT);
     }
 
     @Override
-    public boolean keyReleased(IGui gui, int keyCode, int unknown1, int unknown2) {
-        return doWorkB(e -> e.keyReleased(gui, keyCode, unknown1, unknown2), IGuiElement.PriorityTarget.KEY_INPUT);
+    public boolean keyReleased(IGui gui, int keyCode, int scanCode, int modifiers) {
+        return doWorkB(e -> e.keyReleased(gui, keyCode, scanCode, modifiers), IGuiElement.PriorityTarget.KEY_INPUT);
     }
 
     @Override
@@ -249,8 +249,8 @@ public class GuiDefinition
     }
 
     @Override
-    public void guiClosed(IGui gui) {
-        doWorkV(e -> e.guiClosed(gui));
+    public void onClose(IGui gui) {
+        doWorkV(e -> e.onClose(gui));
     }
 
     private boolean doWorkB(Function<IGuiElement, Boolean> execElem, IGuiElement.PriorityTarget target) {

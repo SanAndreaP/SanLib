@@ -27,7 +27,6 @@ public class CommandSanLib
                     return 1;
                 })
         ).executes(c -> {
-            //TODO: proper error message?
             c.getSource().sendErrorMessage(new TranslationTextComponent("commands.sanlib.errorArgs"));
             return 0;
         }));

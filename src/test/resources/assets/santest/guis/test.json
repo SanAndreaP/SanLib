@@ -5,7 +5,6 @@
   "backgroundElements": [
     {
       "type": "texture",
-      "pos": [0, 0],
       "data": {
         "size": [195, 136],
         "uv": [0, 0]
@@ -13,15 +12,15 @@
     },
     {
       "type": "button",
-      "pos": [80, 0],
+      "pos": [-800, 0],
       "data": {
         "size": [50, 60],
-        "buttonFunction": 0,
         "labelText": "testing\ntesting2"
       }
     },
     {
       "type": "group_box",
+      "pos": [-800, 0],
       "data": {
         "size": [80, 80],
         "title": {
@@ -53,8 +52,17 @@
         },
         "elements": [
           {
+            "type": "rectangle",
+            "pos": [0, 2800],
+            "data": {
+              "size": [100, 100],
+              "color": ["0xFFFFFF00", "0xFFFF0000"]
+            }
+          },
+          {
             "type": "item",
-            "alignment": ["right"],
+            "alignment": ["left"],
+            "pos": [0, 2950],
             "data": {
               "item": {
                 "item": "minecraft:command_block"
@@ -64,7 +72,6 @@
           },
           {
             "type": "text",
-            "pos": [0, 0],
             "data": {
               "color": "0xFFFF0000",
               "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.\nVivamus viverra consectetur orci.\nFusce lectus odio, cursus sit amet ex ac, congue faucibus turpis.\nAliquam lobortis malesuada hendrerit.\nVivamus dapibus ullamcorper finibus.\nDonec tempus ultricies iaculis.\nNam eu orci sed odio fringilla iaculis a in lacus.\nCras maximus, nunc vitae pellentesque volutpat, ante eros luctus urna, ac gravida elit quam molestie augue.\nPhasellus eu rutrum neque, sed viverra ipsum.\nCurabitur mattis maximus neque rhoncus auctor.\nEtiam sed eros libero.\nMorbi non vestibulum lorem, luctus mollis tortor.\nDonec eros purus, fringilla ac scelerisque sit amet, lacinia sit amet arcu.\nSuspendisse id mauris eu sapien consectetur egestas.\nMorbi scelerisque erat nec gravida iaculis.\nSed ullamcorper eget sem vitae porta.\nInteger accumsan enim enim, nec scelerisque neque iaculis vel."
