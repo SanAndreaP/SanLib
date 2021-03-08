@@ -186,14 +186,6 @@ public final class ItemStackUtils
                 tag.putShort("Slot", (short) i);
                 stack.write(tag);
 
-//                if( maxQuantity > Short.MAX_VALUE ) {
-//                    tag.putInt("Count", Math.min(stack.getCount(), maxQuantity));
-//                } else if( maxQuantity > Byte.MAX_VALUE ) {
-//                    tag.putInt("Count", (short) Math.min(stack.getCount(), maxQuantity));
-//                } else {
-//                    tag.putInt("Count", (byte) Math.min(stack.getCount(), maxQuantity));
-//                }
-
                 if( callbackMethod != null ) {
                     CompoundNBT stackNbt = new CompoundNBT();
                     callbackMethod.accept(stack, stackNbt);
@@ -216,9 +208,6 @@ public final class ItemStackUtils
             CompoundNBT tag = tagList.getCompound(i);
             short slot = tag.getShort("Slot");
             items[slot] = ItemStack.read(tag);
-//            if( tag.hasKey("Quantity") ) {
-//                items[slot].setCount(((NBTPrimitive) tag.getTag("Quantity")).getInt());
-//            }
 
             if( callbackMethod != null && tag.contains("StackNBT") ) {
                 callbackMethod.accept(items[slot], tag.getCompound("StackNBT"));
@@ -232,18 +221,6 @@ public final class ItemStackUtils
 
     public static void readItemStacksFromTag(List<ItemStack> items, ListNBT tagList, BiConsumer<ItemStack, CompoundNBT> callbackMethod) {
         readItemStacksFromTag(items.toArray(new ItemStack[0]), tagList, callbackMethod);
-//        for( int i = 0; i < tagList.tagCount(); i++ ) {
-//            NBTTagCompound tag = tagList.getCompoundTagAt(i);
-//            short slot = tag.getShort("Slot");
-//            items.set(slot, new ItemStack(tag));
-//            if( tag.hasKey("Quantity") ) {
-//                items.get(slot).setCount(((NBTPrimitive) tag.getTag("Quantity")).getInt());
-//            }
-//
-//            if( callbackMethod != null && tag.hasKey("StackNBT") ) {
-//                callbackMethod.accept(items.get(slot), (NBTTagCompound) tag.getTag("StackNBT"));
-//            }
-//        }
     }
 
     public static void dropBlockItem(ItemStack stack, World world, BlockPos pos) {

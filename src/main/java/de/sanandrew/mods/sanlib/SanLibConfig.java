@@ -20,17 +20,17 @@ public final class SanLibConfig
 
     public static final class Client
     {
-        public static ForgeConfigSpec.ConfigValue<Integer> glSecondaryTextureUnit;
-        public static ForgeConfigSpec.ConfigValue<Boolean> useShaders;
-        public static ForgeConfigSpec.ConfigValue<Boolean> allowCustomSanModel;
-        public static ForgeConfigSpec.ConfigValue<Boolean> setSplashTitle;
-        public static ForgeConfigSpec.ConfigValue<Boolean> enableEmissiveTextures;
+        public static ForgeConfigSpec.IntValue glSecondaryTextureUnit;
+        public static ForgeConfigSpec.BooleanValue useShaders;
+        public static ForgeConfigSpec.BooleanValue allowCustomSanModel;
+        public static ForgeConfigSpec.BooleanValue setSplashTitle;
+        public static ForgeConfigSpec.BooleanValue enableEmissiveTextures;
 
         Client(ForgeConfigSpec.Builder builder) {
             builder.comment("Client-only configuration")
                    .push("client");
             glSecondaryTextureUnit = builder.comment("The GL Texture Unit to use for the secondary sampler passed in to some of the shaders. DO NOT TOUCH THIS IF YOU DON'T KNOW WHAT YOU'RE DOING")
-                                            .define("glSecondaryTextureUnit", 7);
+                                            .defineInRange("glSecondaryTextureUnit", 7, 0, 255);
             useShaders = builder.comment("Whether or not to use shaders. When disabled, some fancier rendering won't work. Only disable if there's incompatibilities with another mod!")
                                 .define("useShaders", true);
             allowCustomSanModel = builder.comment("Whether or not to allow a custom player model for the mod author to be rendered. Does not affect anything else. Turn off if you have issues when looking at the author.")

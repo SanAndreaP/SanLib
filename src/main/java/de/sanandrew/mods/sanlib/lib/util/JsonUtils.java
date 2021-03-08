@@ -13,12 +13,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.Range;
 
 import javax.annotation.Nonnull;
@@ -288,96 +286,17 @@ public final class JsonUtils
         }
     }
 
+    /** @deprecated use {@link Ingredient#deserialize(JsonElement)} or your own deserializer */
     @Nonnull
+    @Deprecated
     public static ItemStack getItemStack(JsonElement json) {
-        if( json == null || json.isJsonNull() ) {
-            throw new JsonSyntaxException("Json cannot be null");
-        }
-
-        if( json.isJsonArray() ) {
-            throw new JsonSyntaxException("Expected value to be an object, not an array");
-        }
-
-        if( !json.isJsonObject() ) {
-            throw new JsonSyntaxException("Expcted value to be an object");
-        }
-
-        return getStack((JsonObject) json);
+        return Ingredient.deserialize(json).getMatchingStacks()[0];
     }
 
-    @Nonnull
+    /** @deprecated use {@link Ingredient#deserialize(JsonElement)} or your own deserializer */
+    @Deprecated
     public static NonNullList<ItemStack> getItemStacks(JsonElement json) {
-        if( json == null || json.isJsonNull() ) {
-            throw new JsonSyntaxException("Json cannot be null");
-        }
-
-        return getStacks(json);
-    }
-
-    private static ItemStack getStack(JsonObject jsonObj) {
-        String itemName = getStringVal(jsonObj.get("item"));
-        Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName));
-
-        if( item == null ) {
-            throw new JsonParseException(String.format("Unknown item '%s'", itemName));
-        }
-
-        ItemStack stack;
-        if( jsonObj.has("nbt") ) {
-            CompoundNBT    nbt = JsonNbtReader.getTagFromJson(jsonObj.get("nbt"));
-            CompoundNBT tmp = new CompoundNBT();
-            if( nbt.contains("ForgeCaps") ) {
-                tmp.put("ForgeCaps", nbt.getCompound("ForgeCaps"));
-                nbt.remove("ForgeCaps");
-            }
-
-            tmp.put("tag", nbt);
-            tmp.putString("id", itemName);
-            tmp.putInt("Count", getIntVal(jsonObj.get("count"), 1));
-            tmp.putInt("Damage", getIntVal(jsonObj.get("data"), 0));
-
-            stack = ItemStack.read(tmp);
-        } else {
-            stack = new ItemStack(item, getIntVal(jsonObj.get("count"), 1));
-        }
-
-        if( !ItemStackUtils.isValid(stack) ) {
-            throw new JsonParseException("Invalid Item: " + stack.toString());
-        }
-
-        return stack;
-    }
-
-    private static NonNullList<ItemStack> getStacks(JsonElement json) {
-        NonNullList<ItemStack> items = NonNullList.create();
-
-        if( json == null || json.isJsonNull() ) {
-            throw new JsonSyntaxException("Json cannot be null");
-        }
-
-        if( json.isJsonArray() ) {
-            json.getAsJsonArray().forEach(elem -> {
-                if( elem != null && elem.isJsonObject() ) {
-                    items.addAll(getStacks(elem));
-                } else {
-                    throw new JsonSyntaxException("Expcted stack to be an object");
-                }
-            });
-        } else if( json.isJsonObject() ) {
-            JsonObject jsonObj = json.getAsJsonObject();
-
-            //TODO: use new tag system
-//            if( jsonObj.has("type") && MiscUtils.defIfNull(jsonObj.get("type").getAsString(), "").equals("forge:ore_dict") ) {
-//                String oredictName = jsonObj.get("ore").getAsString();
-//                items.addAll(OreDictionary.getOres(oredictName).stream().map(ItemStack::copy).collect(Collectors.toList()));
-//            } else {
-                items.add(getStack(jsonObj));
-//            }
-        } else {
-            throw new JsonSyntaxException("Expected stack(s) to be an object or an array of objects");
-        }
-
-        return items;
+        return NonNullList.from(ItemStack.EMPTY, Ingredient.deserialize(json).getMatchingStacks());
     }
 
     public static void addDefaultJsonProperty(JsonObject jobj, String name, String val) {
@@ -514,10 +433,4 @@ public final class JsonUtils
     public static JsonObject deepCopy(JsonObject obj) {
         return JsonUtils.GSON.fromJson(JsonUtils.GSON.toJson(obj), JsonObject.class);
     }
-
-    //todo: ???????????????????????
-//    @Nullable
-//    public static <T> T gsonDeserialize(Gson gsonIn, Reader readerIn, Class<T> adapter, boolean lenient) {
-//        return net.minecraft.util.JSONUtils.deserializeClass(gsonIn, readerIn, adapter, lenient);
-//    }
 }
