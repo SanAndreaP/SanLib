@@ -10,7 +10,6 @@ import de.sanandrew.mods.sanlib.network.MessageReloadModels;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
@@ -25,15 +24,11 @@ public class SanLib
 
     public SanLib() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::clientSetup);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, SanLibConfig.CLIENT_SPEC);
     }
 
     private void setup(FMLCommonSetupEvent event) {
         NETWORK.registerMessage(0, MessageReloadModels.class, MessageReloadModels::new);
-    }
-
-    private void clientSetup(FMLClientSetupEvent event) {
     }
 
     //TODO: FMLFingerprintViolationEvent is deprecated???
