@@ -7,7 +7,7 @@ issueTrackerURL="https://github.com/SanAndreasP/SanLib/issues"
     modId="sanlib"
     version="$version"
     displayName="$name"
-    logoFile="assets/logo.png"
+    logoFile="logo.png"
     authors="SanAndreasP"
     description='''
     A library made for and required by all my mods.
