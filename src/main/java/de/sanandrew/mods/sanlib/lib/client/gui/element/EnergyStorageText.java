@@ -14,7 +14,7 @@ import net.minecraft.util.ResourceLocation;
 public class EnergyStorageText
         extends Text
 {
-    public static final ResourceLocation ID = new ResourceLocation("rflux_text");
+    public static final ResourceLocation ID = new ResourceLocation("energy_text");
 
     @Override
     public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) {
