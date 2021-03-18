@@ -123,24 +123,46 @@ public final class RenderUtils
     public static void renderStackInWorld(ItemStack stack, MatrixStack matrixStack, Vector3f pos, Vector3f rotation, float scale,
                                           ItemCameraTransforms.TransformType transformType, IRenderTypeBuffer buffer, LivingEntity entity, int light, int overlay)
     {
+        matrixStack.push();
+        matrixStack.translate(pos.getX(), pos.getY(), pos.getZ());
+        matrixStack.rotate(Vector3f.XP.rotationDegrees(180.0F));
+        matrixStack.rotate(Vector3f.XP.rotationDegrees(rotation.getX()));
+        matrixStack.rotate(Vector3f.YP.rotationDegrees(rotation.getY()));
+        matrixStack.rotate(Vector3f.ZP.rotationDegrees(rotation.getZ()));
+        matrixStack.scale(scale, scale, scale);
+
+        renderStackInWorldPure(stack, matrixStack, transformType, buffer, entity, light, overlay);
+
+        matrixStack.pop();
+    }
+
+
+    public static void renderStackInWorld(ItemStack stack, MatrixStack matrixStack, Vector3f pos, Quaternion rotation, float scale,
+                                          ItemCameraTransforms.TransformType transformType, IRenderTypeBuffer buffer, LivingEntity entity, int light, int overlay)
+    {
+        matrixStack.push();
+        matrixStack.translate(pos.getX(), pos.getY(), pos.getZ());
+        matrixStack.rotate(Vector3f.XP.rotationDegrees(180.0F));
+        matrixStack.rotate(rotation);
+        matrixStack.scale(scale, scale, scale);
+
+        renderStackInWorldPure(stack, matrixStack, transformType, buffer, entity, light, overlay);
+
+        matrixStack.pop();
+    }
+
+
+    public static void renderStackInWorldPure(ItemStack stack, MatrixStack matrixStack,
+                                              ItemCameraTransforms.TransformType transformType, IRenderTypeBuffer buffer, LivingEntity entity, int light, int overlay)
+    {
         if( itemRenderer == null ) {
             itemRenderer = Minecraft.getInstance().getItemRenderer();
         }
-
-        matrixStack.push();
-        matrixStack.translate(pos.getX(), pos.getY(), pos.getZ());
-        matrixStack.rotate(new Quaternion(180.0F, 1.0F, 0.0F, 0.0F));
-        matrixStack.rotate(new Quaternion(rotation.getX(), 1.0F, 0.0F, 0.0F));
-        matrixStack.rotate(new Quaternion(rotation.getY(), 0.0F, 1.0F, 0.0F));
-        matrixStack.rotate(new Quaternion(rotation.getZ(), 0.0F, 0.0F, 1.0F));
-        matrixStack.scale(scale, scale, scale);
 
         if( entity != null ) {
             itemRenderer.renderItem(entity, stack, transformType, entity.getPrimaryHand() == HandSide.LEFT, matrixStack, buffer, entity.world, light, overlay);
         } else {
             itemRenderer.renderItem(stack, transformType, light, overlay, matrixStack, buffer);
         }
-
-        matrixStack.pop();
     }
 }
