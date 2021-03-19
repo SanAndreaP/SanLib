@@ -88,7 +88,9 @@ public class Tooltip
                 xPos -= width + 28;
             }
 
-            RenderSystem.disableDepthTest();
+//            RenderSystem.disableDepthTest();
+            stack.push();
+            stack.translate(0.0D, 0.0D, 400.0D);
             AbstractGui.fill(stack, xPos - 3, yPos - 4, xPos + width + 3, yPos - 3, this.backgroundColor);
             AbstractGui.fill(stack, xPos - 3,         yPos + height + 3, xPos + width + 3, yPos + height + 4, this.backgroundColor);
             AbstractGui.fill(stack, xPos - 3,         yPos - 3,          xPos + width + 3, yPos + height + 3, this.backgroundColor);
@@ -102,7 +104,8 @@ public class Tooltip
 
             super.render(gui, stack, partTicks, xPos + this.padding[3], yPos + this.padding[0], mouseX, mouseY, data);
 
-            RenderSystem.enableDepthTest();
+            stack.pop();
+//            RenderSystem.enableDepthTest();
         }
     }
 
