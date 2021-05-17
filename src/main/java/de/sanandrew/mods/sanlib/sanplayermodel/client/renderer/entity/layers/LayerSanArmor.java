@@ -33,8 +33,10 @@ public class LayerSanArmor
             this.bipedRightArm.rotateAngleZ += 0.2F;
             this.bipedLeftArm.rotateAngleZ -= 0.2F;
 
-            this.bipedLeftLeg.rotateAngleX /= 3.5F;
-            this.bipedRightLeg.rotateAngleX /= 3.5F;
+            if( !this.isRiding ) {
+                this.bipedLeftLeg.rotateAngleX /= 3.5F;
+                this.bipedRightLeg.rotateAngleX /= 3.5F;
+            }
         }
     }
 }

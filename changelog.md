@@ -1,3 +1,7 @@
+**1.6.3**
+- **requires Forge 14.23.5.2831 or higher**
+- fixes an issue regarding limb rotation on my player model
+
 **1.6.2**
 - **requires Forge 14.23.5.2831 or higher**
 - fixes crash with Ido and my player model hack

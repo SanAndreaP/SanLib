@@ -28,7 +28,7 @@ Object grabConstant = { String name ->
     }
 } as Object
 
-apply plugin: "com.wynprice.cursemaven"
+//apply plugin: "com.wynprice.cursemaven"
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'idea'
 idea {
@@ -64,16 +64,20 @@ repositories {
         url = "http://maven.covers1624.net"
     }
 	maven {
-        name = "Jared Maven"
-        url = "https://mmdmaven.blamejared.com/"
+        name = "MMD Maven"
+        url = "https://maven.mcmoddev.com"
+    }
+    maven {
+        name = "CurseForge Maven"
+        url = "https://www.cursemaven.com"
     }
 }
 
 dependencies {
     deobfCompile "cofh:RedstoneFlux:1.12-2.0.2.3:universal"
     deobfCompile "net.darkhax.tesla:Tesla-1.12.2:1.0.63"
-    deobfCompile "curse.maven:obfuscate:2916310"
-    deobfCompile "curse.maven:ido:3096693"
+    deobfCompile "curse.maven:obfuscate-289380:2916310"
+    deobfCompile "curse.maven:ido-322131:3096693"
 }
 
 apply plugin: 'maven'
