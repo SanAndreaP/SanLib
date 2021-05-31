@@ -14,20 +14,15 @@ import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NumberNBT;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.ModContainer;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.Level;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -346,34 +341,34 @@ public final class MiscUtils
 //
 //        return false;
 //    }
-
-    private static boolean findFilesIntrn(Path root, ModContainer mod, Function<Path, Boolean> preprocessor, BiFunction<Path, Path, Boolean> processor) {
-        if( root == null || !Files.exists(root) ) {
-            return false;
-        }
-
-        if( preprocessor != null && !MiscUtils.defIfNull(preprocessor.apply(root), false) ) {
-            return false;
-        }
-
-        if( processor != null ) {
-            Iterator<Path> itr;
-            try {
-                itr = Files.walk(root).iterator();
-            } catch( IOException e ) {
-                SanLib.LOG.log(Level.ERROR, String.format("Error iterating filesystem for: %s", mod.getModId()), e);
-                return false;
-            }
-
-            while( itr.hasNext() ) {
-                if( !MiscUtils.defIfNull(processor.apply(root, itr.next()), false) ) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
+//
+//    private static boolean findFilesIntrn(Path root, ModContainer mod, Function<Path, Boolean> preprocessor, BiFunction<Path, Path, Boolean> processor) {
+//        if( root == null || !Files.exists(root) ) {
+//            return false;
+//        }
+//
+//        if( preprocessor != null && !MiscUtils.defIfNull(preprocessor.apply(root), false) ) {
+//            return false;
+//        }
+//
+//        if( processor != null ) {
+//            Iterator<Path> itr;
+//            try {
+//                itr = Files.walk(root).iterator();
+//            } catch( IOException e ) {
+//                SanLib.LOG.log(Level.ERROR, String.format("Error iterating filesystem for: %s", mod.getModId()), e);
+//                return false;
+//            }
+//
+//            while( itr.hasNext() ) {
+//                if( !MiscUtils.defIfNull(processor.apply(root, itr.next()), false) ) {
+//                    return false;
+//                }
+//            }
+//        }
+//
+//        return true;
+//    }
 
     public static boolean doesNbtContainOther(CompoundNBT mainNBT, CompoundNBT otherNBT) {
         return doesNbtContainOther(mainNBT, otherNBT, true);

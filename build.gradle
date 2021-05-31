@@ -14,7 +14,7 @@ apply plugin: 'maven-publish'
 
 Object grabConstant = { String name ->
     name = name.toUpperCase(Locale.ROOT)
-    def f = new File("src/main/java/de/sanandrew/mods/sanlib/Constants.java").text
+    def f = new File("$project.projectDir/src/main/java/de/sanandrew/mods/sanlib/Constants.java").text
     def m = f =~ name + /\s*=\s*"(.*?)"/
     if( m.find() ) {
         return m.group(1)
