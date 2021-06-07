@@ -5,6 +5,8 @@
 
 package de.sanandrew.mods.sanlib.lib;
 
+import net.minecraft.util.math.vector.Vector3d;
+
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -188,5 +190,11 @@ public final class XorShiftRandom
             this.haveNextGaussian = true;
             return currNr * multiplier;
         }
+    }
+
+    public Vector3d randomVector(Vector3d from, Vector3d to) {
+        return new Vector3d(this.randomDouble() * (to.x - from.x) + from.x,
+                            this.randomDouble() * (to.y - from.y) + from.y,
+                            this.randomDouble() * (to.z - from.z) + from.z);
     }
 }
