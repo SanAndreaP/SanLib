@@ -15,10 +15,17 @@ import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import de.sanandrew.mods.sanlib.lib.util.LangUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.fonts.Font;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import org.apache.commons.lang3.Range;
 
@@ -41,9 +48,9 @@ public class TextField
     public boolean      canLoseFocus;
     public boolean      drawBackground;
     public boolean      shadow;
-    public String       text;
-    public String       placeholderText;
-    public FontRenderer fontRenderer;
+    public String         text;
+    public ITextComponent placeholderText;
+    public FontRenderer   fontRenderer;
 
     public TextFieldWidget textfield;
 
@@ -53,8 +60,8 @@ public class TextField
     public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) {
         this.size = JsonUtils.getIntArray(data.get("size"), Range.is(2));
         this.text = JsonUtils.getStringVal(data.get("text"), "");
-        this.placeholderText = JsonUtils.getStringVal(data.get("placeholderText"), "");
-//        this.shadow = JsonUtils.getBoolVal(data.get("shadow"), true);
+        this.placeholderText = new TranslationTextComponent(JsonUtils.getStringVal(data.get("placeholderText"), ""));
+        this.shadow = JsonUtils.getBoolVal(data.get("shadow"), true);
         this.canLoseFocus = JsonUtils.getBoolVal(data.get("canLoseFocus"), true);
         this.drawBackground = JsonUtils.getBoolVal(data.get("drawBackground"), true);
         this.color = MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("textColor"), "0xFFE0E0E0"));
@@ -63,18 +70,18 @@ public class TextField
 
         JsonElement cstFont = data.get("font");
         if( cstFont == null ) {
-            this.fontRenderer = new Text.Font("standard").get(gui.get());
+            this.fontRenderer = new TxtFontRenderer();
         } else {
             this.fontRenderer = JsonUtils.GSON.fromJson(cstFont, Text.Font.class).get(gui.get());
         }
 
 //        this.textfield = new TextFieldWidget(0, new FontRendererTF(gui.get().mc, this.fontRenderer), 0, 0, this.size[0], this.size[1]);
-        this.textfield = new TextFieldWidget(this.fontRenderer, 0, 0, 0, 0, new StringTextComponent(""));
-        this.textfield.setText(LangUtils.translate(this.text));
+        this.textfield = new TextFieldWidget(this.fontRenderer, 0, 0, this.size[0], this.size[1], StringTextComponent.EMPTY);
+        this.textfield.setValue(LangUtils.translate(this.text));
         this.textfield.setTextColor(this.color);
-        this.textfield.setDisabledTextColour(this.disabledColor);
+        this.textfield.setTextColorUneditable(this.disabledColor);
         this.textfield.setCanLoseFocus(this.canLoseFocus);
-        this.textfield.setEnableBackgroundDrawing(this.drawBackground);
+        this.textfield.setBordered(this.drawBackground);
     }
 
     @Override
@@ -87,10 +94,10 @@ public class TextField
         this.textfield.x = x;
         this.textfield.y = y;
         this.textfield.renderButton(stack, x, y, partTicks);
-        if( !this.isFocused() && !Strings.isNullOrEmpty(this.placeholderText) && Strings.isNullOrEmpty(this.getText()) ) {
+        if( !this.isFocused() && Strings.isNullOrEmpty(this.getText()) && !Strings.isNullOrEmpty(this.placeholderText.getString()) ) {
             x += (this.drawBackground ? 4 : 0);
             y += (this.drawBackground ? (this.size[1] - 8) / 2 : 0);
-            this.fontRenderer.drawString(stack, LangUtils.translate(this.placeholderText), x, y, this.placeholderColor);
+            this.fontRenderer.draw(stack, this.placeholderText, x, y, this.placeholderColor);
         }
     }
 
@@ -105,15 +112,15 @@ public class TextField
     }
 
     public void setText(String text) {
-        this.textfield.setText(text);
+        this.textfield.setValue(text);
     }
 
     public String getText() {
-        return this.textfield.getText();
+        return this.textfield.getValue();
     }
 
     public void setMaxStringLength(int length) {
-        this.textfield.setMaxStringLength(this.maxStringLength = length);
+        this.textfield.setMaxLength(this.maxStringLength = length);
     }
 
     public int getMaxStringLength() {
@@ -121,7 +128,7 @@ public class TextField
     }
 
     public void setFocused(boolean isFocused) {
-        this.textfield.setFocused2(isFocused);
+        this.textfield.setFocus(isFocused);
     }
 
     public boolean isFocused() {
@@ -133,23 +140,23 @@ public class TextField
     }
 
     public void setSelectionEnd(int pos) {
-        this.textfield.setSelectionPos(pos);
+        this.textfield.setHighlightPos(pos);
     }
 
-//    public int[] getSelectionPos() {
-//        return new int[] { this.textfield.getCursorPosition(), this.textfield.getSelectedText() };
-//    }
+    public int[] getSelectionPos() {
+        return new int[] { this.textfield.getCursorPosition(), this.textfield.getCursorPosition() + this.textfield.getHighlighted().length() };
+    }
 
     public String getSelectedText() {
-        return this.textfield.getSelectedText();
+        return this.textfield.getHighlighted();
     }
 
     public void insertText(String text) {
-        this.textfield.writeText(text);
+        this.textfield.insertText(text);
     }
 
     public void setCursorPositionEnd() {
-        this.textfield.setCursorPositionEnd();
+        this.textfield.moveCursorToEnd();
     }
 
     public boolean isEnabled() {
@@ -157,17 +164,17 @@ public class TextField
     }
 
     public void setEnabled(boolean enabled) {
-        this.textfield.setEnabled(enabled);
+        this.textfield.setEditable(enabled);
         this.enabled = enabled;
     }
 
     @Override
     public boolean isVisible() {
-        return this.textfield.getVisible();
+        return this.textfield.isVisible();
     }
 
     public void setValidator(Predicate<String> validator) {
-        this.textfield.setValidator(validator);
+        this.textfield.setFilter(validator);
     }
 
     public void setResponder(Consumer<String> responder) {
@@ -183,80 +190,42 @@ public class TextField
     public int getHeight() {
         return this.size[1] - (this.drawBackground ? 8 : 0);
     }
+    
+    @SuppressWarnings("NullableProblems")
+    private final class TxtFontRenderer
+            extends FontRenderer
+    {
+        private TxtFontRenderer() {
+            super(r -> new Font(Minecraft.getInstance().textureManager, Minecraft.DEFAULT_FONT));
+        }
 
-    //TODO: maybe needed???
-//    private final class FontRendererTF
-//            extends FontRenderer
-//    {
-//        private final FontRenderer fontRenderer;
-//
-//        private FontRendererTF(Minecraft mc, FontRenderer orig) {
-//            super(mc.gameSettings, new ResourceLocation("textures/font/ascii.png"), mc.renderEngine, false);
-//            this.fontRenderer = orig;
-//        }
-//
-//        public void onResourceManagerReload(IResourceManager resourceManager) {
-//            this.fontRenderer.onResourceManagerReload(resourceManager);
-//        }
-//
-//        public int drawStringWithShadow(String text, float x, float y, int color) {
-//            return this.drawString(text, x, y, color, TextField.this.shadow);
-//        }
-//
-//        public int drawString(String text, int x, int y, int color) {
-//            return this.fontRenderer.drawString(text, x, y, color);
-//        }
-//
-//        public int drawString(String text, float x, float y, int color, boolean dropShadow) {
-//            return this.fontRenderer.drawString(text, x, y, color, dropShadow);
-//        }
-//
-//        public int getStringWidth(String text) {
-//            return this.fontRenderer.getStringWidth(text);
-//        }
-//
-//        public int getCharWidth(char character) {
-//            return this.fontRenderer.getCharWidth(character);
-//        }
-//
-//        public String trimStringToWidth(String text, int width) {
-//            return this.fontRenderer.trimStringToWidth(text, width);
-//        }
-//
-//        public String trimStringToWidth(String text, int width, boolean reverse) {
-//            return this.fontRenderer.trimStringToWidth(text, width, reverse);
-//        }
-//
-//        public void drawSplitString(String str, int x, int y, int wrapWidth, int textColor) {
-//            this.fontRenderer.drawSplitString(str, x, y, wrapWidth, textColor);
-//        }
-//
-//        public int getWordWrappedHeight(String str, int maxLength) {
-//            return this.fontRenderer.getWordWrappedHeight(str, maxLength);
-//        }
-//
-//        public void setUnicodeFlag(boolean unicodeFlagIn) {
-//            this.fontRenderer.setUnicodeFlag(unicodeFlagIn);
-//        }
-//
-//        public boolean getUnicodeFlag() {
-//            return this.fontRenderer.getUnicodeFlag();
-//        }
-//
-//        public void setBidiFlag(boolean bidiFlagIn) {
-//            this.fontRenderer.setBidiFlag(bidiFlagIn);
-//        }
-//
-//        public List<String> listFormattedStringToWidth(String str, int wrapWidth) {
-//            return this.fontRenderer.listFormattedStringToWidth(str, wrapWidth);
-//        }
-//
-//        public boolean getBidiFlag() {
-//            return this.fontRenderer.getBidiFlag();
-//        }
-//
-//        public int getColorCode(char character) {
-//            return this.fontRenderer.getColorCode(character);
-//        }
-//    }
+        public int drawInBatch(String txt, float x, float y, int color, boolean shadow, Matrix4f pose,
+                               IRenderTypeBuffer buf, boolean seeThrough, int effectColor, int packedLight)
+        {
+            return super.drawInBatch(txt, x, y, color, shadow && TextField.this.shadow, pose,
+                                     buf, seeThrough, effectColor, packedLight);
+        }
+
+        public int drawInBatch(String txt, float x, float y, int color, boolean shadow, Matrix4f pose,
+                               IRenderTypeBuffer buf, boolean seeThrough, int effectColor, int packedLight,
+                               boolean isBidirectional)
+        {
+            return super.drawInBatch(txt, x, y, color, shadow && TextField.this.shadow, pose,
+                                     buf, seeThrough, effectColor, packedLight, isBidirectional);
+        }
+
+        public int drawInBatch(ITextComponent txt, float x, float y, int color, boolean shadow, Matrix4f pose,
+                               IRenderTypeBuffer buf, boolean seeThrough, int effectColor, int packedLight)
+        {
+            return super.drawInBatch(txt, x, y, color, shadow && TextField.this.shadow, pose,
+                                     buf, seeThrough, effectColor, packedLight);
+        }
+
+        public int drawInBatch(IReorderingProcessor txt, float x, float y, int color, boolean shadow, Matrix4f pose,
+                               IRenderTypeBuffer buf, boolean seeThrough, int effectColor, int packedLight)
+        {
+            return super.drawInBatch(txt, x, y, color, shadow && TextField.this.shadow, pose,
+                                     buf, seeThrough, effectColor, packedLight);
+        }
+    }
 }

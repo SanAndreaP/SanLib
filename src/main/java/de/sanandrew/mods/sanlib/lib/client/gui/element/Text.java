@@ -17,7 +17,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -56,7 +56,7 @@ public class Text
 {
     public static final ResourceLocation ID = new ResourceLocation("text");
     
-    public String text;
+    public ITextComponent text;
     public int            color;
     public Map<String, Integer> colors;
     public boolean              shadow;
@@ -69,8 +69,8 @@ public class Text
     protected int                    currHeight;
     protected GuiElementInst.Justify justify;
 
-    private       String       prevTxt;
-    private final List<String> renderedLines = new ArrayList<>();
+    private       ITextComponent       prevTxt;
+    private final List<ITextProperties> renderedLines = new ArrayList<>();
 
     @Override
     public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) {
@@ -116,7 +116,9 @@ public class Text
         }
 
         this.currWidth = this.getTextWidth(gui);
-        this.currHeight = this.fontRenderer.getCharacterManager().func_238365_g_(this.text, this.wrapWidth <= 0 ? Integer.MAX_VALUE : this.wrapWidth, Style.EMPTY).size()
+        this.currHeight = this.fontRenderer.getSplitter()
+                                           .splitLines(this.text, this.wrapWidth <= 0 ? Integer.MAX_VALUE : this.wrapWidth, Style.EMPTY)
+                                           .size()
                           * this.lineHeight;
         if( this.shadow ) {
             this.currHeight += 1;
@@ -129,41 +131,39 @@ public class Text
         this.color = 0xFF000000;
     }
 
-    public String getBakedText(IGui gui, JsonObject data) {
-        return new TranslationTextComponent(data.get("text").getAsString()).getString();
+    public ITextComponent getBakedText(IGui gui, JsonObject data) {
+        return new TranslationTextComponent(data.get("text").getAsString());
     }
 
-    public String getDynamicText(IGui gui, String originalText) {
+    public ITextComponent getDynamicText(IGui gui, ITextComponent originalText) {
         return originalText;
     }
 
     public int getTextWidth(IGui gui) {
-        if( this.wrapWidth > 0 ) {
+        ITextComponent text = this.getDynamicText(gui, this.text);
+        int maxWidth = this.wrapWidth;
+        if( maxWidth > 0 ) {
             if( this.justify == GuiElementInst.Justify.JUSTIFY ) {
-                return this.wrapWidth;
-            } else {
-                return this.fontRenderer.getCharacterManager().func_238365_g_(this.text, this.wrapWidth, Style.EMPTY)
-                                        .stream().map(tp -> MathHelper.ceil(this.fontRenderer.getCharacterManager().func_238356_a_(tp))).reduce(Integer::max).orElse(0);
+                return maxWidth;
             }
+        } else {
+            maxWidth = Integer.MAX_VALUE;
         }
 
-        return Arrays.stream(this.getDynamicText(gui, this.text).split("\n")).map(s -> this.fontRenderer.getStringWidth(s))
-                     .reduce(0, Math::max, Math::max);
+        return this.fontRenderer.getSplitter().splitLines(text, maxWidth, Style.EMPTY)
+                                .stream().map(tp -> this.fontRenderer.width(tp))
+                                .reduce(Integer::max).orElse(0);
     }
 
     @Override
     public void update(IGui gui, JsonObject data) {
         this.renderedLines.clear();
-        String s = this.getDynamicText(gui, this.text);
+        ITextComponent s = this.getDynamicText(gui, this.text);
 
         this.currWidth = this.getTextWidth(gui);
-        String[] ln;
-        if( this.wrapWidth > 0 ) {
-            ln = this.fontRenderer.getCharacterManager().func_238365_g_(s, this.wrapWidth, Style.EMPTY)
-                                  .stream().map(ITextProperties::getString).toArray(String[]::new);
-        } else {
-            ln = s.split("\n");
-        }
+        ITextProperties[] ln = this.fontRenderer.getSplitter()
+                                                .splitLines(s, this.wrapWidth > 0 ? this.wrapWidth : Integer.MAX_VALUE, Style.EMPTY)
+                                                .toArray(new ITextProperties[0]);
         this.currHeight = ln.length * this.lineHeight;
 
         this.renderedLines.addAll(Arrays.asList(ln));
@@ -171,31 +171,31 @@ public class Text
 
     @Override
     public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data) {
-        for( String sln : this.renderedLines ) {
+        for( ITextProperties sln : this.renderedLines ) {
             this.renderLine(stack, sln, x, y);
             y += this.lineHeight;
         }
     }
 
-    private void renderLine(MatrixStack stack, String s, int x, int y) {
+    private void renderLine(MatrixStack stack, ITextProperties s, int x, int y) {
         switch( this.justify ) {
             case JUSTIFY:
                 if( this.wrapWidth > 0 ) {
-                    String[] words = s.split("\\s");
+                    String[] words = s.getString().split("\\s");
                     float spaceDist = this.wrapWidth;
                     int[] wordWidths = new int[words.length];
 
                     for( int i = 0; i < words.length; i++ ) {
-                        wordWidths[i] = this.fontRenderer.getStringWidth(words[i]);
+                        wordWidths[i] = this.fontRenderer.width(words[i]);
                         spaceDist -= wordWidths[i];
                     }
 
                     spaceDist /= words.length - 1;
                     for( int i = 0; i < words.length; i++ ) {
                         if( this.shadow ) {
-                            this.fontRenderer.drawStringWithShadow(stack, words[i], x, y, this.color);
+                            this.fontRenderer.drawShadow(stack, words[i], x, y, this.color);
                         } else {
-                            this.fontRenderer.drawString(stack, words[i], x, y, this.color);
+                            this.fontRenderer.draw(stack, words[i], x, y, this.color);
                         }
                         x += wordWidths[i] + spaceDist;
                     }
@@ -205,16 +205,16 @@ public class Text
             case LEFT:
                 break;
             case CENTER:
-                x += (this.currWidth - this.fontRenderer.getStringWidth(s)) / 2;
+                x += (this.currWidth - this.fontRenderer.width(s)) / 2;
                 break;
             case RIGHT:
-                x += this.currWidth - this.fontRenderer.getStringWidth(s);
+                x += this.currWidth - this.fontRenderer.width(s);
         }
 
         if( this.shadow ) {
-            this.fontRenderer.drawStringWithShadow(stack, s, x, y, this.color);
+            this.fontRenderer.drawShadow(stack, s.getString(), x, y, this.color);
         } else {
-            this.fontRenderer.drawString(stack, s, x, y, this.color);
+            this.fontRenderer.draw(stack, s.getString(), x, y, this.color);
         }
     }
 
@@ -255,10 +255,10 @@ public class Text
 
         public FontRenderer get(Screen gui) {
             if( "standard".equals(this.texture) ) {
-                return gui.getMinecraft().fontRenderer;
+                return gui.getMinecraft().font;
             } else if( "galactic".equals(this.texture) ) {
                 if( frGalactic == null ) {
-                    net.minecraft.client.gui.fonts.Font f = getMcFont(gui.getMinecraft(), Minecraft.standardGalacticFontRenderer);
+                    net.minecraft.client.gui.fonts.Font f = getMcFont(gui.getMinecraft(), Minecraft.ALT_FONT);
                     frGalactic = new FontRenderer(r -> f);
                 }
 
@@ -287,9 +287,9 @@ public class Text
 
     @Override
     public boolean forceRenderUpdate(IGui gui) {
-        String s = this.getDynamicText(gui, this.text);
+        ITextComponent s = this.getDynamicText(gui, this.text);
 
-        if( !s.equals(this.prevTxt) ) {
+        if( !s.getString().equals(this.prevTxt.getString()) ) {
             this.prevTxt = s;
             return true;
         } else {

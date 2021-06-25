@@ -40,7 +40,7 @@ public class ClientTickHandler
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         if( event.phase == TickEvent.Phase.END ) {
-            Screen gui = Minecraft.getInstance().currentScreen;
+            Screen gui = Minecraft.getInstance().screen;
             if( gui == null || !gui.isPauseScreen() ) {
                 ticksInGame++;
             }
@@ -81,8 +81,8 @@ public class ClientTickHandler
             }
 
             if( !Strings.isNullOrEmpty(splashText) && splashText.hashCode() != 125780783 ) {
-                MainWindow window = Minecraft.getInstance().getMainWindow();
-                window.setWindowTitle(Minecraft.getInstance().getWindowTitle() + " - " + splashText);
+                MainWindow window = Minecraft.getInstance().getWindow();
+                window.setTitle(Minecraft.getInstance().createTitle() + " - " + splashText);
             }
         }
     }

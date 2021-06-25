@@ -22,12 +22,12 @@ public class CommandSanLib
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(LiteralArgumentBuilder.<CommandSource>literal("sanlib").then(
                 LiteralArgumentBuilder.<CommandSource>literal("reloadModels").executes(c -> {
-                    SanLib.NETWORK.sendToPlayer(new MessageReloadModels(), c.getSource().asPlayer());
-                    c.getSource().sendFeedback(new TranslationTextComponent("commands.sanlib.reloadModels.success"), true);
+                    SanLib.NETWORK.sendToPlayer(new MessageReloadModels(), c.getSource().getPlayerOrException());
+                    c.getSource().sendSuccess(new TranslationTextComponent("commands.sanlib.reloadModels.success"), true);
                     return 1;
                 })
         ).executes(c -> {
-            c.getSource().sendErrorMessage(new TranslationTextComponent("commands.sanlib.errorArgs"));
+            c.getSource().sendFailure(new TranslationTextComponent("commands.sanlib.errorArgs"));
             return 0;
         }));
     }

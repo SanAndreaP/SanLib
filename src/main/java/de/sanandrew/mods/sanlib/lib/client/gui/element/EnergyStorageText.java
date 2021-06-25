@@ -10,6 +10,8 @@ import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 
 public class EnergyStorageText
         extends Text
@@ -25,8 +27,8 @@ public class EnergyStorageText
     }
 
     @Override
-    public String getBakedText(IGui gui, JsonObject data) {
-        return "";
+    public ITextComponent getBakedText(IGui gui, JsonObject data) {
+        return StringTextComponent.EMPTY;
     }
 
     @Override
@@ -35,8 +37,8 @@ public class EnergyStorageText
     }
 
     @Override
-    public String getDynamicText(IGui gui, String originalText) {
+    public ITextComponent getDynamicText(IGui gui, ITextComponent originalText) {
         EnergyStorageBar.IGuiEnergyContainer gec = (EnergyStorageBar.IGuiEnergyContainer) gui;
-        return String.format("%d / %d RF", gec.getEnergy(), gec.getMaxEnergy());
+        return new StringTextComponent(String.format("%d / %d RF", gec.getEnergy(), gec.getMaxEnergy()));
     }
 }

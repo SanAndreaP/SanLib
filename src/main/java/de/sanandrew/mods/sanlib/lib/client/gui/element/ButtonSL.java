@@ -113,14 +113,14 @@ public class ButtonSL
         this.isCurrHovering = isHovering(gui, x, y, mouseX, mouseY);
         boolean isActive = this.isActive();
 
-        gui.get().getMinecraft().getTextureManager().bindTexture(this.texture);
-        stack.push();
+        gui.get().getMinecraft().getTextureManager().bind(this.texture);
+        stack.pushPose();
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA.param, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA.param);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         stack.translate(x, y, 0.0D);
         drawRect(stack, isActive, this.isCurrHovering);
-        stack.pop();
+        stack.popPose();
 
         GuiElementInst label = this.getChild(LABEL);
         if( label != null ) {
@@ -149,7 +149,7 @@ public class ButtonSL
             Screen gs  = gui.get();
             Button btn = this.buttonDelegate;
 
-            btn.playDownSound(gs.getMinecraft().getSoundHandler());
+            btn.playDownSound(gs.getMinecraft().getSoundManager());
             this.buttonFunction.onPress(this.buttonDelegate);
 
             return true;

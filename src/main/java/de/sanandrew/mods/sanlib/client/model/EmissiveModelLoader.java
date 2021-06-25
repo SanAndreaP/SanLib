@@ -78,7 +78,7 @@ public class EmissiveModelLoader
     private List<EmissiveBlockPart> getModelElements(JsonDeserializationContext deserializationContext, JsonObject object) {
         List<EmissiveBlockPart> list = Lists.newArrayList();
         if( object.has("elements") ) {
-            for( JsonElement jsonelement : JSONUtils.getJsonArray(object, "elements") ) {
+            for( JsonElement jsonelement : JSONUtils.getAsJsonArray(object, "elements") ) {
                 list.add(new EmissiveBlockPartDeserializer().deserialize(jsonelement, BlockPart.class, deserializationContext));
             }
         }
@@ -92,7 +92,7 @@ public class EmissiveModelLoader
         final Map<Direction, Boolean> emissive;
 
         public EmissiveBlockPart(BlockPart delegate, Map<Direction, Boolean> emissive) {
-            super(delegate.positionFrom, delegate.positionTo, delegate.mapFaces, delegate.partRotation, delegate.shade);
+            super(delegate.from, delegate.to, delegate.faces, delegate.rotation, delegate.shade);
             this.emissive = emissive;
         }
     }
@@ -103,16 +103,16 @@ public class EmissiveModelLoader
         @Override
         public EmissiveBlockPart deserialize(JsonElement elem, Type type, JsonDeserializationContext context) throws JsonParseException {
             Map<Direction, Boolean> emissiveFaces = new EnumMap<>(Direction.class);
-            JsonObject              elemObj       = JSONUtils.getJsonObject(elem, "element");
+            JsonObject              elemObj       = JSONUtils.convertToJsonObject(elem, "element");
             if( elemObj.has("emissive") ) {
                 boolean emissive = JsonUtils.getBoolVal(elemObj.get("emissive"));
                 for( Direction dir : Direction.values() ) {
                     emissiveFaces.put(dir, emissive);
                 }
             } else {
-                JsonObject faces = JSONUtils.getJsonObject(elemObj, "faces");
+                JsonObject faces = JSONUtils.getAsJsonObject(elemObj, "faces");
                 for( Direction dir : Direction.values() ) {
-                    String dirName = dir.getName2();
+                    String dirName = dir.getName();
                     if( faces.has(dirName) ) {
                         JsonObject dirData = faces.getAsJsonObject(dirName);
                         emissiveFaces.put(dir, JsonUtils.getBoolVal(dirData.get("emissive"), false));
@@ -139,14 +139,14 @@ public class EmissiveModelLoader
         public void addQuads(IModelConfiguration owner, IModelBuilder<?> modelBuilder, ModelBakery bakery, Function<RenderMaterial, TextureAtlasSprite> spriteGetter, IModelTransform modelTransform, ResourceLocation modelLocation)
         {
             for( EmissiveBlockPart blockpart : elements ) {
-                for( Direction direction : blockpart.mapFaces.keySet() ) {
-                    BlockPartFace      blockpartface = blockpart.mapFaces.get(direction);
+                for( Direction direction : blockpart.faces.keySet() ) {
+                    BlockPartFace      blockpartface = blockpart.faces.get(direction);
                     TextureAtlasSprite sprite        = spriteGetter.apply(owner.resolveTexture(blockpartface.texture));
-                    if( blockpartface.cullFace == null ) {
+                    if( blockpartface.cullForDirection == null ) {
                         modelBuilder.addGeneralQuad(bakeQuad(blockpart, blockpartface, sprite, direction, modelTransform, modelLocation));
                     } else {
                         modelBuilder.addFaceQuad(
-                                modelTransform.getRotation().rotateTransform(blockpartface.cullFace),
+                                modelTransform.getRotation().rotateTransform(blockpartface.cullForDirection),
                                 bakeQuad(blockpart, blockpartface, sprite, direction, modelTransform, modelLocation));
                     }
                 }
@@ -168,10 +168,10 @@ public class EmissiveModelLoader
                 };
 
                 vlf.setParent(builder);
-                vlf.setTransform(new MatrixStack().getLast());
+                vlf.setTransform(new MatrixStack().last());
                 quad.pipe(vlf);
                 builder.setQuadTint(quad.getTintIndex());
-                builder.setQuadOrientation(quad.getFace());
+                builder.setQuadOrientation(quad.getDirection());
                 builder.setTexture(quad.getSprite());
                 builder.setApplyDiffuseLighting(false);
 
@@ -186,9 +186,9 @@ public class EmissiveModelLoader
             Set<RenderMaterial> textures = Sets.newHashSet();
 
             for( BlockPart part : elements ) {
-                for( BlockPartFace face : part.mapFaces.values() ) {
+                for( BlockPartFace face : part.faces.values() ) {
                     RenderMaterial texture = owner.resolveTexture(face.texture);
-                    if( Objects.equals(texture.getTextureLocation(), MissingTextureSprite.getLocation()) ) {
+                    if( Objects.equals(texture.texture(), MissingTextureSprite.getLocation()) ) {
                         missingTextureErrors.add(Pair.of(face.texture, owner.getModelName()));
                     }
 

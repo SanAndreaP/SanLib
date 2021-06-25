@@ -9,10 +9,11 @@ import com.google.gson.JsonObject;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
-import de.sanandrew.mods.sanlib.lib.util.LangUtils;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
-@SuppressWarnings("WeakerAccess")
 public class DynamicText
     extends Text
 {
@@ -30,17 +31,19 @@ public class DynamicText
     }
 
     @Override
-    public String getBakedText(IGui gui, JsonObject data) {
-        return data.has("text") ? LangUtils.translate(JsonUtils.getStringVal(data.get("text"))) : "";
+    public ITextComponent getBakedText(IGui gui, JsonObject data) {
+        return data.has("text")
+               ? new TranslationTextComponent(JsonUtils.getStringVal(data.get("text")))
+               : StringTextComponent.EMPTY;
     }
 
     @Override
-    public String getDynamicText(IGui gui, String originalText) {
+    public ITextComponent getDynamicText(IGui gui, ITextComponent originalText) {
         return ((IGuiDynamicText) gui).getText(this.key, originalText);
     }
 
     public interface IGuiDynamicText
     {
-        String getText(String key, String originalText);
+        ITextComponent getText(String key, ITextComponent originalText);
     }
 }
