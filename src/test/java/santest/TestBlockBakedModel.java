@@ -6,6 +6,7 @@ import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ItemOverrideList;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.Direction;
+import net.minecraftforge.client.model.data.IModelData;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -15,7 +16,7 @@ import java.util.Random;
 public class TestBlockBakedModel
         implements IBakedModel
 {
-    private IBakedModel original;
+    private final IBakedModel original;
 
     public TestBlockBakedModel(IBakedModel original) {
         this.original = original;
@@ -24,15 +25,12 @@ public class TestBlockBakedModel
     @Override
     @Deprecated
     public @Nonnull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @Nonnull Random rand) {
-        List<BakedQuad> quads = this.original.getQuads(state, side, rand);
-//        List<BakedQuad> processedQuads
-//        quads.
-        return quads;
+        return this.original.getQuads(state, side, rand);
     }
 
     @Override
-    public boolean isAmbientOcclusion() {
-        return this.original.isAmbientOcclusion();
+    public boolean useAmbientOcclusion() {
+        return this.original.useAmbientOcclusion();
     }
 
     @Override
@@ -41,19 +39,20 @@ public class TestBlockBakedModel
     }
 
     @Override
-    public boolean isSideLit() {
-        return this.original.isSideLit();
+    public boolean usesBlockLight() {
+        return this.original.usesBlockLight();
     }
 
     @Override
-    public boolean isBuiltInRenderer() {
+    public boolean isCustomRenderer() {
         return false;
     }
 
     @Override
-    @Deprecated
-    public @Nonnull TextureAtlasSprite getParticleTexture() {
-        return this.original.getParticleTexture();
+    @Nonnull
+    @SuppressWarnings("deprecation")
+    public TextureAtlasSprite getParticleIcon() {
+        return this.original.getParticleIcon();
     }
 
     @Override

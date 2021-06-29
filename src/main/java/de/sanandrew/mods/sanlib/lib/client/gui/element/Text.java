@@ -289,7 +289,7 @@ public class Text
     public boolean forceRenderUpdate(IGui gui) {
         ITextComponent s = this.getDynamicText(gui, this.text);
 
-        if( !s.getString().equals(this.prevTxt.getString()) ) {
+        if( this.prevTxt == null || !s.getString().equals(this.prevTxt.getString()) ) {
             this.prevTxt = s;
             return true;
         } else {

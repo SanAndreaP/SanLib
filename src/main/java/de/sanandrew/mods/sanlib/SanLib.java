@@ -30,10 +30,4 @@ public class SanLib
     private void setup(FMLCommonSetupEvent event) {
         NETWORK.registerMessage(0, MessageReloadModels.class, MessageReloadModels::new);
     }
-
-    //TODO: FMLFingerprintViolationEvent is deprecated???
-//    @Mod.EventHandler
-//    public void onFingerprintViolation(FMLFingerprintViolationEvent event) {
-//        LOG.log(Level.ERROR, "Invalid Fingerprint detected! The file " + event.getSource().getName() + " may have been tampered with. This version will NOT be supported by the author");
-//    }
 }

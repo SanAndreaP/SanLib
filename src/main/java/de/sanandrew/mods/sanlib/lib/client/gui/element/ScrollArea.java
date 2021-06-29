@@ -113,7 +113,7 @@ public class ScrollArea
         this.posX = x;
         this.posY = y;
 
-        boolean isLmbDown = Minecraft.getInstance().mouseHelper.isLeftDown();
+        boolean isLmbDown = Minecraft.getInstance().mouseHandler.isLeftPressed();
         GuiElementInst btn = this.scrollBtn[this.countAll > this.countSub ? 0 : 1];
         int scrollY = btn.pos[1] + (int) Math.round(this.scroll * (this.scrollHeight - btn.get(Texture.class).size[1]));
 

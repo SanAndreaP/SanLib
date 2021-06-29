@@ -38,7 +38,7 @@ public class TestMod
     }
 
     private void registerItems(RegistryEvent.Register<Item> event) {
-        event.getRegistry().register(new BlockItem(TestBlock.INSTANCE, new Item.Properties().group(ItemGroup.MATERIALS)).setRegistryName(TestBlock.INSTANCE.getRegistryName()));
+        event.getRegistry().register(new BlockItem(TestBlock.INSTANCE, new Item.Properties().tab(ItemGroup.TAB_BUILDING_BLOCKS)).setRegistryName(TestBlock.INSTANCE.getRegistryName()));
     }
 
     private static void testTickFormat() {

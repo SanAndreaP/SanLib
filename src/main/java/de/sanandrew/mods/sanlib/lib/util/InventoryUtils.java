@@ -32,7 +32,7 @@ public final class InventoryUtils
      * @return a Tuple with the slot number ({@code Integer - 0})<br>
      *         and the ItemStack instance from the Inventory ({@code ItemStack - 1})
      */
-    public static Tuple getSimilarStackFromInventory(@Nonnull ItemStack stack, IInventory inv, boolean checkNbt) {
+    public static SlotDef getSimilarStackFromInventory(@Nonnull ItemStack stack, IInventory inv, boolean checkNbt) {
         if( !ItemStackUtils.isValid(stack) ) {
             return null;
         }
@@ -41,12 +41,12 @@ public final class InventoryUtils
             return null;
         }
 
-        int size = inv.getSizeInventory();
+        int size = inv.getContainerSize();
         for( int i = 0; i < size; i++ ) {
-            ItemStack invStack = inv.getStackInSlot(i);
+            ItemStack invStack = inv.getItem(i);
             if( ItemStackUtils.isValid(invStack) ) {
                 if( ItemStackUtils.areEqual(stack, invStack, checkNbt) ) {
-                    return new Tuple(i, invStack);
+                    return new SlotDef(i, invStack);
                 }
             }
         }
@@ -55,21 +55,21 @@ public final class InventoryUtils
     }
 
     /**
-     * Checks wether or not the given ItemStack can fit completely or partially into the provided Inventory.
-     * @param is
-     * @param inv
-     * @param checkNBT
-     * @param maxStackSize
-     * @return
+     * Checks wether or not the given ItemStack can fit completely or partially into the provided inventory.
+     * @param stack The item that should fit
+     * @param inv The inventory the item needs to fit in
+     * @param checkNBT wether or not to check the NBT of the items
+     * @param maxStackSize the maximum size the item should stack to
+     * @return <tt>true</tt>, if the item fits inside the inventory, <tt>false</tt> otherwise
      */
-    public static boolean canStackFitInInventory(@Nonnull ItemStack is, IInventory inv, boolean checkNBT, int maxStackSize) {
-        return canStackFitInInventory(is, inv, checkNBT, maxStackSize, 0, inv.getSizeInventory() - (inv instanceof PlayerInventory ? 4 : 0));
+    public static boolean canStackFitInInventory(@Nonnull ItemStack stack, IInventory inv, boolean checkNBT, int maxStackSize) {
+        return canStackFitInInventory(stack, inv, checkNBT, maxStackSize, 0, inv.getContainerSize() - (inv instanceof PlayerInventory ? 4 : 0));
     }
 
     public static boolean canStackFitInInventory(@Nonnull ItemStack is, IInventory inv, boolean checkNBT, int maxStackSize, int begin, int end) {
         ItemStack stack = is.copy();
         for( int i = begin; i < end; i++ ) {
-            ItemStack invIS = inv.getStackInSlot(i);
+            ItemStack invIS = inv.getItem(i);
             if( ItemStackUtils.areEqual(is, invIS, checkNBT) ) {
                 int fit = Math.min(invIS.getMaxStackSize(), maxStackSize) - invIS.getCount();
                 int stackCnt = stack.getCount();
@@ -78,7 +78,7 @@ public final class InventoryUtils
                 } else {
                     stack.setCount(stackCnt - fit);
                 }
-            } else if( !ItemStackUtils.isValid(invIS) && inv.isItemValidForSlot(i, stack) ) {
+            } else if( !ItemStackUtils.isValid(invIS) && inv.canPlaceItem(i, stack) ) {
                 int max = Math.min(stack.getMaxStackSize(), maxStackSize);
                 int stackCnt = stack.getCount();
                 if( stackCnt - max <= 0 ) {
@@ -93,46 +93,46 @@ public final class InventoryUtils
     }
 
     public static ItemStack addStackToInventory(@Nonnull ItemStack is, IInventory inv) {
-        return addStackToInventory(is, inv, true, inv.getInventoryStackLimit(), 0, inv.getSizeInventory() - (inv instanceof PlayerInventory ? 4 : 0));
+        return addStackToInventory(is, inv, true, inv.getMaxStackSize(), 0, inv.getContainerSize() - (inv instanceof PlayerInventory ? 4 : 0));
     }
 
     public static ItemStack addStackToInventory(@Nonnull ItemStack is, IInventory inv, boolean checkNBT) {
-        return addStackToInventory(is, inv, checkNBT, inv.getInventoryStackLimit(), 0, inv.getSizeInventory() - (inv instanceof PlayerInventory ? 4 : 0));
+        return addStackToInventory(is, inv, checkNBT, inv.getMaxStackSize(), 0, inv.getContainerSize() - (inv instanceof PlayerInventory ? 4 : 0));
     }
 
     public static ItemStack addStackToInventory(@Nonnull ItemStack is, IInventory inv, boolean checkNBT, int maxStackSize) {
-        return addStackToInventory(is, inv, checkNBT, maxStackSize, 0, inv.getSizeInventory() - (inv instanceof PlayerInventory ? 4 : 0));
+        return addStackToInventory(is, inv, checkNBT, maxStackSize, 0, inv.getContainerSize() - (inv instanceof PlayerInventory ? 4 : 0));
     }
 
     @Nonnull
     public static ItemStack addStackToInventory(@Nonnull ItemStack is, IInventory inv, boolean checkNBT, int maxStackSize, int begin, int end) {
         for( int i = begin; i < end && ItemStackUtils.isValid(is); ++i ) {
-            ItemStack invIS = inv.getStackInSlot(i);
+            ItemStack invIS = inv.getItem(i);
             int rest;
             if( ItemStackUtils.areEqual(is, invIS, checkNBT) ) {
                 rest = is.getCount() + invIS.getCount();
                 int maxStack = Math.min(invIS.getMaxStackSize(), maxStackSize);
                 if( rest <= maxStack ) {
                     invIS.setCount(rest);
-                    inv.setInventorySlotContents(i, invIS.copy());
+                    inv.setItem(i, invIS.copy());
                     is = ItemStackUtils.getEmpty();
                     break;
                 }
 
                 int rest1 = rest - maxStack;
                 invIS.setCount(maxStack);
-                inv.setInventorySlotContents(i, invIS.copy());
+                inv.setItem(i, invIS.copy());
                 is.setCount(rest1);
-            } else if( !ItemStackUtils.isValid(invIS) && inv.isItemValidForSlot(i, is) ) {
+            } else if( !ItemStackUtils.isValid(invIS) && inv.canPlaceItem(i, is) ) {
                 if( is.getCount() <= maxStackSize ) {
-                    inv.setInventorySlotContents(i, is.copy());
+                    inv.setItem(i, is.copy());
                     is = ItemStackUtils.getEmpty();
                     break;
                 }
 
                 rest = is.getCount() - maxStackSize;
                 is.setCount(maxStackSize);
-                inv.setInventorySlotContents(i, is.copy());
+                inv.setItem(i, is.copy());
                 is.setCount(rest);
             }
         }
@@ -192,22 +192,22 @@ public final class InventoryUtils
 
         if( stack.isStackable() ) {
             while( stack.getCount() > 0 && (!reverse && start < endSlot || reverse && start >= beginSlot) ) {
-                slot = container.inventorySlots.get(start);
-                slotStack = slot.getStack();
+                slot = container.slots.get(start);
+                slotStack = slot.getItem();
 
-                if( ItemStackUtils.areEqual(slotStack, stack) && slot.isItemValid(stack) ) {
+                if( ItemStackUtils.areEqual(slotStack, stack) && slot.mayPlace(stack) ) {
                     int combStackSize = slotStack.getCount() + stack.getCount();
-                    int maxStackSize = Math.min(stack.getMaxStackSize(), slot.getItemStackLimit(stack));
+                    int maxStackSize = Math.min(stack.getMaxStackSize(), slot.getMaxStackSize(stack));
 
                     if( combStackSize <= maxStackSize ) {
                         stack.setCount(0);
                         slotStack.setCount(combStackSize);
-                        slot.onSlotChanged();
+                        slot.setChanged();
                         slotChanged = true;
                     } else if( slotStack.getCount() < maxStackSize ) {
                         stack.shrink(maxStackSize - slotStack.getCount());
                         slotStack.setCount(maxStackSize);
-                        slot.onSlotChanged();
+                        slot.setChanged();
                         slotChanged = true;
                     }
                 }
@@ -228,21 +228,21 @@ public final class InventoryUtils
             }
 
             while( stack.getCount() > 0 && (!reverse && start < endSlot || reverse && start >= beginSlot) ) {
-                slot = container.inventorySlots.get(start);
+                slot = container.slots.get(start);
 
-                if( !ItemStackUtils.isValid(slot.getStack()) && slot.isItemValid(stack) ) {
-                    int maxStackSize = Math.min(stack.getMaxStackSize(), slot.getItemStackLimit(stack));
+                if( !ItemStackUtils.isValid(slot.getItem()) && slot.mayPlace(stack) ) {
+                    int maxStackSize = Math.min(stack.getMaxStackSize(), slot.getMaxStackSize(stack));
                     if( stack.getCount() > maxStackSize ) {
                         ItemStack newSlotStack = stack.copy();
 
                         stack.shrink(maxStackSize);
                         newSlotStack.setCount(maxStackSize);
-                        slot.putStack(newSlotStack);
-                        slot.onSlotChanged();
+                        slot.set(newSlotStack);
+                        slot.setChanged();
                         slotChanged = true;
                     } else {
-                        slot.putStack(stack.copy());
-                        slot.onSlotChanged();
+                        slot.set(stack.copy());
+                        slot.setChanged();
                         stack.setCount(0);
                         slotChanged = true;
                         break;
@@ -262,9 +262,9 @@ public final class InventoryUtils
 
     public static boolean finishTransfer(PlayerEntity player, ItemStack origStack, Slot slot, ItemStack slotStack) {
         if( slotStack.getCount() == 0 ) { // if stackSize of slot got to 0
-            slot.putStack(ItemStack.EMPTY);
+            slot.set(ItemStack.EMPTY);
         } else { // update changed slot stack state
-            slot.onSlotChanged();
+            slot.setChanged();
         }
 
         if( slotStack.getCount() == origStack.getCount() ) { // if nothing changed stackSize-wise
@@ -277,8 +277,24 @@ public final class InventoryUtils
     }
 
     public static void dropBlockItems(IInventory inv, World world, BlockPos pos) {
-        for( int i = 0, max = inv.getSizeInventory(); i < max; i++ ) {
-            ItemStackUtils.dropBlockItem(inv.getStackInSlot(i), world, pos);
+        for( int i = 0, max = inv.getContainerSize(); i < max; i++ ) {
+            ItemStackUtils.dropBlockItem(inv.getItem(i), world, pos);
+        }
+    }
+
+    public static final class SlotDef
+            extends Tuple
+    {
+        SlotDef(int i, ItemStack invStack) {
+            super(i, invStack);
+        }
+
+        public int getSlotId() {
+            return this.getValue(0);
+        }
+
+        public ItemStack getItem() {
+            return this.getValue(1);
         }
     }
 }

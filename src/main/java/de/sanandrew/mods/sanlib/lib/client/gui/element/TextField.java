@@ -75,7 +75,6 @@ public class TextField
             this.fontRenderer = JsonUtils.GSON.fromJson(cstFont, Text.Font.class).get(gui.get());
         }
 
-//        this.textfield = new TextFieldWidget(0, new FontRendererTF(gui.get().mc, this.fontRenderer), 0, 0, this.size[0], this.size[1]);
         this.textfield = new TextFieldWidget(this.fontRenderer, 0, 0, this.size[0], this.size[1], StringTextComponent.EMPTY);
         this.textfield.setValue(LangUtils.translate(this.text));
         this.textfield.setTextColor(this.color);

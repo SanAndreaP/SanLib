@@ -7,13 +7,13 @@ package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.client.util.RenderUtils;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
 
 @SuppressWarnings({ "WeakerAccess", "unused" })
@@ -49,7 +49,7 @@ public class Item
     }
 
     protected ItemStack getBakedItem(IGui gui, JsonObject data) {
-        return JsonUtils.getItemStack(data.get("item"));
+        return Ingredient.fromJson(data.get("item")).getItems()[0];
     }
 
     protected ItemStack getDynamicStack(IGui gui) {

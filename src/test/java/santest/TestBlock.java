@@ -20,19 +20,20 @@ public class TestBlock
     public static final TestBlock INSTANCE = new TestBlock();
 
     public TestBlock() {
-        super(Properties.create(Material.CLAY));
+        super(Properties.of(Material.CLAY));
         this.setRegistryName(new ResourceLocation("santest", "testblock"));
     }
 
-    @Override
-    @Deprecated
     @Nonnull
-    public ActionResultType onBlockActivated(@Nonnull BlockState state, @Nonnull World worldIn, @Nonnull BlockPos pos,
-                                             @Nonnull PlayerEntity player, @Nonnull Hand handIn, @Nonnull BlockRayTraceResult hit)
+    @Override
+    @SuppressWarnings("deprecation")
+    public ActionResultType use(@Nonnull BlockState state, @Nonnull World worldIn, @Nonnull BlockPos pos,
+                                @Nonnull PlayerEntity player, @Nonnull Hand handIn, @Nonnull BlockRayTraceResult hit)
     {
-        if( worldIn.isRemote ) {
-            Minecraft.getInstance().displayGuiScreen(new TestGui());
+        if( worldIn.isClientSide ) {
+            Minecraft.getInstance().setScreen(new TestGui());
         }
+
         return ActionResultType.SUCCESS;
     }
 }

@@ -21,9 +21,9 @@ public class RenderPlayerEvent
     public static void onRenderPost(RenderLivingEvent.Post<?, ?> event) {
         Entity e = event.getEntity();
         if( e instanceof AbstractClientPlayerEntity && SanPlayerModel.isSanPlayer((AbstractClientPlayerEntity) e) ) {
-            NetworkPlayerInfo npi = Objects.requireNonNull(Minecraft.getInstance().getConnection()).getPlayerInfo(e.getUniqueID());
+            NetworkPlayerInfo npi = Objects.requireNonNull(Minecraft.getInstance().getConnection()).getPlayerInfo(e.getUUID());
 
-            ReflectionUtils.setCachedFieldValue(NetworkPlayerInfo.class, npi, "skinType", "field_178863_g", "slim_san");
+            ReflectionUtils.setCachedFieldValue(NetworkPlayerInfo.class, npi, "skinModel", "field_178863_g", "slim_san");
         }
     }
 }

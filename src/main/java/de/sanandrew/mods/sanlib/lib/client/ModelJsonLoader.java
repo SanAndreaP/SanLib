@@ -115,7 +115,7 @@ public class ModelJsonLoader<T extends Model & ModelJsonHandler<T, U>, U extends
         REGISTERED_JSON_LOADERS.add(this);
 
         if( Minecraft.getInstance().getResourceManager() instanceof SimpleReloadableResourceManager ) {
-            ((SimpleReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(this);
+            ((SimpleReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(this);
         }
 
         this.reload(null);
@@ -130,7 +130,7 @@ public class ModelJsonLoader<T extends Model & ModelJsonHandler<T, U>, U extends
      */
     public void unregister() {
         if( Minecraft.getInstance().getResourceManager() instanceof SimpleReloadableResourceManager ) {
-            ((SimpleReloadableResourceManager) Minecraft.getInstance().getResourceManager()).reloadListeners.remove(this);
+            ((SimpleReloadableResourceManager) Minecraft.getInstance().getResourceManager()).listeners.remove(this);
         }
 
         REGISTERED_JSON_LOADERS.remove(this);
@@ -186,7 +186,7 @@ public class ModelJsonLoader<T extends Model & ModelJsonHandler<T, U>, U extends
                                                .setLocation(cb.rotationPointX, cb.rotationPointY, cb.rotationPointZ)
                                                .setRotation(cb.rotateAngleX, cb.rotateAngleY, cb.rotateAngleZ)
                                                .getBox(cb.offsetX, cb.offsetY, cb.offsetZ, cb.sizeX, cb.sizeY, cb.sizeZ, scaling.floatValue());
-                    box.showModel = !cb.isHidden;
+                    box.visible = !cb.isHidden;
 
                     if( cb.parentBox != null && !cb.parentBox.isEmpty() ) {
                         children.put(cb.boxName, new ChildCube(box, cb.parentBox));

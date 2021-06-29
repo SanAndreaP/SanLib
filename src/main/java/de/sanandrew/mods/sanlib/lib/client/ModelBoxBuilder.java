@@ -59,7 +59,7 @@ public final class ModelBoxBuilder<T extends ModelRenderer>
      * @return The ModelBoxBuilder instance calling this method.
      */
     public ModelBoxBuilder<T> setTexture(int x, int y, boolean mirror) {
-        this.box.setTextureOffset(x, y);
+        this.box.texOffs(x, y);
         this.box.mirror = mirror;
 
         return this;
@@ -75,8 +75,8 @@ public final class ModelBoxBuilder<T extends ModelRenderer>
      * @return The ModelBoxBuilder instance calling this method.
      */
     public ModelBoxBuilder<T> setTexture(int x, int y, boolean mirror, int width, int height) {
-        this.box.setTextureSize(width, height);
-        this.box.setTextureOffset(x, y);
+        this.box.setTexSize(width, height);
+        this.box.texOffs(x, y);
         this.box.mirror = mirror;
 
         return this;
@@ -90,9 +90,9 @@ public final class ModelBoxBuilder<T extends ModelRenderer>
      * @return The ModelBoxBuilder instance calling this method.
      */
     public ModelBoxBuilder<T> setLocation(float pointX, float pointY, float pointZ) {
-        this.box.rotationPointX = pointX;
-        this.box.rotationPointY = pointY;
-        this.box.rotationPointZ = pointZ;
+        this.box.x = pointX;
+        this.box.y = pointY;
+        this.box.z = pointZ;
 
         return this;
     }
@@ -105,9 +105,9 @@ public final class ModelBoxBuilder<T extends ModelRenderer>
      * @return The ModelBoxBuilder instance calling this method.
      */
     public ModelBoxBuilder<T> setRotation(float angleX, float angleY, float angleZ) {
-        this.box.rotateAngleX = angleX;
-        this.box.rotateAngleY = angleY;
-        this.box.rotateAngleZ = angleZ;
+        this.box.xRot = angleX;
+        this.box.yRot = angleY;
+        this.box.zRot = angleZ;
 
         return this;
     }

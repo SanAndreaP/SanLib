@@ -5,8 +5,11 @@
 
 package de.sanandrew.mods.sanlib.lib;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import net.minecraft.util.math.vector.Vector3d;
 
+import javax.annotation.Nonnull;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -18,14 +21,15 @@ import java.util.concurrent.atomic.AtomicLong;
 @SuppressWarnings({"unused"})
 public final class XorShiftRandom
 {
-    private long seed;
-    private double nextGaussian;
-    private boolean haveNextGaussian;
+    private final AtomicLong   seed = new AtomicLong(0xdeadbeef);
+    private final AtomicDouble        nextGaussian = new AtomicDouble();
+    private final AtomicBoolean hasNextGaussian = new AtomicBoolean();
 
     private static final double DOUBLE_UNIT = 0x1.0p-53;
-    private static final String BAD_BOUND = "bound must be positive";
     private static final long MASK = (1L << 48) - 1;
     private static final AtomicLong SEED_UNIQUIFIER = new AtomicLong(8682522807148012L);
+
+    static final String BAD_BOUND = "bound must be positive";
 
     /**
      * Creates a new instance of this RNG with a random seed based off the system clock.
@@ -48,8 +52,13 @@ public final class XorShiftRandom
      * @param seed The new seed
      */
     public void setSeed(long seed) {
-        this.seed = seed == 0 ? 0xdeadbeef : seed;
-        this.haveNextGaussian = false;
+        if( seed == 0 ) {
+            seed = 0xdeadbeef;
+        }
+
+        this.seed.set(seed);
+
+        this.hasNextGaussian.set(false);
     }
 
     /**
@@ -71,12 +80,16 @@ public final class XorShiftRandom
      * The algorithm used to get the next random seed.
      * @return the new randomized seed.
      */
-    private long rng() {
-        this.seed ^= (this.seed << 21);
-        this.seed ^= (this.seed >>> 35);
-        this.seed ^= (this.seed << 4);
+    long rng() {
+        long cs = this.seed.get();
 
-        return this.seed;
+        cs ^= (cs << 21);
+        cs ^= (cs >>> 35);
+        cs ^= (cs << 4);
+
+        this.seed.set(cs);
+
+        return cs;
     }
 
     /**
@@ -129,6 +142,19 @@ public final class XorShiftRandom
     }
 
     /**
+     * Calculates new randomized values for the provided byte array
+     * @param bytes the array to be randomized
+     * @implNote similar to {@link java.util.Random#nextBytes(byte[])}
+     */
+    public void randomBytes(@Nonnull byte[] bytes) {
+        for( int i = 0, max = bytes.length; i < max; ) {
+            for( int r = randomInt(), n = Integer.SIZE / Byte.SIZE; n > 0 && i < max; r >>= 8, n-- ) {
+                bytes[i++] = (byte) (r & 0xFF);
+            }
+        }
+    }
+
+    /**
      * Calculates a new randomized 4-bit number
      * @return the new randomized nibble number
      */
@@ -163,6 +189,34 @@ public final class XorShiftRandom
         return (rng() >>> 40) / (float) (1 << 24);
     }
 
+    public int randomIntRange(int origin, int bound) {
+        if( origin <= bound ) {
+            return this.randomInt(bound - origin) + origin;
+        }
+
+        return this.randomInt();
+    }
+
+    public long randomLongRange(long origin, long bound) {
+        if( origin <= bound ) {
+            return (this.randomLong() >>> 1) % (bound - origin) + origin;
+        }
+
+        return this.randomLong();
+    }
+
+    public double randomDoubleRange(double origin, double bound) {
+        double r = this.randomDouble();
+        if( origin <= bound ) {
+            r = (randomDouble()) * (bound - origin) + origin;
+            if( r >= bound ) {
+                r = Double.longBitsToDouble(Double.doubleToLongBits(r) - 1L);
+            }
+        }
+
+        return r;
+    }
+
 
     /**
      * Calculates a new randomized 64-bit, gaussian distributed floating point number
@@ -171,9 +225,9 @@ public final class XorShiftRandom
      */
     public double randomGaussian() {
         // See Knuth, ACP, Section 3.4.1 Algorithm C.
-        if( this.haveNextGaussian ) {
-            this.haveNextGaussian = false;
-            return this.nextGaussian;
+        if( this.hasNextGaussian.get() ) {
+            this.hasNextGaussian.set(false);
+            return this.nextGaussian.get();
         } else {
             double currNr;
             double nextNr;
@@ -186,15 +240,16 @@ public final class XorShiftRandom
             } while( s >= 1 || s == 0 );
 
             double multiplier = StrictMath.sqrt(-2 * StrictMath.log(s) / s);
-            this.nextGaussian = nextNr * multiplier;
-            this.haveNextGaussian = true;
+            this.nextGaussian.set(nextNr * multiplier);
+            this.hasNextGaussian.set(true);
             return currNr * multiplier;
         }
     }
 
     public Vector3d randomVector(Vector3d from, Vector3d to) {
-        return new Vector3d(this.randomDouble() * (to.x - from.x) + from.x,
-                            this.randomDouble() * (to.y - from.y) + from.y,
-                            this.randomDouble() * (to.z - from.z) + from.z);
+        Vector3d distVec = from.vectorTo(to);
+        distVec.scale(this.randomDouble());
+
+        return from.add(distVec);
     }
 }

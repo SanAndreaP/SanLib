@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.ResourceLocation;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Set;
@@ -18,18 +19,19 @@ public class TestBlockUnbakedModel
         implements IUnbakedModel
 {
     @Override
+    @Nonnull
     public Collection<ResourceLocation> getDependencies() {
         return null;
     }
 
     @Override
-    public Collection<RenderMaterial> getTextures(Function<ResourceLocation, IUnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
+    public Collection<RenderMaterial> getMaterials(Function<ResourceLocation, IUnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors) {
         return null;
     }
 
     @Nullable
     @Override
-    public IBakedModel bakeModel(ModelBakery modelBakeryIn, Function<RenderMaterial, TextureAtlasSprite> spriteGetterIn, IModelTransform transformIn, ResourceLocation locationIn) {
+    public IBakedModel bake(ModelBakery modelBakery, Function<RenderMaterial, TextureAtlasSprite> spriteGetter, IModelTransform transform, ResourceLocation location) {
         return null;
     }
 }

@@ -5,6 +5,7 @@
 
 package de.sanandrew.mods.sanlib.lib.util;
 
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -62,7 +63,6 @@ public final class UuidUtils
         UUID uuidInst1 = getUUID.apply(uuid1);
         UUID uuidInst2 = getUUID.apply(uuid2);
 
-        //noinspection ObjectEquality
-        return uuidInst1 == uuidInst2 || (uuidInst1 != null && uuidInst1.equals(uuidInst2));
+        return Objects.equals(uuidInst1, uuidInst2);
     }
 }

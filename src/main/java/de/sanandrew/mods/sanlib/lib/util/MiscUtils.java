@@ -13,10 +13,15 @@ import net.minecraft.nbt.FloatNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NumberNBT;
+import net.minecraft.resources.IResource;
+import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Level;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
@@ -25,6 +30,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -314,61 +320,24 @@ public final class MiscUtils
         return obj != null ? onNonNull.apply(obj) : null;
     }
 
-    //// USE DATAPACK DATA FOR THESE NOW!!!
-//    /**
-//     * Looks inside a directory (outside and inside of classpath) and calls the processor for each file found
-//     * @param mod The mod container to be looked in (Use {@link net.minecraftforge.fml.common.Loader} to get one)
-//     * @param base The path of the directory to be scanned
-//     * @param preprocessor A functional reference that gets called before the files are scanned. Its parameter is the path to the directory.
-//     *                     It should return true if successful, false otherwise (which also cancels further operations)
-//     * @param processor A functional reference that gets called on each file found. Its parameters are the path to the directory the file is in and the path of the file itself.
-//     *                  It should return true if the processing was successful, false otherwise (which also cancels further operations)
-//     * @return true if both the preprocessor (for the directory) and the processor (for each file) return true, false otherwise.
-//     */
-//    public static boolean findFiles(ModContainer mod, String base, Function<Path, Boolean> preprocessor, BiFunction<Path, Path, Boolean> processor) {
-//        File source = mod.getSource();
-//
-//        if( source.isFile() ) {
-//            try( FileSystem fs = FileSystems.newFileSystem(source.toPath(), null) ) {
-//                return findFilesIntrn(fs.getPath('/' + base), mod, preprocessor, processor);
-//            } catch( IOException e ) {
-//                SanLib.LOG.log(Level.ERROR, "Error loading FileSystem from jar: ", e);
-//                return false;
-//            }
-//        } else if( source.isDirectory() ) {
-//            return findFilesIntrn(source.toPath().resolve(base), mod, preprocessor, processor);
-//        }
-//
-//        return false;
-//    }
-//
-//    private static boolean findFilesIntrn(Path root, ModContainer mod, Function<Path, Boolean> preprocessor, BiFunction<Path, Path, Boolean> processor) {
-//        if( root == null || !Files.exists(root) ) {
-//            return false;
-//        }
-//
-//        if( preprocessor != null && !MiscUtils.defIfNull(preprocessor.apply(root), false) ) {
-//            return false;
-//        }
-//
-//        if( processor != null ) {
-//            Iterator<Path> itr;
-//            try {
-//                itr = Files.walk(root).iterator();
-//            } catch( IOException e ) {
-//                SanLib.LOG.log(Level.ERROR, String.format("Error iterating filesystem for: %s", mod.getModId()), e);
-//                return false;
-//            }
-//
-//            while( itr.hasNext() ) {
-//                if( !MiscUtils.defIfNull(processor.apply(root, itr.next()), false) ) {
-//                    return false;
-//                }
-//            }
-//        }
-//
-//        return true;
-//    }
+    public static void findFiles(String dataFolder, IResourceManager resMgr, boolean idNoExtension, Predicate<String> fileNameFilter,
+                                 FileProcessor processor)
+            throws IOException
+    {
+        for( ResourceLocation rl : resMgr.listResources(dataFolder, fileNameFilter) ) {
+            ResourceLocation conversionId = new ResourceLocation(rl.getNamespace(), getFilename(dataFolder, rl.getPath(), idNoExtension));
+            for( IResource r : resMgr.getResources(rl) ) {
+                try( InputStream is = r.getInputStream() ) {
+                    processor.accept(conversionId, is);
+                }
+                IOUtils.closeQuietly(r);
+            }
+        }
+    }
+
+    private static String getFilename(String folder, String path, boolean noExt) {
+        return path.substring(folder.length() + 1, path.length() - (noExt ? FilenameUtils.getExtension(path).length() : 0));
+    }
 
     public static boolean doesNbtContainOther(CompoundNBT mainNBT, CompoundNBT otherNBT) {
         return doesNbtContainOther(mainNBT, otherNBT, true);
@@ -376,10 +345,10 @@ public final class MiscUtils
 
     public static boolean doesNbtContainOther(final CompoundNBT mainNBT, final CompoundNBT otherNBT, boolean strict) {
         return otherNBT == null
-               || (mainNBT != null && otherNBT.keySet().stream().allMatch(key -> {
+               || (mainNBT != null && otherNBT.getAllKeys().stream().allMatch(key -> {
                         if( mainNBT.contains(key) ) {
                             if( strict ) {
-                                return mainNBT.getTagId(key) == otherNBT.getTagId(key) && Objects.equals(mainNBT.get(key), otherNBT.get(key));
+                                return mainNBT.getTagType(key) == otherNBT.getTagType(key) && Objects.equals(mainNBT.get(key), otherNBT.get(key));
                             } else {
                                 return compareNBTBase(mainNBT.get(key), otherNBT.get(key));
                             }
@@ -395,15 +364,15 @@ public final class MiscUtils
             NumberNBT mainBase = ((NumberNBT) main);
             NumberNBT otherBase = ((NumberNBT) other);
 
-            long mainNb = isNbtDouble(mainBase) ? Double.doubleToLongBits(mainBase.getDouble()) : mainBase.getLong();
-            long otherNb = isNbtDouble(otherBase) ? Double.doubleToLongBits(otherBase.getDouble()) : otherBase.getLong();
+            long mainNb = isNbtDouble(mainBase) ? Double.doubleToLongBits(mainBase.getAsDouble()) : mainBase.getAsLong();
+            long otherNb = isNbtDouble(otherBase) ? Double.doubleToLongBits(otherBase.getAsDouble()) : otherBase.getAsLong();
 
             return mainNb == otherNb;
         } else if( main instanceof ListNBT && other instanceof ListNBT ) {
             ListNBT mainList = (ListNBT) main;
             ListNBT otherList = (ListNBT) other.copy();
 
-            if( mainList.getTagType() == otherList.getTagType() ) {
+            if( mainList.getElementType() == otherList.getElementType() ) {
                 for( int i = mainList.size() - 1; i >= 0 && otherList.size() > 0; i-- ) {
                     for( int j = otherList.size() - 1; j >= 0; j-- ) {
                         if( compareNBTBase(mainList.get(i), otherList.get(j)) ) {
@@ -439,46 +408,6 @@ public final class MiscUtils
 
         return defReturn;
     }
-
-    //TODO: figure out when and why and if, how this is used
-//    public static StateContainer buildCustomBlockStateContainer(Block block,
-//                                                                BiFunction<Block, ImmutableMap<IProperty<?>, Comparable<?>>, BlockStateContainer.StateImplementation> stateImplCtor,
-//                                                                IProperty<?>... properties)
-//    {
-//        return new StateContainer(block, properties) {
-//            @Override
-//            @Nonnull
-//            protected StateImplementation createState(@Nonnull Block block, @Nonnull ImmutableMap<IProperty<?>, Comparable<?>> properties,
-//                                                      @Nullable ImmutableMap<IUnlistedProperty<?>, Optional<?>> unlistedProperties)
-//            {
-//                return stateImplCtor.apply(block, properties);
-//            }
-//        };
-//    }
-
-
-    //// USE DATAPACK DATA FOR THESE NOW!!!
-//    public static void readFile(ModContainer mod, String file, Consumer<BufferedReader> c) {
-////    public static BufferedReader getFile(ModContainer mod, String file) {
-//        File source = mod.getSource();
-//
-//        try {
-//            if( source.isFile() ) {
-//                try( FileSystem fs = FileSystems.newFileSystem(source.toPath(), null) ) {
-//                    c.accept(Files.newBufferedReader(fs.getPath('/' + file), StandardCharsets.UTF_8));
-////                    return ;
-//                }
-//            } else if( source.isDirectory() ) {
-//                c.accept(Files.newBufferedReader(source.toPath().resolve(file), StandardCharsets.UTF_8));
-////                return ;
-//            }
-//        } catch( IOException e ) {
-//            SanLib.LOG.log(Level.ERROR, "Error loading file: ", e);
-////            return null;
-//        }
-//
-////        return null;
-//    }
 
     public static Integer getInteger(String s) {
         try {
@@ -538,6 +467,7 @@ public final class MiscUtils
             this.exp = exp;
         }
     }
+
     public static String getNumberSiPrefixed(double number, int precision, String langCode) {
         for( SiPrefixes prefix : SiPrefixes.VALUES ) {
             double scaledNum = number / Math.pow(10, prefix.exp);
@@ -549,9 +479,16 @@ public final class MiscUtils
         return getNumberFormat(precision, false, langCode).format(number) + ' ';
     }
 
+    @Deprecated
     public static ResourceLocation getPathedRL(String domain, Path root, Path file) {
         Path filePath = Paths.get(FilenameUtils.getPathNoEndSeparator(root.relativize(file).toString()),
                                   FilenameUtils.removeExtension(file.getFileName().toString()));
         return new ResourceLocation(domain, FilenameUtils.separatorsToUnix(filePath.toString()));
+    }
+
+    @FunctionalInterface
+    public interface FileProcessor
+    {
+        void accept(ResourceLocation rl, InputStream is) throws IOException;
     }
 }

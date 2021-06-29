@@ -91,7 +91,7 @@ public class GuiDefinition
         this.data = data;
         this.loadProcessor = loadProcessor;
 
-        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(this);
+        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(this);
         this.reloadDefinition();
     }
 

@@ -39,7 +39,7 @@ public class TestGui
     protected void init() {
         super.init();
 
-        if( this.guiDef == null ) { this.closeScreen(); return; }
+        if( this.guiDef == null ) { this.onClose(); return; }
 
         this.posX = (this.width - this.guiDef.width) / 2;
         this.posY = (this.height - this.guiDef.height) / 2;
@@ -57,11 +57,11 @@ public class TestGui
     public void render(@Nonnull MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(stack);
 
-        stack.push();
+        stack.pushPose();
         stack.translate(this.posX, this.posY, 0.0D);
         this.guiDef.drawBackground(this, stack, mouseX, mouseY, partialTicks);
         this.guiDef.drawForeground(this, stack, mouseX, mouseY, partialTicks);
-        stack.pop();
+        stack.popPose();
 
         super.render(stack, mouseX, mouseY, partialTicks);
     }

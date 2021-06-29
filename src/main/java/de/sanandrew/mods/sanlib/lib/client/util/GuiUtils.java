@@ -38,8 +38,8 @@ public final class GuiUtils
     public static void enableScissor(int x, int y, int width, int height) {
         Minecraft mc = Minecraft.getInstance();
 
-        MainWindow window = mc.getMainWindow();
-        double scaleFactor = window.getGuiScaleFactor();
+        MainWindow window = mc.getWindow();
+        double scaleFactor = window.getGuiScale();
 
         RenderSystem.enableScissor((int) (x * scaleFactor), (int) (window.getHeight() - (y + height) * scaleFactor),
                                    (int) (width * scaleFactor), (int) (height * scaleFactor));
@@ -56,7 +56,7 @@ public final class GuiUtils
 //        byte rShift = keyDownBuffer.get(Keyboard.KEY_RSHIFT);
 //        keyDownBuffer.put(Keyboard.KEY_LSHIFT, (byte) 0);
 //        keyDownBuffer.put(Keyboard.KEY_RSHIFT, (byte) 0);
-//        List<?> tooltip = stack.getTooltip(Minecraft.getInstance().player, ITooltipFlag.TooltipFlags.NORMAL);
+//        List<?> tooltip = stack.getTooltipLines(Minecraft.getInstance().player, ITooltipFlag.TooltipFlags.NORMAL);
 //        keyDownBuffer.put(Keyboard.KEY_LSHIFT, lShift);
 //        keyDownBuffer.put(Keyboard.KEY_RSHIFT, rShift);
 //
@@ -92,17 +92,17 @@ public final class GuiUtils
      * @param resScaleY The resolution scale on the Y axis. Can be calculated via {@code 1F / texture height in pixel}, e.g. {@code 1F / 256F = 0.00390625F}
      */
     public static void drawTexture(MatrixStack stack, int xPos, int yPos, float z, int u, int v, int width, int height, float resScaleX, float resScaleY) {
-        Matrix4f      matrix = stack.getLast().getMatrix();
-        BufferBuilder buffer = Tessellator.getInstance().getBuffer();
+        Matrix4f      matrix = stack.last().pose();
+        BufferBuilder buffer = Tessellator.getInstance().getBuilder();
 
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-        buffer.pos(matrix, xPos, yPos + height, z).tex(u * resScaleX, (v + height) * resScaleY).endVertex();
-        buffer.pos(matrix, xPos + width, yPos + height, z).tex((u + width) * resScaleX, (v + height) * resScaleY).endVertex();
-        buffer.pos(matrix, xPos + width, yPos, z).tex((u + width) * resScaleX, v * resScaleY).endVertex();
-        buffer.pos(matrix, xPos, yPos, z).tex(u * resScaleX, v * resScaleY).endVertex();
-        buffer.finishDrawing();
+        buffer.vertex(matrix, xPos, yPos + height, z)        .uv(u * resScaleX, (v + height) * resScaleY)          .endVertex();
+        buffer.vertex(matrix, xPos + width, yPos + height, z).uv((u + width) * resScaleX, (v + height) * resScaleY).endVertex();
+        buffer.vertex(matrix, xPos + width, yPos, z)         .uv((u + width) * resScaleX, v * resScaleY)           .endVertex();
+        buffer.vertex(matrix, xPos, yPos, z)                 .uv(u * resScaleX, v * resScaleY)                     .endVertex();
+        buffer.end();
         RenderSystem.enableAlphaTest();
-        WorldVertexBufferUploader.draw(buffer);
+        WorldVertexBufferUploader.end(buffer);
     }
 
     /**
@@ -119,8 +119,8 @@ public final class GuiUtils
     public static void drawGradient(MatrixStack stack, int x, int y, int width, int height, int color1, int color2, boolean isHorizontal) {
         ColorObj startColor = new ColorObj(color1);
         ColorObj endColor = new ColorObj(color2);
-        Matrix4f      matrix = stack.getLast().getMatrix();
-        BufferBuilder buffer = Tessellator.getInstance().getBuffer();
+        Matrix4f      matrix = stack.last().pose();
+        BufferBuilder buffer = Tessellator.getInstance().getBuilder();
 
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
         if( isHorizontal ) {
@@ -128,14 +128,14 @@ public final class GuiUtils
         } else {
             buildColoredQuad(matrix, buffer, x, y, width, height, endColor, startColor, startColor, endColor);
         }
-        buffer.finishDrawing();
+        buffer.end();
 
         RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.disableAlphaTest();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         RenderSystem.shadeModel(GL11.GL_SMOOTH);
-        WorldVertexBufferUploader.draw(buffer);
+        WorldVertexBufferUploader.end(buffer);
         RenderSystem.shadeModel(GL11.GL_FLAT);
         RenderSystem.disableBlend();
         RenderSystem.enableAlphaTest();
@@ -153,9 +153,9 @@ public final class GuiUtils
             case 3: colors = new ColorObj[] {colors[0], colors[1], colors[2], colors[2]}; break;
         }
 
-        bb.pos(matrix, x + width, y, 0).color(colors[0].fRed(), colors[0].fGreen(), colors[0].fBlue(), colors[0].fAlpha()).endVertex();
-        bb.pos(matrix, x, y, 0).color(colors[1].fRed(), colors[1].fGreen(), colors[1].fBlue(), colors[1].fAlpha()).endVertex();
-        bb.pos(matrix, x, y + height, 0).color(colors[2].fRed(), colors[2].fGreen(), colors[2].fBlue(), colors[2].fAlpha()).endVertex();
-        bb.pos(matrix, x + width, y + height, 0).color(colors[3].fRed(), colors[3].fGreen(), colors[3].fBlue(), colors[3].fAlpha()).endVertex();
+        bb.vertex(matrix, x + width, y, 0)         .color(colors[0].fRed(), colors[0].fGreen(), colors[0].fBlue(), colors[0].fAlpha()).endVertex();
+        bb.vertex(matrix, x, y, 0)                 .color(colors[1].fRed(), colors[1].fGreen(), colors[1].fBlue(), colors[1].fAlpha()).endVertex();
+        bb.vertex(matrix, x, y + height, 0)        .color(colors[2].fRed(), colors[2].fGreen(), colors[2].fBlue(), colors[2].fAlpha()).endVertex();
+        bb.vertex(matrix, x + width, y + height, 0).color(colors[3].fRed(), colors[3].fGreen(), colors[3].fBlue(), colors[3].fAlpha()).endVertex();
     }
 }

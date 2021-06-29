@@ -13,13 +13,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.Range;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Arrays;
@@ -284,19 +280,6 @@ public final class JsonUtils
         if( arr.size() > 0 && !arr.get(0).isJsonPrimitive() ) {
             throw new JsonSyntaxException("Expected array needs to contain primitive values");
         }
-    }
-
-    /** @deprecated use {@link Ingredient#deserialize(JsonElement)} or your own deserializer */
-    @Nonnull
-    @Deprecated
-    public static ItemStack getItemStack(JsonElement json) {
-        return Ingredient.deserialize(json).getMatchingStacks()[0];
-    }
-
-    /** @deprecated use {@link Ingredient#deserialize(JsonElement)} or your own deserializer */
-    @Deprecated
-    public static NonNullList<ItemStack> getItemStacks(JsonElement json) {
-        return NonNullList.from(ItemStack.EMPTY, Ingredient.deserialize(json).getMatchingStacks());
     }
 
     public static void addDefaultJsonProperty(JsonObject jobj, String name, String val) {

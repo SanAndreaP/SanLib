@@ -15,23 +15,23 @@ import net.minecraft.util.ResourceLocation;
 public class TagUtils
 {
     public static <T> boolean isThingInTag(ITagCollection<T> tags, ResourceLocation tagId, T thing) {
-        ITag<T> t = tags.get(tagId);
+        ITag<T> t = tags.getTag(tagId);
         return t != null && t.contains(thing);
     }
 
     public static boolean isItemInTag(ResourceLocation tagId, Item item) {
-        return isThingInTag(ItemTags.getCollection(), tagId, item);
+        return isThingInTag(ItemTags.getAllTags(), tagId, item);
     }
 
     public static boolean isBlockInTag(ResourceLocation tagId, Block block) {
-        return isThingInTag(BlockTags.getCollection(), tagId, block);
+        return isThingInTag(BlockTags.getAllTags(), tagId, block);
     }
 
     public static boolean isEntityTypeInTag(ResourceLocation tagId, EntityType<?> type) {
-        return isThingInTag(EntityTypeTags.getCollection(), tagId, type);
+        return isThingInTag(EntityTypeTags.getAllTags(), tagId, type);
     }
 
     public static boolean isEntityInTag(ResourceLocation tagId, Entity entity) {
-        return isThingInTag(EntityTypeTags.getCollection(), tagId, entity.getType());
+        return isThingInTag(EntityTypeTags.getAllTags(), tagId, entity.getType());
     }
 }

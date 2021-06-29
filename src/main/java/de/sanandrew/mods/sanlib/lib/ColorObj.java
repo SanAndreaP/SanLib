@@ -32,6 +32,10 @@ public final class ColorObj
         return obj;
     }
 
+    public static ColorObj fromRGB(int rgb) {
+        return new ColorObj(rgb | 0xFF000000);
+    }
+
     private ColorObj() { }
 
     /**
@@ -150,6 +154,10 @@ public final class ColorObj
      */
     public float fAlpha() {
         return this.a / 255.0F;
+    }
+
+    public float fAlpha(float min) {
+        return Math.max(min, this.a / 255.0F);
     }
 
     /**

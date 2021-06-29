@@ -5,8 +5,8 @@
 
 package de.sanandrew.mods.sanlib.lib.client;
 
-import de.sanandrew.mods.sanlib.SanLibConfig;
 import de.sanandrew.mods.sanlib.SanLib;
+import de.sanandrew.mods.sanlib.SanLibConfig;
 import de.sanandrew.mods.sanlib.client.ClientTickHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.IResource;
@@ -56,8 +56,7 @@ public final class ShaderHelper
     }
 
     public static boolean areShadersEnabled() {
-        //TODO: figure out if shaders are supported on the machine or if MC thinks it should always be supported
-        return /*OpenGlHelper.shadersSupported &&*/ SanLibConfig.Client.useShaders.get();
+        return SanLibConfig.Client.useShaders.get();
     }
 
     public static int getSecondaryTextureUnit() {

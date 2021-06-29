@@ -7,7 +7,7 @@ package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
@@ -38,15 +38,15 @@ public class Rectangle
 
     @Override
     public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data) {
-        stack.push();
+        stack.pushPose();
         stack.translate(x, y, 0.0D);
         if( this.color[0] != this.color[1] ) {
             GuiUtils.drawGradient(stack, 0, 0, this.size[0], this.size[1], this.color[0], this.color[1], this.horizontal);
         } else {
             AbstractGui.fill(stack, 0, 0, this.size[0], this.size[1], this.color[0]);
         }
-        GlStateManager.enableBlend();
-        stack.pop();
+        RenderSystem.enableBlend();
+        stack.popPose();
     }
 
     @Override

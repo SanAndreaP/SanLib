@@ -69,7 +69,7 @@ public final class ItemStackUtils
      * @see #isValid(ItemStack)
      */
     public static boolean isBlock(@Nonnull ItemStack stack, Block block) {
-        return isValid(stack) && Block.getBlockFromItem(stack.getItem()) == block;
+        return isValid(stack) && Block.byItem(stack.getItem()) == block;
     }
 
     /**
@@ -123,7 +123,7 @@ public final class ItemStackUtils
             return false;
         }
 
-        if( is1.getDamage() != is2.getDamage() ) {
+        if( is1.getDamageValue() != is2.getDamageValue() ) {
             return false;
         }
 
@@ -138,7 +138,7 @@ public final class ItemStackUtils
      */
     public static void writeStackToTag(@Nonnull ItemStack stack, CompoundNBT tag, String tagName) {
         CompoundNBT stackTag = new CompoundNBT();
-        stack.write(stackTag);
+        stack.save(stackTag);
         tag.put(tagName, stackTag);
     }
 
@@ -184,7 +184,7 @@ public final class ItemStackUtils
 
                 CompoundNBT tag = new CompoundNBT();
                 tag.putShort("Slot", (short) i);
-                stack.write(tag);
+                stack.save(tag);
 
                 if( callbackMethod != null ) {
                     CompoundNBT stackNbt = new CompoundNBT();
@@ -207,7 +207,7 @@ public final class ItemStackUtils
         for( int i = 0; i < tagList.size(); i++ ) {
             CompoundNBT tag = tagList.getCompound(i);
             short slot = tag.getShort("Slot");
-            items[slot] = ItemStack.read(tag);
+            items[slot] = ItemStack.of(tag);
 
             if( callbackMethod != null && tag.contains("StackNBT") ) {
                 callbackMethod.accept(items[slot], tag.getCompound("StackNBT"));
@@ -232,10 +232,10 @@ public final class ItemStackUtils
             ItemEntity item = new ItemEntity(world, (pos.getX() + xOff), (pos.getY() + yOff), (pos.getZ() + zOff), stack.copy());
 
             final float motionSpeed = 0.05F;
-            item.setMotion(((float) MiscUtils.RNG.randomGaussian() * motionSpeed),
-                           ((float) MiscUtils.RNG.randomGaussian() * motionSpeed + 0.2F),
-                           ((float) MiscUtils.RNG.randomGaussian() * motionSpeed));
-            world.addEntity(item);
+            item.setDeltaMovement(((float) MiscUtils.RNG.randomGaussian() * motionSpeed),
+                                  ((float) MiscUtils.RNG.randomGaussian() * motionSpeed + 0.2F),
+                                  ((float) MiscUtils.RNG.randomGaussian() * motionSpeed));
+            world.addFreshEntity(item);
         }
     }
 
@@ -246,7 +246,7 @@ public final class ItemStackUtils
     public static NonNullList<ItemStack> getCompactItems(NonNullList<ItemStack> items, int maxInvStackSize, Integer maxStackSize) {
         NonNullList<ItemStack> cmpItems = NonNullList.create();
 
-        items.sort((i1, i2) -> ItemStackUtils.areEqual(i1, i2, false, true) ? 0 : i1.getTranslationKey().compareTo(i2.getTranslationKey()));
+        items.sort((i1, i2) -> ItemStackUtils.areEqual(i1, i2, false, true) ? 0 : i1.getDescriptionId().compareTo(i2.getDescriptionId()));
         items.forEach(v -> {
             int cmpSize = cmpItems.size();
             if( cmpSize < 1 ) {

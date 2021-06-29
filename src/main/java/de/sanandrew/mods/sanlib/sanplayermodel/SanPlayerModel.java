@@ -31,8 +31,8 @@ public class SanPlayerModel
     }
 
     private void clientSetup(FMLClientSetupEvent event) {
-        EntityRendererManager rm = Minecraft.getInstance().getRenderManager();
-        rm.skinMap.put("slim_san", new RenderSanPlayer(rm));
+        EntityRendererManager rm = Minecraft.getInstance().getEntityRenderDispatcher();
+        rm.playerRenderers.put("slim_san", new RenderSanPlayer(rm));
     }
 
     public static boolean isSanPlayer(PlayerEntity e) {

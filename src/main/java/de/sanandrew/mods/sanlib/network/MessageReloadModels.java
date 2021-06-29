@@ -15,6 +15,7 @@ public class MessageReloadModels
 {
     public MessageReloadModels() { }
 
+    @SuppressWarnings("unused")
     public MessageReloadModels(PacketBuffer buffer) { }
 
     @Override

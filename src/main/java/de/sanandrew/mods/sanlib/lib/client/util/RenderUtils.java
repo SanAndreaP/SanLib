@@ -72,26 +72,26 @@ public final class RenderUtils
             itemRenderer = Minecraft.getInstance().getItemRenderer();
         }
 
-        itemRenderer.zLevel -= 50.0F;
-        matrixStack.push();
+        itemRenderer.blitOffset -= 50.0F;
+        matrixStack.pushPose();
         matrixStack.translate(posX, posY, 0.0F);
         matrixStack.scale(scale, scale, scale);
         RenderSystem.pushMatrix();
-        RenderSystem.multMatrix(matrixStack.getLast().getMatrix());
+        RenderSystem.multMatrix(matrixStack.last().pose());
 
-        itemRenderer.renderItemIntoGUI(stack, 0, 0);
+        itemRenderer.renderGuiItem(stack, 0, 0);
 
         if( doOverlay ) {
             if( fontRenderer != null ) {
-                itemRenderer.renderItemOverlayIntoGUI(fontRenderer, stack, 0, 0, customTxt);
+                itemRenderer.renderGuiItemDecorations(fontRenderer, stack, 0, 0, customTxt);
             } else {
-                itemRenderer.renderItemOverlayIntoGUI(Minecraft.getInstance().fontRenderer, stack, 0, 0, "");
+                itemRenderer.renderGuiItemDecorations(Minecraft.getInstance().font, stack, 0, 0, "");
             }
         }
 
         RenderSystem.popMatrix();
-        matrixStack.pop();
-        itemRenderer.zLevel += 50.0F;
+        matrixStack.popPose();
+        itemRenderer.blitOffset += 50.0F;
     }
 
     /**
@@ -123,32 +123,32 @@ public final class RenderUtils
     public static void renderStackInWorld(ItemStack stack, MatrixStack matrixStack, Vector3f pos, Vector3f rotation, float scale,
                                           ItemCameraTransforms.TransformType transformType, IRenderTypeBuffer buffer, LivingEntity entity, int light, int overlay)
     {
-        matrixStack.push();
-        matrixStack.translate(pos.getX(), pos.getY(), pos.getZ());
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(180.0F));
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(rotation.getX()));
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(rotation.getY()));
-        matrixStack.rotate(Vector3f.ZP.rotationDegrees(rotation.getZ()));
+        matrixStack.pushPose();
+        matrixStack.translate(pos.x(), pos.y(), pos.z());
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(180.0F));
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(rotation.x()));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(rotation.y()));
+        matrixStack.mulPose(Vector3f.ZP.rotationDegrees(rotation.z()));
         matrixStack.scale(scale, scale, scale);
 
         renderStackInWorldPure(stack, matrixStack, transformType, buffer, entity, light, overlay);
 
-        matrixStack.pop();
+        matrixStack.popPose();
     }
 
 
     public static void renderStackInWorld(ItemStack stack, MatrixStack matrixStack, Vector3f pos, Quaternion rotation, float scale,
                                           ItemCameraTransforms.TransformType transformType, IRenderTypeBuffer buffer, LivingEntity entity, int light, int overlay)
     {
-        matrixStack.push();
-        matrixStack.translate(pos.getX(), pos.getY(), pos.getZ());
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(180.0F));
-        matrixStack.rotate(rotation);
+        matrixStack.pushPose();
+        matrixStack.translate(pos.x(), pos.y(), pos.z());
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(180.0F));
+        matrixStack.mulPose(rotation);
         matrixStack.scale(scale, scale, scale);
 
         renderStackInWorldPure(stack, matrixStack, transformType, buffer, entity, light, overlay);
 
-        matrixStack.pop();
+        matrixStack.popPose();
     }
 
 
@@ -160,9 +160,9 @@ public final class RenderUtils
         }
 
         if( entity != null ) {
-            itemRenderer.renderItem(entity, stack, transformType, entity.getPrimaryHand() == HandSide.LEFT, matrixStack, buffer, entity.world, light, overlay);
+            itemRenderer.renderStatic(entity, stack, transformType, entity.getMainArm() == HandSide.LEFT, matrixStack, buffer, entity.level, light, overlay);
         } else {
-            itemRenderer.renderItem(stack, transformType, light, overlay, matrixStack, buffer);
+            itemRenderer.renderStatic(stack, transformType, light, overlay, matrixStack, buffer);
         }
     }
 }

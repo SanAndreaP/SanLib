@@ -13,9 +13,9 @@ public class RenderSanPlayer
     public RenderSanPlayer(EntityRendererManager renderManager) {
         super(renderManager, true);
 
-        this.entityModel = new ModelSanPlayer<>(0.0F);
+        this.model = new ModelSanPlayer<>(0.0F);
 
-        this.layerRenderers.removeIf(BipedArmorLayer.class::isInstance);
+        this.layers.removeIf(BipedArmorLayer.class::isInstance);
 
         this.addLayer(new LayerSanSkirt<>(this));
         this.addLayer(new LayerSanArmor<>(this, new LayerSanArmor.ModelSanBiped<>(0.4F), new LayerSanArmor.ModelSanBiped<>(0.9F)));

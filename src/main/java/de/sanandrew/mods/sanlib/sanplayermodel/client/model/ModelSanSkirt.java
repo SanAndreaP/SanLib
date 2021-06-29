@@ -45,7 +45,7 @@ public class ModelSanSkirt<T extends PlayerEntity>
     }
 
     @Override
-    public void render(@Nonnull MatrixStack matrixStackIn, @Nonnull IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn,
+    public void renderToBuffer(@Nonnull MatrixStack matrixStackIn, @Nonnull IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn,
                        float red, float green, float blue, float alpha)
     {
         if( this.modelJson != null && this.modelJson.isLoaded() ) {
@@ -56,24 +56,23 @@ public class ModelSanSkirt<T extends PlayerEntity>
     }
 
     @Override
-    public void setRotationAngles(@Nonnull PlayerEntity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks,
-                                  float netHeadYaw, float headPitch)
-    {
-        if( this.isSneak ) {
-            this.skirt1.rotationPointZ = 3.0F;
-            this.skirt1.rotationPointY = -0.6F;
-            this.skirt2.rotationPointZ = 5.0F;
-            this.skirt2.rotationPointY = -1.0F;
-            this.skirt1.rotateAngleX = -0.29F;
-            this.skirt2.rotateAngleX = -0.43F;
-        } else {
-            this.skirt1.rotationPointZ = 0.0F;
-            this.skirt2.rotationPointZ = 0.0F;
-            this.skirt1.rotationPointY = 0.0F;
-            this.skirt2.rotationPointY = 0.0F;
+    public void setupAnim(@Nonnull PlayerEntity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+        if( this.crouching ) {
+            this.skirt1.z = 3.0F;
+            this.skirt1.y = -0.6F;
+            this.skirt2.z = 5.0F;
+            this.skirt2.y = -1.0F;
 
-            this.skirt1.rotateAngleX = 0.0F;
-            this.skirt2.rotateAngleX = 0.0F;
+            this.skirt1.xRot = -0.29F;
+            this.skirt2.xRot = -0.43F;
+        } else {
+            this.skirt1.z = 0.0F;
+            this.skirt2.z = 0.0F;
+            this.skirt1.y = 0.0F;
+            this.skirt2.y = 0.0F;
+
+            this.skirt1.xRot = 0.0F;
+            this.skirt2.xRot = 0.0F;
         }
     }
 

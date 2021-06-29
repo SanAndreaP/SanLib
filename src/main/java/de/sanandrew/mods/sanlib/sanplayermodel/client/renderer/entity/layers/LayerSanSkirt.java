@@ -47,14 +47,14 @@ public class LayerSanSkirt<T extends PlayerEntity, M extends PlayerModel<T>>
                        float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch)
     {
         if( SanPlayerModel.isSanPlayer(player) ) {
-            ItemStack pants = player.getItemStackFromSlot(EquipmentSlotType.LEGS);
+            ItemStack pants = player.getItemBySlot(EquipmentSlotType.LEGS);
             boolean hasPants = ItemStackUtils.isValid(pants);
 
-            PlayerModel<T> pm = this.getEntityModel();
+            PlayerModel<T> pm = this.getParentModel();
 
             if( !hasPants || hasSkirtArmor(pants) ) {
-                pm.setModelAttributes(this.skirt);
-                renderSkirt(matrixStackIn, bufferIn, packedLightIn, this.skirt, pm.bipedBody, false, null,
+                pm.copyPropertiesTo(this.skirt);
+                renderSkirt(matrixStackIn, bufferIn, packedLightIn, this.skirt, pm.body, false, null,
                             player, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
             }
 
@@ -63,7 +63,7 @@ public class LayerSanSkirt<T extends PlayerEntity, M extends PlayerModel<T>>
                 boolean test = false;
                 Integer overlay = null;
 
-                if( pantsItem instanceof IDyeableArmorItem && ((IDyeableArmorItem) pantsItem).hasColor(pants) ) {
+                if( pantsItem instanceof IDyeableArmorItem && ((IDyeableArmorItem) pantsItem).hasCustomColor(pants) ) {
                     overlay = ((IDyeableArmorItem) pantsItem).getColor(pants);
                 }
 
@@ -84,14 +84,14 @@ public class LayerSanSkirt<T extends PlayerEntity, M extends PlayerModel<T>>
                             Minecraft.getInstance().getResourceManager().getResource(rl);
                         }
 
-                        pm.setModelAttributes(this.skirtArmor);
+                        pm.copyPropertiesTo(this.skirtArmor);
                         this.skirtArmor.setTexture(rl);
-                        renderSkirt(matrixStackIn, bufferIn, packedLightIn, this.skirtArmor, pm.bipedBody, pants.hasEffect(), overlay,
+                        renderSkirt(matrixStackIn, bufferIn, packedLightIn, this.skirtArmor, pm.body, pants.hasFoil(), overlay,
                                     player, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
 
                         if( this.skirtArmorOverlays.containsKey(pantsItem) ) {
                             this.skirtArmor.setTexture(this.skirtArmorOverlays.get(pantsItem));
-                            renderSkirt(matrixStackIn, bufferIn, packedLightIn, this.skirtArmor, pm.bipedBody, pants.hasEffect(), null,
+                            renderSkirt(matrixStackIn, bufferIn, packedLightIn, this.skirtArmor, pm.body, pants.hasFoil(), null,
                                         player, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
                         }
                     } catch( IOException ex ) {
@@ -121,12 +121,12 @@ public class LayerSanSkirt<T extends PlayerEntity, M extends PlayerModel<T>>
             blue = (float) (overlay & 255) / 255.0F;
         }
 
-        IVertexBuilder ivertexbuilder = ItemRenderer.getArmorVertexBuilder(bufferIn, RenderType.getArmorCutoutNoCull(skirt.getTexture()), false, glint);
+        IVertexBuilder ivertexbuilder = ItemRenderer.getArmorFoilBuffer(bufferIn, RenderType.armorCutoutNoCull(skirt.getTexture()), false, glint);
 
-        stack.push();
-        body.translateRotate(stack);
-        skirt.setRotationAngles(player, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        skirt.render(stack, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, red, green, blue, 1.0F);
-        stack.pop();
+        stack.pushPose();
+        body.translateAndRotate(stack);
+        skirt.setupAnim(player, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+        skirt.renderToBuffer(stack, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, red, green, blue, 1.0F);
+        stack.popPose();
     }
 }

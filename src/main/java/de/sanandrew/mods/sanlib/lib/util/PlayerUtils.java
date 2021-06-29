@@ -21,9 +21,9 @@ public final class PlayerUtils
 //    }
 
     public static ItemStack getHeldItemOfType(PlayerEntity player, Item type) {
-        ItemStack heldStack = player.getHeldItemMainhand();
+        ItemStack heldStack = player.getMainHandItem();
         if( !ItemStackUtils.isItem(heldStack, type) ) {
-            return player.getHeldItemOffhand();
+            return player.getOffhandItem();
         }
 
         return heldStack;

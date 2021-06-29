@@ -20,34 +20,32 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({ "unused", "unchecked" })
 public final class EntityUtils
 {
     public static final int ATTR_ADD_VAL_TO_BASE = 0;
     public static final int ATTR_ADD_PERC_VAL_TO_SUM = 1;
     public static final int RISE_SUM_WITH_PERC_VAL = 2;
 
-    public static Entity getEntityByUUID(World worldObj, UUID uuid) {
-        return (worldObj instanceof ServerWorld ? ((ServerWorld) worldObj).getEntityByUuid(uuid) : null);//new ArrayList<>(worldObj.getLoadedEntitiesWithinAABB()).stream().filter(entity -> entity.getUniqueID().equals(uuid)).findFirst().orElse(null);
+    public static Entity getServerEntity(World worldObj, UUID uuid) {
+        return (worldObj instanceof ServerWorld ? ((ServerWorld) worldObj).getEntity(uuid) : null);
     }
 
     public static <T extends Entity> List<T> getPassengersOfClass(Entity e, Class<T> psgClass) {
-        //noinspection unchecked
         return e.getPassengers().stream().filter(psgClass::isInstance).map(entity -> (T) entity).collect(Collectors.toList());
     }
 
     public static <T extends Goal> List<T> getAisFromTaskList(Set<PrioritizedGoal> taskList, Class<T> cls) {
-        //noinspection unchecked
         return taskList.stream().filter(task -> cls.equals(task.getGoal().getClass())).map(task -> (T) task.getGoal()).collect(Collectors.toList());
     }
 
-    public static boolean tryApplyModifier(LivingEntity e, Attribute attribute, AttributeModifier modifier, boolean persist) {
+    public static boolean tryApplyModifier(LivingEntity e, Attribute attribute, AttributeModifier modifier, boolean permanent) {
         ModifiableAttributeInstance attrib = e.getAttribute(attribute);
         if( attrib != null && !attrib.hasModifier(modifier) ) {
-            if( persist ) {
-                attrib.applyPersistentModifier(modifier);
+            if( permanent ) {
+                attrib.addPermanentModifier(modifier);
             } else {
-                attrib.applyNonPersistentModifier(modifier);
+                attrib.addTransientModifier(modifier);
             }
 
             return true;
@@ -55,17 +53,6 @@ public final class EntityUtils
 
         return false;
     }
-
-//    public static boolean tryApplyModifier(LivingEntity e, String attributeName, AttributeModifier modifier) {
-//        ModifiableAttributeInstance attrib = e.getAttributeManager(attributeName);
-//        if( attrib != null && !attrib.hasModifier(modifier) ) {
-//            attrib.applyModifier(modifier);
-//
-//            return true;
-//        }
-//
-//        return false;
-//    }
 
     public static boolean tryRemoveModifier(LivingEntity e, Attribute attribute, AttributeModifier modifier) {
         ModifiableAttributeInstance attrib = e.getAttribute(attribute);
@@ -77,15 +64,4 @@ public final class EntityUtils
 
         return false;
     }
-
-//    public static boolean tryRemoveModifier(LivingEntity e, String attributeName, AttributeModifier modifier) {
-//        ModifiableAttributeInstance attrib = e.getAttributeMap().getAttributeInstanceByName(attributeName);
-//        if( attrib != null && attrib.hasModifier(modifier) ) {
-//            attrib.removeModifier(modifier);
-//
-//            return true;
-//        }
-//
-//        return false;
-//    }
 }

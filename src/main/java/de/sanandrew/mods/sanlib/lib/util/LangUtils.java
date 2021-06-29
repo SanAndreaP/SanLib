@@ -6,7 +6,6 @@
 package de.sanandrew.mods.sanlib.lib.util;
 
 import de.sanandrew.mods.sanlib.Constants;
-import net.minecraft.entity.EntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.LanguageMap;
 
@@ -39,10 +38,9 @@ public final class LangUtils
 
     public static String translateOrDefault(String langKey, String defaultVal, Object... args) {
         final String s;
-        if( LanguageMap.getInstance().func_230506_b_(langKey) ) {
-            s = args == null || args.length < 1
-                ? LanguageMap.getInstance().func_230503_a_(langKey)
-                : String.format(LanguageMap.getInstance().func_230503_a_(langKey), args);
+        if( LanguageMap.getInstance().has(langKey) ) {
+            String l = LanguageMap.getInstance().getOrDefault(langKey);
+            s = args == null || args.length < 1 ? l : String.format(l, args);
         } else {
             s = defaultVal;
         }
@@ -52,14 +50,6 @@ public final class LangUtils
 
     public static String translateOrDefault(TranslateKey langKey, String defaultVal) {
         return translateOrDefault(langKey.key, defaultVal);
-    }
-
-    /**
-     * @deprecated Use {@link EntityType#getName()} instead whenever possible
-     */
-    @Deprecated
-    public static String translateEntityCls(EntityType<?> type) {
-        return translate(type.getTranslationKey());
     }
 
     public static TKeyBuilder newKey(String key) {

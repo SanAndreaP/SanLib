@@ -23,10 +23,8 @@ public class LayerSanArmor<T extends LivingEntity, M extends BipedModel<T>, A ex
         }
 
         @Override
-        public void setRotationAngles(@Nonnull T entityIn, float limbSwing, float limbSwingAmount, float ageInTicks,
-                                      float netHeadYaw, float headPitch)
-        {
-            super.setRotationAngles(entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+        public void setupAnim(@Nonnull T entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+            super.setupAnim(entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
 
             ModelSanPlayer.setLimbRotations(this);
         }

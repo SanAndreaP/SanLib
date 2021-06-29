@@ -5,24 +5,28 @@
 
 package santest;
 
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.lwjgl.glfw.GLFW;
 
 @Mod.EventBusSubscriber(modid = "santest", value = Dist.CLIENT)
 public class Events
 {
-//    @SubscribeEvent
-//    public static void onKeyPress(InputEvent.KeyInputEvent event) {
-//        // when up_arrow is pressed...
-//        if( Keyboard.isKeyDown(Keyboard.KEY_UP) && Minecraft.getInstance().currentScreen == null ) {
-//            Minecraft.getInstance().displayGuiScreen(new TestGui());
-//        }
-//        if( Keyboard.isKeyDown(Keyboard.KEY_DOWN) && Minecraft.getInstance().currentScreen == null ) {
+    @SubscribeEvent
+    public static void onKeyPress(InputEvent.KeyInputEvent event) {
+        // when up_arrow is pressed...
+        if( event.getKey() == GLFW.GLFW_KEY_UP && Minecraft.getInstance().screen == null ) {
+            Minecraft.getInstance().setScreen(new TestGui());
+        }
+        if( event.getKey() == GLFW.GLFW_KEY_DOWN && Minecraft.getInstance().screen == null ) {
 //            try {
 //                Minecraft.getInstance().displayGuiScreen(new GuiLexicon(Test.lexiconId));
 //            } catch( IOException e ) {
 //                e.printStackTrace();
 //            }
-//        }
-//    }
+        }
+    }
 }

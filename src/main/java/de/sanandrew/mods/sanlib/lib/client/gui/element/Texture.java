@@ -63,15 +63,15 @@ public class Texture
     @Override
     @SuppressWarnings("deprecation")
     public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data) {
-        gui.get().getMinecraft().getTextureManager().bindTexture(this.texture);
-        stack.push();
-        GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA.param, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA.param);
+        gui.get().getMinecraft().getTextureManager().bind(this.texture);
+        stack.pushPose();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         stack.translate(x, y, 0.0D);
         stack.scale(this.scale[0], this.scale[1], 1.0F);
         RenderSystem.color4f(this.color.fRed(), this.color.fGreen(), this.color.fBlue(), this.color.fAlpha());
         drawRect(gui, stack);
-        stack.pop();
+        stack.popPose();
     }
 
     protected void drawRect(IGui gui, MatrixStack stack) {

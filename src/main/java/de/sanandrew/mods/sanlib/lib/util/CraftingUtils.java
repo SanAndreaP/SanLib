@@ -5,16 +5,17 @@
 
 package de.sanandrew.mods.sanlib.lib.util;
 
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.IRecipeType;
+import net.minecraft.world.World;
 
 @SuppressWarnings("unused")
 public final class CraftingUtils
 {
-
-    public static IRecipe<?> findShapedRecipe(final ItemStack result) {
-        throw new RuntimeException("NYI");
-//        return CraftingManager..getRecipeList().stream().filter(recipe -> ItemStackUtils.areEqual(recipe.getRecipeOutput(), result, result.hasTagCompound()))
-//                              .findFirst().orElse(null);
+    public static <C extends IInventory, T extends IRecipe<C>> T findRecipe(World level, IRecipeType<T> type, final ItemStack result) {
+        return level.getRecipeManager().getAllRecipesFor(type).stream().filter(r -> ItemStackUtils.areEqual(result, r.getResultItem(), result.hasTag()))
+                    .findFirst().orElse(null);
     }
 }
