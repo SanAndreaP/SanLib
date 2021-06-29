@@ -31,9 +31,10 @@
   ],
   "foregroundElements": [
     {
-      "type": "text",
+      "type": "textfield",
       "pos": [3, 5],
       "data": {
+        "size": [12, 24],
         "color": "0xFFFF0000",
         "text": "sanlib.test.text"
       }

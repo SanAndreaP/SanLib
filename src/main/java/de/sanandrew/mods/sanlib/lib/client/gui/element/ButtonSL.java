@@ -253,4 +253,13 @@ public class ButtonSL
     public boolean isActive() {
         return this.buttonDelegate.active;
     }
+
+    @Override
+    public boolean isVisible() {
+        return this.buttonDelegate != null && this.buttonDelegate.visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.buttonDelegate.visible = visible;
+    }
 }

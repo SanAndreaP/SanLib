@@ -5,6 +5,7 @@
 
 package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
+import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -15,6 +16,11 @@ import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.fonts.Font;
+import net.minecraft.client.gui.fonts.providers.DefaultGlyphProvider;
+import net.minecraft.client.gui.fonts.providers.IGlyphProvider;
+import net.minecraft.client.gui.fonts.providers.IGlyphProviderFactory;
+import net.minecraft.client.gui.fonts.providers.TextureGlyphProvider;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -112,7 +118,7 @@ public class Text
         if( cstFont == null ) {
             this.fontRenderer = new Font("standard").get(gui.get());
         } else {
-            this.fontRenderer = JsonUtils.GSON.fromJson(cstFont, Font.class).get(gui.get());
+            this.fontRenderer = JsonUtils.GSON.fromJson(cstFont, Font.class).get(gui.get(), data.getAsJsonObject("glyphProvider"));
         }
 
         this.currWidth = this.getTextWidth(gui);
@@ -236,6 +242,17 @@ public class Text
         this.color = this.colors.get(colorId);
     }
 
+    public static net.minecraft.client.gui.fonts.Font getMcFont(Minecraft mc, ResourceLocation rl) {
+        return getMcFont(mc, rl, new DefaultGlyphProvider());
+    }
+
+    public static net.minecraft.client.gui.fonts.Font getMcFont(Minecraft mc, ResourceLocation rl, IGlyphProvider glyphProvider) {
+        net.minecraft.client.gui.fonts.Font f = new net.minecraft.client.gui.fonts.Font(mc.textureManager, rl);
+        f.reload(Lists.newArrayList(glyphProvider));
+
+        return f;
+    }
+
     @SuppressWarnings("WeakerAccess")
     public static final class Font
     {
@@ -254,6 +271,10 @@ public class Text
         }
 
         public FontRenderer get(Screen gui) {
+            return this.get(gui, null);
+        }
+
+        public FontRenderer get(Screen gui, JsonObject glyphProvider) {
             if( "standard".equals(this.texture) ) {
                 return gui.getMinecraft().font;
             } else if( "galactic".equals(this.texture) ) {
@@ -266,16 +287,17 @@ public class Text
             } else {
                 FontRenderer fr = this.frInst == null ? null : this.frInst.get();
                 if( fr == null ) {
-                    net.minecraft.client.gui.fonts.Font f = getMcFont(gui.getMinecraft(), new ResourceLocation(this.texture));
+                    IGlyphProvider p = null;
+                    if( glyphProvider != null ) {
+                        p = TextureGlyphProvider.Factory.fromJson(glyphProvider).create(gui.getMinecraft().getResourceManager());
+                    }
+
+                    net.minecraft.client.gui.fonts.Font f = getMcFont(gui.getMinecraft(), new ResourceLocation(this.texture), p);
                     this.frInst = new WeakReference<>(new FontRenderer(r -> f));
                 }
 
                 return fr;
             }
-        }
-
-        private static net.minecraft.client.gui.fonts.Font getMcFont(Minecraft mc, ResourceLocation rl) {
-            return new net.minecraft.client.gui.fonts.Font(mc.textureManager, rl);
         }
 
         @Override

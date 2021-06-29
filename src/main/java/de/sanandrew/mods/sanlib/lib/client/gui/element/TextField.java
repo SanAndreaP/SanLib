@@ -13,16 +13,11 @@ import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
-import de.sanandrew.mods.sanlib.lib.util.LangUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.fonts.Font;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -47,21 +42,18 @@ public class TextField
     public int          placeholderColor;
     public boolean      canLoseFocus;
     public boolean      drawBackground;
-    public boolean      shadow;
-    public String         text;
     public ITextComponent placeholderText;
     public FontRenderer   fontRenderer;
 
-    public TextFieldWidget textfield;
+    private TextFieldWidget textfield;
 
     private int maxStringLength;
+    private boolean isEditable = true;
 
     @Override
     public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) {
         this.size = JsonUtils.getIntArray(data.get("size"), Range.is(2));
-        this.text = JsonUtils.getStringVal(data.get("text"), "");
         this.placeholderText = new TranslationTextComponent(JsonUtils.getStringVal(data.get("placeholderText"), ""));
-        this.shadow = JsonUtils.getBoolVal(data.get("shadow"), true);
         this.canLoseFocus = JsonUtils.getBoolVal(data.get("canLoseFocus"), true);
         this.drawBackground = JsonUtils.getBoolVal(data.get("drawBackground"), true);
         this.color = MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("textColor"), "0xFFE0E0E0"));
@@ -70,13 +62,12 @@ public class TextField
 
         JsonElement cstFont = data.get("font");
         if( cstFont == null ) {
-            this.fontRenderer = new TxtFontRenderer();
+            this.fontRenderer = Minecraft.getInstance().font;
         } else {
-            this.fontRenderer = JsonUtils.GSON.fromJson(cstFont, Text.Font.class).get(gui.get());
+            this.fontRenderer = JsonUtils.GSON.fromJson(cstFont, Text.Font.class).get(gui.get(), data.getAsJsonObject("glyphProvider"));
         }
 
         this.textfield = new TextFieldWidget(this.fontRenderer, 0, 0, this.size[0], this.size[1], StringTextComponent.EMPTY);
-        this.textfield.setValue(LangUtils.translate(this.text));
         this.textfield.setTextColor(this.color);
         this.textfield.setTextColorUneditable(this.disabledColor);
         this.textfield.setCanLoseFocus(this.canLoseFocus);
@@ -126,6 +117,14 @@ public class TextField
         return this.maxStringLength;
     }
 
+    public void setEditable(boolean editable) {
+        this.textfield.setEditable(this.isEditable = editable);
+    }
+
+    public boolean isEditable() {
+        return this.isEditable;
+    }
+
     public void setFocused(boolean isFocused) {
         this.textfield.setFocus(isFocused);
     }
@@ -169,7 +168,7 @@ public class TextField
 
     @Override
     public boolean isVisible() {
-        return this.textfield.isVisible();
+        return this.textfield != null && this.textfield.isVisible();
     }
 
     public void setValidator(Predicate<String> validator) {
@@ -188,43 +187,5 @@ public class TextField
     @Override
     public int getHeight() {
         return this.size[1] - (this.drawBackground ? 8 : 0);
-    }
-    
-    @SuppressWarnings("NullableProblems")
-    private final class TxtFontRenderer
-            extends FontRenderer
-    {
-        private TxtFontRenderer() {
-            super(r -> new Font(Minecraft.getInstance().textureManager, Minecraft.DEFAULT_FONT));
-        }
-
-        public int drawInBatch(String txt, float x, float y, int color, boolean shadow, Matrix4f pose,
-                               IRenderTypeBuffer buf, boolean seeThrough, int effectColor, int packedLight)
-        {
-            return super.drawInBatch(txt, x, y, color, shadow && TextField.this.shadow, pose,
-                                     buf, seeThrough, effectColor, packedLight);
-        }
-
-        public int drawInBatch(String txt, float x, float y, int color, boolean shadow, Matrix4f pose,
-                               IRenderTypeBuffer buf, boolean seeThrough, int effectColor, int packedLight,
-                               boolean isBidirectional)
-        {
-            return super.drawInBatch(txt, x, y, color, shadow && TextField.this.shadow, pose,
-                                     buf, seeThrough, effectColor, packedLight, isBidirectional);
-        }
-
-        public int drawInBatch(ITextComponent txt, float x, float y, int color, boolean shadow, Matrix4f pose,
-                               IRenderTypeBuffer buf, boolean seeThrough, int effectColor, int packedLight)
-        {
-            return super.drawInBatch(txt, x, y, color, shadow && TextField.this.shadow, pose,
-                                     buf, seeThrough, effectColor, packedLight);
-        }
-
-        public int drawInBatch(IReorderingProcessor txt, float x, float y, int color, boolean shadow, Matrix4f pose,
-                               IRenderTypeBuffer buf, boolean seeThrough, int effectColor, int packedLight)
-        {
-            return super.drawInBatch(txt, x, y, color, shadow && TextField.this.shadow, pose,
-                                     buf, seeThrough, effectColor, packedLight);
-        }
     }
 }
