@@ -161,18 +161,26 @@ public class Text
                                 .reduce(Integer::max).orElse(0);
     }
 
+    protected void updateSize(IGui gui) {
+        this.currWidth = this.getTextWidth(gui);
+        this.currHeight = this.renderedLines.size() * this.lineHeight;
+    }
+
     @Override
-    public void update(IGui gui, JsonObject data) {
+    public void tick(IGui gui, JsonObject data) {
         this.renderedLines.clear();
         ITextComponent s = this.getDynamicText(gui, this.text);
 
-        this.currWidth = this.getTextWidth(gui);
-        ITextProperties[] ln = this.fontRenderer.getSplitter()
+        this.renderedLines.addAll(Arrays.asList(this.fontRenderer.getSplitter()
                                                 .splitLines(s, this.wrapWidth > 0 ? this.wrapWidth : Integer.MAX_VALUE, Style.EMPTY)
-                                                .toArray(new ITextProperties[0]);
-        this.currHeight = ln.length * this.lineHeight;
+                                                .toArray(new ITextProperties[0])));
 
-        this.renderedLines.addAll(Arrays.asList(ln));
+        this.updateSize(gui);
+    }
+
+    @Override
+    public void renderTick(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data) {
+        this.updateSize(gui);
     }
 
     @Override
@@ -304,18 +312,6 @@ public class Text
         @SuppressWarnings("NonFinalFieldReferencedInHashCode")
         public int hashCode() {
             return Objects.hash(this.texture, this.unicode);
-        }
-    }
-
-    @Override
-    public boolean forceRenderUpdate(IGui gui) {
-        ITextComponent s = this.getDynamicText(gui, this.text);
-
-        if( this.prevTxt == null || !s.getString().equals(this.prevTxt.getString()) ) {
-            this.prevTxt = s;
-            return true;
-        } else {
-            return false;
         }
     }
 }

@@ -12,6 +12,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
+import de.sanandrew.mods.sanlib.lib.client.util.GuiUtils;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.Minecraft;
@@ -75,19 +76,27 @@ public class TextField
     }
 
     @Override
-    public void update(IGui gui, JsonObject data) {
+    public void tick(IGui gui, JsonObject data) {
         this.textfield.tick();
     }
 
     @Override
     public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data) {
+        stack.pushPose();
+        this.textfield.x = gui.getScreenPosX() + x;
+        this.textfield.y = gui.getScreenPosY() + y;
+        stack.translate(x - this.textfield.x, y - this.textfield.y, 0);
+        this.textfield.renderButton(stack, (int) mouseX, (int) mouseY, partTicks);
         this.textfield.x = x;
         this.textfield.y = y;
-        this.textfield.renderButton(stack, x, y, partTicks);
+        stack.popPose();
+
         if( !this.isFocused() && Strings.isNullOrEmpty(this.getText()) && !Strings.isNullOrEmpty(this.placeholderText.getString()) ) {
             x += (this.drawBackground ? 4 : 0);
             y += (this.drawBackground ? (this.size[1] - 8) / 2 : 0);
+            GuiUtils.enableScissor(gui.getScreenPosX() + x, gui.getScreenPosY() + y, this.size[0] - (this.drawBackground ? 8 : 0), this.size[1]);
             this.fontRenderer.draw(stack, this.placeholderText, x, y, this.placeholderColor);
+            GuiUtils.disableScissor();
         }
     }
 
@@ -99,6 +108,11 @@ public class TextField
     @Override
     public boolean keyPressed(IGui gui, int keyCode, int scanCode, int modifiers) {
         return this.textfield.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean charTyped(IGui gui, char typedChar, int keyCode) {
+        return this.textfield.charTyped(typedChar, keyCode);
     }
 
     public void setText(String text) {
@@ -181,11 +195,11 @@ public class TextField
 
     @Override
     public int getWidth() {
-        return this.textfield.getWidth();
+        return this.size[0] + (this.drawBackground ? 2 : 0);
     }
 
     @Override
     public int getHeight() {
-        return this.size[1] - (this.drawBackground ? 8 : 0);
+        return this.size[1] + (this.drawBackground ? 2 : 0);
     }
 }

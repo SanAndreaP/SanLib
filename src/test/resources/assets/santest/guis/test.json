@@ -31,12 +31,13 @@
   ],
   "foregroundElements": [
     {
-      "type": "textfield",
+      "type": "_textfield",
       "pos": [3, 5],
       "data": {
-        "size": [12, 24],
-        "color": "0xFFFF0000",
-        "text": "sanlib.test.text"
+        "size": [36, 12],
+        "textColor": "0xFFFF0000",
+        "text": "sanlib.test.text",
+        "placeholderText": "placeholderText"
       }
     },
     {
@@ -69,6 +70,16 @@
                 "item": "minecraft:command_block"
               },
               "scale": 2.0
+            }
+          },
+          {
+            "type": "textfield",
+            "pos": [3, 3000],
+            "data": {
+              "size": [360, 12],
+              "textColor": "0xFFFF0000",
+              "text": "sanlib.test.text",
+              "placeholderText": "placeholderText"
             }
           },
           {

@@ -45,6 +45,10 @@ public final class GuiUtils
                                    (int) (width * scaleFactor), (int) (height * scaleFactor));
     }
 
+    public static void disableScissor() {
+        RenderSystem.disableScissor();
+    }
+
 //    /**
 //     * Returns the tooltip from an ItemStack without the info whilst holding SHIFT (added by some mods).
 //     * @param stack The ItemStack.

@@ -21,7 +21,9 @@ public interface IGuiElement
 {
     void bakeData(IGui gui, JsonObject data, GuiElementInst inst);
 
-    default void update(IGui gui, JsonObject data) {}
+    default void tick(IGui gui, JsonObject data) {}
+
+    default void renderTick(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data) {}
 
     void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data);
 
@@ -30,8 +32,6 @@ public interface IGuiElement
     int getHeight();
 
     default boolean isVisible() { return true; }
-
-    default boolean forceRenderUpdate(IGui gui) { return false; }
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)

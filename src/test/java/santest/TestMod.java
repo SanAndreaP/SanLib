@@ -19,6 +19,8 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.Level;
 
+import java.util.Objects;
+
 @Mod("santest")
 public class TestMod
 {
@@ -38,7 +40,8 @@ public class TestMod
     }
 
     private void registerItems(RegistryEvent.Register<Item> event) {
-        event.getRegistry().register(new BlockItem(TestBlock.INSTANCE, new Item.Properties().tab(ItemGroup.TAB_BUILDING_BLOCKS)).setRegistryName(TestBlock.INSTANCE.getRegistryName()));
+        event.getRegistry().register(new BlockItem(TestBlock.INSTANCE, new Item.Properties().tab(ItemGroup.TAB_BUILDING_BLOCKS)).setRegistryName(
+                Objects.requireNonNull(TestBlock.INSTANCE.getRegistryName())));
     }
 
     private static void testTickFormat() {

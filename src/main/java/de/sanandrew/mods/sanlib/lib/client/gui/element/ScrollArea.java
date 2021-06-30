@@ -102,10 +102,10 @@ public class ScrollArea
     }
 
     @Override
-    public void update(IGui gui, JsonObject data) {
+    public void tick(IGui gui, JsonObject data) {
         this.rebuildChildren(gui, data, false);
 
-        super.update(gui, data);
+        super.tick(gui, data);
     }
 
     @Override

@@ -56,7 +56,7 @@ public class GroupBox
     }
 
     @Override
-    public void update(IGui gui, JsonObject data) {
+    public void tick(IGui gui, JsonObject data) {
         GuiElementInst label = this.getChild(LABEL);
         GuiElementInst rectTR = this.getChild(RECTS[1]);
         int tw = label.get(Text.class).getTextWidth(gui);
@@ -64,7 +64,7 @@ public class GroupBox
         rectTR.pos[0] = 6 + tw;
         rectTR.get(Rectangle.class).size[0] = this.size[0] - 6 - tw;
 
-        super.update(gui, data);
+        super.tick(gui, data);
     }
 
     @Override

@@ -58,14 +58,14 @@ public abstract class ElementParent<K>
     }
 
     @Override
-    public void update(IGui gui, JsonObject data) {
-        doWorkVI(e -> e.get().update(gui, e.data));
+    public void tick(IGui gui, JsonObject data) {
+        doWorkVI(e -> e.get().tick(gui, e.data));
     }
 
     @Override
     public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data) {
         for( GuiElementInst inst : this.getChildren() ) {
-            GuiDefinition.renderElement(gui, stack, x + inst.pos[0], y + inst.pos[1], mouseX, mouseY, partTicks, inst);
+            GuiDefinition.renderElement(gui, stack, x + inst.pos[0], y + inst.pos[1], mouseX, mouseY, partTicks, inst, true);
         }
     }
 
@@ -81,7 +81,7 @@ public abstract class ElementParent<K>
 
     @Override
     public boolean mouseClicked(IGui gui, double mouseX, double mouseY, int button) {
-        return doWorkB(e -> e.mouseReleased(gui, mouseX, mouseY, button));
+        return doWorkB(e -> e.mouseClicked(gui, mouseX, mouseY, button));
     }
 
     @Override
@@ -151,10 +151,5 @@ public abstract class ElementParent<K>
             }
         }
         return h;
-    }
-
-    @Override
-    public boolean forceRenderUpdate(IGui gui) {
-        return doWorkB(e -> e.forceRenderUpdate(gui));
     }
 }

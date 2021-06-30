@@ -103,6 +103,25 @@ public class GuiDefinition
         return new GuiDefinition(data, loadProcessor);
     }
 
+    public static boolean initialize(GuiDefinition guiDef, IGui gui) {
+        if( guiDef == null ) {
+            gui.get().getMinecraft().setScreen(null);
+
+            return false;
+        }
+
+        guiDef.initGui(gui);
+
+        return true;
+    }
+
+    public static void drawBackground(GuiDefinition guiDef, MatrixStack stack, IGui gui, float partTicks, int mouseX, int mouseY) {
+        stack.pushPose();
+        stack.translate(gui.getScreenPosX(), gui.getScreenPosY(), 0.0F);
+        guiDef.drawBackground(gui, stack, mouseX, mouseY, partTicks);
+        stack.popPose();
+    }
+
     private void reloadDefinition() throws IOException {
         this.idToElementMap.clear();
 
@@ -177,15 +196,22 @@ public class GuiDefinition
     }
 
     public static void renderElement(IGui gui, MatrixStack stack, int mouseX, int mouseY, float partialTicks, GuiElementInst e) {
-        renderElement(gui, stack, e.pos[0], e.pos[1], mouseX, mouseY, partialTicks, e);
+        renderElement(gui, stack, e.pos[0], e.pos[1], mouseX, mouseY, partialTicks, e, true);
     }
 
     public static void renderElement(IGui gui, MatrixStack stack, int x, int y, double mouseX, double mouseY, float partialTicks, GuiElementInst e) {
+        renderElement(gui, stack, x, y, mouseX, mouseY, partialTicks, e, true);
+    }
+
+    public static void renderElement(IGui gui, MatrixStack stack, int mouseX, int mouseY, float partialTicks, GuiElementInst e, boolean doRenderTick) {
+        renderElement(gui, stack, e.pos[0], e.pos[1], mouseX, mouseY, partialTicks, e, doRenderTick);
+    }
+
+    public static void renderElement(IGui gui, MatrixStack stack, int x, int y, double mouseX, double mouseY, float partialTicks, GuiElementInst e, boolean doRenderTick) {
         IGuiElement ie = e.get();
         if( e.isVisible() ) {
-            if( !e.firstRenderUpdate || ie.forceRenderUpdate(gui) ) {
-                e.firstRenderUpdate = true;
-                ie.update(gui, e.data);
+            if( doRenderTick ) {
+                ie.renderTick(gui, stack, partialTicks, x, y, mouseX, mouseY, e.data);
             }
 
             switch( e.getAlignmentH() ) {
@@ -313,8 +339,7 @@ public class GuiDefinition
     public void update(IGui gui) {
         Consumer<GuiElementInst> f = e -> {
             if( e.isVisible() ) {
-                e.firstRenderUpdate = true;
-                e.get().update(gui, e.data);
+                e.get().tick(gui, e.data);
             }
         };
         Arrays.stream(this.backgroundElements).forEach(f);

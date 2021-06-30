@@ -8,7 +8,7 @@ package de.sanandrew.mods.sanlib.lib.client.gui.element;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
+import de.sanandrew.mods.sanlib.lib.client.gui.GuiDefinition;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
@@ -78,7 +78,11 @@ public class Tooltip
             double locMouseX = mouseX - gui.getScreenPosX();
             double locMouseY = mouseY - gui.getScreenPosY();
 
-            IGuiElement contentElem = this.getChild(CONTENT).get();
+            GuiElementInst inst = this.getChild(CONTENT);
+            IGuiElement contentElem = inst.get();
+
+            contentElem.renderTick(gui, stack, partTicks, x + inst.pos[0], y + inst.pos[1], mouseX, mouseY, inst.data);
+
             int width = contentElem.getWidth() + this.padding[1] + this.padding[3];
             int height = contentElem.getHeight() + this.padding[0] + this.padding[2];
             int xPos = (int) locMouseX + 12;
@@ -88,7 +92,6 @@ public class Tooltip
                 xPos -= width + 28;
             }
 
-//            RenderSystem.disableDepthTest();
             stack.pushPose();
             stack.translate(0.0D, 0.0D, 400.0D);
             AbstractGui.fill(stack, xPos - 3, yPos - 4, xPos + width + 3, yPos - 3, this.backgroundColor);
@@ -102,10 +105,9 @@ public class Tooltip
             AbstractGui.fill(stack, xPos - 3, yPos - 3,          xPos + width + 3, yPos - 2,          this.borderTopColor);
             AbstractGui.fill(stack, xPos - 3, yPos + height + 2, xPos + width + 3, yPos + height + 3, this.borderBottomColor);
 
-            super.render(gui, stack, partTicks, xPos + this.padding[3], yPos + this.padding[0], mouseX, mouseY, data);
+            GuiDefinition.renderElement(gui, stack, x + inst.pos[0], y + inst.pos[1], mouseX, mouseY, partTicks, inst, false);
 
             stack.popPose();
-//            RenderSystem.enableDepthTest();
         }
     }
 
