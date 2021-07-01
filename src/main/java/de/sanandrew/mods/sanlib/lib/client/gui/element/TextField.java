@@ -180,6 +180,10 @@ public class TextField
         this.enabled = enabled;
     }
 
+    public boolean canConsumeInput() {
+        return this.textfield.canConsumeInput();
+    }
+
     @Override
     public boolean isVisible() {
         return this.textfield != null && this.textfield.isVisible();
