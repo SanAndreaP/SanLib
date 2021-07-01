@@ -77,16 +77,16 @@ public class Tooltip
         if( IGuiElement.isHovering(gui, x, y, mouseX, mouseY, this.size[0], this.size[1]) ) {
             double locMouseX = mouseX - gui.getScreenPosX();
             double locMouseY = mouseY - gui.getScreenPosY();
+            int xPos = (int) locMouseX + 12;
+            int yPos = (int) locMouseY - 12;
 
             GuiElementInst inst = this.getChild(CONTENT);
             IGuiElement contentElem = inst.get();
 
-            contentElem.renderTick(gui, stack, partTicks, x + inst.pos[0], y + inst.pos[1], mouseX, mouseY, inst.data);
+            contentElem.renderTick(gui, stack, partTicks, xPos, yPos, mouseX, mouseY, inst.data);
 
             int width = contentElem.getWidth() + this.padding[1] + this.padding[3];
             int height = contentElem.getHeight() + this.padding[0] + this.padding[2];
-            int xPos = (int) locMouseX + 12;
-            int yPos = (int) locMouseY - 12;
 
             if( mouseX + width + 16 > gui.get().width ) {
                 xPos -= width + 28;
@@ -105,7 +105,7 @@ public class Tooltip
             AbstractGui.fill(stack, xPos - 3, yPos - 3,          xPos + width + 3, yPos - 2,          this.borderTopColor);
             AbstractGui.fill(stack, xPos - 3, yPos + height + 2, xPos + width + 3, yPos + height + 3, this.borderBottomColor);
 
-            GuiDefinition.renderElement(gui, stack, x + inst.pos[0], y + inst.pos[1], mouseX, mouseY, partTicks, inst, false);
+            GuiDefinition.renderElement(gui, stack, xPos, yPos, mouseX, mouseY, partTicks, inst, false);
 
             stack.popPose();
         }

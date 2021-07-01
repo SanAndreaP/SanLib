@@ -31,13 +31,11 @@
   ],
   "foregroundElements": [
     {
-      "type": "_textfield",
-      "pos": [3, 5],
+      "type": "tooltip",
+      "pos": [0, 0],
       "data": {
-        "size": [36, 12],
-        "textColor": "0xFFFF0000",
-        "text": "sanlib.test.text",
-        "placeholderText": "placeholderText"
+        "size": [16, 16],
+        "text": "test"
       }
     },
     {
