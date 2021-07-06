@@ -68,7 +68,7 @@ public class LayerSanSkirt<T extends PlayerEntity, M extends PlayerModel<T>>
                 }
 
                 if( !this.skirtArmorList.containsKey(pantsItem) ) {
-                    String path = String.format("textures/entity/player/%s", MiscUtils.applyNonNull(pants.getItem().getRegistryName(), ResourceLocation::toString, "").replace(":", "_"));
+                    String path = String.format("textures/entity/player/%s", MiscUtils.apply(pants.getItem().getRegistryName(), ResourceLocation::toString, "").replace(":", "_"));
                     this.skirtArmorList.put(pantsItem, new ResourceLocation(Constants.PM_ID, path + ".png"));
                     test = true;
 

@@ -68,7 +68,7 @@ public class ScrollArea
         this.maxScrollDelta = JsonUtils.getFloatVal(data.get("maxScrollDelta"), 1.0F);
 
         int[] scrollBarPos = JsonUtils.getIntArray(data.get("scrollbarPos"), new int[] {0, this.areaSize[1]}, org.apache.commons.lang3.Range.is(2));
-        JsonObject scrollBtnData = MiscUtils.defIfNull(data.getAsJsonObject("scrollButton"), JsonObject::new);
+        JsonObject scrollBtnData = MiscUtils.get(data.getAsJsonObject("scrollButton"), JsonObject::new);
         this.scrollBtn[0] = new GuiElementInst(scrollBarPos, new Texture(), scrollBtnData).initialize(gui);
         this.scrollBtn[0].get().bakeData(gui, scrollBtnData, this.scrollBtn[0]);
         scrollBtnData = JsonUtils.deepCopy(scrollBtnData);

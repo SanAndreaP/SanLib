@@ -311,7 +311,7 @@ public class ModelJsonLoader<T extends Model & ModelJsonHandler<T, U>, U extends
     }
 
     public void reload(IResourceManager resourceManager) {
-        this.modelBase.onReload(MiscUtils.defIfNull(resourceManager, () -> Minecraft.getInstance().getResourceManager()), this);
+        this.modelBase.onReload(MiscUtils.get(resourceManager, () -> Minecraft.getInstance().getResourceManager()), this);
     }
 
     @Override

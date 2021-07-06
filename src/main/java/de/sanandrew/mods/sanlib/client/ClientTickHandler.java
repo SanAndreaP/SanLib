@@ -50,7 +50,7 @@ public class ClientTickHandler
     @SubscribeEvent
     public static void onRenderTick(TickEvent.RenderTickEvent event) {
         if( doSplashTitle == null ) {
-            doSplashTitle = MiscUtils.defIfNull(SanLibConfig.Client.setSplashTitle.get(), false);
+            doSplashTitle = MiscUtils.get(SanLibConfig.Client.setSplashTitle.get(), false);
         }
 
         if( doSplashTitle && event.phase == TickEvent.Phase.END ) {

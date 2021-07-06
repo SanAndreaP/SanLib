@@ -254,7 +254,7 @@ public final class ItemStackUtils
             } else {
                 ItemStack cs = cmpItems.get(cmpSize - 1);
                 if( ItemStackUtils.areEqual(cs, v, false, true) ) {
-                    int rest = Math.min(MiscUtils.defIfNull(maxStackSize, cs::getMaxStackSize), maxInvStackSize) - cs.getCount();
+                    int rest = Math.min(MiscUtils.get(maxStackSize, cs::getMaxStackSize), maxInvStackSize) - cs.getCount();
                     if( rest >= v.getCount() ) {
                         cs.grow(v.getCount());
                     } else {

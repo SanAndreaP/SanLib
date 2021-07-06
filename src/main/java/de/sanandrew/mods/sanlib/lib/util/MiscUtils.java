@@ -277,7 +277,7 @@ public final class MiscUtils
      *
      * @return value, if it's not null, def otherwise
      */
-    public static <T> T defIfNull(T val, T def) {
+    public static <T> T get(T val, T def) {
         return val != null ? val : def;
     }
 
@@ -290,7 +290,7 @@ public final class MiscUtils
      *
      * @return val, if it's not null, return value from def otherwise
      */
-    public static <T> T defIfNull(T val, Supplier<T> def) {
+    public static <T> T get(T val, Supplier<T> def) {
         return val != null ? val : def.get();
     }
 
@@ -301,7 +301,7 @@ public final class MiscUtils
      * @param onNonNull The function called if <tt>obj</tt> is not <tt>null</tt>
      * @param <T> The type of <tt>obj</tt>
      */
-    public static <T> void call(T obj, Consumer<T> onNonNull) {
+    public static <T> void accept(T obj, Consumer<T> onNonNull) {
         if( obj != null ) {
             onNonNull.accept(obj);
         }
@@ -316,7 +316,7 @@ public final class MiscUtils
      * @param <T> The type of <tt>obj</tt>
      * @param <R> The type of the return value
      */
-    public static <T, R> R call(T obj, Function<T, R> onNonNull) {
+    public static <T, R> R apply(T obj, Function<T, R> onNonNull) {
         return obj != null ? onNonNull.apply(obj) : null;
     }
 
@@ -401,7 +401,7 @@ public final class MiscUtils
         return angle >= 360.0F ? wrap360(angle - 360.0F) : angle < 0 ? wrap360(angle + 360.0F) : angle;
     }
 
-    public static <T, R> R applyNonNull(T nullableObj, Function<T, R> onNonNull, R defReturn) {
+    public static <T, R> R apply(T nullableObj, Function<T, R> onNonNull, R defReturn) {
         if( nullableObj != null ) {
             return onNonNull.apply(nullableObj);
         }
