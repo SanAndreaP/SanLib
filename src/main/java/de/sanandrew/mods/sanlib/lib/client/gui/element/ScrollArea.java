@@ -67,7 +67,7 @@ public class ScrollArea
         this.rasterized = JsonUtils.getBoolVal(data.get("rasterized"), false);
         this.maxScrollDelta = JsonUtils.getFloatVal(data.get("maxScrollDelta"), 1.0F);
 
-        int[] scrollBarPos = JsonUtils.getIntArray(data.get("scrollbarPos"), new int[] {0, this.areaSize[1]}, org.apache.commons.lang3.Range.is(2));
+        int[] scrollBarPos = JsonUtils.getIntArray(data.get("scrollbarPos"), new int[] {inst.pos[0] + this.areaSize[0], inst.pos[1]}, org.apache.commons.lang3.Range.is(2));
         JsonObject scrollBtnData = MiscUtils.get(data.getAsJsonObject("scrollButton"), JsonObject::new);
         this.scrollBtn[0] = new GuiElementInst(scrollBarPos, new Texture(), scrollBtnData).initialize(gui);
         this.scrollBtn[0].get().bakeData(gui, scrollBtnData, this.scrollBtn[0]);
@@ -113,7 +113,10 @@ public class ScrollArea
         this.posX = x;
         this.posY = y;
 
-        boolean isLmbDown = Minecraft.getInstance().mouseHandler.isLeftPressed();
+        if( this.prevLmbDown && !Minecraft.getInstance().mouseHandler.isLeftPressed() ) {
+            this.prevLmbDown = false;
+        }
+
         GuiElementInst btn = this.scrollBtn[this.countAll > this.countSub ? 0 : 1];
         int scrollY = btn.pos[1] + (int) Math.round(this.scroll * (this.scrollHeight - btn.get(Texture.class).size[1]));
 
@@ -163,7 +166,9 @@ public class ScrollArea
         GuiElementInst btn = this.scrollBtn[this.countAll > this.countSub ? 0 : 1];
         Texture btnElem = btn.get(Texture.class);
 
-        if( this.prevLmbDown || IGuiElement.isHovering(gui, btn.pos[0], btn.pos[1], mouseX, mouseY, btnElem.size[0], this.scrollHeight) ) {
+        if( this.countAll > this.countSub
+            && (this.prevLmbDown || IGuiElement.isHovering(gui, btn.pos[0], btn.pos[1], mouseX, mouseY, btnElem.size[0], this.scrollHeight)) )
+        {
             double scrollAmt = mouseY - gui.getScreenPosY() - btn.pos[1] - btnElem.size[1] / 2.0D;
             this.scroll = Math.max(0.0F, Math.min(1.0F, 1.0F / (this.scrollHeight - btnElem.size[1]) * scrollAmt));
             this.prevLmbDown = true;
