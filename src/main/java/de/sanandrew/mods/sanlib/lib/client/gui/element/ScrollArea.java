@@ -17,9 +17,9 @@ import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.client.util.GuiUtils;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -113,10 +113,6 @@ public class ScrollArea
         this.posX = x;
         this.posY = y;
 
-        if( this.prevLmbDown && !Minecraft.getInstance().mouseHandler.isLeftPressed() ) {
-            this.prevLmbDown = false;
-        }
-
         GuiElementInst btn = this.scrollBtn[this.countAll > this.countSub ? 0 : 1];
         int scrollY = btn.pos[1] + (int) Math.round(this.scroll * (this.scrollHeight - btn.get(Texture.class).size[1]));
 
@@ -163,17 +159,19 @@ public class ScrollArea
 
     @Override
     public boolean mouseDragged(IGui gui, double mouseX, double mouseY, int button, double dragX, double dragY) {
-        GuiElementInst btn = this.scrollBtn[this.countAll > this.countSub ? 0 : 1];
-        Texture btnElem = btn.get(Texture.class);
+        if( button == GLFW.GLFW_MOUSE_BUTTON_LEFT ) {
+            GuiElementInst btn     = this.scrollBtn[this.countAll > this.countSub ? 0 : 1];
+            Texture        btnElem = btn.get(Texture.class);
 
-        if( this.countAll > this.countSub
-            && (this.prevLmbDown || IGuiElement.isHovering(gui, btn.pos[0], btn.pos[1], mouseX, mouseY, btnElem.size[0], this.scrollHeight)) )
-        {
-            double scrollAmt = mouseY - gui.getScreenPosY() - btn.pos[1] - btnElem.size[1] / 2.0D;
-            this.scroll = Math.max(0.0F, Math.min(1.0F, 1.0F / (this.scrollHeight - btnElem.size[1]) * scrollAmt));
-            this.prevLmbDown = true;
-        } else {
-            this.prevLmbDown = false;
+            if( this.countAll > this.countSub
+                && (this.prevLmbDown || IGuiElement.isHovering(gui, btn.pos[0], btn.pos[1], mouseX, mouseY, btnElem.size[0], this.scrollHeight)) )
+            {
+                double scrollAmt = mouseY - gui.getScreenPosY() - btn.pos[1] - btnElem.size[1] / 2.0D;
+                this.scroll = Math.max(0.0F, Math.min(1.0F, 1.0F / (this.scrollHeight - btnElem.size[1]) * scrollAmt));
+                this.prevLmbDown = true;
+            } else {
+                this.prevLmbDown = false;
+            }
         }
 
         if( IGuiElement.isHovering(gui, this.posX, this.posY, mouseX, mouseY, this.areaSize[0], this.areaSize[1]) ) {
@@ -185,6 +183,10 @@ public class ScrollArea
 
     @Override
     public boolean mouseReleased(IGui gui, double mouseX, double mouseY, int button) {
+        if( button == GLFW.GLFW_MOUSE_BUTTON_LEFT ) {
+            this.prevLmbDown = false;
+        }
+
         if( IGuiElement.isHovering(gui, this.posX, this.posY, mouseX, mouseY, this.areaSize[0], this.areaSize[1]) ) {
             return super.mouseReleased(gui, mouseX, mouseY, button);
         }
