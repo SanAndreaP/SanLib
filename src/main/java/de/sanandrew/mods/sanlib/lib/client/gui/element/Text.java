@@ -16,12 +16,11 @@ import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.fonts.Font;
 import net.minecraft.client.gui.fonts.providers.DefaultGlyphProvider;
 import net.minecraft.client.gui.fonts.providers.IGlyphProvider;
-import net.minecraft.client.gui.fonts.providers.IGlyphProviderFactory;
 import net.minecraft.client.gui.fonts.providers.TextureGlyphProvider;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.ITextProperties;
@@ -56,13 +55,14 @@ import java.util.Objects;
 &#125;
  * </pre>
  */
-@SuppressWarnings("WeakerAccess")
+
+@SuppressWarnings("java:S1104")
 public class Text
         implements IGuiElement
 {
     public static final ResourceLocation ID = new ResourceLocation("text");
     
-    public ITextComponent text;
+    public ITextComponent bakedText;
     public int            color;
     public Map<String, Integer> colors;
     public boolean              shadow;
@@ -75,8 +75,9 @@ public class Text
     protected int                    currHeight;
     protected GuiElementInst.Justify justify;
 
-    private       ITextComponent       prevTxt;
     private final List<ITextProperties> renderedLines = new ArrayList<>();
+
+    private static final String DEFAULT_COLOR = "default";
 
     @Override
     public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) {
@@ -87,19 +88,10 @@ public class Text
         if( data.has("color") ) {
             JsonElement clrData = data.get("color");
             if( clrData.isJsonObject() ) {
-                for( Map.Entry<String, JsonElement> o : clrData.getAsJsonObject().entrySet() ) {
-                    String key = o.getKey();
-                    if( key.equalsIgnoreCase("default") || this.defaultColor == null ) {
-                        this.defaultColor = key;
-                    }
-
-                    this.colors.put(key, MiscUtils.hexToInt(o.getValue().getAsString()));
-                }
-
-                this.color = this.colors.get(this.defaultColor);
+                this.bakeColorObj(clrData.getAsJsonObject());
             } else if( clrData.isJsonPrimitive() ) {
                 int clr = MiscUtils.hexToInt(clrData.getAsString());
-                this.defaultColor = "default";
+                this.defaultColor = DEFAULT_COLOR;
                 this.colors.put(this.defaultColor, clr);
                 this.color = clr;
             } else {
@@ -109,7 +101,7 @@ public class Text
             this.bakeDefaultColor();
         }
 
-        this.text = getBakedText(gui, data);
+        this.bakedText = this.getBakedText(gui, data);
         this.shadow = JsonUtils.getBoolVal(data.get("shadow"), false);
         this.wrapWidth = JsonUtils.getIntVal(data.get("wrapWidth"), 0);
         this.lineHeight = JsonUtils.getIntVal(data.get("lineHeight"), 9);
@@ -123,7 +115,7 @@ public class Text
 
         this.currWidth = this.getTextWidth(gui);
         this.currHeight = this.fontRenderer.getSplitter()
-                                           .splitLines(this.text, this.wrapWidth <= 0 ? Integer.MAX_VALUE : this.wrapWidth, Style.EMPTY)
+                                           .splitLines(this.bakedText, this.wrapWidth <= 0 ? Integer.MAX_VALUE : this.wrapWidth, Style.EMPTY)
                                            .size()
                           * this.lineHeight;
         if( this.shadow ) {
@@ -131,22 +123,37 @@ public class Text
         }
     }
 
+    private void bakeColorObj(JsonObject clrData) {
+        for( Map.Entry<String, JsonElement> o : clrData.entrySet() ) {
+            String key = o.getKey();
+            if( key.equalsIgnoreCase(DEFAULT_COLOR) || this.defaultColor == null ) {
+                this.defaultColor = key;
+            }
+
+            this.colors.put(key, MiscUtils.hexToInt(o.getValue().getAsString()));
+        }
+
+        this.color = this.colors.get(this.defaultColor);
+    }
+
     private void bakeDefaultColor() {
-        this.defaultColor = "default";
+        this.defaultColor = DEFAULT_COLOR;
         this.colors.put(this.defaultColor, 0xFF000000);
         this.color = 0xFF000000;
     }
 
+    @SuppressWarnings("unused")
     public ITextComponent getBakedText(IGui gui, JsonObject data) {
         return new TranslationTextComponent(data.get("text").getAsString());
     }
 
+    @SuppressWarnings("unused")
     public ITextComponent getDynamicText(IGui gui, ITextComponent originalText) {
         return originalText;
     }
 
     public int getTextWidth(IGui gui) {
-        ITextComponent text = this.getDynamicText(gui, this.text);
+        ITextComponent tc = this.getDynamicText(gui, this.bakedText);
         int maxWidth = this.wrapWidth;
         if( maxWidth > 0 ) {
             if( this.justify == GuiElementInst.Justify.JUSTIFY ) {
@@ -156,7 +163,7 @@ public class Text
             maxWidth = Integer.MAX_VALUE;
         }
 
-        return this.fontRenderer.getSplitter().splitLines(text, maxWidth, Style.EMPTY)
+        return this.fontRenderer.getSplitter().splitLines(tc, maxWidth, Style.EMPTY)
                                 .stream().map(tp -> this.fontRenderer.width(tp))
                                 .reduce(Integer::max).orElse(0);
     }
@@ -169,7 +176,7 @@ public class Text
     @Override
     public void tick(IGui gui, JsonObject data) {
         this.renderedLines.clear();
-        ITextComponent s = this.getDynamicText(gui, this.text);
+        ITextComponent s = this.getDynamicText(gui, this.bakedText);
 
         this.renderedLines.addAll(Arrays.asList(this.fontRenderer.getSplitter()
                                                 .splitLines(s, this.wrapWidth > 0 ? this.wrapWidth : Integer.MAX_VALUE, Style.EMPTY)
@@ -195,27 +202,10 @@ public class Text
         switch( this.justify ) {
             case JUSTIFY:
                 if( this.wrapWidth > 0 ) {
-                    String[] words = s.getString().split("\\s");
-                    float spaceDist = this.wrapWidth;
-                    int[] wordWidths = new int[words.length];
-
-                    for( int i = 0; i < words.length; i++ ) {
-                        wordWidths[i] = this.fontRenderer.width(words[i]);
-                        spaceDist -= wordWidths[i];
-                    }
-
-                    spaceDist /= words.length - 1;
-                    for( int i = 0; i < words.length; i++ ) {
-                        if( this.shadow ) {
-                            this.fontRenderer.drawShadow(stack, words[i], x, y, this.color);
-                        } else {
-                            this.fontRenderer.draw(stack, words[i], x, y, this.color);
-                        }
-                        x += wordWidths[i] + spaceDist;
-                    }
-
+                    this.renderLineJustified(stack, s, x, y);
                     return;
                 }
+                break;
             case LEFT:
                 break;
             case CENTER:
@@ -223,12 +213,38 @@ public class Text
                 break;
             case RIGHT:
                 x += this.currWidth - this.fontRenderer.width(s);
+                break;
+            default:
         }
 
+        IReorderingProcessor irp = IReorderingProcessor.forward(s.getString(), s instanceof ITextComponent ? ((ITextComponent) s).getStyle() : Style.EMPTY);
         if( this.shadow ) {
-            this.fontRenderer.drawShadow(stack, s.getString(), x, y, this.color);
+            this.fontRenderer.drawShadow(stack, irp, x, y, this.color);
         } else {
-            this.fontRenderer.draw(stack, s.getString(), x, y, this.color);
+            this.fontRenderer.draw(stack, irp, x, y, this.color);
+        }
+    }
+
+    private void renderLineJustified(MatrixStack stack, ITextProperties s, int x, int y) {
+        String[] words = s.getString().split("\\s");
+        float spaceDist = this.wrapWidth;
+        int[] wordWidths = new int[words.length];
+
+        for( int i = 0; i < words.length; i++ ) {
+            wordWidths[i] = this.fontRenderer.width(words[i]);
+            spaceDist -= wordWidths[i];
+        }
+
+        spaceDist /= words.length - 1;
+        Style style = s instanceof ITextComponent ? ((ITextComponent) s).getStyle() : Style.EMPTY;
+        for( int i = 0; i < words.length; i++ ) {
+            IReorderingProcessor irp = IReorderingProcessor.forward(words[i], style);
+            if( this.shadow ) {
+                this.fontRenderer.drawShadow(stack, irp, x, y, this.color);
+            } else {
+                this.fontRenderer.draw(stack, irp, x, y, this.color);
+            }
+            x += wordWidths[i] + spaceDist;
         }
     }
 
@@ -264,10 +280,9 @@ public class Text
     @SuppressWarnings("WeakerAccess")
     public static final class Font
     {
-        public String texture;
-        public Boolean unicode;
+        private String texture;
 
-        public WeakReference<FontRenderer> frInst;
+        private WeakReference<FontRenderer> frInst;
 
         private static FontRenderer frGalactic;
 
@@ -282,6 +297,7 @@ public class Text
             return this.get(gui, null);
         }
 
+        @SuppressWarnings("java:S2696")
         public FontRenderer get(Screen gui, JsonObject glyphProvider) {
             if( "standard".equals(this.texture) ) {
                 return gui.getMinecraft().font;
@@ -311,7 +327,21 @@ public class Text
         @Override
         @SuppressWarnings("NonFinalFieldReferencedInHashCode")
         public int hashCode() {
-            return Objects.hash(this.texture, this.unicode);
+            return Objects.hash(this.texture);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if( this == o ) {
+                return true;
+            }
+
+            if( o == null || this.getClass() != o.getClass() ) {
+                return false;
+            }
+
+            Font font = (Font) o;
+            return Objects.equals(this.texture, font.texture);
         }
     }
 }
