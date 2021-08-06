@@ -14,6 +14,7 @@ import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.fonts.providers.DefaultGlyphProvider;
@@ -26,6 +27,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TranslationTextComponent;
+import org.apache.commons.lang3.mutable.MutableInt;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * JSON format:
@@ -115,7 +118,7 @@ public class Text
 
         this.currWidth = this.getTextWidth(gui);
         this.currHeight = this.fontRenderer.getSplitter()
-                                           .splitLines(this.bakedText, this.wrapWidth <= 0 ? Integer.MAX_VALUE : this.wrapWidth, Style.EMPTY)
+                                           .splitLines(this.bakedText, this.wrapWidth <= 0 ? Integer.MAX_VALUE : this.wrapWidth, this.bakedText.getStyle())
                                            .size()
                           * this.lineHeight;
         if( this.shadow ) {
@@ -179,7 +182,7 @@ public class Text
         ITextComponent s = this.getDynamicText(gui, this.bakedText);
 
         this.renderedLines.addAll(Arrays.asList(this.fontRenderer.getSplitter()
-                                                .splitLines(s, this.wrapWidth > 0 ? this.wrapWidth : Integer.MAX_VALUE, Style.EMPTY)
+                                                .splitLines(s, this.wrapWidth > 0 ? this.wrapWidth : Integer.MAX_VALUE, s.getStyle())
                                                 .toArray(new ITextProperties[0])));
 
         this.updateSize(gui);
@@ -217,35 +220,46 @@ public class Text
             default:
         }
 
-        IReorderingProcessor irp = IReorderingProcessor.forward(s.getString(), s instanceof ITextComponent ? ((ITextComponent) s).getStyle() : Style.EMPTY);
-        if( this.shadow ) {
-            this.fontRenderer.drawShadow(stack, irp, x, y, this.color);
-        } else {
-            this.fontRenderer.draw(stack, irp, x, y, this.color);
-        }
+        final MutableInt mx = new MutableInt(x);
+        s.visit((style, str) -> {
+            IReorderingProcessor irp = IReorderingProcessor.forward(str, style);
+            if( this.shadow ) {
+                this.fontRenderer.drawShadow(stack, irp, mx.getValue(), y, this.color);
+            } else {
+                this.fontRenderer.draw(stack, irp, mx.getValue(), y, this.color);
+            }
+            mx.add(this.fontRenderer.width(irp));
+
+            return Optional.empty();
+        }, Style.EMPTY);
     }
 
     private void renderLineJustified(MatrixStack stack, ITextProperties s, int x, int y) {
-        String[] words = s.getString().split("\\s");
-        float spaceDist = this.wrapWidth;
-        int[] wordWidths = new int[words.length];
+        final MutableInt mx = new MutableInt(x);
+        s.visit((style, str) -> {
+            String[] words = str.split("\\s");
+            float spaceDist = this.wrapWidth;
+            int[] wordWidths = new int[words.length];
 
-        for( int i = 0; i < words.length; i++ ) {
-            wordWidths[i] = this.fontRenderer.width(words[i]);
-            spaceDist -= wordWidths[i];
-        }
-
-        spaceDist /= words.length - 1;
-        Style style = s instanceof ITextComponent ? ((ITextComponent) s).getStyle() : Style.EMPTY;
-        for( int i = 0; i < words.length; i++ ) {
-            IReorderingProcessor irp = IReorderingProcessor.forward(words[i], style);
-            if( this.shadow ) {
-                this.fontRenderer.drawShadow(stack, irp, x, y, this.color);
-            } else {
-                this.fontRenderer.draw(stack, irp, x, y, this.color);
+            for( int i = 0; i < words.length; i++ ) {
+                wordWidths[i] = this.fontRenderer.width(words[i]);
+                spaceDist -= wordWidths[i];
             }
-            x += wordWidths[i] + spaceDist;
-        }
+
+            spaceDist /= words.length - 1;
+
+            for( int i = 0; i < words.length; i++ ) {
+                IReorderingProcessor irp = IReorderingProcessor.forward(words[i], style);
+                if( this.shadow ) {
+                    this.fontRenderer.drawShadow(stack, irp, mx.getValue(), y, this.color);
+                } else {
+                    this.fontRenderer.draw(stack, irp, mx.getValue(), y, this.color);
+                }
+                mx.add(wordWidths[i] + spaceDist);
+            }
+
+            return Optional.empty();
+        }, Style.EMPTY);
     }
 
     @Override
