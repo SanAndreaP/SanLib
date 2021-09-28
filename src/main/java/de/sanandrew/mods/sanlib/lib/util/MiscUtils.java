@@ -50,9 +50,11 @@ public final class MiscUtils
      *            ({@code a}){@code sin}/({@code a}){@code cos}/({@code a}){@code tan}/{@code sqrt} functions and exponentials via " {@code ^} "
      * @return A calculated value from the formula, or {@code null} if the formula is invalid
      */
+    @SuppressWarnings({"java:S135", "java:S3776"})
     public static Double calcFormula(final String str) {
         return new Object() {
-            private int pos = -1, ch;
+            private int pos = -1;
+            private int ch;
 
             private void nextChar() {
                 this.ch = ++this.pos < str.length() ? str.charAt(this.pos) : -1;
@@ -373,7 +375,7 @@ public final class MiscUtils
             ListNBT otherList = (ListNBT) other.copy();
 
             if( mainList.getElementType() == otherList.getElementType() ) {
-                for( int i = mainList.size() - 1; i >= 0 && otherList.size() > 0; i-- ) {
+                for( int i = mainList.size() - 1; i >= 0 && !otherList.isEmpty(); i-- ) {
                     for( int j = otherList.size() - 1; j >= 0; j-- ) {
                         if( compareNBTBase(mainList.get(i), otherList.get(j)) ) {
                             otherList.remove(j);
@@ -382,7 +384,7 @@ public final class MiscUtils
                     }
                 }
 
-                return otherList.size() == 0;
+                return otherList.isEmpty();
             }
 
             return false;
@@ -398,7 +400,11 @@ public final class MiscUtils
     }
 
     public static float wrap360(float angle) {
-        return angle >= 360.0F ? wrap360(angle - 360.0F) : angle < 0 ? wrap360(angle + 360.0F) : angle;
+        if( angle >= 360.0F ) {
+            return wrap360(angle - 360.0F);
+        }
+
+        return angle < 0 ? wrap360(angle + 360.0F) : angle;
     }
 
     public static <T, R> R apply(T nullableObj, Function<T, R> onNonNull, R defReturn) {
@@ -460,7 +466,7 @@ public final class MiscUtils
         public final int exp;
         public final String prefix;
 
-        public static final SiPrefixes[] VALUES = values();
+        private static final SiPrefixes[] PB_VALUES = values();
 
         SiPrefixes(String prefix, int exp) {
             this.prefix = prefix;
@@ -469,7 +475,7 @@ public final class MiscUtils
     }
 
     public static String getNumberSiPrefixed(double number, int precision, String langCode) {
-        for( SiPrefixes prefix : SiPrefixes.VALUES ) {
+        for( SiPrefixes prefix : SiPrefixes.PB_VALUES ) {
             double scaledNum = number / Math.pow(10, prefix.exp);
             if( scaledNum >= 1.0 ) {
                 return getNumberFormat(precision, false, langCode).format(scaledNum) + ' ' + prefix.prefix;
@@ -479,6 +485,9 @@ public final class MiscUtils
         return getNumberFormat(precision, false, langCode).format(number) + ' ';
     }
 
+    /**
+     * @deprecated I don't know where this is used now, it was used before the MC recipe refactoring...
+     */
     @Deprecated
     public static ResourceLocation getPathedRL(String domain, Path root, Path file) {
         Path filePath = Paths.get(FilenameUtils.getPathNoEndSeparator(root.relativize(file).toString()),

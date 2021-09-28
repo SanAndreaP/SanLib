@@ -5,17 +5,16 @@
 
 package de.sanandrew.mods.sanlib.lib.client.gui;
 
-import com.google.gson.JsonObject;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 public class EmptyGuiElement
         implements IGuiElement
 {
     @Override
-    public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) { }
+    public void setup(IGui gui, GuiElementInst inst) { }
 
     @Override
-    public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data) { }
+    public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, GuiElementInst inst) { }
 
     @Override
     public int getWidth() {

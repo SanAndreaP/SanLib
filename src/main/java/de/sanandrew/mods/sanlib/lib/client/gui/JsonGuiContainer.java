@@ -9,7 +9,7 @@ import net.minecraft.util.text.ITextComponent;
 
 import javax.annotation.Nonnull;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "java:S5993"})
 public abstract class JsonGuiContainer<T extends Container>
         extends ContainerScreen<T>
         implements IGui
@@ -45,7 +45,7 @@ public abstract class JsonGuiContainer<T extends Container>
     public void tick() {
         super.tick();
 
-        this.guiDefinition.update(this);
+        this.guiDefinition.tick(this);
     }
 
     @Override

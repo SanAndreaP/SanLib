@@ -5,8 +5,9 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.text.ITextComponent;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "java:S1104", "java:S5993"})
 public abstract class JsonGuiScreen
         extends Screen
         implements IGui
@@ -35,12 +36,15 @@ public abstract class JsonGuiScreen
     protected void init() {
         super.init();
 
-        if( GuiDefinition.initialize(this.guiDefinition, this) ) {
-            this.leftPos = (this.width - this.imageWidth) / 2;
-            this.topPos = (this.height - this.imageHeight) / 2;
+        try {
+            if( GuiDefinition.initialize(this.guiDefinition, this) ) {
+                this.leftPos = (this.width - this.imageWidth) / 2;
+                this.topPos = (this.height - this.imageHeight) / 2;
 
-            this.initGd();
-            this.tick();
+                this.initGd();
+            }
+        } catch( Exception ex ) {
+            Objects.requireNonNull(this.minecraft).setScreen(null);
         }
     }
 
@@ -50,7 +54,7 @@ public abstract class JsonGuiScreen
     public void tick() {
         super.tick();
 
-        this.guiDefinition.update(this);
+        this.guiDefinition.tick(this);
     }
 
     @Override

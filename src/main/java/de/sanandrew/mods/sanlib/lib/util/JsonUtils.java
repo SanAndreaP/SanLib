@@ -19,6 +19,8 @@ import org.apache.commons.lang3.Range;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Arrays;
+import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
@@ -51,6 +53,12 @@ public final class JsonUtils
         return json.getAsFloat();
     }
 
+    public static void fetchFloat(JsonElement json, Consumer<Float> proc) {
+        if( json != null && json.isJsonPrimitive() ) {
+            proc.accept(json.getAsFloat());
+        }
+    }
+
     public static double getDoubleVal(JsonElement json) {
         requirePrimitive(json);
 
@@ -63,6 +71,12 @@ public final class JsonUtils
         }
 
         return json.getAsDouble();
+    }
+
+    public static void fetchDouble(JsonElement json, Consumer<Double> proc) {
+        if( json != null && json.isJsonPrimitive() ) {
+            proc.accept(json.getAsDouble());
+        }
     }
 
     public static String getStringVal(JsonElement json) {
@@ -85,6 +99,12 @@ public final class JsonUtils
         return json.getAsString();
     }
 
+    public static void fetchString(JsonElement json, Consumer<String> proc) {
+        if( json != null && json.isJsonPrimitive() ) {
+            proc.accept(json.getAsString());
+        }
+    }
+
     public static int getIntVal(JsonElement json) {
         requirePrimitive(json);
 
@@ -99,6 +119,12 @@ public final class JsonUtils
         return json.getAsInt();
     }
 
+    public static void fetchInt(JsonElement json, IntConsumer proc) {
+        if( json != null && json.isJsonPrimitive() ) {
+            proc.accept(json.getAsInt());
+        }
+    }
+
     public static boolean getBoolVal(JsonElement json) {
         requirePrimitive(json);
 
@@ -111,6 +137,12 @@ public final class JsonUtils
         }
 
         return json.getAsBoolean();
+    }
+
+    public static void fetchBool(JsonElement json, Consumer<Boolean> proc) {
+        if( json != null && json.isJsonPrimitive() ) {
+            proc.accept(json.getAsBoolean());
+        }
     }
 
     public static ResourceLocation getLocation(JsonElement json) {
@@ -174,11 +206,21 @@ public final class JsonUtils
     }
 
     public static int[] getIntArray(JsonElement json, int[] defVal, Range<Integer> requiredSize) {
-        if( isNotPrimitiveArray(json, requiredSize) ) {
+        if( !isPrimitiveArray(json, requiredSize) ) {
             return defVal;
         }
 
         return GSON.fromJson(json, int[].class);
+    }
+
+    public static void fetchIntArray(JsonElement json, Consumer<int[]> proc) {
+        fetchIntArray(json, proc, FULL_ARRAY_RANGE);
+    }
+
+    public static void fetchIntArray(JsonElement json, Consumer<int[]> proc, Range<Integer> requiredSize) {
+        if( isPrimitiveArray(json, requiredSize) ) {
+            proc.accept(GSON.fromJson(json, int[].class));
+        }
     }
 
     public static double[] getDoubleArray(JsonElement json) {
@@ -196,11 +238,21 @@ public final class JsonUtils
     }
 
     public static double[] getDoubleArray(JsonElement json, double[] defVal, Range<Integer> requiredSize) {
-        if( isNotPrimitiveArray(json, requiredSize) ) {
+        if( !isPrimitiveArray(json, requiredSize) ) {
             return defVal;
         }
 
         return GSON.fromJson(json, double[].class);
+    }
+
+    public static void fetchDoubleArray(JsonElement json, Consumer<double[]> proc) {
+        fetchDoubleArray(json, proc, FULL_ARRAY_RANGE);
+    }
+
+    public static void fetchDoubleArray(JsonElement json, Consumer<double[]> proc, Range<Integer> requiredSize) {
+        if( isPrimitiveArray(json, requiredSize) ) {
+            proc.accept(GSON.fromJson(json, double[].class));
+        }
     }
 
     public static float[] getFloatArray(JsonElement json) {
@@ -218,11 +270,21 @@ public final class JsonUtils
     }
 
     public static float[] getFloatArray(JsonElement json, float[] defVal, Range<Integer> requiredSize) {
-        if( isNotPrimitiveArray(json, requiredSize) ) {
+        if( !isPrimitiveArray(json, requiredSize) ) {
             return defVal;
         }
 
         return GSON.fromJson(json, float[].class);
+    }
+
+    public static void fetchFloatArray(JsonElement json, Consumer<float[]> proc) {
+        fetchFloatArray(json, proc, FULL_ARRAY_RANGE);
+    }
+
+    public static void fetchFloatArray(JsonElement json, Consumer<float[]> proc, Range<Integer> requiredSize) {
+        if( isPrimitiveArray(json, requiredSize) ) {
+            proc.accept(GSON.fromJson(json, float[].class));
+        }
     }
 
     public static String[] getStringArray(JsonElement json) {
@@ -240,20 +302,30 @@ public final class JsonUtils
     }
 
     public static String[] getStringArray(JsonElement json, String[] defVal, Range<Integer> requiredSize) {
-        if( isNotPrimitiveArray(json, requiredSize) ) {
+        if( !isPrimitiveArray(json, requiredSize) ) {
             return defVal;
         }
 
         return GSON.fromJson(json, String[].class);
     }
 
-    private static boolean isNotPrimitiveArray(JsonElement json, Range<Integer> requiredSize) {
+    public static void fetchStringArray(JsonElement json, Consumer<String[]> proc) {
+        fetchStringArray(json, proc, FULL_ARRAY_RANGE);
+    }
+
+    public static void fetchStringArray(JsonElement json, Consumer<String[]> proc, Range<Integer> requiredSize) {
+        if( isPrimitiveArray(json, requiredSize) ) {
+            proc.accept(GSON.fromJson(json, String[].class));
+        }
+    }
+
+    private static boolean isPrimitiveArray(JsonElement json, Range<Integer> requiredSize) {
         if( json == null || !json.isJsonArray() ) {
-            return true;
+            return false;
         }
 
         JsonArray arr = json.getAsJsonArray();
-        return !requiredSize.contains(arr.size()) || (arr.size() > 0 && !arr.get(0).isJsonPrimitive());
+        return requiredSize.contains(arr.size()) && (arr.size() <= 0 || arr.get(0).isJsonPrimitive());
     }
 
     private static JsonArray requireArray(JsonElement json, Range<Integer> requiredSize) {
@@ -282,60 +354,88 @@ public final class JsonUtils
         }
     }
 
-    public static void addDefaultJsonProperty(JsonObject jobj, String name, String val) {
+    public static JsonObject addDefaultJsonProperty(JsonObject jobj, String name, String val) {
         if( !jobj.has(name) ) { jobj.addProperty(name, val); }
+
+        return jobj;
     }
 
-    public static void addDefaultJsonProperty(JsonObject jobj, String name, Boolean val) {
+    public static JsonObject addDefaultJsonProperty(JsonObject jobj, String name, Boolean val) {
         if( !jobj.has(name) ) { jobj.addProperty(name, val); }
+
+        return jobj;
     }
 
-    public static void addDefaultJsonProperty(JsonObject jobj, String name, Character val) {
+    public static JsonObject addDefaultJsonProperty(JsonObject jobj, String name, Character val) {
         if( !jobj.has(name) ) { jobj.addProperty(name, val); }
+
+        return jobj;
     }
 
-    public static void addDefaultJsonProperty(JsonObject jobj, String name, Number val) {
+    public static JsonObject addDefaultJsonProperty(JsonObject jobj, String name, Number val) {
         if( !jobj.has(name) ) { jobj.addProperty(name, val); }
+
+        return jobj;
     }
 
-    public static void addDefaultJsonProperty(JsonObject jobj, String name, String[] val) {
+    public static JsonObject addDefaultJsonProperty(JsonObject jobj, String name, String[] val) {
         if( !jobj.has(name) ) { addJsonProperty(jobj, name, val); }
+
+        return jobj;
     }
 
-    public static void addDefaultJsonProperty(JsonObject jobj, String name, Boolean[] val) {
+    public static JsonObject addDefaultJsonProperty(JsonObject jobj, String name, Boolean[] val) {
         if( !jobj.has(name) ) { addJsonProperty(jobj, name, val); }
+
+        return jobj;
     }
 
-    public static void addDefaultJsonProperty(JsonObject jobj, String name, Character[] val) {
+    public static JsonObject addDefaultJsonProperty(JsonObject jobj, String name, Character[] val) {
         if( !jobj.has(name) ) { addJsonProperty(jobj, name, val); }
+
+        return jobj;
     }
 
-    public static void addDefaultJsonProperty(JsonObject jobj, String name, Number[] val) {
+    public static JsonObject addDefaultJsonProperty(JsonObject jobj, String name, Number[] val) {
         if( !jobj.has(name) ) { addJsonProperty(jobj, name, val); }
+
+        return jobj;
     }
 
-    public static void addDefaultJsonProperty(JsonObject jobj, String name, int[] arr) {
+    public static JsonObject addDefaultJsonProperty(JsonObject jobj, String name, int[] arr) {
         if( !jobj.has(name) ) { addJsonProperty(jobj, name, arr); }
+
+        return jobj;
     }
 
-    public static void addDefaultJsonProperty(JsonObject jobj, String name, long[] arr) {
+    public static JsonObject addDefaultJsonProperty(JsonObject jobj, String name, long[] arr) {
         if( !jobj.has(name) ) { addJsonProperty(jobj, name, arr); }
+
+        return jobj;
     }
 
-    public static void addDefaultJsonProperty(JsonObject jobj, String name, double[] arr) {
+    public static JsonObject addDefaultJsonProperty(JsonObject jobj, String name, double[] arr) {
         if( !jobj.has(name) ) { addJsonProperty(jobj, name, arr); }
+
+        return jobj;
     }
 
-    public static void addDefaultJsonProperty(JsonObject jobj, String name, byte[] arr) {
+    public static JsonObject addDefaultJsonProperty(JsonObject jobj, String name, byte[] arr) {
         if( !jobj.has(name) ) { addJsonProperty(jobj, name, arr); }
+
+        return jobj;
     }
 
-    public static void addDefaultJsonProperty(JsonObject jobj, String name, short[] arr) {
+    public static JsonObject addDefaultJsonProperty(JsonObject jobj, String name, short[] arr) {
         if( !jobj.has(name) ) { addJsonProperty(jobj, name, arr); }
+
+        return jobj;
     }
 
-    public static void addDefaultJsonProperty(JsonObject jobj, String name, float[] arr) {
+    public static JsonObject addDefaultJsonProperty(JsonObject jobj, String name, float[] arr) {
         if( !jobj.has(name) ) { addJsonProperty(jobj, name, arr); }
+
+        return jobj;
     }
 
     private static Number[] convertNArray(Object arr) {

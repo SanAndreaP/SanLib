@@ -6,58 +6,55 @@
 package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonObject;
+import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
-import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 
+import javax.annotation.Nonnull;
 import java.util.Map;
 
-@SuppressWarnings({"unused", "UnusedReturnValue", "java:S1172", "java:S1104"})
-public class EnergyStorageText
-        extends Text
+public class ScreenTitle
+    extends Text
 {
-    public static final ResourceLocation ID = new ResourceLocation("energy_text");
+    public static final ResourceLocation ID = new ResourceLocation("screen_title");
 
-    public EnergyStorageText(boolean shadow, int wrapWidth, int lineHeight, FontRenderer fontRenderer, Map<String, Integer> colors) {
+    @Nonnull
+    protected ITextComponent guiText = StringTextComponent.EMPTY;
+
+    public ScreenTitle(boolean shadow, int wrapWidth, int lineHeight, FontRenderer fontRenderer, Map<String, Integer> colors) {
         super(StringTextComponent.EMPTY, shadow, wrapWidth, lineHeight, fontRenderer, colors);
     }
 
     @Override
-    public ITextComponent getDynamicText(IGui gui, ITextComponent originalText) {
-        EnergyStorageBar.IGuiEnergyContainer gec = (EnergyStorageBar.IGuiEnergyContainer) gui;
-        return new StringTextComponent(String.format("%d / %d RF", gec.getEnergy(), gec.getMaxEnergy()));
+    public void setup(IGui gui, GuiElementInst inst) {
+        this.guiText = gui.get().getTitle();
+
+        super.setup(gui, inst);
     }
 
     public static class Builder
             extends Text.Builder
     {
+
         public Builder() {
             super(StringTextComponent.EMPTY);
         }
 
         @Override
-        protected void sanitize(IGui gui) {
-            if( this.colors.isEmpty() ) {
-                this.colors.put(DEFAULT_COLOR, 0xFF000000);
-            }
-
-            super.sanitize(gui);
-        }
-
-        public EnergyStorageText get(IGui gui) {
+        public ScreenTitle get(IGui gui) {
             super.sanitize(gui);
 
-            return new EnergyStorageText(this.shadow, this.wrapWidth, this.lineHeight, this.fontRenderer, this.colors);
+            return new ScreenTitle(this.shadow, this.wrapWidth, this.lineHeight, this.fontRenderer, this.colors);
         }
 
         protected static Builder buildFromJson(IGui gui, JsonObject data) {
             Text.Builder sb = Text.Builder.buildFromJson(gui, data);
             Builder      db = new Builder();
 
-            db.shadow = JsonUtils.getBoolVal(data.get("shadow"), true);
+            db.shadow = sb.shadow;
             db.wrapWidth = sb.wrapWidth;
             db.lineHeight = sb.lineHeight;
             db.fontRenderer = sb.fontRenderer;
@@ -66,7 +63,7 @@ public class EnergyStorageText
             return db;
         }
 
-        public static EnergyStorageText fromJson(IGui gui, JsonObject data) {
+        public static ScreenTitle fromJson(IGui gui, JsonObject data) {
             return buildFromJson(gui, data).get(gui);
         }
     }

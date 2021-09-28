@@ -37,33 +37,32 @@ import org.apache.commons.lang3.Range;
 &#125;
  * </pre>
  */
-@SuppressWarnings({"WeakerAccess", "Duplicates"})
+@SuppressWarnings({"unused", "UnusedReturnValue", "java:S1172", "java:S1104"})
 public class Texture
         implements IGuiElement
 {
     public static final ResourceLocation ID = new ResourceLocation("texture");
 
-    public ResourceLocation texture;
-    public int[] size;
-    public int[] textureSize;
-    public int[] uv;
-    public float[] scale;
-    public ColorObj color;
+    protected ResourceLocation txLocation;
+    protected int[]            size;
+    protected int[]            textureSize;
+    protected int[]            uv;
+    protected float[]          scale;
+    protected ColorObj         color;
 
-    @Override
-    public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) {
-        this.texture = gui.getDefinition().getTexture(data.get("texture"));
-        this.size = JsonUtils.getIntArray(data.get("size"), Range.is(2));
-        this.uv = JsonUtils.getIntArray(data.get("uv"), Range.is(2));
-        this.textureSize = JsonUtils.getIntArray(data.get("textureSize"), new int[] {256, 256}, Range.is(2));
-        this.scale = JsonUtils.getFloatArray(data.get("scale"), new float[] {1.0F, 1.0F}, Range.is(2));
-        this.color = new ColorObj(MiscUtils.hexToInt(JsonUtils.getStringVal(data.get("color"), "0xFFFFFFFF")));
+    public Texture(ResourceLocation txLocation, int[] size, int[] textureSize, int[] uv, float[] scale, ColorObj color) {
+        this.txLocation = txLocation;
+        this.size = size;
+        this.textureSize = textureSize;
+        this.uv = uv;
+        this.scale = scale;
+        this.color = color;
     }
 
     @Override
     @SuppressWarnings("deprecation")
-    public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data) {
-        gui.get().getMinecraft().getTextureManager().bind(this.texture);
+    public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, GuiElementInst inst) {
+        gui.get().getMinecraft().getTextureManager().bind(this.txLocation);
         stack.pushPose();
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
@@ -86,5 +85,79 @@ public class Texture
     @Override
     public int getHeight() {
         return this.size[1];
+    }
+
+    public static class Builder
+    {
+        protected ResourceLocation texture;
+        protected int[] size;
+        protected int[] textureSize;
+        protected int[] uv;
+        protected float[] scale;
+        protected ColorObj color;
+
+        public Builder(int width, int height) {
+            this(new int[] { width, height });
+        }
+
+        public Builder(int[] size) {
+            this.size = size;
+        }
+
+        public Builder texture(ResourceLocation texture) { this.texture = texture;                               return this; }
+        public Builder textureSize(int[] size)           { this.textureSize = size;                              return this; }
+        public Builder uv(int[] uv)                      { this.uv = uv;                                         return this; }
+        public Builder scale(float[] scale)              { this.scale = scale;                                   return this; }
+        public Builder color(int color)                  { this.color = new ColorObj(color);                     return this; }
+
+        public Builder textureSize(int width, int height) { return this.textureSize(new int[] {width, height}); }
+        public Builder uv(int u, int v)                   { return this.uv(new int[] {u, v}); }
+        public Builder scale(float x, float y)            { return this.scale(new float[] {x, y}); }
+        public Builder scale(float scale)                 { return this.scale(new float[] {scale, scale}); }
+        public Builder color(String color)                { return this.color(MiscUtils.hexToInt(color)); }
+
+        protected void sanitize(IGui gui) {
+            if( this.texture == null ) {
+                this.texture = gui.getDefinition().getTexture(null);
+            }
+
+            if( this.textureSize == null ) {
+                this.textureSize = new int[] {256, 256};
+            }
+
+            if( this.uv == null ) {
+                this.uv = new int[] {0, 0};
+            }
+
+            if( this.scale == null ) {
+                this.scale = new float[] {1.0F, 1.0F};
+            }
+
+            if( this.color == null ) {
+                this.color = new ColorObj(0xFFFFFFFF);
+            }
+        }
+
+        public Texture get(IGui gui) {
+            this.sanitize(gui);
+
+            return new Texture(this.texture, this.size, this.textureSize, this.uv, this.scale, this.color);
+        }
+
+        protected static Builder buildFromJson(IGui gui, JsonObject data) {
+            Builder b = new Builder(JsonUtils.getIntArray(data.get("size"), Range.is(2)))
+                    .texture(gui.getDefinition().getTexture(data.get("texture")))
+                    .uv(JsonUtils.getIntArray(data.get("uv"), Range.is(2)));
+
+            JsonUtils.fetchIntArray(data.get("textureSize"), b::textureSize, Range.is(2));
+            JsonUtils.fetchFloatArray(data.get("scale"), b::scale, Range.is(2));
+            JsonUtils.fetchString(data.get("color"), b::color);
+
+            return b;
+        }
+
+        public static Texture fromJson(IGui gui, JsonObject data) {
+            return buildFromJson(gui, data).get(gui);
+        }
     }
 }

@@ -16,25 +16,31 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
 
-@SuppressWarnings({ "WeakerAccess", "unused" })
+import javax.annotation.Nonnull;
+
+@SuppressWarnings({"unused", "UnusedReturnValue", "java:S1172", "java:S1104"})
 public class Item
         implements IGuiElement
 {
     public static final ResourceLocation ID = new ResourceLocation("item");
 
-    public ItemStack item = ItemStack.EMPTY;
-    public float     scale;
-    public int       size;
+    protected ItemStack stack;
+    protected float     scale;
+    protected int       size;
+
+    public Item(@Nonnull ItemStack stack, float scale) {
+        this.stack = stack;
+        this.scale = scale;
+        this.size = Math.round(16.0F * this.scale);
+    }
 
     @Override
-    public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) {
-        this.item = this.getBakedItem(gui, data);
-        this.scale = JsonUtils.getFloatVal(data.get("scale"), 1.0F);
+    public void setup(IGui gui, GuiElementInst inst) {
         this.size = (int) Math.round(16.0D * this.scale);
     }
 
     @Override
-    public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data) {
+    public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, GuiElementInst inst) {
         RenderUtils.renderStackInGui(this.getDynamicStack(gui), stack, x, y, this.scale);
     }
 
@@ -48,11 +54,44 @@ public class Item
         return this.size;
     }
 
-    protected ItemStack getBakedItem(IGui gui, JsonObject data) {
-        return Ingredient.fromJson(data.get("item")).getItems()[0];
+    protected ItemStack getDynamicStack(IGui gui) {
+        return this.stack;
     }
 
-    protected ItemStack getDynamicStack(IGui gui) {
-        return this.item;
+    public static class Builder
+    {
+        @Nonnull
+        protected ItemStack item;
+        protected float     scale = 0.0F;
+
+        public Builder(@Nonnull ItemStack item) {
+            this.item = item;
+        }
+
+        public Builder scale(float scale) { this.scale = scale; return this; }
+
+        public void sanitize(IGui gui) {
+            if( this.scale <= 0.0000001F ) {
+                this.scale = 1.0F;
+            }
+        }
+
+        public Item get(IGui gui) {
+            this.sanitize(gui);
+
+            return new Item(this.item, this.scale);
+        }
+
+        protected static Builder buildFromJson(IGui gui, JsonObject data) {
+            Builder b = new Builder(Ingredient.fromJson(data.get("item")).getItems()[0]);
+
+            JsonUtils.fetchFloat(data.get("scale"), b::scale);
+
+            return b;
+        }
+
+        public static Item fromJson(IGui gui, JsonObject data) {
+            return buildFromJson(gui, data).get(gui);
+        }
     }
 }

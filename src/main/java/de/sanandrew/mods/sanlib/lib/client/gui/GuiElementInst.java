@@ -10,7 +10,9 @@ import de.sanandrew.mods.sanlib.SanLib;
 import net.minecraft.util.ResourceLocation;
 import org.apache.logging.log4j.Level;
 
+import javax.annotation.Nonnull;
 import java.util.Locale;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 @SuppressWarnings("unused")
@@ -28,24 +30,48 @@ public final class GuiElementInst
 
     public GuiElementInst() { }
 
-    public GuiElementInst(IGuiElement element) {
-        this.element = element;
-    }
-
-    public GuiElementInst(IGuiElement element, JsonObject data) {
-        this.element = element;
+    public GuiElementInst(String type, @Nonnull JsonObject data) {
+        this.type = type;
         this.data = data;
     }
 
-    public GuiElementInst(int[] pos, IGuiElement element) {
+    public GuiElementInst(int[] pos, String type, @Nonnull JsonObject data) {
+        this.pos = pos;
+        this.type = type;
+        this.data = data;
+    }
+
+    public GuiElementInst(String id, String type, @Nonnull JsonObject data) {
+        this.id = id;
+        this.type = type;
+        this.data = data;
+    }
+
+    public GuiElementInst(int[] pos, String id, String type, @Nonnull JsonObject data) {
+        this.id = id;
+        this.pos = pos;
+        this.type = type;
+        this.data = data;
+    }
+
+    public GuiElementInst(@Nonnull IGuiElement element) {
+        this.element = element;
+    }
+
+    public GuiElementInst(int[] pos, @Nonnull IGuiElement element) {
         this.pos = pos;
         this.element = element;
     }
 
-    public GuiElementInst(int[] pos, IGuiElement element, JsonObject data) {
+    public GuiElementInst(String id, @Nonnull IGuiElement element) {
+        this.id = id;
+        this.element = element;
+    }
+
+    public GuiElementInst(int[] pos, String id, @Nonnull IGuiElement element) {
+        this.id = id;
         this.pos = pos;
         this.element = element;
-        this.data = data;
     }
 
     public IGuiElement get() {
@@ -53,16 +79,6 @@ public final class GuiElementInst
     }
 
     public <T extends IGuiElement> T get(Class<T> returnCls) {
-        if( this.element == null ) {
-            Supplier<IGuiElement> cnst = GuiDefinition.TYPES.get(new ResourceLocation(this.type));
-            if( cnst != null ) {
-                this.element = cnst.get();
-            } else {
-                SanLib.LOG.log(Level.ERROR, String.format("A GUI Definition uses an unknown type %s for an element!", this.type));
-                this.element = new EmptyGuiElement();
-            }
-        }
-
         return returnCls.cast(this.element);
     }
 
@@ -75,6 +91,20 @@ public final class GuiElementInst
     }
 
     public GuiElementInst initialize(IGui gui) {
+        if( this.element == null ) {
+            if( this.data == null ) {
+                this.data = new JsonObject();
+            }
+
+            BiFunction<IGui, JsonObject, IGuiElement> cnst = GuiDefinition.TYPES.get(new ResourceLocation(this.type));
+            if( cnst != null ) {
+                this.element = cnst.apply(gui, this.data);
+            } else {
+                SanLib.LOG.log(Level.ERROR, "A GUI Definition uses an unknown type {} for an element!", this.type);
+                this.element = new EmptyGuiElement();
+            }
+        }
+
         gui.getDefinition().initElement(this);
         return this;
     }

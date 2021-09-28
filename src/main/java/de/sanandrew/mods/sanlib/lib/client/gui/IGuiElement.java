@@ -5,7 +5,6 @@
 
 package de.sanandrew.mods.sanlib.lib.client.gui;
 
-import com.google.gson.JsonObject;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraftforge.eventbus.api.EventPriority;
 
@@ -19,13 +18,13 @@ import java.lang.annotation.Target;
 public interface IGuiElement
         extends IGuiReference
 {
-    void bakeData(IGui gui, JsonObject data, GuiElementInst inst);
+    default void setup(IGui gui, GuiElementInst inst) {}
 
-    default void tick(IGui gui, JsonObject data) {}
+    default void tick(IGui gui, GuiElementInst inst) {}
 
-    default void renderTick(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data) {}
+    default void renderTick(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, GuiElementInst inst) {}
 
-    void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data);
+    void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, GuiElementInst inst);
 
     int getWidth();
 

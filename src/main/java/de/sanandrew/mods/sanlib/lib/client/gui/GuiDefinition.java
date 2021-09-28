@@ -12,13 +12,13 @@ import com.google.gson.JsonParser;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.ButtonSL;
-import de.sanandrew.mods.sanlib.lib.client.gui.element.ContainerName;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.DynamicText;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.EnergyStorageBar;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.EnergyStorageText;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.GroupBox;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.Item;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.Rectangle;
-import de.sanandrew.mods.sanlib.lib.client.gui.element.EnergyStorageBar;
-import de.sanandrew.mods.sanlib.lib.client.gui.element.EnergyStorageText;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.ScreenTitle;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.ScrollArea;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.Text;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.TextField;
@@ -46,30 +46,29 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "java:S1104", "java:S2386"})
 public class GuiDefinition
         implements ISelectiveResourceReloadListener, IGuiReference
 {
-    public static final Map<ResourceLocation, Supplier<IGuiElement>> TYPES = new HashMap<>();
+    public static final Map<ResourceLocation, BiFunction<IGui, JsonObject, IGuiElement>> TYPES = new HashMap<>();
     static {
-        TYPES.put(Text.ID, Text::new);
-        TYPES.put(Texture.ID, Texture::new);
-        TYPES.put(Rectangle.ID, Rectangle::new);
-        TYPES.put(ScrollArea.ID, ScrollArea::new);
-        TYPES.put(ContainerName.ID, ContainerName::new);
-        TYPES.put(Tooltip.ID, Tooltip::new);
-        TYPES.put(EnergyStorageBar.ID, EnergyStorageBar::new);
-        TYPES.put(EnergyStorageText.ID, EnergyStorageText::new);
-        TYPES.put(DynamicText.ID, DynamicText::new);
-        TYPES.put(ButtonSL.ID, ButtonSL::new);
-        TYPES.put(TextField.ID, TextField::new);
-        TYPES.put(Item.ID, Item::new);
-        TYPES.put(GroupBox.ID, GroupBox::new);
+        TYPES.put(Text.ID, Text.Builder::fromJson);
+        TYPES.put(Texture.ID, Texture.Builder::fromJson);
+        TYPES.put(Rectangle.ID, Rectangle.Builder::fromJson);
+        TYPES.put(ScrollArea.ID, ScrollArea.Builder::fromJson);
+        TYPES.put(ScreenTitle.ID, ScreenTitle.Builder::fromJson);
+        TYPES.put(Tooltip.ID, Tooltip.Builder::fromJson);
+        TYPES.put(EnergyStorageBar.ID, EnergyStorageBar.Builder::fromJson);
+        TYPES.put(EnergyStorageText.ID, EnergyStorageText.Builder::fromJson);
+        TYPES.put(DynamicText.ID, DynamicText.Builder::fromJson);
+        TYPES.put(ButtonSL.ID, ButtonSL.Builder::fromJson);
+        TYPES.put(TextField.ID, TextField.Builder::fromJson);
+        TYPES.put(Item.ID, Item.Builder::fromJson);
+        TYPES.put(GroupBox.ID, GroupBox.Builder::fromJson);
     }
 
     public int width;
@@ -172,9 +171,8 @@ public class GuiDefinition
     }
 
     public void initElement(GuiElementInst e) {
-        if( e != null ) {
-            if( !Strings.isNullOrEmpty(e.id) ) this.idToElementMap.put(e.id, e);
-            if( e.data == null ) e.data = new JsonObject();
+        if( e != null && !Strings.isNullOrEmpty(e.id) ) {
+            this.idToElementMap.put(e.id, e);
         }
     }
 
@@ -187,9 +185,12 @@ public class GuiDefinition
     }
 
     public void initGui(IGui gui) {
+        Arrays.stream(this.backgroundElements).forEach(e -> e.initialize(gui));
+        Arrays.stream(this.foregroundElements).forEach(e -> e.initialize(gui));
+
         Consumer<GuiElementInst> f = e -> {
             e.firstRenderUpdate = false;
-            e.get().bakeData(gui, e.data, e);
+            e.get().setup(gui, e);
         };
         Arrays.stream(this.backgroundElements).forEach(f);
         Arrays.stream(this.foregroundElements).forEach(f);
@@ -211,19 +212,21 @@ public class GuiDefinition
         IGuiElement ie = e.get();
         if( e.isVisible() ) {
             if( doRenderTick ) {
-                ie.renderTick(gui, stack, partialTicks, x, y, mouseX, mouseY, e.data);
+                ie.renderTick(gui, stack, partialTicks, x, y, mouseX, mouseY, e);
             }
 
             switch( e.getAlignmentH() ) {
                 case RIGHT: x -= ie.getWidth(); break;
                 case CENTER: x -= ie.getWidth() / 2; break;
+                default: break;
             }
             switch( e.getAlignmentV() ) {
                 case BOTTOM: y -= ie.getHeight(); break;
                 case CENTER: y -= ie.getHeight() / 2; break;
+                default: break;
             }
 
-            ie.render(gui, stack, partialTicks, x, y, mouseX, mouseY, e.data);
+            ie.render(gui, stack, partialTicks, x, y, mouseX, mouseY, e);
         }
     }
 
@@ -279,14 +282,14 @@ public class GuiDefinition
         doWorkV(e -> e.onClose(gui));
     }
 
-    private boolean doWorkB(Function<IGuiElement, Boolean> execElem, IGuiElement.PriorityTarget target) {
+    private boolean doWorkB(Predicate<IGuiElement> execElem, IGuiElement.PriorityTarget target) {
         for( GuiElementInst e : (target != null ? this.prioritizedBgElements.get(target) : this.backgroundElements) ) {
-            if( e.isVisible() && execElem.apply(e.get()) ) {
+            if( e.isVisible() && execElem.test(e.get()) ) {
                 return true;
             }
         }
         for( GuiElementInst e : (target != null ? this.prioritizedFgElements.get(target) : this.foregroundElements) ) {
-            if( e.isVisible() && execElem.apply(e.get()) ) {
+            if( e.isVisible() && execElem.test(e.get()) ) {
                 return true;
             }
         }
@@ -336,10 +339,10 @@ public class GuiDefinition
         }
     }
 
-    public void update(IGui gui) {
+    public void tick(IGui gui) {
         Consumer<GuiElementInst> f = e -> {
             if( e.isVisible() ) {
-                e.get().tick(gui, e.data);
+                e.get().tick(gui, e);
             }
         };
         Arrays.stream(this.backgroundElements).forEach(f);

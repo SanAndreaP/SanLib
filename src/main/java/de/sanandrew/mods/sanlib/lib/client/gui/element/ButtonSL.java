@@ -10,6 +10,7 @@ import com.google.gson.JsonObject;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import de.sanandrew.mods.sanlib.lib.client.gui.EmptyGuiElement;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiDefinition;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
@@ -20,11 +21,10 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import org.apache.commons.lang3.Range;
 
-import java.util.Map;
-
-@SuppressWarnings({ "WeakerAccess", "Duplicates", "unused" })
+@SuppressWarnings({"unused", "UnusedReturnValue", "java:S1172"})
 public class ButtonSL
         extends ElementParent<String>
 {
@@ -32,16 +32,15 @@ public class ButtonSL
 
     public static final String LABEL = "label";
 
-    public ResourceLocation texture;
-    public int[]            size;
-    public int[]            textureSize;
-    public int[]            uvEnabled;
-    public int[]            uvHover;
-    public int[]            uvDisabled;
-    public int[]            uvSize;
-    public int              centralTextureWidth;
-    public int              centralTextureHeight;
-    public Button.IPressable buttonFunction = btn -> {};
+    protected ResourceLocation texture;
+    protected int[]            size;
+    protected int[]            textureSize;
+    protected int[]            uvEnabled;
+    protected int[]            uvHover;
+    protected int[]            uvDisabled;
+    protected int[]            uvSize;
+    protected int[]            centralTextureSize;
+    protected Button.IPressable buttonFunction = btn -> {};
 
     protected Button buttonDelegate;
 
@@ -49,64 +48,32 @@ public class ButtonSL
     protected double     currMouseY;
     protected boolean isCurrHovering;
 
-    @Override
-    public void buildChildren(IGui gui, JsonObject data, Map<String, GuiElementInst> listToBuild) {
-        JsonElement lbl = data.get("label");
-        GuiElementInst lblInst = null;
-        if( lbl != null ) {
-            lblInst = JsonUtils.GSON.fromJson(lbl, GuiElementInst.class).initialize(gui);
-        } else {
-            lbl = data.get("labelText");
-            if( lbl != null ) {
-                int[] lblPos = new int[] { this.size[0] / 2, this.size[1] / 2 };
-                if( lbl.isJsonPrimitive() ) {
-                    JsonObject colors = new JsonObject();
-                    colors.addProperty("default", "0xFFFFFFFF");
-                    colors.addProperty("hover", "0xFFFFFFA0");
-                    colors.addProperty("disabled", "0xFFA0A0A0");
+    @SuppressWarnings("java:S107")
+    public ButtonSL(ResourceLocation texture, int[] size, int[] textureSize, int[] uvEnabled, int[] uvHover, int[] uvDisabled, int[] uvSize, int[] centralTextureSize,
+                    GuiElementInst label)
+    {
+        this.texture = texture;
+        this.size = size;
+        this.textureSize = textureSize;
+        this.uvEnabled = uvEnabled;
+        this.uvHover = uvHover;
+        this.uvDisabled = uvDisabled;
+        this.uvSize = uvSize;
+        this.centralTextureSize = centralTextureSize;
 
-                    JsonObject lblData = new JsonObject();
-                    JsonUtils.addJsonProperty(lblData, "text", lbl.getAsString());
-                    lblData.add("color", colors);
-
-                    lblInst = new GuiElementInst(lblPos, new Text(), lblData).initialize(gui);
-                } else {
-                    lblInst = new GuiElementInst(lblPos, new Text(), lbl.getAsJsonObject()).initialize(gui);
-                }
-            }
-        }
-
-        if( lblInst != null ) {
-            lblInst.alignment = JsonUtils.getStringArray(data.get("alignLabel"), new String[] { "center", "center" });
-
-            listToBuild.put(LABEL, lblInst);
-        }
+        this.put(LABEL, label);
     }
 
     @Override
-    public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) {
-        if( JsonUtils.getBoolVal(data.get("useVanillaTexture"), true) ) {
-            this.texture = new ResourceLocation(JsonUtils.getStringVal(data.get("texture"), "textures/gui/widgets.png"));
-        } else {
-            this.texture = gui.getDefinition().getTexture(data.get("texture"));
-        }
-        this.size = JsonUtils.getIntArray(data.get("size"), Range.is(2));
-        this.uvSize = JsonUtils.getIntArray(data.get("uvSize"), new int[] { 200, 20 }, Range.is(2));
-        this.uvEnabled = JsonUtils.getIntArray(data.get("uvEnabled"), new int[] { 0, 66 }, Range.is(2));
-        this.uvHover = JsonUtils.getIntArray(data.get("uvHover"), new int[] { this.uvEnabled[0], this.uvEnabled[1] + this.uvSize[1] }, Range.is(2));
-        this.uvDisabled = JsonUtils.getIntArray(data.get("uvDisabled"), new int[] { this.uvEnabled[0], this.uvEnabled[1] - this.uvSize[1] }, Range.is(2));
-        this.centralTextureWidth = JsonUtils.getIntVal(data.get("centralTextureWidth"), 190);
-        this.centralTextureHeight = JsonUtils.getIntVal(data.get("centralTextureHeight"), 14);
-        this.textureSize = JsonUtils.getIntArray(data.get("textureSize"), new int[] { 256, 256 }, Range.is(2));
+    public void setup(IGui gui, GuiElementInst inst) {
+        super.setup(gui, inst);
 
-        this.buttonDelegate = new Button(0, 0, 0, 0, new StringTextComponent(""), btn -> buttonFunction.onPress(btn));
-
-        super.bakeData(gui, data, inst);
+        this.buttonDelegate = new Button(0, 0, 0, 0, StringTextComponent.EMPTY, btn -> this.buttonFunction.onPress(btn));
     }
 
+    @Override
     @SuppressWarnings("deprecation")
-    @Override
-    public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data) {
+    public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, GuiElementInst inst) {
         this.currMouseX = mouseX;
         this.currMouseY = mouseY;
 
@@ -117,18 +84,22 @@ public class ButtonSL
         stack.pushPose();
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableBlend();
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+                                       GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         stack.translate(x, y, 0.0D);
-        drawRect(stack, isActive, this.isCurrHovering);
+        this.drawRect(stack, isActive, this.isCurrHovering);
         stack.popPose();
 
-        GuiElementInst label = this.getChild(LABEL);
+        GuiElementInst label = this.get(LABEL);
         if( label != null ) {
             IGuiElement e = label.get();
             if( e instanceof Text ) {
-                ((Text) e).setColor(isActive ? this.isCurrHovering ? "hover"
-                                                                   : "default"
-                                             : "disabled");
+                Text et = (Text) e;
+                if( isActive ) {
+                    et.setColor(this.isCurrHovering ? "hover" : "default");
+                } else {
+                    et.setColor("disabled");
+                }
             }
 
             GuiDefinition.renderElement(gui, stack, x + label.pos[0], y + label.pos[1], mouseX, mouseY, partTicks, label);
@@ -159,56 +130,57 @@ public class ButtonSL
     }
 
     protected void drawRect(MatrixStack stack, boolean enabled, boolean hovered) {
-        int[] uv = enabled
-                   ? (hovered ? this.uvHover : this.uvEnabled)
-                   : this.uvDisabled;
+        int[] uv = this.uvDisabled;
+        if( enabled ) {
+            uv = hovered ? this.uvHover : this.uvEnabled;
+        }
 
         if( this.uvSize[0] == this.size[0] && this.uvSize[1] == this.size[1] ) {
             AbstractGui.blit(stack, 0, 0, uv[0], uv[1], this.size[0], this.size[1], this.textureSize[0], this.textureSize[1]);
         } else {
-            int cornerWidth = (this.uvSize[0] - this.centralTextureWidth) / 2;
-            int cornerHeight = (this.uvSize[1] - this.centralTextureHeight) / 2;
+            int cornerWidth = (this.uvSize[0] - this.centralTextureSize[0]) / 2;
+            int cornerHeight = (this.uvSize[1] - this.centralTextureSize[1]) / 2;
 
             AbstractGui.blit(stack, 0, 0,
                                                     uv[0], uv[1],
                                                     cornerWidth, cornerHeight,
                                                     this.textureSize[0], this.textureSize[1]);
             AbstractGui.blit(stack, 0, this.size[1] - cornerHeight,
-                                                    uv[0], uv[1] + this.uvSize[1] - cornerHeight,
+                                                    uv[0], uv[1] + this.uvSize[1] - (float) cornerHeight,
                                                     cornerWidth, cornerHeight,
                                                     this.textureSize[0], this.textureSize[1]);
             AbstractGui.blit(stack, this.size[0] - cornerWidth, 0,
-                                                    uv[0] + this.uvSize[0] - cornerWidth, uv[1],
+                                                    uv[0] + this.uvSize[0] - (float) cornerWidth, uv[1],
                                                     cornerWidth, cornerHeight,
                                                     this.textureSize[0], this.textureSize[1]);
             AbstractGui.blit(stack, this.size[0] - cornerWidth, this.size[1] - cornerHeight,
-                                                    uv[0] + this.uvSize[0] - cornerWidth, uv[1] + this.uvSize[1] - cornerHeight,
+                                                    uv[0] + this.uvSize[0] - (float) cornerWidth, uv[1] + this.uvSize[1] - (float) cornerHeight,
                                                     cornerWidth, cornerHeight,
                                                     this.textureSize[0], this.textureSize[1]);
 
             drawTiledTexture(stack, 0, cornerHeight,
-                             uv[0], uv[1] + cornerHeight,
+                             uv[0], uv[1] + (float) cornerHeight,
                              cornerWidth, this.uvSize[1] - cornerHeight * 2,
                              cornerWidth, this.size[1] - cornerHeight * 2,
                              this.textureSize[0], this.textureSize[1]);
             drawTiledTexture(stack, cornerWidth, 0,
-                             uv[0] + cornerWidth, uv[1],
+                             uv[0] + (float) cornerWidth, uv[1],
                              this.uvSize[0] - cornerWidth * 2, cornerHeight,
                              this.size[0] - cornerWidth * 2, cornerHeight,
                              this.textureSize[0], this.textureSize[1]);
             drawTiledTexture(stack, this.size[0] - cornerWidth, cornerHeight,
-                             uv[0] + this.uvSize[0] - cornerWidth, uv[1] + cornerHeight,
+                             uv[0] + this.uvSize[0] - (float) cornerWidth, uv[1] + (float) cornerHeight,
                              cornerWidth, this.uvSize[1] - cornerHeight * 2,
                              cornerWidth, this.size[1] - cornerHeight * 2,
                              this.textureSize[0], this.textureSize[1]);
             drawTiledTexture(stack, cornerWidth, this.size[1] - cornerHeight,
-                             uv[0] + cornerWidth, uv[1] + this.uvSize[1] - cornerHeight,
+                             uv[0] + (float) cornerWidth, uv[1] + this.uvSize[1] - (float) cornerHeight,
                              this.uvSize[0] - cornerWidth * 2, cornerHeight,
                              this.size[0] - cornerWidth * 2, cornerHeight,
                              this.textureSize[0], this.textureSize[1]);
 
             drawTiledTexture(stack, cornerWidth, cornerHeight,
-                             uv[0] + cornerWidth, uv[1] + cornerHeight,
+                             uv[0] + (float) cornerWidth, uv[1] + (float) cornerHeight,
                              this.uvSize[0] - cornerWidth * 2, this.uvSize[1] - cornerHeight * 2,
                              this.size[0] - cornerWidth * 2, this.size[1] - cornerHeight * 2,
                              this.textureSize[0], this.textureSize[1]);
@@ -261,5 +233,116 @@ public class ButtonSL
 
     public void setVisible(boolean visible) {
         this.buttonDelegate.visible = visible;
+    }
+
+    public static class Builder
+    {
+        protected ResourceLocation texture;
+        protected int[]            size;
+        protected int[]            textureSize;
+        protected int[]            uvSize;
+        protected int[]            uvEnabled;
+        protected int[]            uvHover;
+        protected int[]            uvDisabled;
+        protected int[]            centralTextureSize;
+        protected String[]         labelAlignment;
+        protected GuiElementInst   label;
+
+        public Builder(int[] size) {
+            this.size = size;
+        }
+
+        public Builder vanillaTexture()                        { this.texture = new ResourceLocation("textures/gui/widgets.png"); return this; }
+        public Builder customTexture(ResourceLocation texture) { this.texture = texture;                                          return this; }
+        public Builder textureSize(int[] size)                 { this.textureSize = size;                                         return this; }
+        public Builder uvSize(int[] size)                      { this.uvSize = size;                                              return this; }
+        public Builder uvEnabled(int[] uv)                     { this.uvEnabled = uv;                                             return this; }
+        public Builder uvHover(int[] uv)                       { this.uvHover = uv;                                               return this; }
+        public Builder uvDisabled(int[] uv)                    { this.uvDisabled = uv;                                            return this; }
+        public Builder centralTextureSize(int[] size)          { this.centralTextureSize = size;                                  return this; }
+        public Builder labelAlignment(String[] align)          { this.labelAlignment = align;                                     return this; }
+        public Builder label(GuiElementInst label)             { this.label = label;                                              return this; }
+
+        public void sanitize(IGui gui) {
+            if( this.texture == null ) {
+                this.vanillaTexture();
+            }
+
+            if( this.textureSize == null ) {
+                this.textureSize = new int[] { 256, 256 };
+            }
+
+            if( this.uvSize == null ) {
+                this.uvSize = new int[] { 200, 20 };
+            }
+
+            if( this.uvEnabled == null ) {
+                this.uvEnabled = new int[] { 0, 66 };
+            }
+
+            if( this.uvHover == null ) {
+                this.uvHover = new int[] { this.uvEnabled[0], this.uvEnabled[1] + this.uvSize[1] };
+            }
+
+            if( this.uvDisabled == null ) {
+                this.uvDisabled = new int[] { this.uvEnabled[0], this.uvEnabled[1] - this.uvSize[1] };
+            }
+
+            if( this.centralTextureSize == null ) {
+                this.centralTextureSize = new int[] { 190, 14 };
+            }
+
+            if( this.label == null ) {
+                this.label = new GuiElementInst(new EmptyGuiElement());
+            }
+
+            if( this.labelAlignment == null ) {
+                this.labelAlignment = new String[] { "center", "center"};
+            }
+        }
+
+        public ButtonSL get(IGui gui) {
+            this.sanitize(gui);
+
+            this.label.alignment = this.labelAlignment;
+
+            return new ButtonSL(this.texture, this.size, this.textureSize, this.uvEnabled, this.uvHover, this.uvDisabled, this.uvSize, this.centralTextureSize,
+                                this.label.initialize(gui));
+        }
+
+        protected static Builder buildFromJson(IGui gui, JsonObject data) {
+            Builder b = new Builder(JsonUtils.getIntArray(data.get("size"), Range.is(2)));
+
+            if( JsonUtils.getBoolVal(data.get("useVanillaTexture"), true) ) {
+                b.vanillaTexture();
+            } else {
+                b.customTexture(gui.getDefinition().getTexture(data.get("texture")));
+            }
+
+            JsonUtils.fetchIntArray(data.get("textureSize"), b::textureSize, Range.is(2));
+            JsonUtils.fetchIntArray(data.get("uvSize"), b::uvSize, Range.is(2));
+            JsonUtils.fetchIntArray(data.get("uvEnabled"), b::uvEnabled, Range.is(2));
+            JsonUtils.fetchIntArray(data.get("uvHover"), b::uvHover, Range.is(2));
+            JsonUtils.fetchIntArray(data.get("uvDisabled"), b::uvDisabled, Range.is(2));
+            JsonUtils.fetchIntArray(data.get("centralTextureSize"), b::uvDisabled, Range.is(2));
+            JsonUtils.fetchStringArray(data.get("labelAlignment"), b::labelAlignment, Range.between(0, 2));
+
+            JsonElement label = data.get(LABEL);
+            if( label != null ) {
+                if( label.isJsonPrimitive() ) {
+                    int[] lblPos = new int[] { b.size[0] / 2, b.size[1] / 2 };
+                    b.label(new GuiElementInst(lblPos, new Text.Builder(new TranslationTextComponent(label.getAsString()))
+                                                                       .color(0xFFFFFFFF).color("hover", 0xFFFFFFA0).color("disabled", 0xFFA0A0A0).get(gui)));
+                } else {
+                    b.label(JsonUtils.GSON.fromJson(label, GuiElementInst.class));
+                }
+            }
+
+            return b;
+        }
+
+        public static ButtonSL fromJson(IGui gui, JsonObject data) {
+            return buildFromJson(gui, data).get(gui);
+        }
     }
 }

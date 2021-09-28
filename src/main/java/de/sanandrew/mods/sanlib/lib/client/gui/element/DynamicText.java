@@ -6,35 +6,27 @@
 package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonObject;
-import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 
+import javax.annotation.Nonnull;
+import java.util.Map;
+
+@SuppressWarnings({"unused", "UnusedReturnValue", "java:S1172", "java:S1104"})
 public class DynamicText
     extends Text
 {
     public static final ResourceLocation ID = new ResourceLocation("dynamic_text");
 
-    public String key;
+    protected String key;
 
-    @Override
-    public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) {
-        if( this.key == null ) {
-            this.key = JsonUtils.getStringVal(data.get("key"));
-        }
+    public DynamicText(@Nonnull ITextComponent text, boolean shadow, int wrapWidth, int lineHeight, FontRenderer fontRenderer, Map<String, Integer> colors, String key) {
+        super(text, shadow, wrapWidth, lineHeight, fontRenderer, colors);
 
-        super.bakeData(gui, data, inst);
-    }
-
-    @Override
-    public ITextComponent getBakedText(IGui gui, JsonObject data) {
-        return data.has("text")
-               ? new TranslationTextComponent(JsonUtils.getStringVal(data.get("text")))
-               : StringTextComponent.EMPTY;
+        this.key = key;
     }
 
     @Override
@@ -45,5 +37,40 @@ public class DynamicText
     public interface IGuiDynamicText
     {
         ITextComponent getText(String key, ITextComponent originalText);
+    }
+
+    public static class Builder
+            extends Text.Builder
+    {
+        public String key;
+
+        public Builder(ITextComponent text, String key) {
+            super(text);
+
+            this.key = key;
+        }
+
+        public DynamicText get(IGui gui) {
+            super.sanitize(gui);
+
+            return new DynamicText(this.text, this.shadow, this.wrapWidth, this.lineHeight, this.fontRenderer, this.colors, this.key);
+        }
+
+        protected static Builder buildFromJson(IGui gui, JsonObject data) {
+            Text.Builder sb = Text.Builder.buildFromJson(gui, data);
+            Builder db = new Builder(sb.text, JsonUtils.getStringVal(data.get("key")));
+
+            db.shadow = sb.shadow;
+            db.wrapWidth = sb.wrapWidth;
+            db.lineHeight = sb.lineHeight;
+            db.fontRenderer = sb.fontRenderer;
+            db.colors = sb.colors;
+
+            return db;
+        }
+
+        public static DynamicText fromJson(IGui gui, JsonObject data) {
+            return buildFromJson(gui, data).get(gui);
+        }
     }
 }

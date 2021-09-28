@@ -14,7 +14,6 @@ import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.fonts.providers.DefaultGlyphProvider;
@@ -25,10 +24,12 @@ import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.ITextProperties;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TranslationTextComponent;
 import org.apache.commons.lang3.mutable.MutableInt;
 
+import javax.annotation.Nonnull;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,142 +60,81 @@ import java.util.Optional;
  * </pre>
  */
 
-@SuppressWarnings("java:S1104")
+@SuppressWarnings({"unused", "java:S1172", "java:S1104", "UnusedReturnValue"})
 public class Text
         implements IGuiElement
 {
     public static final ResourceLocation ID = new ResourceLocation("text");
-    
-    public ITextComponent bakedText;
-    public int            color;
-    public Map<String, Integer> colors;
-    public boolean              shadow;
-    public int                  wrapWidth;
-    public FontRenderer         fontRenderer;
-    public int                  lineHeight;
+    protected static final String DEFAULT_COLOR = "default";
 
-    protected String                 defaultColor;
+    @Nonnull
+    protected final ITextComponent bakedText;
+    protected int                  currColor;
+    protected Map<String, Integer> colors;
+    protected boolean              shadow;
+    protected int                  wrapWidth;
+    protected FontRenderer         fontRenderer;
+    protected int                  lineHeight;
+
     protected int                    currWidth;
     protected int                    currHeight;
     protected GuiElementInst.Justify justify;
 
     private final List<ITextProperties> renderedLines = new ArrayList<>();
+    private ITextComponent prevText;
 
-    private static final String DEFAULT_COLOR = "default";
+    public Text(@Nonnull ITextComponent text, boolean shadow, int wrapWidth, int lineHeight, FontRenderer fontRenderer, Map<String, Integer> colors) {
+        this.bakedText = text;
+        this.shadow = shadow;
+        this.wrapWidth = wrapWidth;
+        this.lineHeight = lineHeight;
+        this.fontRenderer = fontRenderer;
+        this.colors = colors;
+        this.currColor = colors.getOrDefault(DEFAULT_COLOR, 0xFF000000);
+    }
+
 
     @Override
-    public void bakeData(IGui gui, JsonObject data, GuiElementInst inst) {
+    public void setup(IGui gui, GuiElementInst inst) {
         this.justify = inst.getAlignmentH();
 
-        this.colors = new HashMap<>();
-        this.defaultColor = null;
-        if( data.has("color") ) {
-            JsonElement clrData = data.get("color");
-            if( clrData.isJsonObject() ) {
-                this.bakeColorObj(clrData.getAsJsonObject());
-            } else if( clrData.isJsonPrimitive() ) {
-                int clr = MiscUtils.hexToInt(clrData.getAsString());
-                this.defaultColor = DEFAULT_COLOR;
-                this.colors.put(this.defaultColor, clr);
-                this.color = clr;
-            } else {
-                this.bakeDefaultColor();
-            }
-        } else {
-            this.bakeDefaultColor();
-        }
-
-        this.bakedText = this.getBakedText(gui, data);
-        this.shadow = JsonUtils.getBoolVal(data.get("shadow"), false);
-        this.wrapWidth = JsonUtils.getIntVal(data.get("wrapWidth"), 0);
-        this.lineHeight = JsonUtils.getIntVal(data.get("lineHeight"), 9);
-
-        JsonElement cstFont = data.get("font");
-        if( cstFont == null ) {
-            this.fontRenderer = new Font("standard").get(gui.get());
-        } else {
-            this.fontRenderer = JsonUtils.GSON.fromJson(cstFont, Font.class).get(gui.get(), data.getAsJsonObject("glyphProvider"));
-        }
-
-        this.currWidth = this.getTextWidth(gui);
-        this.currHeight = this.fontRenderer.getSplitter()
-                                           .splitLines(this.bakedText, this.wrapWidth <= 0 ? Integer.MAX_VALUE : this.wrapWidth, this.bakedText.getStyle())
-                                           .size()
-                          * this.lineHeight;
-        if( this.shadow ) {
-            this.currHeight += 1;
-        }
+        this.buildLines(gui);
     }
 
-    private void bakeColorObj(JsonObject clrData) {
-        for( Map.Entry<String, JsonElement> o : clrData.entrySet() ) {
-            String key = o.getKey();
-            if( key.equalsIgnoreCase(DEFAULT_COLOR) || this.defaultColor == null ) {
-                this.defaultColor = key;
-            }
-
-            this.colors.put(key, MiscUtils.hexToInt(o.getValue().getAsString()));
-        }
-
-        this.color = this.colors.get(this.defaultColor);
-    }
-
-    private void bakeDefaultColor() {
-        this.defaultColor = DEFAULT_COLOR;
-        this.colors.put(this.defaultColor, 0xFF000000);
-        this.color = 0xFF000000;
-    }
-
-    @SuppressWarnings("unused")
-    public ITextComponent getBakedText(IGui gui, JsonObject data) {
-        return new TranslationTextComponent(data.get("text").getAsString());
-    }
-
-    @SuppressWarnings("unused")
     public ITextComponent getDynamicText(IGui gui, ITextComponent originalText) {
         return originalText;
     }
 
-    public int getTextWidth(IGui gui) {
-        ITextComponent tc = this.getDynamicText(gui, this.bakedText);
-        int maxWidth = this.wrapWidth;
-        if( maxWidth > 0 ) {
-            if( this.justify == GuiElementInst.Justify.JUSTIFY ) {
-                return maxWidth;
-            }
-        } else {
-            maxWidth = Integer.MAX_VALUE;
-        }
-
-        return this.fontRenderer.getSplitter().splitLines(tc, maxWidth, Style.EMPTY)
-                                .stream().map(tp -> this.fontRenderer.width(tp))
-                                .reduce(Integer::max).orElse(0);
-    }
-
-    protected void updateSize(IGui gui) {
-        this.currWidth = this.getTextWidth(gui);
-        this.currHeight = this.renderedLines.size() * this.lineHeight;
-    }
-
-    @Override
-    public void tick(IGui gui, JsonObject data) {
-        this.renderedLines.clear();
+    protected void buildLines(IGui gui) {
         ITextComponent s = this.getDynamicText(gui, this.bakedText);
+        if( !s.equals(this.prevText) ) {
+            this.renderedLines.clear();
 
-        this.renderedLines.addAll(Arrays.asList(this.fontRenderer.getSplitter()
-                                                .splitLines(s, this.wrapWidth > 0 ? this.wrapWidth : Integer.MAX_VALUE, s.getStyle())
-                                                .toArray(new ITextProperties[0])));
+            this.renderedLines.addAll(Arrays.asList(this.fontRenderer.getSplitter()
+                                                                     .splitLines(s, this.wrapWidth > 0 ? this.wrapWidth : Integer.MAX_VALUE, s.getStyle())
+                                                                     .toArray(new ITextProperties[0])));
 
-        this.updateSize(gui);
+            this.currWidth = this.justify == GuiElementInst.Justify.JUSTIFY && this.wrapWidth > 0
+                             ? this.wrapWidth
+                             : this.renderedLines.stream().map(l -> this.fontRenderer.width(l)).max(Integer::compareTo).orElse(0);
+
+            this.currHeight = this.renderedLines.size() * this.lineHeight;
+
+            if( this.shadow ) {
+                this.currHeight += 1;
+            }
+
+            this.prevText = s;
+        }
     }
 
     @Override
-    public void renderTick(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data) {
-        this.updateSize(gui);
+    public void tick(IGui gui, GuiElementInst inst) {
+        this.buildLines(gui);
     }
 
     @Override
-    public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, JsonObject data) {
+    public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, GuiElementInst inst) {
         for( ITextProperties sln : this.renderedLines ) {
             this.renderLine(stack, sln, x, y);
             y += this.lineHeight;
@@ -224,9 +164,9 @@ public class Text
         s.visit((style, str) -> {
             IReorderingProcessor irp = IReorderingProcessor.forward(str, style);
             if( this.shadow ) {
-                this.fontRenderer.drawShadow(stack, irp, mx.getValue(), y, this.color);
+                this.fontRenderer.drawShadow(stack, irp, mx.getValue(), y, this.currColor);
             } else {
-                this.fontRenderer.draw(stack, irp, mx.getValue(), y, this.color);
+                this.fontRenderer.draw(stack, irp, mx.getValue(), y, this.currColor);
             }
             mx.add(this.fontRenderer.width(irp));
 
@@ -251,9 +191,9 @@ public class Text
             for( int i = 0; i < words.length; i++ ) {
                 IReorderingProcessor irp = IReorderingProcessor.forward(words[i], style);
                 if( this.shadow ) {
-                    this.fontRenderer.drawShadow(stack, irp, mx.getValue(), y, this.color);
+                    this.fontRenderer.drawShadow(stack, irp, mx.getValue(), y, this.currColor);
                 } else {
-                    this.fontRenderer.draw(stack, irp, mx.getValue(), y, this.color);
+                    this.fontRenderer.draw(stack, irp, mx.getValue(), y, this.currColor);
                 }
                 mx.add(wordWidths[i] + spaceDist);
             }
@@ -274,10 +214,10 @@ public class Text
 
     public void setColor(String colorId) {
         if( colorId == null || !this.colors.containsKey(colorId) ) {
-            colorId = this.defaultColor;
+            this.currColor = this.colors.getOrDefault(DEFAULT_COLOR, 0xFF000000);
+        } else {
+            this.currColor = this.colors.get(colorId);
         }
-
-        this.color = this.colors.get(colorId);
     }
 
     public static net.minecraft.client.gui.fonts.Font getMcFont(Minecraft mc, ResourceLocation rl) {
@@ -356,6 +296,81 @@ public class Text
 
             Font font = (Font) o;
             return Objects.equals(this.texture, font.texture);
+        }
+    }
+
+    public static class Builder
+    {
+        protected final ITextComponent text;
+        protected boolean shadow = false;
+        protected int wrapWidth = 0;
+        protected int lineHeight = 9;
+        protected FontRenderer fontRenderer = null;
+        protected Map<String, Integer> colors = new HashMap<>();
+
+        public Builder(ITextComponent text) {
+            this.text = text;
+        }
+
+        public Builder shadow(boolean shadow)              { this.shadow = shadow;                                       return this; }
+        public Builder wrapWidth(int wrapWidth)            { this.wrapWidth = wrapWidth;                                 return this; }
+        public Builder lineHeight(int height)              { this.lineHeight = height;                                   return this; }
+        public Builder font(FontRenderer fontRenderer)     { this.fontRenderer = fontRenderer;                           return this; }
+        public Builder color(int color)                    { this.colors.clear(); this.colors.put(DEFAULT_COLOR, color); return this; }
+        public Builder colors(Map<String, Integer> colors) { this.colors.clear(); this.colors.putAll(colors);            return this; }
+        public Builder color(String key, int color)        { this.colors.put(key, color);                                return this; }
+
+        public Builder font(IGui gui, Font font)                       { return this.font(font.get(gui.get())); }
+        public Builder font(IGui gui, Font font, JsonObject glyphData) { return this.font(font.get(gui.get(), glyphData)); }
+
+        protected void sanitize(IGui gui) {
+            if( this.colors.isEmpty() ) {
+                this.colors.put(DEFAULT_COLOR, 0xFF000000);
+            } else {
+                this.colors.computeIfAbsent(DEFAULT_COLOR, k -> this.colors.values().stream().findFirst().get());
+            }
+
+            if( this.fontRenderer == null ) {
+                this.fontRenderer = gui.get().getMinecraft().font;
+            }
+        }
+
+        public Text get(IGui gui) {
+            this.sanitize(gui);
+
+            return new Text(this.text, this.shadow, this.wrapWidth, this.lineHeight, this.fontRenderer, this.colors);
+        }
+
+        protected static Builder buildFromJson(IGui gui, JsonObject data) {
+            Builder b = new Builder(data.has("text") ? new TranslationTextComponent(JsonUtils.getStringVal(data.get("text"))) : StringTextComponent.EMPTY);
+
+            if( data.has("color") ) {
+                JsonElement clr = data.get("color");
+                if( clr.isJsonObject() ) {
+                    for( Map.Entry<String, JsonElement> o : clr.getAsJsonObject().entrySet() ) {
+                        b.color(o.getKey(), MiscUtils.hexToInt(o.getValue().getAsString()));
+                    }
+                } else if( clr.isJsonPrimitive() ) {
+                    b.color(MiscUtils.hexToInt(clr.getAsString()));
+                }
+            }
+
+            JsonUtils.fetchBool(data.get("shadow"), b::shadow);
+            JsonUtils.fetchInt(data.get("wrapWidth"), b::wrapWidth);
+            JsonUtils.fetchInt(data.get("lineHeight"), b::lineHeight);
+
+            JsonElement cstFont = data.get("font");
+            if( cstFont == null ) {
+                b.font(gui, new Font("standard"));
+            } else {
+                b.font(gui, JsonUtils.GSON.fromJson(cstFont, Font.class), data.getAsJsonObject("glyphProvider"));
+            }
+
+            return b;
+        }
+
+        public static Text fromJson(IGui gui, JsonObject data) {
+            return buildFromJson(gui, data).get(gui);
         }
     }
 }
