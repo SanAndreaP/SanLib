@@ -140,15 +140,9 @@ jar {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            from components.java
             artifactId archivesBaseName
-            pom.withXml { p -> // remove forge dependency
-                p.asNode().dependencies.'*'.findAll() {
-                    it.groupId.text() == 'net.minecraftforge'
-                }.each() {
-                    it.parent().remove(it)
-                }
-            }
+            artifact jar
+            artifact sourcesJar
         }
     }
     repositories {
@@ -174,5 +168,5 @@ task signJar(type: SignJar, dependsOn: jar) {
 }
 
 build.finalizedBy signJar
-publishMavenJavaPublicationToMavenRepository.dependsOn signJar
+generateMetadataFileForMavenJavaPublication.dependsOn signJar
 signJar.finalizedBy publish
