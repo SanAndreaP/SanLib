@@ -28,10 +28,10 @@
           "name": "SanLib-1.16.5-2.0.0.jar",
           "url": "SanLib-1.16.5-2.0.0.jar",
           "size": 280463,
-          "sha512": "cad058c958f3ae8a2aee9f7c692cf5bfe0ee1d7d98e051bddd6b9301abcf5a45ec1635e0176086dc052aabfdb1c1fc815563bbe7ca1f88d92ef013c064182727",
-          "sha256": "f3e0707048041d550c58a46590d1fe6212ab73417f57dad0420596423b7040da",
-          "sha1": "63291731d99986e9c6ec9b37161f571c4c2e2334",
-          "md5": "2cc302d42da642f2e56d7759ba1a8278"
+          "sha512": "02bab436b4f10f7e38955b59711a3fd38e7245a50b92cd913b38e573dd8ae50233f88d0c96ecc8b9f58c915d4fecd1cb53908d251c7d86e7226a77ca13903d50",
+          "sha256": "2be3cdbe164e484457435a2d57eb4de72d3320f21a74d758c1cad036e69442d1",
+          "sha1": "d751438821926136a05d9223c9fedaef680ef8cf",
+          "md5": "9c547be6fe4c1b8ed976297aa6abf91e"
         }
       ]
     },
@@ -73,10 +73,10 @@
           "name": "SanLib-1.16.5-2.0.0.jar",
           "url": "SanLib-1.16.5-2.0.0.jar",
           "size": 280463,
-          "sha512": "cad058c958f3ae8a2aee9f7c692cf5bfe0ee1d7d98e051bddd6b9301abcf5a45ec1635e0176086dc052aabfdb1c1fc815563bbe7ca1f88d92ef013c064182727",
-          "sha256": "f3e0707048041d550c58a46590d1fe6212ab73417f57dad0420596423b7040da",
-          "sha1": "63291731d99986e9c6ec9b37161f571c4c2e2334",
-          "md5": "2cc302d42da642f2e56d7759ba1a8278"
+          "sha512": "02bab436b4f10f7e38955b59711a3fd38e7245a50b92cd913b38e573dd8ae50233f88d0c96ecc8b9f58c915d4fecd1cb53908d251c7d86e7226a77ca13903d50",
+          "sha256": "2be3cdbe164e484457435a2d57eb4de72d3320f21a74d758c1cad036e69442d1",
+          "sha1": "d751438821926136a05d9223c9fedaef680ef8cf",
+          "md5": "9c547be6fe4c1b8ed976297aa6abf91e"
         }
       ]
     },
