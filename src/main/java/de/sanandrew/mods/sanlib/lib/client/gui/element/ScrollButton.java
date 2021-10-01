@@ -9,7 +9,7 @@ import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.Range;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "UnusedReturnValue"})
 public class ScrollButton
         extends Texture
 {
@@ -38,7 +38,7 @@ public class ScrollButton
         }
 
         @Override
-        protected void sanitize(IGui gui) {
+        public void sanitize(IGui gui) {
             super.sanitize(gui);
 
             if( this.uvDisabled == null ) {
@@ -57,14 +57,10 @@ public class ScrollButton
         }
 
         protected static Builder buildFromJson(IGui gui, JsonObject data) {
-            Texture.Builder          tb = Texture.Builder.buildFromJson(gui, data);
-            Builder b  = new Builder(tb.size).uvDisabled(JsonUtils.getIntArray(data.get("uvDisabled"), Range.is(2)));
+            Texture.Builder tb = Texture.Builder.buildFromJson(gui, data);
+            Builder         b  = IBuilder.copyValues(tb, new Builder(tb.size));
 
-            b.texture = tb.texture;
-            b.textureSize = tb.textureSize;
-            b.uv = tb.uv;
-            b.scale = tb.scale;
-            b.color = tb.color;
+            JsonUtils.fetchIntArray(data.get("uvDisabled"), b::uvDisabled, Range.is(2));
 
             return b;
         }

@@ -88,27 +88,24 @@ public class Texture
     }
 
     public static class Builder
+            implements IBuilder<Texture>
     {
+        protected final int[]      size;
         protected ResourceLocation texture;
-        protected int[] size;
-        protected int[] textureSize;
-        protected int[] uv;
-        protected float[] scale;
-        protected ColorObj color;
-
-        public Builder(int width, int height) {
-            this(new int[] { width, height });
-        }
+        protected int[]            textureSize;
+        protected int[]            uv;
+        protected float[]          scale;
+        protected ColorObj         color;
 
         public Builder(int[] size) {
             this.size = size;
         }
 
-        public Builder texture(ResourceLocation texture) { this.texture = texture;                               return this; }
-        public Builder textureSize(int[] size)           { this.textureSize = size;                              return this; }
-        public Builder uv(int[] uv)                      { this.uv = uv;                                         return this; }
-        public Builder scale(float[] scale)              { this.scale = scale;                                   return this; }
-        public Builder color(int color)                  { this.color = new ColorObj(color);                     return this; }
+        public Builder texture(ResourceLocation texture) { this.texture = texture;           return this; }
+        public Builder textureSize(int[] size)           { this.textureSize = size;          return this; }
+        public Builder uv(int[] uv)                      { this.uv = uv;                     return this; }
+        public Builder scale(float[] scale)              { this.scale = scale;               return this; }
+        public Builder color(int color)                  { this.color = new ColorObj(color); return this; }
 
         public Builder textureSize(int width, int height) { return this.textureSize(new int[] {width, height}); }
         public Builder uv(int u, int v)                   { return this.uv(new int[] {u, v}); }
@@ -116,7 +113,8 @@ public class Texture
         public Builder scale(float scale)                 { return this.scale(new float[] {scale, scale}); }
         public Builder color(String color)                { return this.color(MiscUtils.hexToInt(color)); }
 
-        protected void sanitize(IGui gui) {
+        @Override
+        public void sanitize(IGui gui) {
             if( this.texture == null ) {
                 this.texture = gui.getDefinition().getTexture(null);
             }
@@ -138,6 +136,7 @@ public class Texture
             }
         }
 
+        @Override
         public Texture get(IGui gui) {
             this.sanitize(gui);
 
@@ -146,8 +145,8 @@ public class Texture
 
         protected static Builder buildFromJson(IGui gui, JsonObject data) {
             Builder b = new Builder(JsonUtils.getIntArray(data.get("size"), Range.is(2)))
-                    .texture(gui.getDefinition().getTexture(data.get("texture")))
-                    .uv(JsonUtils.getIntArray(data.get("uv"), Range.is(2)));
+                                   .texture(gui.getDefinition().getTexture(data.get("texture")))
+                                   .uv(JsonUtils.getIntArray(data.get("uv"), Range.is(2)));
 
             JsonUtils.fetchIntArray(data.get("textureSize"), b::textureSize, Range.is(2));
             JsonUtils.fetchFloatArray(data.get("scale"), b::scale, Range.is(2));

@@ -38,7 +38,6 @@ public class ScreenTitle
     public static class Builder
             extends Text.Builder
     {
-
         public Builder() {
             super(StringTextComponent.EMPTY);
         }
@@ -51,16 +50,7 @@ public class ScreenTitle
         }
 
         protected static Builder buildFromJson(IGui gui, JsonObject data) {
-            Text.Builder sb = Text.Builder.buildFromJson(gui, data);
-            Builder      db = new Builder();
-
-            db.shadow = sb.shadow;
-            db.wrapWidth = sb.wrapWidth;
-            db.lineHeight = sb.lineHeight;
-            db.fontRenderer = sb.fontRenderer;
-            db.colors = sb.colors;
-
-            return db;
+            return IBuilder.copyValues(Text.Builder.buildFromJson(gui, data), new Builder());
         }
 
         public static ScreenTitle fromJson(IGui gui, JsonObject data) {

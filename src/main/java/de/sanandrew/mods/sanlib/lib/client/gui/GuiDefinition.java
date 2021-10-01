@@ -135,10 +135,10 @@ public class GuiDefinition
         Arrays.stream(this.backgroundElements).forEach(this::initElement);
         Arrays.stream(this.foregroundElements).forEach(this::initElement);
 
-        for( IGuiElement.PriorityTarget tgt : IGuiElement.PriorityTarget.VALUES ) {
+        IGuiElement.PriorityTarget.forEach(tgt -> {
             this.prioritizedBgElements.put(tgt, getPrioritizedElements(this.backgroundElements, tgt));
             this.prioritizedFgElements.put(tgt, getPrioritizedElements(this.foregroundElements, tgt));
-        }
+        });
     }
 
     private void loadFile(ResourceLocation location, List<GuiElementInst> bgElem, List<GuiElementInst> fgElem) throws IOException {
@@ -188,10 +188,7 @@ public class GuiDefinition
         Arrays.stream(this.backgroundElements).forEach(e -> e.initialize(gui));
         Arrays.stream(this.foregroundElements).forEach(e -> e.initialize(gui));
 
-        Consumer<GuiElementInst> f = e -> {
-            e.firstRenderUpdate = false;
-            e.get().setup(gui, e);
-        };
+        Consumer<GuiElementInst> f = e -> e.get().setup(gui, e);
         Arrays.stream(this.backgroundElements).forEach(f);
         Arrays.stream(this.foregroundElements).forEach(f);
     }
@@ -348,4 +345,6 @@ public class GuiDefinition
         Arrays.stream(this.backgroundElements).forEach(f);
         Arrays.stream(this.foregroundElements).forEach(f);
     }
+
+
 }

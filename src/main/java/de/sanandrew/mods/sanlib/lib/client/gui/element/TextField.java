@@ -73,79 +73,6 @@ public class TextField
         this.textfieldWidget.setBordered(this.drawBackground);
     }
 
-
-    public static class Builder
-    {
-        protected int[]          size;
-        protected int            textColor = 0xFFE0E0E0;
-        protected int            disabledTextColor = 0xFF707070;
-        protected int            placeholderTextColor = 0xFFA0A0A0;
-        protected boolean        canLoseFocus = true;
-        protected boolean        drawBackground = true;
-        protected ITextComponent placeholderText;
-        protected FontRenderer   fontRenderer;
-
-        public Builder(int[] size) {
-            this.size = size;
-        }
-
-        public Builder placeholderText(ITextComponent text) { this.placeholderText = text; return this; }
-        public Builder textColor(int color) { this.textColor = color; return this; }
-        public Builder disabledTextColor(int color) { this.disabledTextColor = color; return this; }
-        public Builder placeholderTextColor(int color) { this.placeholderTextColor = color; return this; }
-        public Builder font(FontRenderer fontRenderer) { this.fontRenderer = fontRenderer; return this; }
-        public Builder canLoseFocus(boolean canLoseFocus) { this.canLoseFocus = canLoseFocus; return this; }
-        public Builder drawBackground(boolean drawBackground) { this.drawBackground = drawBackground; return this; }
-
-        public Builder placeholderText(String text) { return this.placeholderText(new TranslationTextComponent(text)); }
-        public Builder textColor(String color) { return this.textColor(MiscUtils.hexToInt(color)); }
-        public Builder disabledTextColor(String color) { return this.disabledTextColor(MiscUtils.hexToInt(color)); }
-        public Builder placeholderTextColor(String color) { return this.placeholderTextColor(MiscUtils.hexToInt(color)); }
-        public Builder font(IGui gui, Text.Font font)                       { return this.font(font.get(gui.get())); }
-        public Builder font(IGui gui, Text.Font font, JsonObject glyphData) { return this.font(font.get(gui.get(), glyphData)); }
-
-        public void sanitize(IGui gui) {
-            if( this.fontRenderer == null ) {
-                this.fontRenderer = gui.get().getMinecraft().font;
-            }
-
-            if( this.placeholderText == null ) {
-                this.placeholderText = StringTextComponent.EMPTY;
-            }
-        }
-
-        public TextField get(IGui gui) {
-            this.sanitize(gui);
-
-            return new TextField(this.size, this.textColor, this.disabledTextColor, this.placeholderTextColor, this.canLoseFocus, this.drawBackground, this.placeholderText,
-                                 this.fontRenderer);
-        }
-
-        protected static Builder buildFromJson(IGui gui, JsonObject data) {
-            Builder b = new Builder(JsonUtils.getIntArray(data.get("size"), Range.is(2)));
-
-            JsonUtils.fetchString(data.get("placeholderText"), b::placeholderText);
-            JsonUtils.fetchBool(data.get("canLoseFocus"), b::canLoseFocus);
-            JsonUtils.fetchBool(data.get("drawBackground"), b::drawBackground);
-            JsonUtils.fetchString(data.get("textColor"), b::textColor);
-            JsonUtils.fetchString(data.get("disabledTextColor"), b::disabledTextColor);
-            JsonUtils.fetchString(data.get("placeholderTextColor"), b::placeholderTextColor);
-
-            JsonElement cstFont = data.get("font");
-            if( cstFont == null ) {
-                b.font(gui, new Text.Font("standard"));
-            } else {
-                b.font(gui, JsonUtils.GSON.fromJson(cstFont, Text.Font.class), data.getAsJsonObject("glyphProvider"));
-            }
-
-            return b;
-        }
-
-        public static TextField fromJson(IGui gui, JsonObject data) {
-            return buildFromJson(gui, data).get(gui);
-        }
-    }
-
     @Override
     public void tick(IGui gui, GuiElementInst inst) {
         this.textfieldWidget.tick();
@@ -278,5 +205,80 @@ public class TextField
     @Override
     public int getHeight() {
         return this.size[1] + (this.drawBackground ? 2 : 0);
+    }
+
+    public static class Builder
+            implements IBuilder<TextField>
+    {
+        protected final int[]    size;
+        protected int            textColor = 0xFFE0E0E0;
+        protected int            disabledTextColor = 0xFF707070;
+        protected int            placeholderTextColor = 0xFFA0A0A0;
+        protected boolean        canLoseFocus = true;
+        protected boolean        drawBackground = true;
+        protected ITextComponent placeholderText;
+        protected FontRenderer   fontRenderer;
+
+        public Builder(int[] size) {
+            this.size = size;
+        }
+
+        public Builder placeholderText(ITextComponent text)   { this.placeholderText = text;          return this; }
+        public Builder textColor(int color)                   { this.textColor = color;               return this; }
+        public Builder disabledTextColor(int color)           { this.disabledTextColor = color;       return this; }
+        public Builder placeholderTextColor(int color)        { this.placeholderTextColor = color;    return this; }
+        public Builder font(FontRenderer fontRenderer)        { this.fontRenderer = fontRenderer;     return this; }
+        public Builder canLoseFocus(boolean canLoseFocus)     { this.canLoseFocus = canLoseFocus;     return this; }
+        public Builder drawBackground(boolean drawBackground) { this.drawBackground = drawBackground; return this; }
+
+        public Builder placeholderText(String text)                         { return this.placeholderText(new TranslationTextComponent(text)); }
+        public Builder textColor(String color)                              { return this.textColor(MiscUtils.hexToInt(color)); }
+        public Builder disabledTextColor(String color)                      { return this.disabledTextColor(MiscUtils.hexToInt(color)); }
+        public Builder placeholderTextColor(String color)                   { return this.placeholderTextColor(MiscUtils.hexToInt(color)); }
+        public Builder font(IGui gui, Text.Font font)                       { return this.font(font.get(gui.get())); }
+        public Builder font(IGui gui, Text.Font font, JsonObject glyphData) { return this.font(font.get(gui.get(), glyphData)); }
+
+        @Override
+        public void sanitize(IGui gui) {
+            if( this.fontRenderer == null ) {
+                this.fontRenderer = gui.get().getMinecraft().font;
+            }
+
+            if( this.placeholderText == null ) {
+                this.placeholderText = StringTextComponent.EMPTY;
+            }
+        }
+
+        @Override
+        public TextField get(IGui gui) {
+            this.sanitize(gui);
+
+            return new TextField(this.size, this.textColor, this.disabledTextColor, this.placeholderTextColor, this.canLoseFocus, this.drawBackground, this.placeholderText,
+                                 this.fontRenderer);
+        }
+
+        protected static Builder buildFromJson(IGui gui, JsonObject data) {
+            Builder b = new Builder(JsonUtils.getIntArray(data.get("size"), Range.is(2)));
+
+            JsonUtils.fetchString(data.get("placeholderText"), b::placeholderText);
+            JsonUtils.fetchBool(data.get("canLoseFocus"), b::canLoseFocus);
+            JsonUtils.fetchBool(data.get("drawBackground"), b::drawBackground);
+            JsonUtils.fetchString(data.get("textColor"), b::textColor);
+            JsonUtils.fetchString(data.get("disabledTextColor"), b::disabledTextColor);
+            JsonUtils.fetchString(data.get("placeholderTextColor"), b::placeholderTextColor);
+
+            JsonElement cstFont = data.get("font");
+            if( cstFont == null ) {
+                b.font(gui, new Text.Font("standard"));
+            } else {
+                b.font(gui, JsonUtils.GSON.fromJson(cstFont, Text.Font.class), data.getAsJsonObject("glyphProvider"));
+            }
+
+            return b;
+        }
+
+        public static TextField fromJson(IGui gui, JsonObject data) {
+            return buildFromJson(gui, data).get(gui);
+        }
     }
 }

@@ -42,7 +42,7 @@ public class DynamicText
     public static class Builder
             extends Text.Builder
     {
-        public String key;
+        protected final String key;
 
         public Builder(ITextComponent text, String key) {
             super(text);
@@ -50,6 +50,7 @@ public class DynamicText
             this.key = key;
         }
 
+        @Override
         public DynamicText get(IGui gui) {
             super.sanitize(gui);
 
@@ -58,15 +59,8 @@ public class DynamicText
 
         protected static Builder buildFromJson(IGui gui, JsonObject data) {
             Text.Builder sb = Text.Builder.buildFromJson(gui, data);
-            Builder db = new Builder(sb.text, JsonUtils.getStringVal(data.get("key")));
 
-            db.shadow = sb.shadow;
-            db.wrapWidth = sb.wrapWidth;
-            db.lineHeight = sb.lineHeight;
-            db.fontRenderer = sb.fontRenderer;
-            db.colors = sb.colors;
-
-            return db;
+            return IBuilder.copyValues(sb, new Builder(sb.text, JsonUtils.getStringVal(data.get("key"))));
         }
 
         public static DynamicText fromJson(IGui gui, JsonObject data) {

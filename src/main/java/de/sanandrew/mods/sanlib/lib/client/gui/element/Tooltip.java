@@ -134,20 +134,17 @@ public class Tooltip
     }
 
     public static class Builder
+            implements IBuilder<Tooltip>
     {
-        protected int[] mouseOverSize;
-        protected int backgroundColor;
-        protected int borderTopColor;
-        protected int borderBottomColor;
-        protected int[] padding;
+        protected final int[] mouseOverSize;
+        protected int         backgroundColor;
+        protected int         borderTopColor;
+        protected int         borderBottomColor;
+        protected int[]       padding;
 
         protected String visibleForId;
 
         protected GuiElementInst content;
-
-        public Builder(int mouseOverWidth, int mouseOverHeight) {
-            this(new int[] {mouseOverWidth, mouseOverHeight});
-        }
 
         public Builder(int[] mouseOverSize) {
             this.mouseOverSize = mouseOverSize;
@@ -172,17 +169,29 @@ public class Tooltip
         public Builder padding(int top, int leftRight, int bottom)       { return this.padding(new int[] {top, leftRight, bottom}); }
         public Builder padding(int top, int right, int bottom, int left) { return this.padding(new int[] {top, right, bottom, left}); }
 
+        @Override
         public void sanitize(IGui gui) {
             if( this.padding == null ) {
                 this.padding = new int[] {2};
             }
         }
 
+        @Override
         public Tooltip get(IGui gui) {
             this.sanitize(gui);
 
             return new Tooltip(this.mouseOverSize, this.backgroundColor, this.borderTopColor, this.borderBottomColor, this.padding, this.visibleForId,
                                this.content.initialize(gui));
+        }
+
+        protected GuiElementInst loadContent(IGui gui, JsonObject data) {
+            if( data.has(CONTENT) ) {
+                return JsonUtils.GSON.fromJson(data.get(CONTENT), GuiElementInst.class);
+            } else if( data.has("text") ) {
+                return new GuiElementInst(new Text.Builder(new TranslationTextComponent(data.get("text").getAsString())).color(0xFFFFFFFF).get(gui));
+            } else {
+                throw new JsonParseException("No data property called \"content\" or \"text\" has been found.");
+            }
         }
 
         protected static Builder buildFromJson(IGui gui, JsonObject data) {
@@ -194,12 +203,9 @@ public class Tooltip
             JsonUtils.fetchIntArray(data.get("padding"), b::padding, Range.between(0, 4));
             JsonUtils.fetchString(data.get("for"), b::visibleFor);
 
-            if( data.has(CONTENT) ) {
-                b.content(JsonUtils.GSON.fromJson(data.get(CONTENT), GuiElementInst.class));
-            } else if( data.has("text") ) {
-                b.content(new GuiElementInst(new Text.Builder(new TranslationTextComponent(data.get("text").getAsString())).color(0xFFFFFFFF).get(gui)));
-            } else {
-                throw new JsonParseException("No data property called \"content\" or \"text\" has been found.");
+            GuiElementInst content = b.loadContent(gui, data);
+            if( content != null ) {
+                b.content(content);
             }
 
             return b;

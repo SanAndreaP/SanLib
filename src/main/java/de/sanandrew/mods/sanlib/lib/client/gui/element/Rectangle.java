@@ -24,7 +24,7 @@ public class Rectangle
 {
     public static final ResourceLocation ID = new ResourceLocation("rectangle");
 
-    protected int[] size;
+    protected int[]   size;
     protected int[]   color;
     protected boolean hGradient;
 
@@ -58,14 +58,11 @@ public class Rectangle
     }
 
     public static class Builder
+            implements IBuilder<Rectangle>
     {
-        protected int[] size;
-        protected int[] color;
-        protected boolean hGradient = false;
-
-        public Builder(int width, int height) {
-            this.size = new int[] {width, height};
-        }
+        protected final int[] size;
+        protected int[]       color;
+        protected boolean     hGradient = false;
 
         public Builder(int[] size) {
             this.size = size;
@@ -81,6 +78,12 @@ public class Rectangle
         public Builder color(String firstColor, String secondColor) { return this.color(MiscUtils.hexToInt(firstColor), MiscUtils.hexToInt(secondColor)); }
         public Builder color(String[] colors)                       { return this.color(MiscUtils.hexToInt(colors[0]), MiscUtils.hexToInt(colors[colors.length > 1 ? 1 : 0])); }
 
+        @Override
+        public void sanitize(IGui gui) {
+            // noop
+        }
+
+        @Override
         public Rectangle get(IGui gui) {
             return new Rectangle(this.size, this.color, this.hGradient);
         }

@@ -1,6 +1,7 @@
 package de.sanandrew.mods.sanlib.lib.client.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import de.sanandrew.mods.sanlib.SanLib;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.entity.player.PlayerInventory;
@@ -8,6 +9,7 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.util.text.ITextComponent;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 @SuppressWarnings({"unused", "java:S5993"})
 public abstract class JsonGuiContainer<T extends Container>
@@ -33,9 +35,14 @@ public abstract class JsonGuiContainer<T extends Container>
     protected void init() {
         super.init();
 
-        if( GuiDefinition.initialize(this.guiDefinition, this) ) {
-            this.initGd();
-            this.tick();
+        try {
+            if( GuiDefinition.initialize(this.guiDefinition, this) ) {
+                this.initGd();
+                this.tick();
+            }
+        } catch( Exception ex ) {
+            SanLib.LOG.catching(ex);
+            Objects.requireNonNull(this.minecraft).setScreen(null);
         }
     }
 

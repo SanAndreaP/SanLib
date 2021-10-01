@@ -1,11 +1,12 @@
+//file:noinspection GroovyAssignabilityCheck
+//file:noinspection GrUnresolvedAccess
 buildscript {
     repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
-        jcenter()
+        maven { url = 'https://maven.minecraftforge.net' }
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
@@ -26,10 +27,9 @@ Object grabConstant = { String name ->
 version = grabConstant("BUILD_MCVER") + '-' + grabConstant("VERSION")
 group = "de.sanandrew.mods"
 archivesBaseName = "SanLib"
-String[] excludes = ["**/*.psd", "**/*.bbmodel", "**/*.ps1", "santest/**", "assets/santest/**"]
+String[] excludes = ["*.psd", "*.bbmodel", "*.ps1", "santest/**", "assets/santest/**"]
 
-//noinspection GroovyUnusedAssignment
-sourceCompatibility = targetCompatibility = "1.8" // Need this here so eclipse task generates correctly.
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 compileJava {
     sourceCompatibility = targetCompatibility = "1.8"
     options.debug = true
@@ -38,73 +38,61 @@ compileJava {
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    // The mappings can be changed at any time, and must be in the following format.
-    // snapshot_YYYYMMDD   Snapshot are built nightly.
-    // stable_#            Stables are built at the discretion of the MCP team.
-    // Use non-default mappings at your own risk. they may not always work.
-    // Simply re-run your setup task after changing the mappings to update your workspace.
-    //noinspection GroovyAssignabilityCheck
     mappings channel: grabConstant("BUILD_MAPPINGS_CHANNEL"), version: grabConstant("BUILD_MAPPINGS_VERSION")
-    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
     
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
-    // Default run configurations.
-    // These can be tweaked, removed, or duplicated as needed.
     runs {
         client {
-            //noinspection GroovyAssignabilityCheck
             workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'info'
+            property 'fml.earlyprogresswindow', 'false'
 
             mods {
                 sanlib {
-                    //noinspection GroovyAssignabilityCheck
                     source sourceSets.main
                 }
             }
         }
 
         server {
-            //noinspection GroovyAssignabilityCheck
             workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
+            property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
 
             mods {
                 sanlib {
-                    //noinspection GroovyAssignabilityCheck
+                    source sourceSets.main
+                }
+            }
+        }
+
+        test {
+            parent minecraft.runs.client
+
+            property 'forge.logging.console.level', 'debug'
+            args '--uuid', "044d980d-5c2a-4030-95cf-cbfde69ea3cb"
+            environment 'MOD_CLASSES', "sanlib%%$project.projectDir/build/resources/test;sanlib%%$project.projectDir/build/classes/java/main;sanlib%%$project.projectDir/build/classes/java/test"
+            ideaModule project.name + ".test"
+
+            mods {
+                sanlib {
                     source sourceSets.main
                 }
             }
         }
 
         data {
-            //noinspection GroovyAssignabilityCheck
             workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
+            property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
+            property 'fml.earlyprogresswindow', 'false'
 
-            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            //noinspection GroovyAssignabilityCheck
             args '--mod', grabConstant("ID"), '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
             mods {
                 sanlib {
-                    //noinspection GroovyAssignabilityCheck
                     source sourceSets.main
                 }
             }
@@ -112,81 +100,47 @@ minecraft {
     }
 }
 
-// Include resources generated by data generators.
 sourceSets.main.resources {
     srcDir 'src/generated/resources'
 }
 
 dependencies {
-    // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
-    // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
-    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    //noinspection GroovyAssignabilityCheck
     minecraft 'net.minecraftforge:forge:' + grabConstant("BUILD_FORGEVER")
-
-    // You may put jars on which you depend on in ./libs or you may define them like so..
-    // compile "some.group:artifact:version:classifier"
-    // compile "some.group:artifact:version"
-
-    // Real examples
-    // compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
-    // compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
-
-    // The 'provided' configuration is for optional dependencies that exist at compile-time but might not at runtime.
-    // provided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-
-    // These dependencies get remapped to your current MCP mappings
-    // deobf 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-
-    // For more info...
-    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
-    // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
 }
 
 processResources {
-    from(sourceSets.main.resources.srcDirs) {
-        include 'META-INF/mods.toml'
-        expand 'version': grabConstant("VERSION"),
-               'name': grabConstant("NAME"),
-               'pm_version': grabConstant("PM_VERSION"),
-               'pm_name': grabConstant("PM_NAME")
-    }
-
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'META-INF/mods.toml'
+    filesMatching("META-INF/mods.toml") {
+        filter {
+            it.replaceAll('$version', grabConstant("VERSION"))
+            it.replaceAll('$name', grabConstant("NAME"))
+            it.replaceAll('$pm_version', grabConstant("PM_VERSION"))
+            it.replaceAll('$pm_name', grabConstant("PM_NAME"))
+        }
     }
 }
 
-// Example for how to get properties into the manifest for reading by the runtime..
 jar {
     exclude(excludes)
     manifest {
         attributes([
-            "Specification-Title": grabConstant("ID"),
-            "Specification-Vendor": "SanAndreasP",
-            "Specification-Version": "1", // We are version 1 of ourselves
-            "Implementation-Title": grabConstant("ID"),
-            "Implementation-Version": "${version}",
-            "Implementation-Vendor" :"SanAndreasP",
-            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+            "Specification-Title" : grabConstant("ID") ,
+            "Specification-Vendor" : "SanAndreasP" ,
+            "Specification-Version" : "1" , // We are version 1 of ourselves
+            "Implementation-Title" : grabConstant("ID") ,
+            "Implementation-Version" : "${archiveVersion}" ,
+            "Implementation-Vendor" : "SanAndreasP" ,
+            "Implementation-Timestamp" : new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
 }
 
-// Example configuration to allow publishing using the maven-publish task
-// This is the preferred method to reobfuscate your jar file
-jar.finalizedBy('reobfJar') 
-// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
-//publish.dependsOn('reobfJar')
+jar.finalizedBy('reobfJar')
 
 publishing {
     publications {
-        //noinspection GroovyAssignabilityCheck
         mavenJava(MavenPublication) {
-            //noinspection GroovyAssignabilityCheck
             artifactId = archivesBaseName
-            //noinspection GroovyAssignabilityCheck
             artifact jar
         }
     }
@@ -197,20 +151,20 @@ publishing {
     }
 }
 
-import net.minecraftforge.gradle.common.task.SignJar
+import net.minecraftforge.gradle.common.tasks.SignJar
 
 task signJar(type: SignJar, dependsOn: jar) {
     onlyIf {
         project.hasProperty('keyStore')
     }
-    //noinspection GroovyAssignabilityCheck
+
     keyStore = project.findProperty('keyStore')
     alias = project.findProperty('keyStoreAlias')
     storePass = project.findProperty('keyStorePass')
     keyPass = project.findProperty('keyStoreKeyPass')
-    inputFile = jar.archivePath
-    outputFile = jar.archivePath
+    inputFile = jar.archiveFile
+    outputFile = jar.archiveFile
 }
 
-build.dependsOn signJar
-build.finalizedBy publish
+build.finalizedBy signJar
+publish.dependsOn signJar

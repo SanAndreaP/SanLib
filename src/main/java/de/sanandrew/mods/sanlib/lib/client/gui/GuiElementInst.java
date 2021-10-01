@@ -13,9 +13,8 @@ import org.apache.logging.log4j.Level;
 import javax.annotation.Nonnull;
 import java.util.Locale;
 import java.util.function.BiFunction;
-import java.util.function.Supplier;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "java:S1104"})
 public final class GuiElementInst
 {
     public String      type;
@@ -24,9 +23,10 @@ public final class GuiElementInst
     public JsonObject  data;
     public IGuiElement element;
     public String[]    alignment;
-    public boolean     firstRenderUpdate;
 
     private boolean visible = true;
+
+    public static final GuiElementInst EMPTY = new GuiElementInst(new EmptyGuiElement());
 
     public GuiElementInst() { }
 

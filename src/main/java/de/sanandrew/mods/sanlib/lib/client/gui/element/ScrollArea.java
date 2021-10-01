@@ -54,13 +54,13 @@ public class ScrollArea
     protected int posY;
     protected boolean isVisible = true;
 
-    public ScrollArea(int[] areaSize, int scrollHeight, boolean rasterized, float maxScrollDelta, GuiElementInst scrollButton) {
+    public ScrollArea(int[] areaSize, int scrollHeight, boolean rasterized, float maxScrollDelta, int[] scrollbarPos, ScrollButton scrollButton, IGui gui) {
         this.areaSize = areaSize;
         this.scrollHeight = scrollHeight;
         this.rasterized = rasterized;
         this.maxScrollDelta = maxScrollDelta;
 
-        this.scrollBtn = scrollButton;
+        this.scrollBtn = new GuiElementInst(scrollbarPos, scrollButton).initialize(gui);
 
         this.namedChildren = this.elements.asMapOfRanges();
     }
@@ -303,20 +303,15 @@ public class ScrollArea
     }
 
     public static class Builder
+            implements IBuilder<ScrollArea>
     {
-        protected int[]   areaSize;
-        protected int     scrollHeight;
-        protected boolean rasterized;
-        protected float   maxScrollDelta;
-        protected int[]   scrollbarPos;
-
+        protected final int[]      areaSize;
+        protected int              scrollHeight;
+        protected boolean          rasterized;
+        protected float            maxScrollDelta;
+        protected int[]            scrollbarPos;
         protected GuiElementInst[] elements;
-
-        ScrollButton.Builder scrollButton;
-
-        public Builder(int areaWidth, int areaHeight) {
-            this(new int[] { areaWidth, areaHeight });
-        }
+        protected ScrollButton     scrollButton;
 
         public Builder(int[] areaSize) {
             this.areaSize = areaSize;
@@ -325,12 +320,12 @@ public class ScrollArea
             this.maxScrollDelta = 1.0F;
         }
 
-        public Builder scrollHeight(int height)                     { this.scrollHeight = height;    return this; }
-        public Builder rasterized(boolean rasterized)               { this.rasterized = rasterized;  return this; }
-        public Builder maxScrollDelta(float delta)                  { this.maxScrollDelta = delta;   return this; }
-        public Builder scrollbarPos(int[] pos)                      { this.scrollbarPos = pos;       return this; }
-        public Builder scrollButton(ScrollButton.Builder sbBuilder) { this.scrollButton = sbBuilder; return this; }
-        public Builder elements(GuiElementInst... elements)         { this.elements = elements ;     return this; }
+        public Builder scrollHeight(int height)             { this.scrollHeight = height;    return this; }
+        public Builder rasterized(boolean rasterized)       { this.rasterized = rasterized;  return this; }
+        public Builder maxScrollDelta(float delta)          { this.maxScrollDelta = delta;   return this; }
+        public Builder scrollbarPos(int[] pos)              { this.scrollbarPos = pos;       return this; }
+        public Builder scrollButton(ScrollButton sbBuilder) { this.scrollButton = sbBuilder; return this; }
+        public Builder elements(GuiElementInst... elements) { this.elements = elements;      return this; }
 
         public Builder scrollbarPos(int x, int y) { return this.scrollbarPos(new int[] { x, y }); }
 
@@ -343,8 +338,7 @@ public class ScrollArea
         public ScrollArea get(IGui gui) {
             this.sanitize(gui);
 
-            ScrollArea sa = new ScrollArea(this.areaSize, this.scrollHeight, this.rasterized, this.maxScrollDelta,
-                                           new GuiElementInst(this.scrollbarPos, this.scrollButton.get(gui)).initialize(gui));
+            ScrollArea sa = new ScrollArea(this.areaSize, this.scrollHeight, this.rasterized, this.maxScrollDelta, this.scrollbarPos, this.scrollButton, gui);
 
             if( this.elements != null && this.elements.length > 0 ) {
                 Arrays.stream(this.elements).forEach(e -> sa.add(e.initialize(gui), true));
@@ -354,23 +348,29 @@ public class ScrollArea
             return sa;
         }
 
+        @Nonnull
+        protected GuiElementInst[] loadElements(IGui gui, JsonElement je) {
+            if( je != null ) {
+                if( je.isJsonArray() ) {
+                    return JsonUtils.GSON.fromJson(je, GuiElementInst[].class);
+                } else {
+                    throw new JsonParseException("elements property is not an array!");
+                }
+            }
+
+            return new GuiElementInst[0];
+        }
+
         protected static Builder buildFromJson(IGui gui, JsonObject data) {
             Builder b = new Builder(JsonUtils.getIntArray(data.get("areaSize"), org.apache.commons.lang3.Range.is(2)))
-                                   .scrollButton(ScrollButton.Builder.buildFromJson(gui, data.getAsJsonObject("scrollButton")));
+                                   .scrollButton(ScrollButton.Builder.buildFromJson(gui, data.getAsJsonObject("scrollButton")).get(gui));
 
             JsonUtils.fetchInt(data.get("scrollbarHeight"), b::scrollHeight);
             JsonUtils.fetchIntArray(data.get("scrollbarPos"), b::scrollbarPos);
             JsonUtils.fetchBool(data.get("rasterized"),     b::rasterized);
             JsonUtils.fetchFloat(data.get("maxScrollDelta"), b::maxScrollDelta);
 
-            if( data.has("elements") ) {
-                JsonElement je = data.get("elements");
-                if( je.isJsonArray() ) {
-                    b.elements(JsonUtils.GSON.fromJson(je, GuiElementInst[].class));
-                } else {
-                    throw new JsonParseException("elements property is not an array!");
-                }
-            }
+            b.elements(b.loadElements(gui, data.get("elements")));
 
             return b;
         }

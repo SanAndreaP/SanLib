@@ -10,7 +10,6 @@ import com.google.gson.JsonObject;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import de.sanandrew.mods.sanlib.lib.client.gui.EmptyGuiElement;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiDefinition;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
@@ -236,9 +235,10 @@ public class ButtonSL
     }
 
     public static class Builder
+            implements IBuilder<ButtonSL>
     {
+        protected final int[]      size;
         protected ResourceLocation texture;
-        protected int[]            size;
         protected int[]            textureSize;
         protected int[]            uvSize;
         protected int[]            uvEnabled;
@@ -263,6 +263,7 @@ public class ButtonSL
         public Builder labelAlignment(String[] align)          { this.labelAlignment = align;                                     return this; }
         public Builder label(GuiElementInst label)             { this.label = label;                                              return this; }
 
+        @Override
         public void sanitize(IGui gui) {
             if( this.texture == null ) {
                 this.vanillaTexture();
@@ -293,14 +294,15 @@ public class ButtonSL
             }
 
             if( this.label == null ) {
-                this.label = new GuiElementInst(new EmptyGuiElement());
+                this.label = GuiElementInst.EMPTY;
             }
 
             if( this.labelAlignment == null ) {
-                this.labelAlignment = new String[] { "center", "center"};
+                this.labelAlignment = new String[] { "center", "center" };
             }
         }
 
+        @Override
         public ButtonSL get(IGui gui) {
             this.sanitize(gui);
 
@@ -310,7 +312,21 @@ public class ButtonSL
                                 this.label.initialize(gui));
         }
 
-        protected static Builder buildFromJson(IGui gui, JsonObject data) {
+        protected GuiElementInst loadLabel(IGui gui, JsonElement lblData) {
+            if( lblData != null ) {
+                if( lblData.isJsonPrimitive() ) {
+                    int[] lblPos = new int[] { this.size[0] / 2, this.size[1] / 2 };
+                    return new GuiElementInst(lblPos, new Text.Builder(new TranslationTextComponent(lblData.getAsString()))
+                                                                      .color(0xFFFFFFFF).color("hover", 0xFFFFFFA0).color("disabled", 0xFFA0A0A0).get(gui));
+                } else {
+                    return JsonUtils.GSON.fromJson(lblData, GuiElementInst.class);
+                }
+            }
+
+            return null;
+        }
+
+        public static Builder buildFromJson(IGui gui, JsonObject data) {
             Builder b = new Builder(JsonUtils.getIntArray(data.get("size"), Range.is(2)));
 
             if( JsonUtils.getBoolVal(data.get("useVanillaTexture"), true) ) {
@@ -327,15 +343,9 @@ public class ButtonSL
             JsonUtils.fetchIntArray(data.get("centralTextureSize"), b::uvDisabled, Range.is(2));
             JsonUtils.fetchStringArray(data.get("labelAlignment"), b::labelAlignment, Range.between(0, 2));
 
-            JsonElement label = data.get(LABEL);
-            if( label != null ) {
-                if( label.isJsonPrimitive() ) {
-                    int[] lblPos = new int[] { b.size[0] / 2, b.size[1] / 2 };
-                    b.label(new GuiElementInst(lblPos, new Text.Builder(new TranslationTextComponent(label.getAsString()))
-                                                                       .color(0xFFFFFFFF).color("hover", 0xFFFFFFA0).color("disabled", 0xFFA0A0A0).get(gui)));
-                } else {
-                    b.label(JsonUtils.GSON.fromJson(label, GuiElementInst.class));
-                }
+            GuiElementInst lbl = b.loadLabel(gui, data.get(LABEL));
+            if( lbl != null ) {
+                b.label(lbl);
             }
 
             return b;

@@ -59,10 +59,11 @@ public class Item
     }
 
     public static class Builder
+            implements IBuilder<Item>
     {
         @Nonnull
-        protected ItemStack item;
-        protected float     scale = 0.0F;
+        protected final ItemStack item;
+        protected float           scale = 1.0F;
 
         public Builder(@Nonnull ItemStack item) {
             this.item = item;
@@ -70,12 +71,14 @@ public class Item
 
         public Builder scale(float scale) { this.scale = scale; return this; }
 
+        @Override
         public void sanitize(IGui gui) {
             if( this.scale <= 0.0000001F ) {
                 this.scale = 1.0F;
             }
         }
 
+        @Override
         public Item get(IGui gui) {
             this.sanitize(gui);
 

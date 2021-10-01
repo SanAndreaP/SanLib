@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[35,)"
+loaderVersion="[36,)"
 license="BSD 3-Clause \"New\" or \"Revised\" License"
 issueTrackerURL="https://github.com/SanAndreasP/SanLib/issues"
 
@@ -12,16 +12,16 @@ issueTrackerURL="https://github.com/SanAndreasP/SanLib/issues"
     description='''
     A library made for and required by all my mods.
     '''
-    [[dependencies.sanlib]] #optional
+    [[dependencies.sanlib]]
         modId="forge"
         mandatory=true
-        versionRange="[35,)"
+        versionRange="[36,)"
         ordering="NONE"
         side="BOTH"
     [[dependencies.sanlib]]
         modId="minecraft"
         mandatory=true
-        versionRange="[1.16.4,1.17)"
+        versionRange="[1.16.5,1.17)"
         ordering="NONE"
         side="BOTH"
 

@@ -39,7 +39,7 @@ public class EnergyStorageText
         }
 
         @Override
-        protected void sanitize(IGui gui) {
+        public void sanitize(IGui gui) {
             if( this.colors.isEmpty() ) {
                 this.colors.put(DEFAULT_COLOR, 0xFF000000);
             }
@@ -47,6 +47,7 @@ public class EnergyStorageText
             super.sanitize(gui);
         }
 
+        @Override
         public EnergyStorageText get(IGui gui) {
             super.sanitize(gui);
 
@@ -55,13 +56,9 @@ public class EnergyStorageText
 
         protected static Builder buildFromJson(IGui gui, JsonObject data) {
             Text.Builder sb = Text.Builder.buildFromJson(gui, data);
-            Builder      db = new Builder();
+            Builder      db = IBuilder.copyValues(sb, new Builder());
 
             db.shadow = JsonUtils.getBoolVal(data.get("shadow"), true);
-            db.wrapWidth = sb.wrapWidth;
-            db.lineHeight = sb.lineHeight;
-            db.fontRenderer = sb.fontRenderer;
-            db.colors = sb.colors;
 
             return db;
         }

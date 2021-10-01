@@ -1,6 +1,7 @@
 package de.sanandrew.mods.sanlib.lib.client.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import de.sanandrew.mods.sanlib.SanLib;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.text.ITextComponent;
 
@@ -44,6 +45,7 @@ public abstract class JsonGuiScreen
                 this.initGd();
             }
         } catch( Exception ex ) {
+            SanLib.LOG.catching(ex);
             Objects.requireNonNull(this.minecraft).setScreen(null);
         }
     }

@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * JSON format:
@@ -83,6 +84,8 @@ public class Text
     private final List<ITextProperties> renderedLines = new ArrayList<>();
     private ITextComponent prevText;
 
+    private Consumer<GuiElementInst> onTextChange;
+
     public Text(@Nonnull ITextComponent text, boolean shadow, int wrapWidth, int lineHeight, FontRenderer fontRenderer, Map<String, Integer> colors) {
         this.bakedText = text;
         this.shadow = shadow;
@@ -93,19 +96,22 @@ public class Text
         this.currColor = colors.getOrDefault(DEFAULT_COLOR, 0xFF000000);
     }
 
-
     @Override
     public void setup(IGui gui, GuiElementInst inst) {
         this.justify = inst.getAlignmentH();
 
-        this.buildLines(gui);
+        this.buildLines(gui, inst);
     }
 
     public ITextComponent getDynamicText(IGui gui, ITextComponent originalText) {
         return originalText;
     }
 
-    protected void buildLines(IGui gui) {
+    public void setOnTextChange(Consumer<GuiElementInst> onTextChange) {
+        this.onTextChange = onTextChange;
+    }
+
+    protected void buildLines(IGui gui, GuiElementInst inst) {
         ITextComponent s = this.getDynamicText(gui, this.bakedText);
         if( !s.equals(this.prevText) ) {
             this.renderedLines.clear();
@@ -125,12 +131,16 @@ public class Text
             }
 
             this.prevText = s;
+
+            if( this.onTextChange != null ) {
+                this.onTextChange.accept(inst);
+            }
         }
     }
 
     @Override
     public void tick(IGui gui, GuiElementInst inst) {
-        this.buildLines(gui);
+        this.buildLines(gui, inst);
     }
 
     @Override
@@ -300,6 +310,7 @@ public class Text
     }
 
     public static class Builder
+            implements IBuilder<Text>
     {
         protected final ITextComponent text;
         protected boolean shadow = false;
@@ -323,7 +334,8 @@ public class Text
         public Builder font(IGui gui, Font font)                       { return this.font(font.get(gui.get())); }
         public Builder font(IGui gui, Font font, JsonObject glyphData) { return this.font(font.get(gui.get(), glyphData)); }
 
-        protected void sanitize(IGui gui) {
+        @Override
+        public void sanitize(IGui gui) {
             if( this.colors.isEmpty() ) {
                 this.colors.put(DEFAULT_COLOR, 0xFF000000);
             } else {
@@ -335,6 +347,7 @@ public class Text
             }
         }
 
+        @Override
         public Text get(IGui gui) {
             this.sanitize(gui);
 
