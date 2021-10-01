@@ -15,30 +15,30 @@ apply plugin: 'maven-publish'
 
 Object grabConstant = { String name ->
     name = name.toUpperCase(Locale.ROOT)
-    def f = new File("$project.projectDir/src/main/java/de/sanandrew/mods/sanlib/Constants.java").text
+    def f = new File("${project.projectDir}/src/main/java/de/sanandrew/mods/sanlib/Constants.java").text
     def m = f =~ name + /\s*=\s*"(.*?)"/
     if( m.find() ) {
         return m.group(1)
     } else {
-        throw new IllegalArgumentException("Cannot grab constant " + name + "!")
+        throw new IllegalArgumentException("Cannot grab constant ${name}!")
     }
 } as Object
 
-version = grabConstant("BUILD_MCVER") + '-' + grabConstant("VERSION")
-group = "de.sanandrew.mods"
-archivesBaseName = "SanLib"
-String[] excludes = ["*.psd", "*.bbmodel", "*.ps1", "santest/**", "assets/santest/**"]
+version = "${grabConstant('BUILD_MCVER')}-${grabConstant('VERSION')}"
+group = 'de.sanandrew.mods'
+archivesBaseName = 'SanLib'
+String[] excludes = ['*.psd', '*.bbmodel', '*.ps1', 'santest/**', 'assets/santest/**']
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 compileJava {
-    sourceCompatibility = targetCompatibility = "1.8"
+    sourceCompatibility = targetCompatibility = '1.8'
     options.debug = true
-    options.debugOptions.debugLevel = "source,lines,vars"
+    options.debugOptions.debugLevel = 'source,lines,vars'
 }
 
-println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
+println("Java: ${System.getProperty('java.version')} | JVM: ${System.getProperty('java.vm.version')} (${System.getProperty('java.vendor')}) | Arch: ${System.getProperty('os.arch')}")
 minecraft {
-    mappings channel: grabConstant("BUILD_MAPPINGS_CHANNEL"), version: grabConstant("BUILD_MAPPINGS_VERSION")
+    mappings channel: grabConstant('BUILD_MAPPINGS_CHANNEL'), version: grabConstant('BUILD_MAPPINGS_VERSION')
     
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
@@ -47,7 +47,6 @@ minecraft {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'info'
-            property 'fml.earlyprogresswindow', 'false'
 
             mods {
                 sanlib {
@@ -72,9 +71,9 @@ minecraft {
             parent minecraft.runs.client
 
             property 'forge.logging.console.level', 'debug'
-            args '--uuid', "044d980d-5c2a-4030-95cf-cbfde69ea3cb"
-            environment 'MOD_CLASSES', "sanlib%%$project.projectDir/build/resources/test;sanlib%%$project.projectDir/build/classes/java/main;sanlib%%$project.projectDir/build/classes/java/test"
-            ideaModule project.name + ".test"
+            args '--uuid', '044d980d-5c2a-4030-95cf-cbfde69ea3cb'
+            environment 'MOD_CLASSES', "sanlib%%${project.projectDir}/build/resources/test;sanlib%%${project.projectDir}/build/classes/java/main;sanlib%%${project.projectDir}/build/classes/java/test"
+            ideaModule "${project.name}.test"
 
             mods {
                 sanlib {
@@ -85,11 +84,11 @@ minecraft {
 
         data {
             workingDirectory project.file('run')
+
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
-            property 'fml.earlyprogresswindow', 'false'
 
-            args '--mod', grabConstant("ID"), '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            args '--mod', grabConstant('ID'), '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
             mods {
                 sanlib {
@@ -105,17 +104,16 @@ sourceSets.main.resources {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:' + grabConstant("BUILD_FORGEVER")
-
+    minecraft 'net.minecraftforge:forge:' + grabConstant('BUILD_FORGEVER')
 }
 
 processResources {
-    filesMatching("META-INF/mods.toml") {
+    filesMatching('META-INF/mods.toml') {
         filter {
-            it.replaceAll('$version', grabConstant("VERSION"))
-            it.replaceAll('$name', grabConstant("NAME"))
-            it.replaceAll('$pm_version', grabConstant("PM_VERSION"))
-            it.replaceAll('$pm_name', grabConstant("PM_NAME"))
+            it.replaceAll('$version', grabConstant('VERSION'))
+            it.replaceAll('$name', grabConstant('NAME'))
+            it.replaceAll('$pm_version', grabConstant('PM_VERSION'))
+            it.replaceAll('$pm_name', grabConstant('PM_NAME'))
         }
     }
 }
@@ -124,13 +122,13 @@ jar {
     exclude(excludes)
     manifest {
         attributes([
-            "Specification-Title" : grabConstant("ID") ,
-            "Specification-Vendor" : "SanAndreasP" ,
-            "Specification-Version" : "1" , // We are version 1 of ourselves
-            "Implementation-Title" : grabConstant("ID") ,
-            "Implementation-Version" : "${archiveVersion}" ,
-            "Implementation-Vendor" : "SanAndreasP" ,
-            "Implementation-Timestamp" : new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+            'Specification-Title' : grabConstant('ID'),
+            'Specification-Vendor' : 'SanAndreasP',
+            'Specification-Version' : '1', // We are version 1 of ourselves
+            'Implementation-Title' : grabConstant('ID'),
+            'Implementation-Version' : archiveVersion,
+            'Implementation-Vendor' : 'SanAndreasP',
+            'Implementation-Timestamp' : new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
 }
