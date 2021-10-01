@@ -62,8 +62,9 @@ public class Item
             implements IBuilder<Item>
     {
         @Nonnull
-        protected final ItemStack item;
-        protected float           scale = 1.0F;
+        public final ItemStack item;
+
+        protected float scale = 1.0F;
 
         public Builder(@Nonnull ItemStack item) {
             this.item = item;

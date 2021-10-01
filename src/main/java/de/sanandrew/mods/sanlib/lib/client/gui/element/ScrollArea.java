@@ -305,7 +305,8 @@ public class ScrollArea
     public static class Builder
             implements IBuilder<ScrollArea>
     {
-        protected final int[]      areaSize;
+        public final int[] areaSize;
+
         protected int              scrollHeight;
         protected boolean          rasterized;
         protected float            maxScrollDelta;

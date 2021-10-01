@@ -210,7 +210,8 @@ public class TextField
     public static class Builder
             implements IBuilder<TextField>
     {
-        protected final int[]    size;
+        public final int[] size;
+
         protected int            textColor = 0xFFE0E0E0;
         protected int            disabledTextColor = 0xFF707070;
         protected int            placeholderTextColor = 0xFFA0A0A0;

@@ -312,7 +312,8 @@ public class Text
     public static class Builder
             implements IBuilder<Text>
     {
-        protected final ITextComponent text;
+        public final ITextComponent text;
+
         protected boolean shadow = false;
         protected int wrapWidth = 0;
         protected int lineHeight = 9;

@@ -90,7 +90,8 @@ public class Texture
     public static class Builder
             implements IBuilder<Texture>
     {
-        protected final int[]      size;
+        public final int[] size;
+
         protected ResourceLocation texture;
         protected int[]            textureSize;
         protected int[]            uv;

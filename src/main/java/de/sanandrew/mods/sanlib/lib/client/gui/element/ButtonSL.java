@@ -237,7 +237,8 @@ public class ButtonSL
     public static class Builder
             implements IBuilder<ButtonSL>
     {
-        protected final int[]      size;
+        public final int[] size;
+
         protected ResourceLocation texture;
         protected int[]            textureSize;
         protected int[]            uvSize;

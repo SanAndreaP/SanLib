@@ -42,7 +42,7 @@ public class DynamicText
     public static class Builder
             extends Text.Builder
     {
-        protected final String key;
+        public final String key;
 
         public Builder(ITextComponent text, String key) {
             super(text);

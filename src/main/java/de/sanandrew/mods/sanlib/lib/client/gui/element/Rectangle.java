@@ -60,9 +60,10 @@ public class Rectangle
     public static class Builder
             implements IBuilder<Rectangle>
     {
-        protected final int[] size;
-        protected int[]       color;
-        protected boolean     hGradient = false;
+        public final int[] size;
+
+        protected int[]   color;
+        protected boolean hGradient = false;
 
         public Builder(int[] size) {
             this.size = size;

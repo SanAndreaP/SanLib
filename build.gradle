@@ -29,7 +29,10 @@ group = 'de.sanandrew.mods'
 archivesBaseName = 'SanLib'
 String[] excludes = ['*.psd', '*.bbmodel', '*.ps1', 'santest/**', 'assets/santest/**']
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+java {
+    withSourcesJar()
+    toolchain.languageVersion = JavaLanguageVersion.of(8)
+}
 compileJava {
     sourceCompatibility = targetCompatibility = '1.8'
     options.debug = true
@@ -131,15 +134,14 @@ jar {
             'Implementation-Timestamp' : new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
+    finalizedBy('reobfJar')
 }
-
-jar.finalizedBy('reobfJar')
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifactId = archivesBaseName
-            artifact jar
+            from components.java
+            artifactId archivesBaseName
         }
     }
     repositories {
@@ -165,4 +167,5 @@ task signJar(type: SignJar, dependsOn: jar) {
 }
 
 build.finalizedBy signJar
-publish.dependsOn signJar
+publishMavenJavaPublicationToMavenRepository.dependsOn signJar
+signJar.finalizedBy publish

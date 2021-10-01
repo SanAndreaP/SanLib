@@ -1,0 +1,104 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "de.sanandrew.mods",
+    "module": "SanLib",
+    "version": "1.16.5-2.0.0",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "7.1.1"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "files": [
+        {
+          "name": "SanLib-1.16.5-2.0.0.jar",
+          "url": "SanLib-1.16.5-2.0.0.jar",
+          "size": 280463,
+          "sha512": "cad058c958f3ae8a2aee9f7c692cf5bfe0ee1d7d98e051bddd6b9301abcf5a45ec1635e0176086dc052aabfdb1c1fc815563bbe7ca1f88d92ef013c064182727",
+          "sha256": "f3e0707048041d550c58a46590d1fe6212ab73417f57dad0420596423b7040da",
+          "sha1": "63291731d99986e9c6ec9b37161f571c4c2e2334",
+          "md5": "2cc302d42da642f2e56d7759ba1a8278"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 8,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "net.minecraftforge",
+          "module": "forge",
+          "version": {
+            "requires": "1.16.5-36.2.6_mapped_official_1.16.5_at_26b995265fc28e446fb0df5471e143d15d2853e8"
+          }
+        },
+        {
+          "group": "net.minecraftforge",
+          "module": "forge",
+          "version": {
+            "requires": "1.16.5-36.2.6_mapped_official_1.16.5_at_26b995265fc28e446fb0df5471e143d15d2853e8"
+          },
+          "thirdPartyCompatibility": {
+            "artifactSelector": {
+              "name": "forge",
+              "type": "jar",
+              "extension": "jar",
+              "classifier": "launcher"
+            }
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "SanLib-1.16.5-2.0.0.jar",
+          "url": "SanLib-1.16.5-2.0.0.jar",
+          "size": 280463,
+          "sha512": "cad058c958f3ae8a2aee9f7c692cf5bfe0ee1d7d98e051bddd6b9301abcf5a45ec1635e0176086dc052aabfdb1c1fc815563bbe7ca1f88d92ef013c064182727",
+          "sha256": "f3e0707048041d550c58a46590d1fe6212ab73417f57dad0420596423b7040da",
+          "sha1": "63291731d99986e9c6ec9b37161f571c4c2e2334",
+          "md5": "2cc302d42da642f2e56d7759ba1a8278"
+        }
+      ]
+    },
+    {
+      "name": "sourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "SanLib-1.16.5-2.0.0-sources.jar",
+          "url": "SanLib-1.16.5-2.0.0-sources.jar",
+          "size": 143896,
+          "sha512": "670d648221b75c0bbe9e5a4779b9ee4ecd9130e85c4e846ba73a87b0f6a332b575d55c798902606d15201d6ada4de3289462ebe0a17ff22acfc8cc35e6bd3831",
+          "sha256": "623060f5434376697fd3e9069dae14f18afe76f1af6f1367378fde8dd0da6733",
+          "sha1": "bc936a919a0c3cdacaba7bd643343bb7630b744f",
+          "md5": "031ebead05b27af33181be4095d2f8e7"
+        }
+      ]
+    }
+  ]
+}

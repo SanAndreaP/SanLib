@@ -82,10 +82,11 @@ public class GroupBox
     public static class Builder
             implements IBuilder<GroupBox>
     {
-        protected final int[]  size;
-        protected int          fThickness;
-        protected int          color;
-        protected Text         label;
+        public final int[] size;
+
+        protected int  fThickness;
+        protected int  color;
+        protected Text label;
 
         public Builder(int width, int height) {
             this(new int[] {width, height});

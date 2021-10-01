@@ -136,11 +136,12 @@ public class Tooltip
     public static class Builder
             implements IBuilder<Tooltip>
     {
-        protected final int[] mouseOverSize;
-        protected int         backgroundColor;
-        protected int         borderTopColor;
-        protected int         borderBottomColor;
-        protected int[]       padding;
+        public final int[] mouseOverSize;
+
+        protected int   backgroundColor;
+        protected int   borderTopColor;
+        protected int   borderBottomColor;
+        protected int[] padding;
 
         protected String visibleForId;
 
