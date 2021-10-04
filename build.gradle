@@ -169,4 +169,5 @@ task signJar(type: SignJar, dependsOn: jar) {
 
 build.finalizedBy signJar
 generateMetadataFileForMavenJavaPublication.dependsOn signJar
+publishMavenJavaPublicationToMavenRepository.dependsOn signJar
 signJar.finalizedBy publish

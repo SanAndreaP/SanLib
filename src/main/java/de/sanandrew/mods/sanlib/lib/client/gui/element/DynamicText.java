@@ -57,7 +57,7 @@ public class DynamicText
             return new DynamicText(this.text, this.shadow, this.wrapWidth, this.lineHeight, this.fontRenderer, this.colors, this.key);
         }
 
-        protected static Builder buildFromJson(IGui gui, JsonObject data) {
+        public static Builder buildFromJson(IGui gui, JsonObject data) {
             Text.Builder sb = Text.Builder.buildFromJson(gui, data);
 
             return IBuilder.copyValues(sb, new Builder(sb.text, JsonUtils.getStringVal(data.get("key"))));

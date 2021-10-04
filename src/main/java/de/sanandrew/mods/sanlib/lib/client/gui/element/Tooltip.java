@@ -195,7 +195,7 @@ public class Tooltip
             }
         }
 
-        protected static Builder buildFromJson(IGui gui, JsonObject data) {
+        public static Builder buildFromJson(IGui gui, JsonObject data) {
             Builder b = new Builder(JsonUtils.getIntArray(data.get("size"), Range.is(2)));
 
             JsonUtils.fetchString(data.get("backgroundColor"), b::backgroundColor);

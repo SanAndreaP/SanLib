@@ -355,7 +355,7 @@ public class Text
             return new Text(this.text, this.shadow, this.wrapWidth, this.lineHeight, this.fontRenderer, this.colors);
         }
 
-        protected static Builder buildFromJson(IGui gui, JsonObject data) {
+        public static Builder buildFromJson(IGui gui, JsonObject data) {
             Builder b = new Builder(data.has("text") ? new TranslationTextComponent(JsonUtils.getStringVal(data.get("text"))) : StringTextComponent.EMPTY);
 
             if( data.has("color") ) {

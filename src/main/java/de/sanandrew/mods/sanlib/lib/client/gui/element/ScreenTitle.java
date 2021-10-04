@@ -49,7 +49,7 @@ public class ScreenTitle
             return new ScreenTitle(this.shadow, this.wrapWidth, this.lineHeight, this.fontRenderer, this.colors);
         }
 
-        protected static Builder buildFromJson(IGui gui, JsonObject data) {
+        public static Builder buildFromJson(IGui gui, JsonObject data) {
             return IBuilder.copyValues(Text.Builder.buildFromJson(gui, data), new Builder());
         }
 

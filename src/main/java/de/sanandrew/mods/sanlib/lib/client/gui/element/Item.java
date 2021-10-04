@@ -86,7 +86,7 @@ public class Item
             return new Item(this.item, this.scale);
         }
 
-        protected static Builder buildFromJson(IGui gui, JsonObject data) {
+        public static Builder buildFromJson(IGui gui, JsonObject data) {
             Builder b = new Builder(Ingredient.fromJson(data.get("item")).getItems()[0]);
 
             JsonUtils.fetchFloat(data.get("scale"), b::scale);

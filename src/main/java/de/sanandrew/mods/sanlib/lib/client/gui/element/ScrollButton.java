@@ -56,7 +56,7 @@ public class ScrollButton
             return new ScrollButton(this.texture, this.size, this.textureSize, this.uv, this.uvDisabled, this.scale, this.color);
         }
 
-        protected static Builder buildFromJson(IGui gui, JsonObject data) {
+        public static Builder buildFromJson(IGui gui, JsonObject data) {
             Texture.Builder tb = Texture.Builder.buildFromJson(gui, data);
             Builder         b  = IBuilder.copyValues(tb, new Builder(tb.size));
 

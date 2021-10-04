@@ -362,7 +362,7 @@ public class ScrollArea
             return new GuiElementInst[0];
         }
 
-        protected static Builder buildFromJson(IGui gui, JsonObject data) {
+        public static Builder buildFromJson(IGui gui, JsonObject data) {
             Builder b = new Builder(JsonUtils.getIntArray(data.get("areaSize"), org.apache.commons.lang3.Range.is(2)))
                                    .scrollButton(ScrollButton.Builder.buildFromJson(gui, data.getAsJsonObject("scrollButton")).get(gui));
 

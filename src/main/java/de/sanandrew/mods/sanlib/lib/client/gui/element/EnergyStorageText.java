@@ -54,7 +54,7 @@ public class EnergyStorageText
             return new EnergyStorageText(this.shadow, this.wrapWidth, this.lineHeight, this.fontRenderer, this.colors);
         }
 
-        protected static Builder buildFromJson(IGui gui, JsonObject data) {
+        public static Builder buildFromJson(IGui gui, JsonObject data) {
             Text.Builder sb = Text.Builder.buildFromJson(gui, data);
             Builder      db = IBuilder.copyValues(sb, new Builder());
 

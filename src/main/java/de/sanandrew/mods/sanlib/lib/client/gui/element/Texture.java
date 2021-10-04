@@ -144,7 +144,7 @@ public class Texture
             return new Texture(this.texture, this.size, this.textureSize, this.uv, this.scale, this.color);
         }
 
-        protected static Builder buildFromJson(IGui gui, JsonObject data) {
+        public static Builder buildFromJson(IGui gui, JsonObject data) {
             Builder b = new Builder(JsonUtils.getIntArray(data.get("size"), Range.is(2)))
                                    .texture(gui.getDefinition().getTexture(data.get("texture")))
                                    .uv(JsonUtils.getIntArray(data.get("uv"), Range.is(2)));

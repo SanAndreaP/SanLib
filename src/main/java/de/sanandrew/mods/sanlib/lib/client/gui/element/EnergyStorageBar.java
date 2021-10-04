@@ -64,7 +64,7 @@ public class EnergyStorageBar
             return new EnergyStorageBar(this.texture, this.size, this.textureSize, this.uv, this.scale, this.color);
         }
 
-        protected static Builder buildFromJson(IGui gui, JsonObject data) {
+        public static Builder buildFromJson(IGui gui, JsonObject data) {
             Texture.Builder tb = Texture.Builder.buildFromJson(gui, data);
 
             return IBuilder.copyValues(tb, new Builder(tb.size));

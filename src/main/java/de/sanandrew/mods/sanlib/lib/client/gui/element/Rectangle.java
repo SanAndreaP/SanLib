@@ -89,7 +89,7 @@ public class Rectangle
             return new Rectangle(this.size, this.color, this.hGradient);
         }
 
-        protected static Builder buildFromJson(IGui gui, JsonObject data) {
+        public static Builder buildFromJson(IGui gui, JsonObject data) {
             Builder b = new Builder(JsonUtils.getIntArray(data.get("size"), Range.is(2)));
 
             JsonUtils.fetchStringArray(data.get("color"), b::color, Range.between(1, 2));
