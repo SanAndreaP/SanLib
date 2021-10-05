@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 @SuppressWarnings({"unused", "UnusedReturnValue", "java:S1172", "UnstableApiUsage"})
 public class ScrollArea
@@ -363,6 +365,10 @@ public class ScrollArea
         }
 
         public static Builder buildFromJson(IGui gui, JsonObject data) {
+            return buildFromJson(gui, data, b -> b::loadElements);
+        }
+
+        public static Builder buildFromJson(IGui gui, JsonObject data, Function<Builder, BiFunction<IGui, JsonElement, GuiElementInst[]>> loadElementsFunc) {
             Builder b = new Builder(JsonUtils.getIntArray(data.get("areaSize"), org.apache.commons.lang3.Range.is(2)))
                                    .scrollButton(ScrollButton.Builder.buildFromJson(gui, data.getAsJsonObject("scrollButton")).get(gui));
 
@@ -371,7 +377,7 @@ public class ScrollArea
             JsonUtils.fetchBool(data.get("rasterized"),     b::rasterized);
             JsonUtils.fetchFloat(data.get("maxScrollDelta"), b::maxScrollDelta);
 
-            b.elements(b.loadElements(gui, data.get("elements")));
+            b.elements(loadElementsFunc.apply(b).apply(gui, data.get("elements")));
 
             return b;
         }

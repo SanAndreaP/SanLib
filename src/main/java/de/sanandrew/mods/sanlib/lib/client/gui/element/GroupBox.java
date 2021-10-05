@@ -14,6 +14,9 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
 import org.apache.commons.lang3.Range;
 
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 @SuppressWarnings({"unused", "UnusedReturnValue", "java:S1172"})
 public class GroupBox
         extends ElementParent<String>
@@ -123,12 +126,16 @@ public class GroupBox
         }
 
         public static Builder buildFromJson(IGui gui, JsonObject data) {
+            return buildFromJson(gui, data, b -> b::loadLabel);
+        }
+
+        public static Builder buildFromJson(IGui gui, JsonObject data, Function<Builder, BiFunction<IGui, JsonObject, Text>> loadLabelFunc) {
             Builder b = new Builder(JsonUtils.getIntArray(data.get("size"), Range.is(2)));
 
             JsonUtils.fetchString(data.get("frameColor"), b::color);
             JsonUtils.fetchInt(data.get("frameThickness"), b::frameThickness);
 
-            b.label(b.loadLabel(gui, data.getAsJsonObject("title")));
+            b.label(loadLabelFunc.apply(b).apply(gui, data.getAsJsonObject("title")));
 
             return b;
         }

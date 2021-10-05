@@ -23,6 +23,9 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import org.apache.commons.lang3.Range;
 
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 @SuppressWarnings({"unused", "UnusedReturnValue", "java:S1172"})
 public class ButtonSL
         extends ElementParent<String>
@@ -328,6 +331,10 @@ public class ButtonSL
         }
 
         public static Builder buildFromJson(IGui gui, JsonObject data) {
+            return buildFromJson(gui, data, b -> b::loadLabel);
+        }
+
+        public static Builder buildFromJson(IGui gui, JsonObject data, Function<Builder, BiFunction<IGui, JsonElement, GuiElementInst>> loadLabelFunc) {
             Builder b = new Builder(JsonUtils.getIntArray(data.get("size"), Range.is(2)));
 
             if( JsonUtils.getBoolVal(data.get("useVanillaTexture"), true) ) {
@@ -344,7 +351,7 @@ public class ButtonSL
             JsonUtils.fetchIntArray(data.get("centralTextureSize"), b::uvDisabled, Range.is(2));
             JsonUtils.fetchStringArray(data.get("labelAlignment"), b::labelAlignment, Range.between(0, 2));
 
-            GuiElementInst lbl = b.loadLabel(gui, data.get(LABEL));
+            GuiElementInst lbl = loadLabelFunc.apply(b).apply(gui, data.get(LABEL));
             if( lbl != null ) {
                 b.label(lbl);
             }

@@ -47,7 +47,7 @@ public class ScrollButton
         }
 
         public Builder uvDisabled(int u, int v) { this.uvDisabled = new int[] { u, v }; return this; }
-        public Builder uvDisabled(int[] uv)     { this.uvDisabled = uv;                return this; }
+        public Builder uvDisabled(int[] uv)     { this.uvDisabled = uv;                 return this; }
 
         @Override
         public ScrollButton get(IGui gui) {

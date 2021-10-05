@@ -21,6 +21,8 @@ import net.minecraft.util.text.TranslationTextComponent;
 import org.apache.commons.lang3.Range;
 
 import javax.annotation.Nonnull;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 @SuppressWarnings({"unused", "UnusedReturnValue", "java:S1172", "java:S1104"})
 public class Tooltip
@@ -196,6 +198,10 @@ public class Tooltip
         }
 
         public static Builder buildFromJson(IGui gui, JsonObject data) {
+            return buildFromJson(gui, data, b -> b::loadContent);
+        }
+
+        public static Builder buildFromJson(IGui gui, JsonObject data, Function<Builder, BiFunction<IGui, JsonObject, GuiElementInst>> loadContentFunc) {
             Builder b = new Builder(JsonUtils.getIntArray(data.get("size"), Range.is(2)));
 
             JsonUtils.fetchString(data.get("backgroundColor"), b::backgroundColor);
@@ -204,7 +210,7 @@ public class Tooltip
             JsonUtils.fetchIntArray(data.get("padding"), b::padding, Range.between(0, 4));
             JsonUtils.fetchString(data.get("for"), b::visibleFor);
 
-            GuiElementInst content = b.loadContent(gui, data);
+            GuiElementInst content = loadContentFunc.apply(b).apply(gui, data);
             if( content != null ) {
                 b.content(content);
             }
