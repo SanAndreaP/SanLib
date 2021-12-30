@@ -114,13 +114,6 @@ public class GuiDefinition
         return true;
     }
 
-    public static void drawBackground(GuiDefinition guiDef, MatrixStack stack, IGui gui, float partTicks, int mouseX, int mouseY) {
-        stack.pushPose();
-        stack.translate(gui.getScreenPosX(), gui.getScreenPosY(), 0.0F);
-        guiDef.drawBackground(gui, stack, mouseX, mouseY, partTicks);
-        stack.popPose();
-    }
-
     private void reloadDefinition() throws IOException {
         this.idToElementMap.clear();
 
@@ -229,6 +222,13 @@ public class GuiDefinition
 
     public void drawBackground(IGui gui, MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         Arrays.stream(this.backgroundElements).forEach(e -> renderElement(gui, stack, mouseX, mouseY, partialTicks, e));
+    }
+
+    public void drawBackgroundContainer(IGui gui, MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+        stack.pushPose();
+        stack.translate(gui.getScreenPosX(), gui.getScreenPosY(), 0.0F);
+        Arrays.stream(this.backgroundElements).forEach(e -> renderElement(gui, stack, mouseX, mouseY, partialTicks, e));
+        stack.popPose();
     }
 
     public void drawForeground(IGui gui, MatrixStack stack, int mouseX, int mouseY, float partialTicks) {

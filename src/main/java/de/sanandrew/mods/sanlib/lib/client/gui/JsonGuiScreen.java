@@ -60,17 +60,20 @@ public abstract class JsonGuiScreen
     }
 
     @Override
-    public void render(@Nonnull MatrixStack mStack, int mouseX, int mouseY, float partTicks) {
+    public void render(@Nonnull MatrixStack mStack, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(mStack);
 
         mStack.pushPose();
         mStack.translate(this.getScreenPosX(), this.getScreenPosY(), 0);
-        this.guiDefinition.drawBackground(this, mStack, mouseX, mouseY, partTicks);
-        this.guiDefinition.drawForeground(this, mStack, mouseX, mouseY, partTicks);
+        this.guiDefinition.drawBackground(this, mStack, mouseX, mouseY, partialTicks);
+        this.renderGd(mStack, mouseX, mouseY, partialTicks);
+        this.guiDefinition.drawForeground(this, mStack, mouseX, mouseY, partialTicks);
         mStack.popPose();
 
-        super.render(mStack, mouseX, mouseY, partTicks);
+        super.render(mStack, mouseX, mouseY, partialTicks);
     }
+
+    protected void renderGd(@Nonnull MatrixStack mStack, int mouseX, int mouseY, float partialTicks) { }
 
     @Override
     public boolean mouseClicked(double mx, double my, int btn) {

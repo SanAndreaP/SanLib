@@ -17,7 +17,6 @@ public abstract class JsonGuiContainer<T extends Container>
         implements IGui
 {
     protected final GuiDefinition guiDefinition;
-    protected float currPartTicks;
 
     public JsonGuiContainer(T container, PlayerInventory playerInv, ITextComponent title) {
         super(container, playerInv, title);
@@ -58,22 +57,20 @@ public abstract class JsonGuiContainer<T extends Container>
     @Override
     public void render(@Nonnull MatrixStack mStack, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(mStack);
+        this.guiDefinition.drawBackgroundContainer(this, mStack, mouseX, mouseY, partialTicks);
         super.render(mStack, mouseX, mouseY, partialTicks);
         this.renderGd(mStack, mouseX, mouseY, partialTicks);
+        this.guiDefinition.drawForeground(this, mStack, mouseX, mouseY, partialTicks);
         this.renderTooltip(mStack, mouseX, mouseY);
     }
 
     protected void renderGd(@Nonnull MatrixStack mStack, int mouseX, int mouseY, float partialTicks) { }
 
     @Override
-    protected void renderBg(@Nonnull MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
-        this.currPartTicks = partialTicks;
-        GuiDefinition.drawBackground(this.guiDefinition, matrixStack, this, partialTicks, mouseX, mouseY);
-    }
+    protected void renderBg(@Nonnull MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) { /* no-op */ }
 
     @Override
     protected void renderLabels(@Nonnull MatrixStack matrixStack, int x, int y) {
-        this.guiDefinition.drawForeground(this, matrixStack, x, y, this.currPartTicks);
     }
 
     @Override
