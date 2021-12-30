@@ -103,16 +103,17 @@ public class Tooltip
 
             stack.pushPose();
             stack.translate(0.0D, 0.0D, 400.0D);
-            AbstractGui.fill(stack, xPos - 3,           yPos - 4,          xPos + width + 1, yPos - 1,          this.backgroundColor); // top
-            AbstractGui.fill(stack, xPos - 3,           yPos + height + 3, xPos + width + 3, yPos + height + 4, this.backgroundColor); // bottom
-            AbstractGui.fill(stack, xPos - 3,           yPos - 3,          xPos + width + 3, yPos + height + 3, this.backgroundColor); // center
-            AbstractGui.fill(stack, xPos - 4,           yPos - 3,          xPos - 3,         yPos + height + 3, this.backgroundColor); // left
-            AbstractGui.fill(stack, xPos + width + 3,   yPos - 3,          xPos + width + 4, yPos + height + 3, this.backgroundColor); // right
+            AbstractGui.fill(stack, xPos - 1,         yPos - 2,          xPos + width + 1, yPos - 1,          this.backgroundColor); // top
+            AbstractGui.fill(stack, xPos - 1,         yPos + height + 1, xPos + width + 1, yPos + height + 2, this.backgroundColor); // bottom
+            AbstractGui.fill(stack, xPos - 1,         yPos - 1,          xPos + width + 1, yPos + height + 1, this.backgroundColor); // center
+            AbstractGui.fill(stack, xPos - 2,         yPos - 1,          xPos - 1,         yPos + height + 1, this.backgroundColor); // left
+            AbstractGui.fill(stack, xPos + width + 1, yPos - 1,          xPos + width + 2, yPos + height + 1, this.backgroundColor); // right
 
-            AbstractGui.fill(     stack, xPos - 3,         yPos - 3,          xPos + width + 3, yPos - 2,          this.borderTopColor);
-            GuiUtils.drawGradient(stack, xPos - 3,         yPos - 2,          1,                height + 4,        this.borderTopColor, this.borderBottomColor, true);
-            GuiUtils.drawGradient(stack, xPos + width + 2, yPos - 2,          1,                height + 4,        this.borderTopColor, this.borderBottomColor, true);
-            AbstractGui.fill(     stack, xPos - 3,         yPos + height + 2, xPos + width + 3, yPos + height + 3, this.borderBottomColor);
+            AbstractGui.fill(stack, xPos - 1, yPos - 1,      xPos + width + 1, yPos,              this.borderTopColor);
+            AbstractGui.fill(stack, xPos - 1, yPos + height, xPos + width + 1, yPos + height + 1, this.borderBottomColor);
+
+            GuiUtils.drawGradient(stack, xPos - 1,     yPos, 1, height, this.borderTopColor, this.borderBottomColor, true);
+            GuiUtils.drawGradient(stack, xPos + width, yPos, 1, height, this.borderTopColor, this.borderBottomColor, true);
 
             GuiDefinition.renderElement(gui, stack, xPos + this.padding[0], yPos + this.padding[3], mouseX, mouseY, partTicks, contentInst, false);
 
@@ -191,7 +192,7 @@ public class Tooltip
             if( data.has(CONTENT) ) {
                 return JsonUtils.GSON.fromJson(data.get(CONTENT), GuiElementInst.class);
             } else if( data.has("text") ) {
-                return new GuiElementInst(new Text.Builder(new TranslationTextComponent(data.get("text").getAsString())).color(0xFFFFFFFF).get(gui));
+                return new GuiElementInst(new Text.Builder(new TranslationTextComponent(data.get("text").getAsString())).color(0xFFFFFFFF).shadow(true).get(gui));
             } else {
                 throw new JsonParseException("No data property called \"content\" or \"text\" has been found.");
             }

@@ -129,6 +129,7 @@ public class Text
             if( this.shadow ) {
                 this.currHeight += 1;
             }
+            this.currHeight -= 2;
 
             this.prevText = s;
 
