@@ -227,7 +227,7 @@ public class GuiDefinition
     public void drawBackgroundContainer(IGui gui, MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         stack.pushPose();
         stack.translate(gui.getScreenPosX(), gui.getScreenPosY(), 0.0F);
-        Arrays.stream(this.backgroundElements).forEach(e -> renderElement(gui, stack, mouseX, mouseY, partialTicks, e));
+        this.drawForeground(gui, stack, mouseX, mouseY, partialTicks);
         stack.popPose();
     }
 

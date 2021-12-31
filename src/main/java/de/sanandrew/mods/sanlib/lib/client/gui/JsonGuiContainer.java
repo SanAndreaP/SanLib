@@ -57,21 +57,24 @@ public abstract class JsonGuiContainer<T extends Container>
     @Override
     public void render(@Nonnull MatrixStack mStack, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(mStack);
-        this.guiDefinition.drawBackgroundContainer(this, mStack, mouseX, mouseY, partialTicks);
         super.render(mStack, mouseX, mouseY, partialTicks);
+        mStack.pushPose();
+        mStack.translate(this.leftPos, this.topPos, 0.0F);
         this.renderGd(mStack, mouseX, mouseY, partialTicks);
         this.guiDefinition.drawForeground(this, mStack, mouseX, mouseY, partialTicks);
+        mStack.popPose();
         this.renderTooltip(mStack, mouseX, mouseY);
     }
 
     protected void renderGd(@Nonnull MatrixStack mStack, int mouseX, int mouseY, float partialTicks) { }
 
     @Override
-    protected void renderBg(@Nonnull MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) { /* no-op */ }
+    protected void renderBg(@Nonnull MatrixStack mStack, float partialTicks, int mouseX, int mouseY) {
+        this.guiDefinition.drawBackgroundContainer(this, mStack, mouseX, mouseY, partialTicks);
+    }
 
     @Override
-    protected void renderLabels(@Nonnull MatrixStack matrixStack, int x, int y) {
-    }
+    protected void renderLabels(@Nonnull MatrixStack matrixStack, int x, int y) { }
 
     @Override
     public boolean mouseClicked(double mx, double my, int btn) {
