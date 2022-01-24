@@ -17,6 +17,7 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nonnull;
+import java.util.function.BiFunction;
 
 @SuppressWarnings({"unused", "UnusedReturnValue", "java:S1172", "java:S1104"})
 public class Item
@@ -86,8 +87,16 @@ public class Item
             return new Item(this.item, this.scale);
         }
 
+        protected static ItemStack loadItem(IGui gui, JsonObject data) {
+            return Ingredient.fromJson(data.get("item")).getItems()[0];
+        }
+
         public static Builder buildFromJson(IGui gui, JsonObject data) {
-            Builder b = new Builder(Ingredient.fromJson(data.get("item")).getItems()[0]);
+            return buildFromJson(gui, data, Builder::loadItem);
+        }
+
+        public static Builder buildFromJson(IGui gui, JsonObject data, BiFunction<IGui, JsonObject, ItemStack> loadItemFunc) {
+            Builder b = new Builder(loadItemFunc.apply(gui, data));
 
             JsonUtils.fetchFloat(data.get("scale"), b::scale);
 
