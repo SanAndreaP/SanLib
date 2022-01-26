@@ -15,6 +15,7 @@ import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
+import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
@@ -351,7 +352,7 @@ public class ButtonSL
             JsonUtils.fetchIntArray(data.get("centralTextureSize"), b::uvDisabled, Range.is(2));
             JsonUtils.fetchStringArray(data.get("labelAlignment"), b::labelAlignment, Range.between(0, 2));
 
-            GuiElementInst lbl = loadLabelFunc.apply(b).apply(gui, data.get(LABEL));
+            GuiElementInst lbl = MiscUtils.apply(loadLabelFunc, lcf -> MiscUtils.apply(lcf.apply(b), f -> f.apply(gui, data.get(LABEL))));
             if( lbl != null ) {
                 b.label(lbl);
             }

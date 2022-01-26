@@ -18,6 +18,7 @@ import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.client.util.GuiUtils;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
+import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
@@ -377,7 +378,7 @@ public class ScrollArea
             JsonUtils.fetchBool(data.get("rasterized"),     b::rasterized);
             JsonUtils.fetchFloat(data.get("maxScrollDelta"), b::maxScrollDelta);
 
-            b.elements(loadElementsFunc.apply(b).apply(gui, data.get("elements")));
+            b.elements(MiscUtils.apply(loadElementsFunc, lcf -> MiscUtils.apply(lcf.apply(b), f -> f.apply(gui, data.get("elements")))));
 
             return b;
         }

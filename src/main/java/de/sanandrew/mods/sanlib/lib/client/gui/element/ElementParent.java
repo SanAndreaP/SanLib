@@ -44,6 +44,10 @@ public abstract class ElementParent<K>
         this.children = this.namedChildren.values().toArray(new GuiElementInst[0]);
     }
 
+    public int size() {
+        return this.children.length;
+    }
+
     @Override
     public void setup(IGui gui, GuiElementInst inst) {
         this.update();
@@ -139,5 +143,18 @@ public abstract class ElementParent<K>
             }
         }
         return h;
+    }
+
+    public static int[] adjustPadding(int[] padding) {
+        if( padding == null || padding.length == 0 ) {
+            return new int[] { 0, 0, 0, 0 };
+        }
+
+        switch( padding.length ) {
+            case 1:  return new int[] { padding[0], padding[0], padding[0], padding[0] };
+            case 2:  return new int[] { padding[0], padding[1], padding[0], padding[1] };
+            case 3:  return new int[] { padding[0], padding[1], padding[2], padding[1] };
+            default: return new int[] { padding[0], padding[1], padding[2], padding[3] };
+        }
     }
 }

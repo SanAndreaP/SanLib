@@ -36,7 +36,7 @@
       "data": {
         "size": [16, 16],
         "content": {
-          "type": text,
+          "type": "text",
           "data": {
             "text": "Bedrock",
             "shadow": true,
@@ -60,7 +60,53 @@
       }
     },
     {
-      "type": "scroll_area",
+      "type": "stack_panel",
+      "pos": [8, 16],
+      "data": {
+        "content": [
+          {
+            "type": "rectangle",
+            "data": {
+              "size": [10, 10],
+              "color": ["0xFF00FF00"]
+            }
+          },
+          {
+            "type": "stack_panel",
+            "pos": [0, 0],
+            "data": {
+              "horizontal": true,
+              "padding": [5],
+              "content": [
+                {
+                  "type": "rectangle",
+                  "data": {
+                    "size": [35, 5],
+                    "color": ["0xFFFFFF00"]
+                  }
+                },
+                {
+                  "type": "rectangle",
+                  "data": {
+                    "size": [15, 9],
+                    "color": ["0xFFFF0000"]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type": "rectangle",
+            "data": {
+              "size": [10, 10],
+              "color": ["0xFF0000FF"]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "ascroll_area",
       "pos": [9, 18],
       "data": {
         "areaSize": [160, 110],

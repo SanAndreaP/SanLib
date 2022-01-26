@@ -20,6 +20,7 @@ import de.sanandrew.mods.sanlib.lib.client.gui.element.Item;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.Rectangle;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.ScreenTitle;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.ScrollArea;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.StackPanel;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.Text;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.TextField;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.Texture;
@@ -69,6 +70,7 @@ public class GuiDefinition
         TYPES.put(TextField.ID, TextField.Builder::fromJson);
         TYPES.put(Item.ID, Item.Builder::fromJson);
         TYPES.put(GroupBox.ID, GroupBox.Builder::fromJson);
+        TYPES.put(StackPanel.ID, StackPanel.Builder::fromJson);
     }
 
     public int width;

@@ -36,7 +36,7 @@ public class Tooltip
     protected int   backgroundColor;
     protected int borderTopColor;
     protected int borderBottomColor;
-    protected int[] padding;
+    protected int[] padding; // top - right - bottom - left
 
     protected String visibleForId;
     protected GuiElementInst visibleFor;
@@ -59,19 +59,6 @@ public class Tooltip
 
     public void add(@Nonnull GuiElementInst child) {
         super.put(CONTENT, child);
-    }
-
-    public int[] adjustPadding(int[] padding) {
-        if( padding == null || padding.length == 0 ) {
-            return new int[] { 0, 0, 0, 0 };
-        }
-
-        switch( padding.length ) {
-            case 1:  return new int[] { padding[0], padding[0], padding[0], padding[0] };
-            case 2:  return new int[] { padding[0], padding[1], padding[0], padding[1] };
-            case 3:  return new int[] { padding[0], padding[1], padding[2], padding[1] };
-            default: return new int[] { padding[0], padding[1], padding[2], padding[3] };
-        }
     }
 
     @Override
@@ -211,7 +198,7 @@ public class Tooltip
             JsonUtils.fetchIntArray(data.get("padding"), b::padding, Range.between(0, 4));
             JsonUtils.fetchString(data.get("for"), b::visibleFor);
 
-            GuiElementInst content = loadContentFunc.apply(b).apply(gui, data);
+            GuiElementInst content = MiscUtils.apply(loadContentFunc, lcf -> MiscUtils.apply(lcf.apply(b), f -> f.apply(gui, data)));
             if( content != null ) {
                 b.content(content);
             }

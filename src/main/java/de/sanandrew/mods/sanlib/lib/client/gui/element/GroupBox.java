@@ -135,7 +135,7 @@ public class GroupBox
             JsonUtils.fetchString(data.get("frameColor"), b::color);
             JsonUtils.fetchInt(data.get("frameThickness"), b::frameThickness);
 
-            b.label(loadLabelFunc.apply(b).apply(gui, data.getAsJsonObject("title")));
+            b.label(MiscUtils.apply(loadLabelFunc, lcf -> MiscUtils.apply(lcf.apply(b), f -> f.apply(gui, data.getAsJsonObject("title")))));
 
             return b;
         }
