@@ -124,7 +124,7 @@ public class Text
                              ? this.wrapWidth
                              : this.renderedLines.stream().map(l -> this.fontRenderer.width(l)).max(Integer::compareTo).orElse(0);
 
-            this.currHeight = this.renderedLines.size() * this.lineHeight;
+            this.currHeight = Math.max(1, this.renderedLines.size()) * this.lineHeight;
 
             if( this.shadow ) {
                 this.currHeight += 1;
