@@ -34,14 +34,18 @@ public class StackPanel
         this.padding = adjustPadding(padding);
         this.horizontal = horizontal;
 
-        for( int i = 0; i < elements.length; i++ ) {
-            this.put(i, elements[i]);
+        for( GuiElementInst element : elements ) {
+            this.add(element);
         }
     }
 
+    public void add(GuiElementInst inst) {
+        this.put(this.namedChildren.size(), inst);
+    }
+
     @Override
-    public void setup(IGui gui, GuiElementInst inst) {
-        super.setup(gui, inst);
+    public void update() {
+        super.update();
 
         this.currWidth = !this.horizontal ? 0 : this.padding[1] + this.padding[3];
         this.currHeight = this.horizontal ? 0 : this.padding[0] + this.padding[2];
