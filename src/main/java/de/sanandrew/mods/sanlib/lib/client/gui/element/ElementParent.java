@@ -40,6 +40,10 @@ public abstract class ElementParent<K>
         return this.namedChildren.remove(id);
     }
 
+    public void clear() {
+        this.namedChildren.clear();
+    }
+
     public void update() {
         this.children = this.namedChildren.values().toArray(new GuiElementInst[0]);
     }
