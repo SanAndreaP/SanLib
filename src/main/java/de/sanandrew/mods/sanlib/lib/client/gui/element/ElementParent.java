@@ -44,7 +44,11 @@ public abstract class ElementParent<K>
         this.namedChildren.clear();
     }
 
-    public void update() {
+    public final void update() {
+        this.update(false);
+    }
+
+    protected void update(boolean isOnSetup) {
         this.children = this.namedChildren.values().toArray(new GuiElementInst[0]);
     }
 
@@ -54,7 +58,7 @@ public abstract class ElementParent<K>
 
     @Override
     public void setup(IGui gui, GuiElementInst inst) {
-        this.update();
+        this.update(true);
 
         this.doWorkV(e -> e.get().setup(gui, e));
     }

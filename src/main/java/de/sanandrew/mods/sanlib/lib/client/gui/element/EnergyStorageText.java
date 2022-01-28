@@ -41,7 +41,7 @@ public class EnergyStorageText
         @Override
         public void sanitize(IGui gui) {
             if( this.colors.isEmpty() ) {
-                this.colors.put(DEFAULT_COLOR, 0xFF000000);
+                this.colors.put(DEFAULT_COLOR, 0xFFFFFFFF);
             }
 
             super.sanitize(gui);

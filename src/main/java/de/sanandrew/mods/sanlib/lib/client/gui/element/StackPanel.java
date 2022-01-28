@@ -43,10 +43,7 @@ public class StackPanel
         this.put(this.namedChildren.size(), inst);
     }
 
-    @Override
-    public void update() {
-        super.update();
-
+    protected void calcSize() {
         this.currWidth = !this.horizontal ? 0 : this.padding[1] + this.padding[3];
         this.currHeight = this.horizontal ? 0 : this.padding[0] + this.padding[2];
         for( int i = 0, max = this.size(); i < max; i++ ) {
@@ -59,6 +56,22 @@ public class StackPanel
                 this.currHeight += elem.pos[1] + elem.get().getHeight();
             }
         }
+    }
+
+    @Override
+    protected void update(boolean isOnSetup) {
+        super.update();
+
+        if( !isOnSetup ) {
+            this.calcSize();
+        }
+    }
+
+    @Override
+    public void setup(IGui gui, GuiElementInst inst) {
+        super.setup(gui, inst);
+
+        this.calcSize();
     }
 
     @Override

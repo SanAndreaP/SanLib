@@ -108,7 +108,7 @@ public class ScrollArea
     }
 
     @Override
-    public void update() {
+    protected void update(boolean isOnSetup) {
         this.sData = this.getScrollData(this.scroll, this.rasterized);
 
         this.children = this.getSubRange(this.sData.minY, this.sData.maxY, false).values().toArray(new GuiElementInst[0]);
