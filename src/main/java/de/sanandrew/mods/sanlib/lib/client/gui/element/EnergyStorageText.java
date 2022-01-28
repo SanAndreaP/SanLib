@@ -49,7 +49,7 @@ public class EnergyStorageText
 
         @Override
         public EnergyStorageText get(IGui gui) {
-            super.sanitize(gui);
+            this.sanitize(gui);
 
             return new EnergyStorageText(this.shadow, this.wrapWidth, this.lineHeight, this.fontRenderer, this.colors);
         }
