@@ -60,7 +60,7 @@ public class StackPanel
 
     @Override
     protected void update(boolean isOnSetup) {
-        super.update();
+        super.update(isOnSetup);
 
         if( !isOnSetup ) {
             this.calcSize();
