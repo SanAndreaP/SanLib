@@ -24,6 +24,7 @@ Object grabConstant = { String name ->
     }
 } as Object
 
+boolean isSnapshots = true
 version = "${grabConstant('BUILD_MCVER')}-${grabConstant('VERSION')}"
 group = 'de.sanandrew.mods'
 archivesBaseName = 'SanLib'
@@ -139,15 +140,21 @@ jar {
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
-            artifactId archivesBaseName
+        maven(MavenPublication) {
+            artifactId archivesBaseName.toLowerCase(Locale.ROOT)
             artifact jar
             artifact sourcesJar
         }
     }
     repositories {
         maven {
-            url "file:///${project.projectDir}/maven/"
+            name "Repsy"
+            url uri("https://repo.repsy.io/mvn/sanandreasp/sanlib")
+            version project.version + (isSnapshots ? "-SNAPSHOT" : "")
+            credentials {
+                username project.findProperty("repsy.user")
+                password project.findProperty("repsy.key")
+            }
         }
     }
 }
@@ -168,6 +175,6 @@ task signJar(type: SignJar, dependsOn: jar) {
 }
 
 build.finalizedBy signJar
-generateMetadataFileForMavenJavaPublication.dependsOn signJar
-publishMavenJavaPublicationToMavenRepository.dependsOn signJar
-signJar.finalizedBy publish
+if( project.hasProperty("repsy.key") ) {
+    signJar.finalizedBy publish
+}
