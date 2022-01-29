@@ -35,6 +35,11 @@ public class ScreenTitle
         super.setup(gui, inst);
     }
 
+    @Override
+    public ITextComponent getDynamicText(IGui gui, ITextComponent originalText) {
+        return this.guiText;
+    }
+
     public static class Builder
             extends Text.Builder
     {
