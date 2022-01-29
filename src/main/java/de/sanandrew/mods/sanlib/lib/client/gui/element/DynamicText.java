@@ -7,60 +7,53 @@ package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonObject;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
-import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
+import java.util.function.BiFunction;
 
-@SuppressWarnings({"unused", "UnusedReturnValue", "java:S1172", "java:S1104"})
+@SuppressWarnings("unused")
 public class DynamicText
     extends Text
 {
     public static final ResourceLocation ID = new ResourceLocation("dynamic_text");
 
-    protected String key;
+    @Nonnull
+    protected BiFunction<IGui, ITextComponent, ITextComponent> textFunc = super::getDynamicText;
 
-    public DynamicText(@Nonnull ITextComponent text, boolean shadow, int wrapWidth, int lineHeight, FontRenderer fontRenderer, Map<String, Integer> colors, String key) {
+    public DynamicText(@Nonnull ITextComponent text, boolean shadow, int wrapWidth, int lineHeight, FontRenderer fontRenderer, Map<String, Integer> colors) {
         super(text, shadow, wrapWidth, lineHeight, fontRenderer, colors);
+    }
 
-        this.key = key;
+    public void setTextFunc(@Nonnull BiFunction<IGui, ITextComponent, ITextComponent> func) {
+        this.textFunc = func;
     }
 
     @Override
     public ITextComponent getDynamicText(IGui gui, ITextComponent originalText) {
-        return ((IGuiDynamicText) gui).getText(this.key, originalText);
-    }
-
-    public interface IGuiDynamicText
-    {
-        ITextComponent getText(String key, ITextComponent originalText);
+        return this.textFunc.apply(gui, originalText);
     }
 
     public static class Builder
             extends Text.Builder
     {
-        public final String key;
-
-        public Builder(ITextComponent text, String key) {
+        public Builder(ITextComponent text) {
             super(text);
-
-            this.key = key;
         }
 
         @Override
         public DynamicText get(IGui gui) {
-            super.sanitize(gui);
+            this.sanitize(gui);
 
-            return new DynamicText(this.text, this.shadow, this.wrapWidth, this.lineHeight, this.fontRenderer, this.colors, this.key);
+            return new DynamicText(this.text, this.shadow, this.wrapWidth, this.lineHeight, this.fontRenderer, this.colors);
         }
 
         public static Builder buildFromJson(IGui gui, JsonObject data) {
             Text.Builder sb = Text.Builder.buildFromJson(gui, data);
-
-            return IBuilder.copyValues(sb, new Builder(sb.text, JsonUtils.getStringVal(data.get("key"))));
+            return IBuilder.copyValues(sb, new Builder(sb.text));
         }
 
         public static DynamicText fromJson(IGui gui, JsonObject data) {
