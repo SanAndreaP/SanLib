@@ -60,7 +60,7 @@
       }
     },
     {
-      "type": "stack_panel",
+      "type": "_stack_panel",
       "pos": [8, 16],
       "data": {
         "content": [
@@ -106,7 +106,7 @@
       }
     },
     {
-      "type": "ascroll_area",
+      "type": "scroll_area",
       "pos": [9, 18],
       "data": {
         "areaSize": [160, 110],

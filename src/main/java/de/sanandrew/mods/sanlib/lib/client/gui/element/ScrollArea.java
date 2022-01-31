@@ -147,8 +147,12 @@ public class ScrollArea
         this.scrollBtn.get().render(gui, stack, partTicks, this.scrollBtn.pos[0], scrollY, mouseX, mouseY, this.scrollBtn);
 
         GuiUtils.enableScissor(gui.getScreenPosX() + x, gui.getScreenPosY() + y, this.areaSize[0], this.areaSize[1]);
-        super.render(gui, stack, partTicks, x, y - this.sData.minY, mouseX, mouseY, inst);
+        this.renderElements(gui, stack, partTicks, x, y - this.sData.minY, mouseX, mouseY, inst);
         RenderSystem.disableScissor();
+    }
+
+    protected void renderElements(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, GuiElementInst inst) {
+        super.render(gui, stack, partTicks, x, y, mouseX, mouseY, inst);
     }
 
     @Override
@@ -188,7 +192,7 @@ public class ScrollArea
     @Override
     public boolean mouseDragged(IGui gui, double mouseX, double mouseY, int button, double dragX, double dragY) {
         if( button == GLFW.GLFW_MOUSE_BUTTON_LEFT ) {
-            Texture        btnElem = this.scrollBtn.get(ScrollButton.class);
+            Texture btnElem = this.scrollBtn.get(ScrollButton.class);
 
             if( this.countAll > this.countSub
                 && (this.prevLmbDown || IGuiElement.isHovering(gui, this.scrollBtn.pos[0], this.scrollBtn.pos[1], mouseX, mouseY, btnElem.size[0], this.scrollHeight)) )
@@ -243,12 +247,13 @@ public class ScrollArea
             return 0.0F;
         }
 
+        Range<Integer> firstRange = first.getKey();
         GuiElementInst firstVal = first.getValue();
         Map.Entry<Range<Integer>, GuiElementInst> second;
         if( next ) {
-            sRange = this.getSubRange(firstVal.pos[1] + firstVal.get().getHeight(), Integer.MAX_VALUE, false);
+            sRange = this.getSubRange(firstRange.upperEndpoint(), Integer.MAX_VALUE, false);
         } else {
-            sRange = this.getSubRange(0, firstVal.pos[1], true);
+            sRange = this.getSubRange(0, firstRange.lowerEndpoint(), true);
         }
 
         second = sRange.entrySet().stream().findFirst().orElse(null);
@@ -258,7 +263,7 @@ public class ScrollArea
 
         int scrollArea = rsData.totalHeight - this.areaSize[1];
 
-        return 1.0F / scrollArea * second.getValue().pos[1];
+        return 1.0F / scrollArea * second.getKey().lowerEndpoint();
     }
 
     @Override
@@ -282,7 +287,7 @@ public class ScrollArea
             getSubRange(data.minY, data.maxY, false).entrySet().stream().findFirst().ifPresent(f -> {
                 int heightAdj = f.getValue().get().getHeight() / 2;
                 getSubRange(data.minY + heightAdj, data.maxY + heightAdj, false).entrySet().stream().findFirst().ifPresent(e -> {
-                    data.minY = e.getValue().pos[1];
+                    data.minY = e.getKey().lowerEndpoint();
                     data.maxY = data.minY + this.areaSize[1];
                 });
             });
