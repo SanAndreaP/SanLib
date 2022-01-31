@@ -110,13 +110,14 @@ public class ScrollArea
     @Override
     protected void update(boolean isOnSetup) {
         this.sData = this.getScrollData(this.scroll, this.rasterized);
-
-        this.children = this.getSubRange(this.sData.minY, this.sData.maxY, false).values().toArray(new GuiElementInst[0]);
-
         this.countAll = this.namedChildren.size();
-        this.countSub = this.children.length;
 
-        this.scrollBtn.get(ScrollButton.class).disabled = this.countAll <= this.countSub;
+        RangeMap<Integer, GuiElementInst> sub = this.elements.subRangeMap(Range.closed(this.sData.minY, this.sData.maxY));
+        this.children = sub.asMapOfRanges().values().toArray(new GuiElementInst[0]);
+
+        Range<Integer> lastRange = this.children.length > 0 ? sub.span() : null;
+
+        this.scrollBtn.get(ScrollButton.class).disabled = MiscUtils.apply(lastRange, Range::upperEndpoint, 0) > this.sData.maxY;
     }
 
     @Override
@@ -157,7 +158,7 @@ public class ScrollArea
 
     @Override
     public boolean mouseScrolled(IGui gui, double mouseX, double mouseY, double mouseScroll) {
-        if( this.countAll <= this.countSub ) {
+        if( this.scrollBtn.get(ScrollButton.class).disabled ) {
             return super.mouseScrolled(gui, mouseX, mouseY, mouseScroll);
         }
 
@@ -192,9 +193,9 @@ public class ScrollArea
     @Override
     public boolean mouseDragged(IGui gui, double mouseX, double mouseY, int button, double dragX, double dragY) {
         if( button == GLFW.GLFW_MOUSE_BUTTON_LEFT ) {
-            Texture btnElem = this.scrollBtn.get(ScrollButton.class);
+            ScrollButton btnElem = this.scrollBtn.get(ScrollButton.class);
 
-            if( this.countAll > this.countSub
+            if( !btnElem.disabled
                 && (this.prevLmbDown || IGuiElement.isHovering(gui, this.scrollBtn.pos[0], this.scrollBtn.pos[1], mouseX, mouseY, btnElem.size[0], this.scrollHeight)) )
             {
                 double scrollAmt = mouseY - gui.getScreenPosY() - this.scrollBtn.pos[1] - btnElem.size[1] / 2.0D;
@@ -282,18 +283,33 @@ public class ScrollArea
         data.totalHeight = this.countAll > 0 ? this.elements.span().upperEndpoint() : 0;
         data.minY = Math.max(0, MathHelper.floor((data.totalHeight - this.areaSize[1]) * scroll));
         data.maxY = MathHelper.ceil((data.totalHeight - this.areaSize[1]) * scroll) + this.areaSize[1];
-
-        if( rasterized ) {
-            getSubRange(data.minY, data.maxY, false).entrySet().stream().findFirst().ifPresent(f -> {
-                int heightAdj = f.getValue().get().getHeight() / 2;
-                getSubRange(data.minY + heightAdj, data.maxY + heightAdj, false).entrySet().stream().findFirst().ifPresent(e -> {
-                    data.minY = e.getKey().lowerEndpoint();
-                    data.maxY = data.minY + this.areaSize[1];
-                });
-            });
-        }
+//        if( rasterized ) {
+//            RangeMap<Integer, GuiElementInst> currRangeMap = this.getSubRangeMap(data.minY, data.maxY, false);
+//            if( currRangeMap.asMapOfRanges().size() > 0 ) {
+//                Range<Integer> currRange = currRangeMap.span();
+//                currRangeMap.asMapOfRanges().entrySet().stream().findFirst().ifPresent(e -> {
+//                    int cElemHeight = e.getKey().upperEndpoint();
+//                    this.getSubRange(data.minY + cElemHeight, data.maxY + cElemHeight, false).entrySet().stream().findFirst().ifPresent(n -> {
+//                        data.minY = e.getKey().lowerEndpoint();
+//                        data.maxY = data.minY + this.areaSize[1];
+//                    });
+//                });
+//            }
+//            getSubRange(data.minY, data.maxY, false).entrySet().stream().findFirst().ifPresent(f -> {
+//                int heightAdj = f.getValue().get().getHeight() / 2;
+//                getSubRange(data.minY + heightAdj, data.maxY + heightAdj, false).entrySet().stream().findFirst().ifPresent(e -> {
+//                    data.minY = e.getKey().lowerEndpoint();
+//                    data.maxY = data.minY + this.areaSize[1];
+//                });
+//            });
+//        } else {
+//        }
 
         return data;
+    }
+
+    public RangeMap<Integer, GuiElementInst> getSubRangeMap(Integer lower, Integer upper, boolean desc) {
+        return this.elements.subRangeMap(Range.closedOpen(lower, upper));
     }
 
     public Map<Range<Integer>, GuiElementInst> getSubRange(Integer lower, Integer upper, boolean desc) {
