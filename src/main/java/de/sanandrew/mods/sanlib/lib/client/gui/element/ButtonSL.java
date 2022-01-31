@@ -45,7 +45,7 @@ public class ButtonSL
     protected int[]            centralTextureSize;
     protected Button.IPressable buttonFunction = btn -> {};
 
-    protected Button buttonDelegate;
+    protected final Button buttonDelegate;
 
     protected double     currMouseX;
     protected double     currMouseY;
@@ -63,15 +63,10 @@ public class ButtonSL
         this.uvDisabled = uvDisabled;
         this.uvSize = uvSize;
         this.centralTextureSize = centralTextureSize;
+        
+        this.buttonDelegate = new Button(0, 0, 0, 0, StringTextComponent.EMPTY, btn -> this.buttonFunction.onPress(btn));
 
         this.put(LABEL, label);
-    }
-
-    @Override
-    public void setup(IGui gui, GuiElementInst inst) {
-        super.setup(gui, inst);
-
-        this.buttonDelegate = new Button(0, 0, 0, 0, StringTextComponent.EMPTY, btn -> this.buttonFunction.onPress(btn));
     }
 
     @Override
