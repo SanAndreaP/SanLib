@@ -225,3 +225,5 @@ src/main/resources/assets/santest
 out/
 SanLib12.ipr
 SanLib12.iws
+src/test/resources/assets/sanlib
+src/test/resources/assets/sanplayermodel

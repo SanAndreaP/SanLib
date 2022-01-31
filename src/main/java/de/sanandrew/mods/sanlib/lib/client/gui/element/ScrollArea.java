@@ -283,33 +283,19 @@ public class ScrollArea
         data.totalHeight = this.countAll > 0 ? this.elements.span().upperEndpoint() : 0;
         data.minY = Math.max(0, MathHelper.floor((data.totalHeight - this.areaSize[1]) * scroll));
         data.maxY = MathHelper.ceil((data.totalHeight - this.areaSize[1]) * scroll) + this.areaSize[1];
-//        if( rasterized ) {
-//            RangeMap<Integer, GuiElementInst> currRangeMap = this.getSubRangeMap(data.minY, data.maxY, false);
-//            if( currRangeMap.asMapOfRanges().size() > 0 ) {
-//                Range<Integer> currRange = currRangeMap.span();
-//                currRangeMap.asMapOfRanges().entrySet().stream().findFirst().ifPresent(e -> {
-//                    int cElemHeight = e.getKey().upperEndpoint();
-//                    this.getSubRange(data.minY + cElemHeight, data.maxY + cElemHeight, false).entrySet().stream().findFirst().ifPresent(n -> {
-//                        data.minY = e.getKey().lowerEndpoint();
-//                        data.maxY = data.minY + this.areaSize[1];
-//                    });
-//                });
-//            }
-//            getSubRange(data.minY, data.maxY, false).entrySet().stream().findFirst().ifPresent(f -> {
-//                int heightAdj = f.getValue().get().getHeight() / 2;
-//                getSubRange(data.minY + heightAdj, data.maxY + heightAdj, false).entrySet().stream().findFirst().ifPresent(e -> {
-//                    data.minY = e.getKey().lowerEndpoint();
-//                    data.maxY = data.minY + this.areaSize[1];
-//                });
-//            });
-//        } else {
-//        }
+
+        if( rasterized ) {
+            Map<Range<Integer>, GuiElementInst> sr = getSubRange(data.minY, data.maxY, false);
+            sr.entrySet().stream().findFirst().ifPresent(f -> {
+                int heightAdj = f.getValue().get().getHeight() / 2;
+                getSubRange(data.minY + heightAdj, data.maxY + heightAdj, false).entrySet().stream().findFirst().ifPresent(e -> {
+                    data.minY = MiscUtils.apply(this.elements.getEntry(e.getKey().lowerEndpoint()), oe -> oe.getKey().lowerEndpoint(), data.minY);
+                    data.maxY = data.minY + this.areaSize[1];
+                });
+            });
+        }
 
         return data;
-    }
-
-    public RangeMap<Integer, GuiElementInst> getSubRangeMap(Integer lower, Integer upper, boolean desc) {
-        return this.elements.subRangeMap(Range.closedOpen(lower, upper));
     }
 
     public Map<Range<Integer>, GuiElementInst> getSubRange(Integer lower, Integer upper, boolean desc) {
