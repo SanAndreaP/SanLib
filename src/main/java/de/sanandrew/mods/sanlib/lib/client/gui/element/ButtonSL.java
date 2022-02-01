@@ -112,13 +112,16 @@ public class ButtonSL
         return IGuiElement.isHovering(gui, x, y, mouseX, mouseY, this.size[0], this.size[1]);
     }
 
+    public boolean isButton(Button b) {
+        return b == this.buttonDelegate;
+    }
+
     @Override
     public boolean mouseClicked(IGui gui, double mouseX, double mouseY, int button) {
         if( button == 0 && this.isActive() && this.isCurrHovering ) {
             Screen gs  = gui.get();
-            Button btn = this.buttonDelegate;
 
-            btn.playDownSound(gs.getMinecraft().getSoundManager());
+            this.buttonDelegate.playDownSound(gs.getMinecraft().getSoundManager());
             this.buttonFunction.onPress(this.buttonDelegate);
 
             return true;
