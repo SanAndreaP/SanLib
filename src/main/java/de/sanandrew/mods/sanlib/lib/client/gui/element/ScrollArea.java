@@ -48,8 +48,6 @@ public class ScrollArea
 
     protected double scroll;
     protected ScrollData sData = new ScrollData();
-    protected int countAll;
-    protected int countSub;
 
     protected boolean prevLmbDown;
 
@@ -110,14 +108,17 @@ public class ScrollArea
     @Override
     protected void update(boolean isOnSetup) {
         this.sData = this.getScrollData(this.scroll, this.rasterized);
-        this.countAll = this.namedChildren.size();
 
         RangeMap<Integer, GuiElementInst> sub = this.elements.subRangeMap(Range.closed(this.sData.minY, this.sData.maxY));
         this.children = sub.asMapOfRanges().values().toArray(new GuiElementInst[0]);
 
-        Range<Integer> lastRange = this.children.length > 0 ? sub.span() : null;
+        Range<Integer> lastRange = this.children.length > 0
+                                   ? this.elements.asDescendingMapOfRanges().entrySet().stream().findFirst().map(Map.Entry::getKey).orElse(null)
+                                   : null;
 
-        this.scrollBtn.get(ScrollButton.class).disabled = MiscUtils.apply(lastRange, Range::upperEndpoint, 0) > this.sData.maxY;
+        this.scrollBtn.get(ScrollButton.class).disabled = this.getTotalCount() <= this.children.length
+                                                          && MiscUtils.apply(lastRange, Range::upperEndpoint, 0) <= this.sData.maxY
+                                                          && MiscUtils.apply(lastRange, Range::lowerEndpoint, 0) >= this.sData.minY;
     }
 
     @Override
@@ -166,14 +167,16 @@ public class ScrollArea
             if( this.rasterized ) {
                 this.scroll = this.getRasterScroll(true);
             } else {
-                this.scroll += Math.min(1.0F / this.countAll, this.maxScrollDelta);
+                int cnt = this.getTotalCount();
+                this.scroll += Math.min(cnt > 0 ? 1.0F / cnt : 0.0F, this.maxScrollDelta);
             }
             this.clipScroll();
         } else if( mouseScroll > 0 ) {
             if( this.rasterized ) {
                 this.scroll = this.getRasterScroll(false);
             } else {
-                this.scroll -= Math.min(1.0F / this.countAll, this.maxScrollDelta);
+                int cnt = this.getTotalCount();
+                this.scroll -= Math.min(cnt > 0 ? 1.0F / cnt : 0.0F, this.maxScrollDelta);
             }
             this.clipScroll();
         }
@@ -280,7 +283,7 @@ public class ScrollArea
     public ScrollData getScrollData(double scroll, boolean rasterized) {
         ScrollData data = new ScrollData();
 
-        data.totalHeight = this.countAll > 0 ? this.elements.span().upperEndpoint() : 0;
+        data.totalHeight = this.getTotalCount() > 0 ? this.elements.span().upperEndpoint() : 0;
         data.minY = Math.max(0, MathHelper.floor((data.totalHeight - this.areaSize[1]) * scroll));
         data.maxY = MathHelper.ceil((data.totalHeight - this.areaSize[1]) * scroll) + this.areaSize[1];
 
@@ -302,6 +305,10 @@ public class ScrollArea
         RangeMap<Integer, GuiElementInst> sub = this.elements.subRangeMap(Range.closedOpen(lower, upper));
 
         return desc ? sub.asDescendingMapOfRanges() : sub.asMapOfRanges();
+    }
+
+    public int getTotalCount() {
+        return this.elements.asMapOfRanges().size();
     }
 
     @SuppressWarnings("java:S1104")

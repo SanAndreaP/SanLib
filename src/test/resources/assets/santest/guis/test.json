@@ -109,6 +109,31 @@
       "type": "scroll_area",
       "pos": [9, 18],
       "data": {
+        "rasterized": false,
+        "areaSize": [160, 110],
+        "scrollbarHeight": 110,
+        "scrollbarPos": [175, 18],
+        "scrollButton": {
+          "size": [12, 15],
+          "uv": [232, 0],
+          "uvDisabled": [244, 0]
+        },
+        "elements": [
+          {
+            "type": "rectangle",
+            "data": {
+              "size": [10, 150],
+              "color": ["0xFFFFFF00", "0xFFFF0000"],
+              "horizontalGradient": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "_scroll_area",
+      "pos": [9, 18],
+      "data": {
         "rasterized": true,
         "areaSize": [160, 110],
         "scrollbarHeight": 110,
