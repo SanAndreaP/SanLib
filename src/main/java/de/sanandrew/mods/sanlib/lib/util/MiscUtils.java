@@ -7,12 +7,6 @@ package de.sanandrew.mods.sanlib.lib.util;
 
 import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.lib.XorShiftRandom;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.DoubleNBT;
-import net.minecraft.nbt.FloatNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NumberNBT;
 import net.minecraft.resources.IResource;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
@@ -27,7 +21,6 @@ import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -339,64 +332,6 @@ public final class MiscUtils
 
     private static String getFilename(String folder, String path, boolean noExt) {
         return path.substring(folder.length() + 1, path.length() - (noExt ? FilenameUtils.getExtension(path).length() : 0));
-    }
-
-    public static boolean doesNbtContainOther(CompoundNBT mainNBT, CompoundNBT otherNBT) {
-        return doesNbtContainOther(mainNBT, otherNBT, true);
-    }
-
-    public static boolean doesNbtContainOther(final CompoundNBT mainNBT, final CompoundNBT otherNBT, boolean strict) {
-        return otherNBT == null
-               || (mainNBT != null && otherNBT.getAllKeys().stream().allMatch(key -> {
-                        if( mainNBT.contains(key) ) {
-                            if( strict ) {
-                                return mainNBT.getTagType(key) == otherNBT.getTagType(key) && Objects.equals(mainNBT.get(key), otherNBT.get(key));
-                            } else {
-                                return compareNBTBase(mainNBT.get(key), otherNBT.get(key));
-                            }
-                        }
-
-                        return false;
-                    })
-               );
-    }
-
-    private static boolean compareNBTBase(INBT main, INBT other) {
-        if( main instanceof NumberNBT && other instanceof NumberNBT ) {
-            NumberNBT mainBase = ((NumberNBT) main);
-            NumberNBT otherBase = ((NumberNBT) other);
-
-            long mainNb = isNbtDouble(mainBase) ? Double.doubleToLongBits(mainBase.getAsDouble()) : mainBase.getAsLong();
-            long otherNb = isNbtDouble(otherBase) ? Double.doubleToLongBits(otherBase.getAsDouble()) : otherBase.getAsLong();
-
-            return mainNb == otherNb;
-        } else if( main instanceof ListNBT && other instanceof ListNBT ) {
-            ListNBT mainList = (ListNBT) main;
-            ListNBT otherList = (ListNBT) other.copy();
-
-            if( mainList.getElementType() == otherList.getElementType() ) {
-                for( int i = mainList.size() - 1; i >= 0 && !otherList.isEmpty(); i-- ) {
-                    for( int j = otherList.size() - 1; j >= 0; j-- ) {
-                        if( compareNBTBase(mainList.get(i), otherList.get(j)) ) {
-                            otherList.remove(j);
-                            break;
-                        }
-                    }
-                }
-
-                return otherList.isEmpty();
-            }
-
-            return false;
-        } else if( main instanceof CompoundNBT && other instanceof CompoundNBT ) {
-            return doesNbtContainOther((CompoundNBT) main, (CompoundNBT) other, false);
-        } else {
-            return main.equals(other);
-        }
-    }
-
-    private static boolean isNbtDouble(INBT base) {
-        return base instanceof DoubleNBT || base instanceof FloatNBT;
     }
 
     public static float wrap360(float angle) {

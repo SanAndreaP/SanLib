@@ -7,6 +7,7 @@ package santest;
 
 import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
+import de.sanandrew.mods.sanlib.lib.util.NBTUtils;
 import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -59,20 +60,20 @@ public class TestMod
 
         SanLib.LOG.log(Level.INFO,
                        String.format("MiscUtils.doesNbtContainOther(numericNbt1, numericNbt2, false) = %s, should be true",
-                                     MiscUtils.doesNbtContainOther(numericNbt1, numericNbt2, false)));
+                                     NBTUtils.doesNbtContainOther(numericNbt1, numericNbt2, false)));
         SanLib.LOG.log(Level.INFO,
                        String.format("MiscUtils.doesNbtContainOther(numericNbt2, numericNbt1, false) = %s, should be false",
-                                     MiscUtils.doesNbtContainOther(numericNbt2, numericNbt1, false)));
+                                     NBTUtils.doesNbtContainOther(numericNbt2, numericNbt1, false)));
 
         CompoundNBT tagNbt1 = new CompoundNBT(); tagNbt1.put("tag", numericNbt1);
         CompoundNBT tagNbt2 = new CompoundNBT(); tagNbt2.put("tag", numericNbt2);
 
         SanLib.LOG.log(Level.INFO,
                        String.format("MiscUtils.doesNbtContainOther(tagNbt1, tagNbt2, false) = %s, should be true",
-                                     MiscUtils.doesNbtContainOther(tagNbt1, tagNbt2, false)));
+                                     NBTUtils.doesNbtContainOther(tagNbt1, tagNbt2, false)));
         SanLib.LOG.log(Level.INFO,
                        String.format("MiscUtils.doesNbtContainOther(tagNbt2, tagNbt1, false) = %s, should be false",
-                                     MiscUtils.doesNbtContainOther(tagNbt2, tagNbt1, false)));
+                                     NBTUtils.doesNbtContainOther(tagNbt2, tagNbt1, false)));
 
         ListNBT list1 = new ListNBT(); list1.add(numericNbt1); list1.add(new CompoundNBT());
         ListNBT list2 = new ListNBT(); list2.add(numericNbt2);
@@ -81,9 +82,9 @@ public class TestMod
 
         SanLib.LOG.log(Level.INFO,
                        String.format("MiscUtils.doesNbtContainOther(listNbt1, listNbt2, false) = %s, should be true",
-                                     MiscUtils.doesNbtContainOther(listNbt1, listNbt2, false)));
+                                     NBTUtils.doesNbtContainOther(listNbt1, listNbt2, false)));
         SanLib.LOG.log(Level.INFO,
                        String.format("MiscUtils.doesNbtContainOther(listNbt2, listNbt1, false) = %s, should be false",
-                                     MiscUtils.doesNbtContainOther(listNbt2, listNbt1, false)));
+                                     NBTUtils.doesNbtContainOther(listNbt2, listNbt1, false)));
     }
 }

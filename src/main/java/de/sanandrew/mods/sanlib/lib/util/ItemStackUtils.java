@@ -111,7 +111,7 @@ public final class ItemStackUtils
 
     public static boolean areEqualNbtFit(@Nonnull ItemStack mainIS, @Nonnull ItemStack otherIS, boolean checkStackSize, boolean strict) {
         return areEqualBase(mainIS, otherIS, checkStackSize)
-               && ( !otherIS.hasTag() || (mainIS.hasTag() && MiscUtils.doesNbtContainOther(mainIS.getTag(), otherIS.getTag(), strict)) );
+               && ( !otherIS.hasTag() || (mainIS.hasTag() && NBTUtils.doesNbtContainOther(mainIS.getTag(), otherIS.getTag(), strict)) );
     }
 
     private static boolean areEqualBase(@Nonnull ItemStack is1, @Nonnull ItemStack is2, boolean checkStackSize) {
