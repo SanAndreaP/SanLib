@@ -24,6 +24,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import org.apache.commons.lang3.Range;
 
+import javax.annotation.Nonnull;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -43,7 +44,10 @@ public class ButtonSL
     protected int[]            uvDisabled;
     protected int[]            uvSize;
     protected int[]            centralTextureSize;
+    @Nonnull
     protected Button.IPressable buttonFunction = btn -> {};
+    @Nonnull
+    protected IHoverFunc hoverFunction = (gui, x, y, mouseX, mouseY) -> IGuiElement.isHovering(gui, x, y, mouseX, mouseY, this.size[0], this.size[1]);
 
     protected final Button buttonDelegate;
 
@@ -104,12 +108,16 @@ public class ButtonSL
         }
     }
 
-    public void setFunction(Button.IPressable func) {
+    public void setFunction(@Nonnull Button.IPressable func) {
         this.buttonFunction = func;
     }
 
+    public void setHoverFunction(@Nonnull IHoverFunc func) {
+        this.hoverFunction = func;
+    }
+
     public boolean isHovering(IGui gui, int x, int y, double mouseX, double mouseY) {
-        return IGuiElement.isHovering(gui, x, y, mouseX, mouseY, this.size[0], this.size[1]);
+        return this.hoverFunction.check(gui, x, y, mouseX, mouseY);
     }
 
     public boolean isButton(Button b) {
@@ -361,5 +369,11 @@ public class ButtonSL
         public static ButtonSL fromJson(IGui gui, JsonObject data) {
             return buildFromJson(gui, data).get(gui);
         }
+    }
+
+    @FunctionalInterface
+    public interface IHoverFunc
+    {
+        boolean check(IGui gui, int x, int y, double mouseX, double mouseY);
     }
 }
