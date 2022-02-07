@@ -12,6 +12,7 @@ import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.PrioritizedGoal;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
@@ -23,9 +24,15 @@ import java.util.stream.Collectors;
 @SuppressWarnings({ "unused", "unchecked" })
 public final class EntityUtils
 {
-    public static final int ATTR_ADD_VAL_TO_BASE = 0;
-    public static final int ATTR_ADD_PERC_VAL_TO_SUM = 1;
-    public static final int RISE_SUM_WITH_PERC_VAL = 2;
+    private EntityUtils() { }
+
+
+    /** @deprecated use {@link AttributeModifier.Operation#ADDITION} */
+    @Deprecated public static final AttributeModifier.Operation ATTR_ADD_VAL_TO_BASE     = AttributeModifier.Operation.ADDITION;
+    /** @deprecated use {@link AttributeModifier.Operation#MULTIPLY_BASE} */
+    @Deprecated public static final AttributeModifier.Operation ATTR_ADD_PERC_VAL_TO_SUM = AttributeModifier.Operation.MULTIPLY_BASE;
+    /** @deprecated use {@link AttributeModifier.Operation#MULTIPLY_TOTAL} */
+    @Deprecated public static final AttributeModifier.Operation RISE_SUM_WITH_PERC_VAL   = AttributeModifier.Operation.MULTIPLY_TOTAL;
 
     public static Entity getServerEntity(World worldObj, UUID uuid) {
         return (worldObj instanceof ServerWorld ? ((ServerWorld) worldObj).getEntity(uuid) : null);
@@ -63,5 +70,10 @@ public final class EntityUtils
         }
 
         return false;
+    }
+
+    public static int getExperienceReward(LivingEntity e, PlayerEntity p) {
+        return ReflectionUtils.invokeCachedMethod(LivingEntity.class, e, "getExperienceReward", "func_70693_a",
+                                                  new Class[] {PlayerEntity.class}, new PlayerEntity[] { p });
     }
 }
