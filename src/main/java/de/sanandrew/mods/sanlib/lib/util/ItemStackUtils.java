@@ -27,6 +27,11 @@ import java.util.function.BiConsumer;
 @SuppressWarnings({"unused", "SameParameterValue", "WeakerAccess", "ObjectEquality"})
 public final class ItemStackUtils
 {
+    private static final String NBT_STACK_TAG = "StackNBT";
+    private static final String NBT_SLOT = "Slot";
+
+    private ItemStackUtils() { }
+
     /**
      * Checks if an ItemStack is a valid stack.
      * <p>An ItemStack is valid, if:
@@ -183,13 +188,13 @@ public final class ItemStackUtils
                 stack.setCount(Math.min(stack.getCount(), maxQuantity));
 
                 CompoundNBT tag = new CompoundNBT();
-                tag.putShort("Slot", (short) i);
+                tag.putShort(NBT_SLOT, (short) i);
                 stack.save(tag);
 
                 if( callbackMethod != null ) {
                     CompoundNBT stackNbt = new CompoundNBT();
                     callbackMethod.accept(stack, stackNbt);
-                    tag.put("StackNBT", stackNbt);
+                    tag.put(NBT_STACK_TAG, stackNbt);
                 }
 
                 tagList.add(tag);
@@ -200,27 +205,33 @@ public final class ItemStackUtils
     }
 
     public static void readItemStacksFromTag(ItemStack[] items, ListNBT tagList) {
-        readItemStacksFromTag(items, tagList, null);
+        readItemStacksFromTag((slot, itm) -> items[slot] = itm, tagList, null);
     }
 
     public static void readItemStacksFromTag(ItemStack[] items, ListNBT tagList, BiConsumer<ItemStack, CompoundNBT> callbackMethod) {
-        for( int i = 0; i < tagList.size(); i++ ) {
-            CompoundNBT tag = tagList.getCompound(i);
-            short slot = tag.getShort("Slot");
-            items[slot] = ItemStack.of(tag);
-
-            if( callbackMethod != null && tag.contains("StackNBT") ) {
-                callbackMethod.accept(items[slot], tag.getCompound("StackNBT"));
-            }
-        }
+        readItemStacksFromTag((slot, itm) -> items[slot] = itm, tagList, callbackMethod);
     }
 
     public static void readItemStacksFromTag(List<ItemStack> items, ListNBT tagList) {
-        readItemStacksFromTag(items, tagList, null);
+        readItemStacksFromTag(items::set, tagList, null);
     }
 
     public static void readItemStacksFromTag(List<ItemStack> items, ListNBT tagList, BiConsumer<ItemStack, CompoundNBT> callbackMethod) {
-        readItemStacksFromTag(items.toArray(new ItemStack[0]), tagList, callbackMethod);
+        readItemStacksFromTag(items::set, tagList, callbackMethod);
+    }
+
+    private static void readItemStacksFromTag(BiConsumer<Short, ItemStack> setItem, ListNBT tagList, BiConsumer<ItemStack, CompoundNBT> callbackMethod) {
+        for( int i = 0; i < tagList.size(); i++ ) {
+            CompoundNBT tag = tagList.getCompound(i);
+            short slot = tag.getShort(NBT_SLOT);
+            ItemStack stack = ItemStack.of(tag);
+
+            setItem.accept(slot, stack);
+
+            if( callbackMethod != null && tag.contains(NBT_STACK_TAG) ) {
+                callbackMethod.accept(stack, tag.getCompound(NBT_STACK_TAG));
+            }
+        }
     }
 
     public static void dropBlockItem(ItemStack stack, World world, BlockPos pos) {
