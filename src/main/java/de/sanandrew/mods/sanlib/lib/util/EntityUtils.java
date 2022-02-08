@@ -76,4 +76,9 @@ public final class EntityUtils
         return ReflectionUtils.invokeCachedMethod(LivingEntity.class, e, "getExperienceReward", "func_70693_a",
                                                   new Class[] {PlayerEntity.class}, new PlayerEntity[] { p });
     }
+
+    public static boolean shouldDropExperience(LivingEntity e) {
+        return ReflectionUtils.invokeCachedMethod(LivingEntity.class, e, "shouldDropExperience", "func_146066_aG",
+                                                  null, null);
+    }
 }
