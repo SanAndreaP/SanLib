@@ -171,7 +171,7 @@ public final class ItemStackUtils
         return writeItemStacksToTag(Arrays.asList(items), maxQuantity, null);
     }
 
-    public static ListNBT writeItemStacksToTag(ItemStack[] items, int maxQuantity, BiConsumer<ItemStack, CompoundNBT> callbackMethod) {
+    public static ListNBT writeItemStacksToTag(ItemStack[] items, int maxQuantity, SlotCallback callbackMethod) {
         return writeItemStacksToTag(Arrays.asList(items), maxQuantity, callbackMethod);
     }
 
@@ -179,21 +179,21 @@ public final class ItemStackUtils
         return writeItemStacksToTag(items, maxQuantity, null);
     }
 
-    public static ListNBT writeItemStacksToTag(List<ItemStack> items, int maxQuantity, BiConsumer<ItemStack, CompoundNBT> callbackMethod) {
+    public static ListNBT writeItemStacksToTag(List<ItemStack> items, int maxQuantity, SlotCallback callbackMethod) {
         ListNBT tagList = new ListNBT();
 
-        for( int i = 0, max = items.size(); i < max; i++ ) {
-            ItemStack stack = items.get(i).copy();
+        for( int slot = 0, max = items.size(); slot < max; slot++ ) {
+            ItemStack stack = items.get(slot).copy();
             if( isValid(stack) ) {
                 stack.setCount(Math.min(stack.getCount(), maxQuantity));
 
                 CompoundNBT tag = new CompoundNBT();
-                tag.putShort(NBT_SLOT, (short) i);
+                tag.putShort(NBT_SLOT, (short) slot);
                 stack.save(tag);
 
                 if( callbackMethod != null ) {
                     CompoundNBT stackNbt = new CompoundNBT();
-                    callbackMethod.accept(stack, stackNbt);
+                    callbackMethod.accept(stack, slot, stackNbt);
                     tag.put(NBT_STACK_TAG, stackNbt);
                 }
 
@@ -208,7 +208,7 @@ public final class ItemStackUtils
         readItemStacksFromTag((slot, itm) -> items[slot] = itm, tagList, null);
     }
 
-    public static void readItemStacksFromTag(ItemStack[] items, ListNBT tagList, BiConsumer<ItemStack, CompoundNBT> callbackMethod) {
+    public static void readItemStacksFromTag(ItemStack[] items, ListNBT tagList, SlotCallback callbackMethod) {
         readItemStacksFromTag((slot, itm) -> items[slot] = itm, tagList, callbackMethod);
     }
 
@@ -216,11 +216,11 @@ public final class ItemStackUtils
         readItemStacksFromTag(items::set, tagList, null);
     }
 
-    public static void readItemStacksFromTag(List<ItemStack> items, ListNBT tagList, BiConsumer<ItemStack, CompoundNBT> callbackMethod) {
+    public static void readItemStacksFromTag(List<ItemStack> items, ListNBT tagList, SlotCallback callbackMethod) {
         readItemStacksFromTag(items::set, tagList, callbackMethod);
     }
 
-    private static void readItemStacksFromTag(BiConsumer<Short, ItemStack> setItem, ListNBT tagList, BiConsumer<ItemStack, CompoundNBT> callbackMethod) {
+    private static void readItemStacksFromTag(BiConsumer<Short, ItemStack> setItem, ListNBT tagList, SlotCallback callbackMethod) {
         for( int i = 0; i < tagList.size(); i++ ) {
             CompoundNBT tag = tagList.getCompound(i);
             short slot = tag.getShort(NBT_SLOT);
@@ -229,7 +229,7 @@ public final class ItemStackUtils
             setItem.accept(slot, stack);
 
             if( callbackMethod != null && tag.contains(NBT_STACK_TAG) ) {
-                callbackMethod.accept(stack, tag.getCompound(NBT_STACK_TAG));
+                callbackMethod.accept(stack, slot, tag.getCompound(NBT_STACK_TAG));
             }
         }
     }
@@ -281,5 +281,11 @@ public final class ItemStackUtils
         });
 
         return cmpItems;
+    }
+
+    @FunctionalInterface
+    public interface SlotCallback
+    {
+        void accept(ItemStack stack, int slot, CompoundNBT nbt);
     }
 }
