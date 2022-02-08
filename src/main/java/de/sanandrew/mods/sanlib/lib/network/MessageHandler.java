@@ -43,7 +43,7 @@ public final class MessageHandler
         this.channel.send(PacketDistributor.PLAYER.with(() -> player), msg);
     }
 
-    public void sendToAll(SimpleMessage msg, ServerPlayerEntity player) {
+    public void sendToAll(SimpleMessage msg) {
         this.channel.send(PacketDistributor.ALL.noArg(), msg);
     }
 
