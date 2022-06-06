@@ -186,16 +186,16 @@ public final class InventoryUtils
 
         ItemStack oldStack = stack.copy();
         if( combStackSize <= maxStackSize ) {
+            onSlotChange.accept(oldStack, slotStack, slot);
             stack.setCount(0);
             slotStack.setCount(combStackSize);
             slot.setChanged();
-            onSlotChange.accept(oldStack, slotStack, slot);
             return true;
         } else if( slotStack.getCount() < maxStackSize ) {
+            onSlotChange.accept(oldStack, slotStack, slot);
             stack.shrink(maxStackSize - slotStack.getCount());
             slotStack.setCount(maxStackSize);
             slot.setChanged();
-            onSlotChange.accept(oldStack, slotStack, slot);
             return true;
         }
 
@@ -207,17 +207,17 @@ public final class InventoryUtils
         ItemStack newSlotStack = stack.copy();
 
         if( stack.getCount() > maxStackSize ) {
+            onSlotChange.accept(ItemStack.EMPTY, newSlotStack, slot);
             stack.shrink(maxStackSize);
             newSlotStack.setCount(maxStackSize);
             slot.set(newSlotStack);
             slot.setChanged();
-            onSlotChange.accept(ItemStack.EMPTY, newSlotStack, slot);
             return false;
         } else {
+            onSlotChange.accept(ItemStack.EMPTY, newSlotStack, slot);
             stack.setCount(0);
             slot.set(newSlotStack);
             slot.setChanged();
-            onSlotChange.accept(ItemStack.EMPTY, newSlotStack, slot);
             return true;
         }
     }
