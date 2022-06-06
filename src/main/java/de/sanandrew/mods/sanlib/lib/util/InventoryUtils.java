@@ -6,6 +6,7 @@
 package de.sanandrew.mods.sanlib.lib.util;
 
 import de.sanandrew.mods.sanlib.lib.Tuple;
+import de.sanandrew.mods.sanlib.lib.function.TriConsumer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
@@ -179,80 +180,88 @@ public final class InventoryUtils
         return is;
     }
 
-    public static boolean mergeItemStack(Container container, @Nonnull ItemStack stack, int beginSlot, int endSlot, boolean reverse) {
-        boolean slotChanged = false;
-        int start = beginSlot;
+    private static boolean stackItem(ItemStack stack, ItemStack slotStack, Slot slot, SlotChangeConsumer onSlotChange) {
+        int combStackSize = slotStack.getCount() + stack.getCount();
+        int maxStackSize = Math.min(stack.getMaxStackSize(), slot.getMaxStackSize(stack));
 
-        if( reverse ) {
-            start = endSlot - 1;
+        ItemStack oldStack = stack.copy();
+        if( combStackSize <= maxStackSize ) {
+            stack.setCount(0);
+            slotStack.setCount(combStackSize);
+            slot.setChanged();
+            onSlotChange.accept(oldStack, slotStack, slot);
+            return true;
+        } else if( slotStack.getCount() < maxStackSize ) {
+            stack.shrink(maxStackSize - slotStack.getCount());
+            slotStack.setCount(maxStackSize);
+            slot.setChanged();
+            onSlotChange.accept(oldStack, slotStack, slot);
+            return true;
         }
+
+        return false;
+    }
+
+    private static boolean moveItem(ItemStack stack, Slot slot, SlotChangeConsumer onSlotChange) {
+        int maxStackSize = Math.min(stack.getMaxStackSize(), slot.getMaxStackSize(stack));
+        ItemStack newSlotStack = stack.copy();
+
+        if( stack.getCount() > maxStackSize ) {
+            stack.shrink(maxStackSize);
+            newSlotStack.setCount(maxStackSize);
+            slot.set(newSlotStack);
+            slot.setChanged();
+            onSlotChange.accept(ItemStack.EMPTY, newSlotStack, slot);
+            return false;
+        } else {
+            stack.setCount(0);
+            slot.set(newSlotStack);
+            slot.setChanged();
+            onSlotChange.accept(ItemStack.EMPTY, newSlotStack, slot);
+            return true;
+        }
+    }
+
+    public static boolean mergeItemStack(Container container, @Nonnull ItemStack stack, int beginSlot, int endSlot, boolean reverse) {
+        return mergeItemStack(container, stack, beginSlot, endSlot, reverse, false, (ois, nis, slot) -> {});
+    }
+
+    public static boolean mergeItemStack(Container container, @Nonnull ItemStack stack, int beginSlot, int endSlot, boolean reverse, boolean vanillaChecks) {
+        return mergeItemStack(container, stack, beginSlot, endSlot, reverse, vanillaChecks, (ois, nis, slot) -> {});
+    }
+
+    public static boolean mergeItemStack(Container container, @Nonnull ItemStack stack, int beginSlot, int endSlot, boolean reverse, boolean vanillaChecks, SlotChangeConsumer onSlotChange) {
+        boolean slotChanged = false;
 
         Slot      slot;
         ItemStack slotStack;
 
         if( stack.isStackable() ) {
-            while( stack.getCount() > 0 && (!reverse && start < endSlot || reverse && start >= beginSlot) ) {
-                slot = container.slots.get(start);
+            for( int i = reverse ? endSlot - 1 : beginSlot; stack.getCount() > 0 && (reverse ? i >= beginSlot : i < endSlot); i = reverse ? i-1 : i+1 ) {
+                slot = container.slots.get(i);
                 slotStack = slot.getItem();
 
-                if( ItemStackUtils.areEqual(slotStack, stack) && slot.mayPlace(stack) ) {
-                    int combStackSize = slotStack.getCount() + stack.getCount();
-                    int maxStackSize = Math.min(stack.getMaxStackSize(), slot.getMaxStackSize(stack));
-
-                    if( combStackSize <= maxStackSize ) {
-                        stack.setCount(0);
-                        slotStack.setCount(combStackSize);
-                        slot.setChanged();
-                        slotChanged = true;
-                    } else if( slotStack.getCount() < maxStackSize ) {
-                        stack.shrink(maxStackSize - slotStack.getCount());
-                        slotStack.setCount(maxStackSize);
-                        slot.setChanged();
-                        slotChanged = true;
-                    }
-                }
-
-                if( reverse ) {
-                    start--;
-                } else {
-                    start++;
+                boolean canPlace = vanillaChecks ? !slotStack.isEmpty() && Container.consideredTheSameItem(stack, slotStack)
+                                                 : ItemStackUtils.areEqual(slotStack, stack) && slot.mayPlace(stack);
+                if( canPlace && stackItem(stack, slotStack, slot, onSlotChange) ) {
+                    slotChanged = true;
                 }
             }
         }
 
         if( stack.getCount() > 0 ) {
-            if( reverse ) {
-                start = endSlot - 1;
-            } else {
-                start = beginSlot;
-            }
+            for( int i = reverse ? endSlot - 1 : beginSlot; stack.getCount() > 0 && (reverse ? i < endSlot : i >= beginSlot); i = reverse ? i-1 : i+1 ) {
+                slot = container.slots.get(i);
+                slotStack = slot.getItem();
 
-            while( stack.getCount() > 0 && (!reverse && start < endSlot || reverse && start >= beginSlot) ) {
-                slot = container.slots.get(start);
+                boolean canPlace = vanillaChecks ? slotStack.isEmpty() && slot.mayPlace(stack)
+                                                 : !ItemStackUtils.isValid(slotStack) && slot.mayPlace(stack);
+                if( canPlace ) {
+                    slotChanged = true;
 
-                if( !ItemStackUtils.isValid(slot.getItem()) && slot.mayPlace(stack) ) {
-                    int maxStackSize = Math.min(stack.getMaxStackSize(), slot.getMaxStackSize(stack));
-                    if( stack.getCount() > maxStackSize ) {
-                        ItemStack newSlotStack = stack.copy();
-
-                        stack.shrink(maxStackSize);
-                        newSlotStack.setCount(maxStackSize);
-                        slot.set(newSlotStack);
-                        slot.setChanged();
-                        slotChanged = true;
-                    } else {
-                        slot.set(stack.copy());
-                        slot.setChanged();
-                        stack.setCount(0);
-                        slotChanged = true;
+                    if( moveItem(stack, slot, onSlotChange) ) {
                         break;
                     }
-                }
-
-                if( reverse ) {
-                    start--;
-                } else {
-                    start++;
                 }
             }
         }
@@ -296,5 +305,13 @@ public final class InventoryUtils
         public ItemStack getItem() {
             return this.getValue(1);
         }
+    }
+
+    @FunctionalInterface
+    public interface SlotChangeConsumer
+            extends TriConsumer<ItemStack, ItemStack, Slot>
+    {
+        @Override
+        void accept(ItemStack oldStack, ItemStack newStack, Slot slot);
     }
 }
