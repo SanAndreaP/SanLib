@@ -124,7 +124,7 @@ public class ProgressBar
             Builder b = IBuilder.copyValues(tb, new Builder(tb.size));
 
             MiscUtils.accept(JsonUtils.getStringVal(data.get("direction")), b::direction);
-            MiscUtils.accept(JsonUtils.getBoolVal(data.get("smooth")), b::smooth);
+            MiscUtils.accept(JsonUtils.getBoolVal(data.get("smooth"), false), b::smooth);
 
             return b;
         }
