@@ -27,6 +27,50 @@
           "text": "test"
         }
       }
+    },
+    {
+      "type": "progress_bar",
+      "pos": [195, 0],
+      "id": "prog_ltr",
+      "data": {
+        "size": [20, 5],
+        "uv": [0, 136],
+        "direction": "left_to_right",
+        "smooth": false
+      }
+    },
+    {
+      "type": "progress_bar",
+      "pos": [195, 6],
+      "id": "prog_rtl",
+      "data": {
+        "size": [20, 5],
+        "uv": [0, 136],
+        "direction": "right_to_left",
+        "smooth": false
+      }
+    },
+    {
+      "type": "progress_bar",
+      "pos": [216, 0],
+      "id": "prog_ttb",
+      "data": {
+        "size": [5, 20],
+        "uv": [0, 141],
+        "direction": "top_to_bottom",
+        "smooth": false
+      }
+    },
+    {
+      "type": "progress_bar",
+      "pos": [222, 0],
+      "id": "prog_btt",
+      "data": {
+        "size": [5, 20],
+        "uv": [0, 141],
+        "direction": "bottom_to_top",
+        "smooth": false
+      }
     }
   ],
   "foregroundElements": [

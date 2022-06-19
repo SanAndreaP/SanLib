@@ -24,7 +24,7 @@ import java.util.UUID;
 public class SanPlayerModel
 {
     public static final Logger LOG = LogManager.getLogger(Constants.PM_ID);
-    public static final String[] SANPLAYER_NAMES_UUID = new String[] { "SanAndreasP", "044d980d-5c2a-4030-95cf-cbfde69ea3cb" };
+    public static final String[] SANPLAYER_NAMES_UUID = new String[] { "SanAndreaP", "044d980d-5c2a-4030-95cf-cbfde69ea3cb" };
 
     public SanPlayerModel() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::clientSetup);
