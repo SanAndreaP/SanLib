@@ -51,19 +51,21 @@ public class ProgressBar
     protected void drawRect(IGui gui, MatrixStack stack) {
         float energyPerc = (float) Math.max(0, Math.min(this.getPercentFunc.applyAsDouble(gui), 1.0D));
 
-        float w = !this.direction.vertical ? this.size[0] * energyPerc : this.size[0];
-        float h = this.direction.vertical ? this.size[1] * energyPerc : this.size[1];
-        float x = this.direction == Direction.RIGHT_TO_LEFT ? this.size[0] - w : 0;
-        float y = this.direction == Direction.BOTTOM_TO_TOP ? this.size[1] - h : 0;
 
         if( this.smooth ) {
+            float w = !this.direction.vertical ? this.size[0] * energyPerc : this.size[0];
+            float h = this.direction.vertical ? this.size[1] * energyPerc : this.size[1];
+            float x = this.direction == Direction.RIGHT_TO_LEFT ? this.size[0] - w : 0;
+            float y = this.direction == Direction.BOTTOM_TO_TOP ? this.size[1] - h : 0;
+
             smoothBlit(stack, x, y, this.uv[0] + x, this.uv[1] + y, w, h, this.textureSize[0], this.textureSize[1]);
         } else {
-            int xi = MathHelper.ceil(x);
-            int yi = MathHelper.ceil(y);
-            int wi = MathHelper.ceil(w);
-            int hi = MathHelper.ceil(h);
-            AbstractGui.blit(stack, xi, yi, this.uv[0] + (float) xi, this.uv[1] + (float) yi, wi, hi, this.textureSize[0], this.textureSize[1]);
+            int w = !this.direction.vertical ? MathHelper.ceil(this.size[0] * energyPerc) : this.size[0];
+            int h = this.direction.vertical ? MathHelper.ceil(this.size[1] * energyPerc) : this.size[1];
+            int x = this.direction == Direction.RIGHT_TO_LEFT ? this.size[0] - w : 0;
+            int y = this.direction == Direction.BOTTOM_TO_TOP ? this.size[1] - h : 0;
+
+            AbstractGui.blit(stack, x, y, this.uv[0] + (float) x, this.uv[1] + (float) y, w, h, this.textureSize[0], this.textureSize[1]);
         }
     }
 
