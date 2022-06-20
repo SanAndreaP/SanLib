@@ -24,8 +24,8 @@ public class ScreenTitle
     @Nonnull
     protected ITextComponent guiText = StringTextComponent.EMPTY;
 
-    public ScreenTitle(boolean shadow, int wrapWidth, int lineHeight, FontRenderer fontRenderer, Map<String, Integer> colors) {
-        super(StringTextComponent.EMPTY, shadow, wrapWidth, lineHeight, fontRenderer, colors);
+    public ScreenTitle(boolean shadow, int wrapWidth, int lineHeight, FontRenderer fontRenderer, Map<String, Integer> colors, boolean bordered) {
+        super(StringTextComponent.EMPTY, shadow, wrapWidth, lineHeight, fontRenderer, colors, bordered);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class ScreenTitle
         public ScreenTitle get(IGui gui) {
             super.sanitize(gui);
 
-            return new ScreenTitle(this.shadow, this.wrapWidth, this.lineHeight, this.fontRenderer, this.colors);
+            return new ScreenTitle(this.shadow, this.wrapWidth, this.lineHeight, this.fontRenderer, this.colors, this.bordered);
         }
 
         public static Builder buildFromJson(IGui gui, JsonObject data) {

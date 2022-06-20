@@ -25,7 +25,6 @@ import javax.annotation.Nonnull;
 import java.util.Locale;
 import java.util.function.ToDoubleFunction;
 
-@SuppressWarnings({"unused", "UnusedReturnValue", "java:S1172", "java:S1104"})
 public class ProgressBar
         extends Texture
 {
@@ -34,8 +33,9 @@ public class ProgressBar
     protected final Direction direction;
     protected final boolean smooth;
 
-    protected ToDoubleFunction<IGui> getPercentFunc = g -> 0.0D;
+    protected ToDoubleFunction<IGui> percentFunc = g -> 0.0D;
 
+    @SuppressWarnings("java:S107")
     public ProgressBar(ResourceLocation txLocation, int[] size, int[] textureSize, int[] uv, float[] scale, ColorObj color, Direction direction, boolean smooth) {
         super(txLocation, size, textureSize, uv, scale, color);
 
@@ -44,13 +44,13 @@ public class ProgressBar
     }
 
     public void setPercentFunc(@Nonnull ToDoubleFunction<IGui> func) {
-        this.getPercentFunc = func;
+        this.percentFunc = func;
     }
 
     @Override
+    @SuppressWarnings("java:S3776")
     protected void drawRect(IGui gui, MatrixStack stack) {
-        float energyPerc = (float) Math.max(0, Math.min(this.getPercentFunc.applyAsDouble(gui), 1.0D));
-
+        float energyPerc = (float) Math.max(0, Math.min(this.percentFunc.applyAsDouble(gui), 1.0D));
 
         if( this.smooth ) {
             float w = !this.direction.vertical ? this.size[0] * energyPerc : this.size[0];
@@ -69,6 +69,7 @@ public class ProgressBar
         }
     }
 
+    @SuppressWarnings("deprecation")
     private static void smoothBlit(MatrixStack stack, float x, float y, float u, float v, float w, float h, int tW, int tH) {
         Matrix4f pose = stack.last().pose();
 
@@ -91,6 +92,7 @@ public class ProgressBar
         WorldVertexBufferUploader.end(builder);
     }
 
+    @SuppressWarnings({"unused", "UnusedReturnValue"})
     public static class Builder
             extends Texture.Builder
     {

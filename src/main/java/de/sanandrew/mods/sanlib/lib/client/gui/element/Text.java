@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 /**
@@ -61,12 +62,13 @@ import java.util.function.Consumer;
  * </pre>
  */
 
-@SuppressWarnings({"unused", "java:S1172", "java:S1104", "UnusedReturnValue"})
+@SuppressWarnings("unused")
 public class Text
         implements IGuiElement
 {
     public static final ResourceLocation ID = new ResourceLocation("text");
     protected static final String DEFAULT_COLOR = "default";
+    protected static final String BORDER_COLOR = "borderColor";
 
     @Nonnull
     protected final ITextComponent bakedText;
@@ -76,6 +78,7 @@ public class Text
     protected int                  wrapWidth;
     protected FontRenderer         fontRenderer;
     protected int                  lineHeight;
+    protected boolean              bordered;
 
     protected int                    currWidth;
     protected int                    currHeight;
@@ -86,7 +89,10 @@ public class Text
 
     private Consumer<GuiElementInst> onTextChange;
 
-    public Text(@Nonnull ITextComponent text, boolean shadow, int wrapWidth, int lineHeight, FontRenderer fontRenderer, Map<String, Integer> colors) {
+    @Nonnull
+    protected BiFunction<IGui, ITextComponent, ITextComponent> textFunc = (g, ot) -> ot;
+
+    public Text(@Nonnull ITextComponent text, boolean shadow, int wrapWidth, int lineHeight, FontRenderer fontRenderer, Map<String, Integer> colors, boolean bordered) {
         this.bakedText = text;
         this.shadow = shadow;
         this.wrapWidth = wrapWidth;
@@ -94,6 +100,7 @@ public class Text
         this.fontRenderer = fontRenderer;
         this.colors = colors;
         this.currColor = colors.getOrDefault(DEFAULT_COLOR, 0xFF000000);
+        this.bordered = bordered;
     }
 
     @Override
@@ -104,11 +111,15 @@ public class Text
     }
 
     public ITextComponent getDynamicText(IGui gui, ITextComponent originalText) {
-        return originalText;
+        return this.textFunc.apply(gui, originalText);
     }
 
     public void setOnTextChange(Consumer<GuiElementInst> onTextChange) {
         this.onTextChange = onTextChange;
+    }
+
+    public void setTextFunc(@Nonnull BiFunction<IGui, ITextComponent, ITextComponent> func) {
+        this.textFunc = func;
     }
 
     protected void buildLines(IGui gui, GuiElementInst inst) {
@@ -147,12 +158,24 @@ public class Text
     @Override
     public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, GuiElementInst inst) {
         for( ITextProperties sln : this.renderedLines ) {
+            if( this.bordered ) {
+                int currColorCache = this.currColor;
+
+                this.setColor(BORDER_COLOR);
+                this.renderLine(stack, sln, x+1, y);
+                this.renderLine(stack, sln, x, y+1);
+                this.renderLine(stack, sln, x-1, y);
+                this.renderLine(stack, sln, x, y-1);
+
+                this.currColor = currColorCache;
+            }
+
             this.renderLine(stack, sln, x, y);
             y += this.lineHeight;
         }
     }
 
-    private void renderLine(MatrixStack stack, ITextProperties s, int x, int y) {
+    protected void renderLine(MatrixStack stack, ITextProperties s, int x, int y) {
         switch( this.justify ) {
             case JUSTIFY:
                 if( this.wrapWidth > 0 ) {
@@ -185,7 +208,7 @@ public class Text
         }, Style.EMPTY);
     }
 
-    private void renderLineJustified(MatrixStack stack, ITextProperties s, int x, int y) {
+    protected void renderLineJustified(MatrixStack stack, ITextProperties s, int x, int y) {
         final MutableInt mx = new MutableInt(x);
         s.visit((style, str) -> {
             String[] words = str.split("\\s");
@@ -310,12 +333,14 @@ public class Text
         }
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public static class Builder
             implements IBuilder<Text>
     {
         public final ITextComponent text;
 
         protected boolean shadow = false;
+        protected boolean bordered = false;
         protected int wrapWidth = 0;
         protected int lineHeight = 9;
         protected FontRenderer fontRenderer = null;
@@ -326,6 +351,7 @@ public class Text
         }
 
         public Builder shadow(boolean shadow)              { this.shadow = shadow;                                       return this; }
+        public Builder bordered(boolean bordered)          { this.bordered = bordered;                                   return this; }
         public Builder wrapWidth(int wrapWidth)            { this.wrapWidth = wrapWidth;                                 return this; }
         public Builder lineHeight(int height)              { this.lineHeight = height;                                   return this; }
         public Builder font(FontRenderer fontRenderer)     { this.fontRenderer = fontRenderer;                           return this; }
@@ -340,8 +366,16 @@ public class Text
         public void sanitize(IGui gui) {
             if( this.colors.isEmpty() ) {
                 this.colors.put(DEFAULT_COLOR, 0xFF000000);
+
+                if( this.bordered ) {
+                    this.colors.put(BORDER_COLOR, 0xFFFFFFFF);
+                }
             } else {
                 this.colors.computeIfAbsent(DEFAULT_COLOR, k -> this.colors.values().stream().findFirst().get());
+
+                if( this.bordered ) {
+                    this.colors.putIfAbsent(BORDER_COLOR, 0xFF000000);
+                }
             }
 
             if( this.fontRenderer == null ) {
@@ -353,7 +387,7 @@ public class Text
         public Text get(IGui gui) {
             this.sanitize(gui);
 
-            return new Text(this.text, this.shadow, this.wrapWidth, this.lineHeight, this.fontRenderer, this.colors);
+            return new Text(this.text, this.shadow, this.wrapWidth, this.lineHeight, this.fontRenderer, this.colors, this.bordered);
         }
 
         public static Builder buildFromJson(IGui gui, JsonObject data) {
@@ -371,6 +405,7 @@ public class Text
             }
 
             JsonUtils.fetchBool(data.get("shadow"), b::shadow);
+            JsonUtils.fetchBool(data.get("bordered"), b::bordered);
             JsonUtils.fetchInt(data.get("wrapWidth"), b::wrapWidth);
             JsonUtils.fetchInt(data.get("lineHeight"), b::lineHeight);
 
