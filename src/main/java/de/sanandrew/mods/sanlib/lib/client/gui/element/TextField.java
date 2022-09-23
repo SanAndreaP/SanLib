@@ -189,6 +189,12 @@ public class TextField
         return this.textfieldWidget != null && this.textfieldWidget.isVisible();
     }
 
+    public void setVisible(boolean visible) {
+        if( this.textfieldWidget != null ) {
+            this.textfieldWidget.setVisible(visible);
+        }
+    }
+
     public void setValidator(Predicate<String> validator) {
         this.textfieldWidget.setFilter(validator);
     }
