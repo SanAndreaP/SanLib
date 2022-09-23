@@ -149,7 +149,7 @@ publishing {
     repositories {
         maven {
             name "Repsy"
-            url uri("https://repo.repsy.io/mvn/sanandreasp/sanlib")
+            url uri("https://repo.repsy.io/mvn/sanandreap/sanlib")
             version project.version + (isSnapshots ? "-SNAPSHOT" : "")
             credentials {
                 username project.findProperty("repsy.user")
