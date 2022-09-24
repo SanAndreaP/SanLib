@@ -130,6 +130,15 @@
             }
           },
           {
+            "type": "textfield",
+            "pos": [0, 0],
+            "data": {
+              "size": [67, 12],
+              "placeholderText": "1234567890123456789012345678901234567890",
+              "placeholderTextColor": "0xFFFF0000"
+            }
+          },
+          {
             "type": "rectangle",
             "pos": [0, 5],
             "data": {

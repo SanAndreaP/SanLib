@@ -19,7 +19,9 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import org.apache.commons.lang3.Range;
@@ -92,10 +94,15 @@ public class TextField
         if( !this.isFocused() && Strings.isNullOrEmpty(this.getText()) && !Strings.isNullOrEmpty(this.placeholderText.getString()) ) {
             x += (this.drawBackground ? 4 : 0);
             y += (this.drawBackground ? (this.size[1] - 8) / 2 : 0);
-            GuiUtils.enableScissor(gui.getScreenPosX() + x, gui.getScreenPosY() + y, this.size[0] - (this.drawBackground ? 8 : 0), this.size[1]);
-            this.fontRenderer.draw(stack, this.placeholderText, x, y, this.placeholderTextColor);
-            GuiUtils.disableScissor();
+            this.fontRenderer.draw(stack, this.getPlaceholderTextSubstr(), x, y, this.placeholderTextColor);
         }
+    }
+
+    private ITextComponent getPlaceholderTextSubstr() {
+        Style placeholderStyle = this.placeholderText.getStyle();
+        String substr = this.fontRenderer.getSplitter().headByWidth(this.placeholderText, this.size[0] - (this.drawBackground ? 8 : 0), placeholderStyle).getString();
+
+        return new StringTextComponent(substr).withStyle(placeholderStyle);
     }
 
     @Override

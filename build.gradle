@@ -76,7 +76,7 @@ minecraft {
 
             property 'forge.logging.console.level', 'debug'
             args '--uuid', '044d980d-5c2a-4030-95cf-cbfde69ea3cb'
-            environment 'MOD_CLASSES', "sanlib%%${project.projectDir}/build/resources/test;sanlib%%${project.projectDir}/build/classes/java/main;sanlib%%${project.projectDir}/build/classes/java/test"
+            environment 'MOD_CLASSES', "sanlib%%${project.projectDir}/build/resources/test:sanlib%%${project.projectDir}/build/classes/java/main:sanlib%%${project.projectDir}/build/classes/java/test"
             ideaModule "${project.name}.test"
 
             mods {
