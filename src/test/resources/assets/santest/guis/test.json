@@ -121,17 +121,17 @@
             "type": "text",
             "pos": [1, 1],
             "data": {
-              "text": "bordered text test",
+              "text": "bordered text test\n§ewith color\nmore color",
               "color": {
-                "default": "0xFFFF0000",
+                "default": "0xFFFFFFFF",
                 "borderColor": "0xFFFFFF00"
               },
-              "bordered": true
+              "bordered": false
             }
           },
           {
             "type": "textfield",
-            "pos": [0, 0],
+            "pos": [0, 5],
             "data": {
               "size": [67, 12],
               "placeholderText": "1234567890123456789012345678901234567890",

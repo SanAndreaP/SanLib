@@ -196,13 +196,13 @@ public class Text
 
         final MutableInt mx = new MutableInt(x);
         s.visit((style, str) -> {
-            IReorderingProcessor irp = IReorderingProcessor.forward(str, style);
+            ITextComponent tc = new StringTextComponent(str).withStyle(style);
             if( this.shadow ) {
-                this.fontRenderer.drawShadow(stack, irp, mx.getValue(), y, this.currColor);
+                this.fontRenderer.drawShadow(stack, tc, mx.getValue(), y, this.currColor);
             } else {
-                this.fontRenderer.draw(stack, irp, mx.getValue(), y, this.currColor);
+                this.fontRenderer.draw(stack, tc, mx.getValue(), y, this.currColor);
             }
-            mx.add(this.fontRenderer.width(irp));
+            mx.add(this.fontRenderer.width(tc));
 
             return Optional.empty();
         }, Style.EMPTY);

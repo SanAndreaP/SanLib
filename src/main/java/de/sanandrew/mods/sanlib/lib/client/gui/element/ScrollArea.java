@@ -13,6 +13,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import de.sanandrew.mods.sanlib.lib.client.gui.GuiDefinition;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
@@ -159,7 +160,10 @@ public class ScrollArea
 
     @Override
     public boolean mouseScrolled(IGui gui, double mouseX, double mouseY, double mouseScroll) {
-        if( this.scrollBtn.get(ScrollButton.class).disabled ) {
+        if( this.scrollBtn.get(ScrollButton.class).disabled
+            || (!IGuiElement.isHovering(gui, this.posX, this.posY, mouseX, mouseY, this.areaSize[0], this.areaSize[1])
+                && !IGuiElement.isHovering(gui, this.scrollBtn.pos[0], this.scrollBtn.pos[1], mouseX, mouseY, this.scrollBtn.get().getWidth(), this.scrollHeight)) )
+        {
             return super.mouseScrolled(gui, mouseX, mouseY, mouseScroll);
         }
 
