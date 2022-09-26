@@ -214,6 +214,10 @@ public class TextField
         this.textfieldWidget.setFormatter(formatter);
     }
 
+    public void setSuggestion(String suggestion) {
+        this.textfieldWidget.setSuggestion(suggestion);
+    }
+
     @Override
     public int getWidth() {
         return this.size[0] + (this.drawBackground ? 2 : 0);
