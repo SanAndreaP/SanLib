@@ -98,6 +98,7 @@ public class ScrollArea
     public void clear() {
         this.elements.clear();
         this.prebuiltElements.clear();
+        this.scroll = 0.0D;
     }
 
     public void update(IGui gui) {
