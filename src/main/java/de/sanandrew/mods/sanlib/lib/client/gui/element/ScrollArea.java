@@ -94,6 +94,12 @@ public class ScrollArea
         this.prebuiltElements.add(child);
     }
 
+    @Override
+    public void clear() {
+        this.elements.clear();
+        this.prebuiltElements.clear();
+    }
+
     public void update(IGui gui) {
         if( !this.prebuiltElements.isEmpty() ) {
             this.prebuiltElements.forEach(e -> {
