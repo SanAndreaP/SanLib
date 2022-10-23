@@ -54,7 +54,7 @@ public class ScrollArea
 
     protected int posX;
     protected int posY;
-    protected boolean isVisible = true;
+    protected boolean isEnabled = true;
 
     public ScrollArea(int[] areaSize, int scrollHeight, boolean rasterized, float maxScrollDelta, int[] scrollbarPos, ScrollButton scrollButton, IGui gui) {
         this.areaSize = areaSize;
@@ -101,6 +101,15 @@ public class ScrollArea
         this.scroll = 0.0D;
     }
 
+    public void setEnabled(boolean isEnabled) {
+        this.isEnabled = isEnabled;
+        this.scrollBtn.get(ScrollButton.class).disabled &= isEnabled;
+    }
+
+    public boolean isEnabled() {
+        return this.isEnabled;
+    }
+
     public void update(IGui gui) {
         if( !this.prebuiltElements.isEmpty() ) {
             this.prebuiltElements.forEach(e -> {
@@ -120,13 +129,17 @@ public class ScrollArea
         RangeMap<Integer, GuiElementInst> sub = this.elements.subRangeMap(Range.closed(this.sData.minY, this.sData.maxY));
         this.children = sub.asMapOfRanges().values().toArray(new GuiElementInst[0]);
 
-        Range<Integer> lastRange = this.children.length > 0
-                                   ? this.elements.asDescendingMapOfRanges().entrySet().stream().findFirst().map(Map.Entry::getKey).orElse(null)
-                                   : null;
+        if( isEnabled ) {
+            Range<Integer> lastRange = this.children.length > 0
+                                       ? this.elements.asDescendingMapOfRanges().entrySet().stream().findFirst().map(Map.Entry::getKey).orElse(null)
+                                       : null;
 
-        this.scrollBtn.get(ScrollButton.class).disabled = this.getTotalCount() <= this.children.length
-                                                          && MiscUtils.apply(lastRange, Range::upperEndpoint, 0) <= this.sData.maxY
-                                                          && MiscUtils.apply(lastRange, Range::lowerEndpoint, 0) >= this.sData.minY;
+            this.scrollBtn.get(ScrollButton.class).disabled = this.getTotalCount() <= this.children.length
+                                                              && MiscUtils.apply(lastRange, Range::upperEndpoint, 0) <= this.sData.maxY
+                                                              && MiscUtils.apply(lastRange, Range::lowerEndpoint, 0) >= this.sData.minY;
+        } else {
+            this.scrollBtn.get(ScrollButton.class).disabled = true;
+        }
     }
 
     @Override
