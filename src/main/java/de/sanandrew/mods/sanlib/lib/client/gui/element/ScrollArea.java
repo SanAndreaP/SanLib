@@ -291,10 +291,27 @@ public class ScrollArea
         return this.areaSize[1];
     }
 
+    public int getScrollY() {
+        return this.sData.minY;
+    }
+
+    @SuppressWarnings("java:S3518")
+    public void scrollTo(GuiElementInst element) {
+        this.namedChildren.entrySet().stream().filter(e -> e.getValue() == element)
+                          .map(Map.Entry::getKey).findFirst().ifPresent(elemRange ->  {
+                              this.scroll = elemRange.lowerEndpoint() / Math.max(this.getTotalHeight(), 1.0F);
+                              this.clipScroll();
+                          });
+    }
+
+    private int getTotalHeight() {
+        return this.getTotalCount() > 0 ? this.elements.span().upperEndpoint() : 0;
+    }
+
     public ScrollData getScrollData(double scroll, boolean rasterized) {
         ScrollData data = new ScrollData();
 
-        data.totalHeight = this.getTotalCount() > 0 ? this.elements.span().upperEndpoint() : 0;
+        data.totalHeight = this.getTotalHeight();
         data.minY = Math.max(0, MathHelper.floor((data.totalHeight - this.areaSize[1]) * scroll));
         data.maxY = MathHelper.ceil((data.totalHeight - this.areaSize[1]) * scroll) + this.areaSize[1];
 
