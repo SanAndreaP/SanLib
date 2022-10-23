@@ -105,6 +105,7 @@
     },
     {
       "type": "stacked_scroll_area",
+      "id": "test-scroll-area",
       "pos": [9, 18],
       "data": {
         "rasterized": true,

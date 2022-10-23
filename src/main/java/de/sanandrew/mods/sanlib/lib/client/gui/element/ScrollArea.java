@@ -103,7 +103,7 @@ public class ScrollArea
 
     public void setEnabled(boolean isEnabled) {
         this.isEnabled = isEnabled;
-        this.scrollBtn.get(ScrollButton.class).disabled &= isEnabled;
+        this.update(false);
     }
 
     public boolean isEnabled() {

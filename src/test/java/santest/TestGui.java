@@ -9,6 +9,7 @@ import de.sanandrew.mods.sanlib.SanLib;
 import de.sanandrew.mods.sanlib.lib.client.gui.GuiDefinition;
 import de.sanandrew.mods.sanlib.lib.client.gui.JsonGuiScreen;
 import de.sanandrew.mods.sanlib.lib.client.gui.element.ProgressBar;
+import de.sanandrew.mods.sanlib.lib.client.gui.element.ScrollArea;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
 import org.apache.logging.log4j.Level;
@@ -54,6 +55,8 @@ public class TestGui
         this.guiDefinition.getElementById("prog_rtl").get(ProgressBar.class).setPercentFunc(p -> this.ticksOpen / pd - 1.0D);
         this.guiDefinition.getElementById("prog_ttb").get(ProgressBar.class).setPercentFunc(p -> this.ticksOpen / pd - 2.0D);
         this.guiDefinition.getElementById("prog_btt").get(ProgressBar.class).setPercentFunc(p -> this.ticksOpen / pd - 3.0D);
+
+        this.guiDefinition.getElementById("test-scroll-area").get(ScrollArea.class).setEnabled(false);
     }
 
     private int getProcessDuration() {
