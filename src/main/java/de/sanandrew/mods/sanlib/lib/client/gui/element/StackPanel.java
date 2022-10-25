@@ -133,6 +133,10 @@ public class StackPanel
             if( this.padding == null ) {
                 this.padding = new int[] {0};
             }
+
+            if( this.elements == null ) {
+                this.elements = new GuiElementInst[0];
+            }
         }
 
         @Override
@@ -148,7 +152,7 @@ public class StackPanel
             if( data.has(CONTENT) ) {
                 return JsonUtils.GSON.fromJson(data.get(CONTENT), GuiElementInst[].class);
             } else {
-                throw new JsonParseException("No data property array called \"content\" has been found.");
+                return new GuiElementInst[0];
             }
         }
 
