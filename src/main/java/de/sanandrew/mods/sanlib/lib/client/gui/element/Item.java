@@ -19,6 +19,7 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nonnull;
+import java.util.Locale;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -30,23 +31,23 @@ public class Item
 
     protected ItemStack item;
     protected float     scale;
-    protected int       size;
-    protected boolean doMouseOver;
+    protected int           size;
+    protected MouseOverType mouseOverType;
 
     private   Supplier<ItemStack> itemSupplier = () -> item;
 
     private ItemStack cachedItem;
 
     public Item(@Nonnull ItemStack item, float scale) {
-        this(item, scale, false);
+        this(item, scale, MouseOverType.NONE);
     }
 
-    public Item(@Nonnull ItemStack item, float scale, boolean doMouseOver) {
+    public Item(@Nonnull ItemStack item, float scale, MouseOverType mouseOverType) {
         this.item = item;
         this.cachedItem = item;
         this.scale = scale;
         this.size = Math.round(16.0F * this.scale);
-        this.doMouseOver = doMouseOver;
+        this.mouseOverType = mouseOverType;
     }
 
     public void setItemSupplier(@Nonnull Supplier<ItemStack> supplier) {
@@ -68,7 +69,7 @@ public class Item
     public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, GuiElementInst inst) {
         RenderUtils.renderStackInGui(this.getDynamicStack(gui), stack, x, y, this.scale);
 
-        if( doMouseOver && IGuiElement.isHovering(gui, x, y, mouseX, mouseY, this.size, this.size) ) {
+        if( this.mouseOverType.isHovering(gui, x, y, mouseX, mouseY, this.size, this.size) ) {
             RenderSystem.disableDepthTest();
             RenderSystem.colorMask(true, true, true, false);
             AbstractGui.fill(stack, x, y, x + this.size, y + this.size, 0x80FFFFFF);
@@ -98,15 +99,16 @@ public class Item
         @Nonnull
         public final ItemStack item;
 
-        protected float scale = 1.0F;
-        protected boolean doMouseOver = false;
+        protected float         scale         = 1.0F;
+        protected MouseOverType mouseOverType = MouseOverType.NONE;
 
         public Builder(@Nonnull ItemStack item) {
             this.item = item;
         }
 
         public Builder scale(float scale) { this.scale = scale; return this; }
-        public Builder doMouseOver(boolean doMouseOver) { this.doMouseOver = doMouseOver; return this; }
+        public Builder mouseOver(MouseOverType mouseOver) { this.mouseOverType = mouseOver; return this; }
+        public Builder mouseOver(String mouseOver) { this.mouseOverType = MouseOverType.fromString(mouseOver); return this; }
 
         @Override
         public void sanitize(IGui gui) {
@@ -119,7 +121,7 @@ public class Item
         public Item get(IGui gui) {
             this.sanitize(gui);
 
-            return new Item(this.item, this.scale, this.doMouseOver);
+            return new Item(this.item, this.scale, this.mouseOverType);
         }
 
         protected static ItemStack loadItem(IGui gui, JsonObject data) {
@@ -134,13 +136,39 @@ public class Item
             Builder b = new Builder(loadItemFunc.apply(gui, data));
 
             JsonUtils.fetchFloat(data.get("scale"), b::scale);
-            JsonUtils.fetchBool(data.get("doMouseOver"), b::doMouseOver);
+            JsonUtils.fetchBool(data.get("doMouseOver"), dmo ->  b.mouseOver(Boolean.TRUE.equals(dmo) ? MouseOverType.VANILLA : MouseOverType.NONE));
+            JsonUtils.fetchString(data.get("mouseOverType"), b::mouseOver);
 
             return b;
         }
 
         public static Item fromJson(IGui gui, JsonObject data) {
             return buildFromJson(gui, data).get(gui);
+        }
+    }
+
+    private enum MouseOverType
+    {
+        NONE(),
+        EXACT(0),
+        VANILLA(1);
+
+        private final int border;
+
+        MouseOverType() {
+            this(0);
+        }
+
+        MouseOverType(int border) {
+            this.border = border;
+        }
+
+        public static MouseOverType fromString(String s) {
+            return MouseOverType.valueOf(s.toUpperCase(Locale.ROOT));
+        }
+
+        public boolean isHovering(IGui gui, int x, int y, double mouseX, double mouseY, int width, int height) {
+            return this != NONE && IGuiElement.isHovering(gui, x - border, y - border, mouseX, mouseY, width + border * 2, height + border * 2);
         }
     }
 }
