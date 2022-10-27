@@ -147,7 +147,7 @@ public class Item
         }
     }
 
-    private enum MouseOverType
+    public enum MouseOverType
     {
         NONE(),
         EXACT(0),
