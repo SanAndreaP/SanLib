@@ -5,6 +5,7 @@
 
 package de.sanandrew.mods.sanlib.lib.client.gui.element;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -14,6 +15,7 @@ import de.sanandrew.mods.sanlib.lib.client.gui.IGuiElement;
 import de.sanandrew.mods.sanlib.lib.client.util.RenderUtils;
 import de.sanandrew.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
@@ -33,6 +35,7 @@ public class Item
     protected float     scale;
     protected int           size;
     protected MouseOverType mouseOverType;
+    protected FontRenderer overlayFont;
 
     private   Supplier<ItemStack> itemSupplier = () -> item;
 
@@ -43,6 +46,10 @@ public class Item
     }
 
     public Item(@Nonnull ItemStack item, float scale, MouseOverType mouseOverType) {
+        this(item, scale, mouseOverType, null);
+    }
+
+    public Item(@Nonnull ItemStack item, float scale, MouseOverType mouseOverType, FontRenderer overlayFont) {
         this.item = item;
         this.cachedItem = item;
         this.scale = scale;
@@ -67,7 +74,7 @@ public class Item
 
     @Override
     public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, GuiElementInst inst) {
-        RenderUtils.renderStackInGui(this.getDynamicStack(gui), stack, x, y, this.scale);
+        RenderUtils.renderStackInGui(this.getDynamicStack(gui), stack, x, y, this.scale, this.overlayFont);
 
         if( this.mouseOverType.isHovering(gui, x, y, mouseX, mouseY, this.size, this.size) ) {
             RenderSystem.disableDepthTest();
@@ -101,14 +108,18 @@ public class Item
 
         protected float         scale         = 1.0F;
         protected MouseOverType mouseOverType = MouseOverType.NONE;
+        protected FontRenderer fontRenderer = null;
 
         public Builder(@Nonnull ItemStack item) {
             this.item = item;
         }
 
-        public Builder scale(float scale) { this.scale = scale; return this; }
-        public Builder mouseOver(MouseOverType mouseOver) { this.mouseOverType = mouseOver; return this; }
-        public Builder mouseOver(String mouseOver) { this.mouseOverType = MouseOverType.fromString(mouseOver); return this; }
+        public Builder scale(float scale)                 { this.scale = scale;                                       return this; }
+        public Builder mouseOver(MouseOverType mouseOver) { this.mouseOverType = mouseOver;                           return this; }
+        public Builder mouseOver(String mouseOver)        { this.mouseOverType = MouseOverType.fromString(mouseOver); return this; }
+        public Builder font(FontRenderer fontRenderer)    { this.fontRenderer = fontRenderer;                         return this; }
+        public Builder font(IGui gui, Text.Font font)                       { return this.font(font.get(gui.get())); }
+        public Builder font(IGui gui, Text.Font font, JsonObject glyphData) { return this.font(font.get(gui.get(), glyphData)); }
 
         @Override
         public void sanitize(IGui gui) {
@@ -121,7 +132,7 @@ public class Item
         public Item get(IGui gui) {
             this.sanitize(gui);
 
-            return new Item(this.item, this.scale, this.mouseOverType);
+            return new Item(this.item, this.scale, this.mouseOverType, this.fontRenderer);
         }
 
         protected static ItemStack loadItem(IGui gui, JsonObject data) {
@@ -138,6 +149,15 @@ public class Item
             JsonUtils.fetchFloat(data.get("scale"), b::scale);
             JsonUtils.fetchBool(data.get("doMouseOver"), dmo ->  b.mouseOver(Boolean.TRUE.equals(dmo) ? MouseOverType.VANILLA : MouseOverType.NONE));
             JsonUtils.fetchString(data.get("mouseOverType"), b::mouseOver);
+
+            JsonElement cstFont = data.get("overlayFont");
+            if( cstFont != null ) {
+                if( cstFont.isJsonPrimitive() ) {
+                    b.font(gui, new Text.Font(cstFont.getAsString()));
+                } else {
+                    b.font(gui, JsonUtils.GSON.fromJson(cstFont, Text.Font.class), data.getAsJsonObject("glyphProvider"));
+                }
+            }
 
             return b;
         }

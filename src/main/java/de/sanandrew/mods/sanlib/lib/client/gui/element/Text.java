@@ -354,11 +354,11 @@ public class Text
         public Builder bordered(boolean bordered)          { this.bordered = bordered;                                   return this; }
         public Builder wrapWidth(int wrapWidth)            { this.wrapWidth = wrapWidth;                                 return this; }
         public Builder lineHeight(int height)              { this.lineHeight = height;                                   return this; }
-        public Builder font(FontRenderer fontRenderer)     { this.fontRenderer = fontRenderer;                           return this; }
         public Builder color(int color)                    { this.colors.clear(); this.colors.put(DEFAULT_COLOR, color); return this; }
         public Builder colors(Map<String, Integer> colors) { this.colors.clear(); this.colors.putAll(colors);            return this; }
         public Builder color(String key, int color)        { this.colors.put(key, color);                                return this; }
 
+        public Builder font(FontRenderer fontRenderer)                 { this.fontRenderer = fontRenderer; return this; }
         public Builder font(IGui gui, Font font)                       { return this.font(font.get(gui.get())); }
         public Builder font(IGui gui, Font font, JsonObject glyphData) { return this.font(font.get(gui.get(), glyphData)); }
 
