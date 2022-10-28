@@ -55,6 +55,7 @@ public class Item
         this.scale = scale;
         this.size = Math.round(16.0F * this.scale);
         this.mouseOverType = mouseOverType;
+        this.overlayFont = overlayFont;
     }
 
     public void setItemSupplier(@Nonnull Supplier<ItemStack> supplier) {
