@@ -71,10 +71,12 @@ public class StackedScrollArea
         elementsIntrn = this.sortAndFilter(elementsIntrn);
 
         elementsIntrn.forEach(e -> {
-            int newPosY = e.pos[1] + updatePosY.getValue();
-            int elemHeight = e.get().getHeight();
-            this.elements.put(Range.closed(newPosY, newPosY + elemHeight), e);
-            updatePosY.add(e.pos[1] + elemHeight);
+            if( e.isVisible() ) {
+                int newPosY    = e.pos[1] + updatePosY.getValue();
+                int elemHeight = e.get().getHeight();
+                this.elements.put(Range.closed(newPosY, newPosY + elemHeight), e);
+                updatePosY.add(e.pos[1] + elemHeight);
+            }
         });
 
         this.update();

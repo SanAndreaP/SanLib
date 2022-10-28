@@ -46,14 +46,17 @@ public class StackPanel
     protected void calcSize() {
         this.currWidth = !this.horizontal ? 0 : this.padding[1] + this.padding[3];
         this.currHeight = this.horizontal ? 0 : this.padding[0] + this.padding[2];
+
         for( int i = 0, max = this.size(); i < max; i++ ) {
             GuiElementInst elem = this.get(i);
-            if( this.horizontal ) {
-                this.currWidth += elem.pos[0] + elem.get().getWidth();
-                this.currHeight = Math.max(this.currHeight, elem.get().getHeight());
-            } else {
-                this.currWidth = Math.max(this.currWidth, elem.get().getWidth());
-                this.currHeight += elem.pos[1] + elem.get().getHeight();
+            if( elem.isVisible() ) {
+                if( this.horizontal ) {
+                    this.currWidth += elem.pos[0] + elem.get().getWidth();
+                    this.currHeight = Math.max(this.currHeight, elem.get().getHeight());
+                } else {
+                    this.currWidth = Math.max(this.currWidth, elem.get().getWidth());
+                    this.currHeight += elem.pos[1] + elem.get().getHeight();
+                }
             }
         }
     }
