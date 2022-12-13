@@ -86,10 +86,14 @@ public class GuiDefinition
     private final ResourceLocation data;
     private final Consumer<JsonObject> loadProcessor;
 
-    private GuiDefinition(ResourceLocation data, Consumer<JsonObject> loadProcessor) throws IOException {
+    GuiDefinition(ResourceLocation data, Consumer<JsonObject> loadProcessor) throws IOException {
         this.data = data;
         this.loadProcessor = loadProcessor;
 
+        this.register();
+    }
+
+    void register() throws IOException {
         ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(this);
         this.reloadDefinition();
     }
@@ -279,7 +283,7 @@ public class GuiDefinition
         doWorkV(e -> e.onClose(gui));
     }
 
-    private boolean doWorkB(Predicate<IGuiElement> execElem, IGuiElement.PriorityTarget target) {
+    boolean doWorkB(Predicate<IGuiElement> execElem, IGuiElement.PriorityTarget target) {
         for( GuiElementInst e : (target != null ? this.prioritizedBgElements.get(target) : this.backgroundElements) ) {
             if( e.isVisible() && execElem.test(e.get()) ) {
                 return true;
@@ -294,7 +298,7 @@ public class GuiDefinition
         return false;
     }
 
-    private void doWorkV(Consumer<IGuiElement> execElem) {
+    void doWorkV(Consumer<IGuiElement> execElem) {
         for( GuiElementInst e : this.backgroundElements ) {
             if( e.isVisible() ) {
                 execElem.accept(e.get());
