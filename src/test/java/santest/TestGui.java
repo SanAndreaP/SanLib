@@ -56,7 +56,7 @@ public class TestGui
         this.guiDefinition.getElementById("prog_ttb").get(ProgressBar.class).setPercentFunc(p -> this.ticksOpen / pd - 2.0D);
         this.guiDefinition.getElementById("prog_btt").get(ProgressBar.class).setPercentFunc(p -> this.ticksOpen / pd - 3.0D);
 
-        this.guiDefinition.getElementById("test-scroll-area").get(ScrollArea.class).setEnabled(false);
+//        this.guiDefinition.getElementById("test-scroll-area").get(ScrollArea.class).setEnabled(false);
     }
 
     private int getProcessDuration() {

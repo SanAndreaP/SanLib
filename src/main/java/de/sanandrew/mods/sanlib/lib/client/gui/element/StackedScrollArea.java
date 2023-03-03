@@ -9,12 +9,13 @@ import de.sanandrew.mods.sanlib.lib.client.gui.GuiElementInst;
 import de.sanandrew.mods.sanlib.lib.client.gui.IGui;
 import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.util.ResourceLocation;
-import org.apache.commons.lang3.mutable.MutableInt;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -24,7 +25,8 @@ public class StackedScrollArea
 {
     public static final ResourceLocation ID = new ResourceLocation("stacked_scroll_area");
 
-    private final List<GuiElementInst> allElements = new ArrayList<>();
+    private final List<GuiElementInst>         allElements = new ArrayList<>();
+    private final Map<GuiElementInst, Integer> stackedYs   = new HashMap<>();
 
     public StackedScrollArea(int[] areaSize, int scrollHeight, boolean rasterized, float maxScrollDelta, int[] scrollbarPos, ScrollButton scrollButton, IGui gui) {
         super(areaSize, scrollHeight, rasterized, maxScrollDelta, scrollbarPos, scrollButton, gui);
@@ -55,29 +57,30 @@ public class StackedScrollArea
 
     @Override
     public void update(IGui gui) {
-        MutableInt           updatePosY    = new MutableInt(0);
-        List<GuiElementInst> elementsIntrn = new ArrayList<>();
-        elementsIntrn.addAll(this.allElements);
-        elementsIntrn.addAll(this.prebuiltElements);
+        this.elements.clear();
 
         if( !this.prebuiltElements.isEmpty() ) {
             this.prebuiltElements.forEach(e -> e.get().setup(gui, e));
             this.allElements.addAll(this.prebuiltElements);
+            this.prebuiltElements.clear();
         }
 
-        this.elements.clear();
-        this.prebuiltElements.clear();
+        List<GuiElementInst> elementsIntrn = new ArrayList<>(this.allElements);
 
         elementsIntrn = this.sortAndFilter(elementsIntrn);
+        stackedYs.clear();
 
-        elementsIntrn.forEach(e -> {
+        int posY = 0;
+        for( GuiElementInst e : elementsIntrn ) {
             if( e.isVisible() ) {
-                int newPosY    = e.pos[1] + updatePosY.getValue();
-                int elemHeight = e.get().getHeight();
-                this.elements.put(Range.closed(newPosY, newPosY + elemHeight), e);
-                updatePosY.add(e.pos[1] + elemHeight);
+                int newPosY = posY + e.pos[1];
+                int heightE = e.get().getHeight();
+
+                posY = newPosY + heightE;
+                this.elements.put(Range.closedOpen(newPosY, posY), e);
+                this.stackedYs.put(e, newPosY);
             }
-        });
+        }
 
         this.update();
     }
@@ -88,14 +91,7 @@ public class StackedScrollArea
 
     @Override
     protected void renderElements(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, GuiElementInst inst) {
-        final int correctedY = y + this.sData.minY;
-        MutableInt updatePosY = new MutableInt(0);
-
-        this.doWorkV(e -> {
-            int newPosY = correctedY + e.pos[1] + updatePosY.getValue();
-            GuiDefinition.renderElement(gui, stack, x + e.pos[0], newPosY, mouseX, mouseY, partTicks, e, true);
-            updatePosY.add(e.pos[1] + e.get().getHeight());
-        });
+        this.doWorkV(e -> GuiDefinition.renderElement(gui, stack, x + e.pos[0], y + this.stackedYs.getOrDefault(e, 0), mouseX, mouseY, partTicks, e, true));
     }
 
     public static class Builder

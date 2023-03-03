@@ -108,7 +108,7 @@ sourceSets.main.resources {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:' + grabConstant('BUILD_FORGEVER')
+    minecraft "net.minecraftforge:forge:${grabConstant('BUILD_FORGEVER')}"
 }
 
 processResources {
@@ -126,11 +126,11 @@ jar {
     manifest {
         attributes([
             'Specification-Title' : grabConstant('ID'),
-            'Specification-Vendor' : 'SanAndreaP',
+            'Specification-Vendor' : grabConstant('VENDOR'),
             'Specification-Version' : '1', // We are version 1 of ourselves
             'Implementation-Title' : grabConstant('ID'),
             'Implementation-Version' : archiveVersion,
-            'Implementation-Vendor' : 'SanAndreaP',
+            'Implementation-Vendor' : grabConstant('VENDOR'),
             'Implementation-Timestamp' : new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
@@ -161,7 +161,8 @@ publishing {
 
 import net.minecraftforge.gradle.common.tasks.SignJar
 
-task signJar(type: SignJar, dependsOn: jar) {
+tasks.register('signJar', SignJar) {
+    dependsOn jar
     onlyIf {
         project.hasProperty('keyStore')
     }

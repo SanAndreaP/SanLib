@@ -98,7 +98,7 @@
           "type": "rectangle",
           "data": {
             "size": [10, 10],
-            "color": ["0xFFFFFF00", "0xFFFF0000"]
+            "color": ["0xFFFFCC00", "0xFFDD0000"]
           }
         }
       }
@@ -108,7 +108,7 @@
       "id": "test-scroll-area",
       "pos": [9, 18],
       "data": {
-        "rasterized": true,
+        "rasterized": false,
         "areaSize": [160, 110],
         "scrollbarHeight": 110,
         "scrollbarPos": [175, 18],
@@ -144,126 +144,126 @@
             "pos": [0, 5],
             "data": {
               "size": [10, 10],
-              "color": ["0xFFFFFF00", "0xFFFF0000"]
+              "color": ["0xFFFFCC00", "0xFFDD0000"]
             }
           },
           {
             "type": "rectangle",
             "data": {
               "size": [10, 10],
-              "color": ["0xFF54c8f3", "0xFFeda3b1"]
+              "color": ["0xFF54c8f3"]
             }
           },
           {
             "type": "rectangle",
             "data": {
               "size": [10, 10],
-              "color": ["0xFFFFFF00", "0xFFFF0000"]
+              "color": ["0xFFFFCC00", "0xFFDD0000"]
             }
           },
           {
             "type": "rectangle",
             "data": {
               "size": [10, 10],
-              "color": ["0xFF54c8f3", "0xFFeda3b1"]
+              "color": ["0xFFeda3b1"]
             }
           },
           {
             "type": "rectangle",
             "data": {
               "size": [10, 10],
-              "color": ["0xFFFFFF00", "0xFFFF0000"]
+              "color": ["0xFFFFCC00", "0xFFDD0000"]
             }
           },
           {
             "type": "rectangle",
             "data": {
               "size": [10, 10],
-              "color": ["0xFF54c8f3", "0xFFeda3b1"]
+              "color": ["0xFFFFFFFF"]
             }
           },
           {
             "type": "rectangle",
             "data": {
               "size": [10, 10],
-              "color": ["0xFFFFFF00", "0xFFFF0000"]
+              "color": ["0xFFFFCC00", "0xFFDD0000"]
             }
           },
           {
             "type": "rectangle",
             "data": {
               "size": [10, 10],
-              "color": ["0xFF54c8f3", "0xFFeda3b1"]
+              "color": ["0xFFeda3b1"]
             }
           },
           {
             "type": "rectangle",
             "data": {
               "size": [10, 10],
-              "color": ["0xFFFFFF00", "0xFFFF0000"]
+              "color": ["0xFFFFCC00", "0xFFDD0000"]
             }
           },
           {
             "type": "rectangle",
             "data": {
               "size": [10, 10],
-              "color": ["0xFF54c8f3", "0xFFeda3b1"]
+              "color": ["0xFF54c8f3"]
             }
           },
           {
             "type": "rectangle",
             "data": {
               "size": [10, 10],
-              "color": ["0xFFFFFF00", "0xFFFF0000"]
+              "color": ["0xFFFFCC00", "0xFFDD0000"]
             }
           },
           {
             "type": "rectangle",
             "data": {
               "size": [10, 10],
-              "color": ["0xFF54c8f3", "0xFFeda3b1"]
+              "color": ["0xFFeda3b1"]
             }
           },
           {
             "type": "rectangle",
             "data": {
               "size": [10, 10],
-              "color": ["0xFFFFFF00", "0xFFFF0000"]
+              "color": ["0xFFFFCC00", "0xFFDD0000"]
             }
           },
           {
             "type": "rectangle",
             "data": {
               "size": [10, 10],
-              "color": ["0xFF54c8f3", "0xFFeda3b1"]
+              "color": ["0xFFFFFFFF"]
             }
           },
           {
             "type": "rectangle",
             "data": {
               "size": [10, 10],
-              "color": ["0xFFFFFF00", "0xFFFF0000"]
+              "color": ["0xFFFFCC00", "0xFFDD0000"]
             }
           },
           {
             "type": "rectangle",
             "data": {
               "size": [10, 10],
-              "color": ["0xFF54c8f3", "0xFFeda3b1"]
+              "color": ["0xFFeda3b1"]
             }
           },
           {
             "type": "rectangle",
             "data": {
               "size": [10, 10],
-              "color": ["0xFFFFFF00", "0xFFFF0000"]
+              "color": ["0xFFFFCC00", "0xFFDD0000"]
             }
           },
           {
             "type": "rectangle",
             "data": {
               "size": [10, 10],
-              "color": ["0xFF54c8f3", "0xFFeda3b1"]
+              "color": ["0xFF54c8f3"]
             }
           }
         ]
