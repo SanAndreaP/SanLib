@@ -6,6 +6,7 @@
 package de.sanandrew.mods.sanlib;
 
 import de.sanandrew.mods.sanlib.lib.network.MessageHandler;
+import de.sanandrew.mods.sanlib.network.MessageEntityRender;
 import de.sanandrew.mods.sanlib.network.MessageReloadModels;
 import de.sanandrew.mods.sanlib.recipes.BetterNBTIngredient;
 import net.minecraft.item.crafting.IRecipeSerializer;
@@ -39,6 +40,7 @@ public class SanLib
 
     private void setup(FMLCommonSetupEvent event) {
         NETWORK.registerMessage(0, MessageReloadModels.class, MessageReloadModels::new);
+        NETWORK.registerMessage(1, MessageEntityRender.class, MessageEntityRender::new);
     }
 
     @SubscribeEvent
