@@ -5,10 +5,10 @@
 
 	Plugin.register('sanlib_entity_models_blockbench', {
 		title: 'SanLib Entity Model Import & Export',
-		author: 'SanAndreasP',
+		author: 'SanAndreaP',
 		icon: 'domain',
 		description: 'Import and export entity models used by SanLib',
-		version: '0.2.0',
+		version: '0.3.0',
 		variant: 'both',
 
 		onload() {
@@ -34,9 +34,9 @@
 				click: saveFile
 			});
 
-			MenuBar.addAction(import_model, 'file.import')
-			MenuBar.addAction(import_parent, 'file.import')
-			MenuBar.addAction(export_model, 'file.export')
+			MenuBar.addAction(import_model, 'file');
+			MenuBar.addAction(import_parent, 'file.import');
+			MenuBar.addAction(export_model, 'file.export');
 		},
 
 		onunload() {
@@ -85,8 +85,7 @@
 
 	function loadFile(content, path, parentCubes, asParent) {
 		if( !parentCubes && !asParent ) {
-			Project.reset();
-			Formats.modded_entity.select();
+			newProject(Formats.modded_entity);
 		}
 
 		const data = JSON.parse(content);
@@ -128,11 +127,11 @@
 			Project.texture_height = cubes.__firstCube.textureHeight;
 		}
 
-		textures.splice(0, textures.length);
+		Project.textures.splice(0, Project.textures.length);
 		if( data.texture && !(Blockbench.isMobile || Blockbench.isWeb) ) {
 			var texture = new Texture().fromPath(getAssetPath(path, data.texture));
 			if( texture && !texture.error && fs.existsSync(texture.path) ) {
-				textures.push(texture);
+				Project.textures.push(texture);
 			}
 		}
 
