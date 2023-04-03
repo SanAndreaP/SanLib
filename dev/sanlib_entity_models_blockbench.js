@@ -209,8 +209,8 @@
 			data["parent"] = Project.parent.toString();
 		}
 
-		if( textures.length > 0 ) {
-			const rl = getResourceLocation(textures[0].path);
+		if( Project.textures.length > 0 ) {
+			const rl = getResourceLocation(Project.textures[0].path);
 			if( rl ) {
 				data["texture"] = rl;
 			}
