@@ -4,13 +4,15 @@
 [![Version][b_version]](https://github.com/SanAndreaP/SanLib/tags)
 [![Game][b_game]](https://minecraft.net)
 [![API][b_api]](https://files.minecraftforge.net)
+[![CurseForge project page](http://cf.way2muchnoise.eu/short_sanlib.svg)](https://www.curseforge.com/minecraft/mc-mods/sanlib)
 
 [![Twitter][b_twitter]](https://twitter.com/SanAndreaP)
 [![Mastodon][b_mastodon]](https://peoplemaking.games/@SanAndreaP)
 [![Reddit][b_reddit]](https://reddit.com/u/SanAndreasP)
 [![Sponsor][b_sponsor]](https://github.com/sponsors/SanAndreaP)
 
-**Get the mod on CurseForge: [CurseForge project page](https://www.curseforge.com/minecraft/mc-mods/sanlib)**
+
+**Get the mod on CurseForge: [Project Page](https://www.curseforge.com/minecraft/mc-mods/sanlib)**
 
 <br>
 
