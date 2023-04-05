@@ -6,8 +6,7 @@ assignees:
 body:
   - type: markdown
     attributes:
-      value: |
-        Please read the [CONTRIBUTING.md](./CONTRIBUTING.md) document before you proceed.
+      value: Please read the [CONTRIBUTING.md](../.github/CONTRIBUTING.md) document before you proceed.
   - type: input
     id: mc-version
     attributes:

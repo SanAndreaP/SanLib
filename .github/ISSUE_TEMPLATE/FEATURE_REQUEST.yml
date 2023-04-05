@@ -6,15 +6,14 @@ assignees:
 body:
   - type: markdown
     attributes:
-      value: |
-        Please read the [CONTRIBUTING.md](./CONTRIBUTING.md) document before you proceed.
+      value: Please read the [CONTRIBUTING.md](../.github/CONTRIBUTING.md) document before you proceed.
   - type: textarea
     attributes:
       label: Problem description
       placeholder: A description of the problem you think SanLib might be able to help you with.
-    validations:
   - type: textarea
     attributes:
       label: Feature description
       placeholder: e.g. a new API, a method
+    validations:
       required: true
