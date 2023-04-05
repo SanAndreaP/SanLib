@@ -12,9 +12,9 @@ body:
     attributes:
       label: Problem description
       placeholder: A description of the problem you think SanLib might be able to help you with.
-    validations:
   - type: textarea
     attributes:
       label: Feature description
       placeholder: e.g. a new API, a method
+    validations:
       required: true
