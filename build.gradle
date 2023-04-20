@@ -148,12 +148,16 @@ publishing {
     }
     repositories {
         maven {
-            name "Repsy"
-            url uri("https://repo.repsy.io/mvn/sanandreap/sanlib")
+            name "Repo"
+            url uri(project.findProperty("repo.url"))
             version project.version + (isSnapshots ? "-SNAPSHOT" : "")
+            allowInsecureProtocol true
             credentials {
-                username project.findProperty("repsy.user")
-                password project.findProperty("repsy.key")
+                username project.findProperty("repo.user")
+                password project.findProperty("repo.key")
+            }
+            authentication {
+                basic(BasicAuthentication)
             }
         }
     }
@@ -176,6 +180,6 @@ tasks.register('signJar', SignJar) {
 }
 
 build.finalizedBy signJar
-if( project.hasProperty("repsy.key") ) {
+if( project.hasProperty("repo.key") ) {
     signJar.finalizedBy publish
 }

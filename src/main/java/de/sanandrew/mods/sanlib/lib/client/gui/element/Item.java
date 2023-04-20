@@ -75,7 +75,7 @@ public class Item
 
     @Override
     public void render(IGui gui, MatrixStack stack, float partTicks, int x, int y, double mouseX, double mouseY, GuiElementInst inst) {
-        RenderUtils.renderStackInGui(this.getDynamicStack(gui), stack, x, y, this.scale, this.overlayFont);
+        RenderUtils.renderGuiItem(this.getDynamicStack(gui), stack, x, y, this.scale, this.overlayFont);
 
         if( this.mouseOverType.isHovering(gui, x, y, mouseX, mouseY, this.size, this.size) ) {
             RenderSystem.disableDepthTest();
