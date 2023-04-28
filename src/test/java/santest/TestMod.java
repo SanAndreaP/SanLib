@@ -5,9 +5,9 @@
 
 package santest;
 
-import de.sanandrew.mods.sanlib.SanLib;
-import de.sanandrew.mods.sanlib.lib.util.MiscUtils;
-import de.sanandrew.mods.sanlib.lib.util.NBTUtils;
+import dev.sanandrea.mods.sanlib.SanLib;
+import dev.sanandrea.mods.sanlib.lib.util.MiscUtils;
+import dev.sanandrea.mods.sanlib.lib.util.NBTUtils;
 import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;

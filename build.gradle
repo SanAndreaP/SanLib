@@ -15,7 +15,7 @@ apply plugin: 'maven-publish'
 
 Object grabConstant = { String name ->
     name = name.toUpperCase(Locale.ROOT)
-    def f = new File("${project.projectDir}/src/main/java/de/sanandrew/mods/sanlib/Constants.java").text
+    def f = new File("${project.projectDir}/src/main/java/dev/sanandrea/mods/sanlib/Constants.java").text
     def m = f =~ name + /\s*=\s*"(.*?)"/
     if( m.find() ) {
         return m.group(1)
@@ -26,7 +26,7 @@ Object grabConstant = { String name ->
 
 boolean isSnapshots = true
 version = "${grabConstant('BUILD_MCVER')}-${grabConstant('VERSION')}"
-group = 'de.sanandrew.mods'
+group = 'dev.sanandrea.mods'
 archivesBaseName = 'SanLib'
 String[] excludes = ['*.psd', '*.bbmodel', '*.ps1', 'santest/**', 'assets/santest/**']
 

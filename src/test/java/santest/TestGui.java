@@ -5,11 +5,10 @@
 
 package santest;
 
-import de.sanandrew.mods.sanlib.SanLib;
-import de.sanandrew.mods.sanlib.lib.client.gui.GuiDefinition;
-import de.sanandrew.mods.sanlib.lib.client.gui.JsonGuiScreen;
-import de.sanandrew.mods.sanlib.lib.client.gui.element.ProgressBar;
-import de.sanandrew.mods.sanlib.lib.client.gui.element.ScrollArea;
+import dev.sanandrea.mods.sanlib.SanLib;
+import dev.sanandrea.mods.sanlib.lib.client.gui.GuiDefinition;
+import dev.sanandrea.mods.sanlib.lib.client.gui.JsonGuiScreen;
+import dev.sanandrea.mods.sanlib.lib.client.gui.element.ProgressBar;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
 import org.apache.logging.log4j.Level;
