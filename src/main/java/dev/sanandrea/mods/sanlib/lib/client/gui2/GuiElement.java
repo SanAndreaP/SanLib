@@ -1,12 +1,19 @@
 package dev.sanandrea.mods.sanlib.lib.client.gui2;
 
+import com.google.gson.JsonObject;
+import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
+import net.minecraftforge.eventbus.api.EventPriority;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Locale;
-import java.util.UUID;
+import java.util.function.Consumer;
 
 public abstract class GuiElement
 {
-    public final String id;
-
     protected int posX = 0;
     protected int posY = 0;
     protected Alignment hAlignment = Alignment.LEFT;
@@ -14,10 +21,6 @@ public abstract class GuiElement
 
     protected boolean isVisible = true;
     private boolean updateState = true;
-
-    public GuiElement(String id) {
-        this.id = id;
-    }
 
     public void updateState() {
         this.updateState = true;
@@ -32,6 +35,21 @@ public abstract class GuiElement
     }
 
     public abstract void update();
+
+    public void unload(IGui gui) { }
+
+    void loadFromJson(IGui gui, JsonObject data) {
+        this.setPosX(JsonUtils.getIntVal(data.get("posX"), 0));
+        this.setPosY(JsonUtils.getIntVal(data.get("posY"), 0));
+        this.setHorizontalAlignment(Alignment.fromString(JsonUtils.getStringVal(data.get("horizontalAlign"), "")));
+        this.setVerticalAlignment(Alignment.fromString(JsonUtils.getStringVal(data.get("verticalAlign"), "")));
+
+        this.setVisible(JsonUtils.getBoolVal(data.get("visible"), true));
+
+        this.fromJson(gui, data);
+    }
+
+    public abstract void fromJson(IGui gui, JsonObject data);
 
     //region Getters & Setters
     public boolean isVisible() {
@@ -109,6 +127,36 @@ public abstract class GuiElement
          */
         public static Alignment fromString(String s) {
             return Alignment.valueOf(s.toUpperCase(Locale.ROOT));
+        }
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    @interface Priorities
+    {
+        Priority[] value();
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Repeatable(Priorities.class)
+    @Target(ElementType.TYPE)
+    @interface Priority
+    {
+        EventPriority value();
+        PriorityTarget target();
+    }
+
+    enum PriorityTarget
+    {
+        MOUSE_INPUT,
+        KEY_INPUT;
+
+        private static final PriorityTarget[] TARGETS = values();
+
+        public static void forEach(Consumer<PriorityTarget> c) {
+            for( PriorityTarget t : TARGETS ) {
+                c.accept(t);
+            }
         }
     }
 }
