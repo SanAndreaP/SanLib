@@ -36,6 +36,8 @@ public abstract class GuiElement
 
     public abstract void update();
 
+    public void load(IGui gui) { }
+
     public void unload(IGui gui) { }
 
     void loadFromJson(IGui gui, JsonObject data) {

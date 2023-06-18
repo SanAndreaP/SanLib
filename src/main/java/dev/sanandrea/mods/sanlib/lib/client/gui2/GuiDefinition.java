@@ -3,7 +3,6 @@
  * Full license text can be found within the LICENSE.md file */
 package dev.sanandrea.mods.sanlib.lib.client.gui2;
 
-import com.google.common.base.Strings;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -25,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -45,21 +45,20 @@ public class GuiDefinition
     public int height;
     private ResourceLocation texture;
 
-    EnumMap<GuiElement.PriorityTarget, GuiElement[]> prioritizedFgElements = new EnumMap<>(GuiElement.PriorityTarget.class);
-    EnumMap<GuiElement.PriorityTarget, GuiElement[]> prioritizedBgElements = new EnumMap<>(GuiElement.PriorityTarget.class);
+    EnumMap<GuiElement.PriorityTarget, GuiElement[]> foregroundElementPrios = new EnumMap<>(GuiElement.PriorityTarget.class);
+    EnumMap<GuiElement.PriorityTarget, GuiElement[]> backgroundElementPrios = new EnumMap<>(GuiElement.PriorityTarget.class);
 
     private final Map<String, GuiElement> backgroundElements = new HashMap<>();
     private final Map<String, GuiElement> foregroundElements = new HashMap<>();
 
-    private final ResourceLocation data;
-    private final Consumer<JsonObject> loadProcessor;
+    private final ResourceLocation     data;
+    private Consumer<JsonObject> loadHandler;
 
     private final IGui gui;
 
-    GuiDefinition(IGui gui, ResourceLocation data, Consumer<JsonObject> loadProcessor) throws IOException {
+    GuiDefinition(IGui gui, ResourceLocation data) throws IOException {
         this.gui = gui;
         this.data = data;
-        this.loadProcessor = loadProcessor;
 
         this.register();
     }
@@ -70,11 +69,13 @@ public class GuiDefinition
     }
 
     public static GuiDefinition getNewDefinition(IGui gui, ResourceLocation data) throws IOException {
-        return new GuiDefinition(gui, data, null);
+        return new GuiDefinition(gui, data);
     }
 
-    public static GuiDefinition getNewDefinition(IGui gui, ResourceLocation data, Consumer<JsonObject> loadProcessor) throws IOException {
-        return new GuiDefinition(gui, data, loadProcessor);
+    public GuiDefinition withLoadHandler(Consumer<JsonObject> handler) {
+        this.loadHandler = handler;
+
+        return this;
     }
 
     public static boolean initialize(GuiDefinition guiDef, IGui gui) {
@@ -84,25 +85,24 @@ public class GuiDefinition
             return false;
         }
 
-        guiDef.initGui(gui);
-
         return true;
     }
 
     private void reloadDefinition() throws IOException {
-        this.backgroundElements.forEach((k, v) -> v.unload(this.gui));
+        this.elementsAccept(e -> e.unload(gui), true);
+
+        this.backgroundElements.clear();
+        this.foregroundElements.clear();
+        this.backgroundElementPrios.clear();
+        this.foregroundElementPrios.clear();
 
         this.loadFile(this.data);
 
-//        this.backgroundElements = bgElem.toArray(new GuiElement[0]);
-//        this.foregroundElements = fgElem.toArray(new GuiElement[0]);
-
-//        Arrays.stream(this.backgroundElements).forEach(this::initElement);
-//        Arrays.stream(this.foregroundElements).forEach(this::initElement);
+        this.elementsAccept(e -> e.load(gui), true);
 
         GuiElement.PriorityTarget.forEach(tgt -> {
-//            this.prioritizedBgElements.put(tgt, getPrioritizedElements(this.backgroundElements, tgt));
-//            this.prioritizedFgElements.put(tgt, getPrioritizedElements(this.foregroundElements, tgt));
+            this.backgroundElementPrios.put(tgt, getPrioritizedElements(this.backgroundElements.values(), tgt));
+            this.foregroundElementPrios.put(tgt, getPrioritizedElements(this.foregroundElements.values(), tgt));
         });
     }
 
@@ -132,11 +132,9 @@ public class GuiDefinition
             JsonUtils.GSON.fromJson(jObj.get("foregroundElements"), JsonObject.class).entrySet().forEach(e ->
                 this.foregroundElements.put(e.getKey(), this.loadElement(e))
             );
-//            bgElem.addAll(Arrays.asList(JsonUtils.GSON.fromJson(jObj.get("backgroundElements"), GuiElement[].class)));
-//            fgElem.addAll(Arrays.asList(JsonUtils.GSON.fromJson(jObj.get("foregroundElements"), GuiElement[].class)));
 
-            if( this.loadProcessor != null ) {
-                this.loadProcessor.accept(jObj);
+            if( this.loadHandler != null ) {
+                this.loadHandler.accept(jObj);
             }
         }
     }
@@ -156,15 +154,6 @@ public class GuiDefinition
         }
 
         return this.texture;
-    }
-
-    public void initGui(IGui gui) {
-        Arrays.stream(this.backgroundElements).forEach(e -> e.initialize(gui));
-        Arrays.stream(this.foregroundElements).forEach(e -> e.initialize(gui));
-
-        Consumer<GuiElementInst> f = e -> e.get().setup(gui, e);
-        Arrays.stream(this.backgroundElements).forEach(f);
-        Arrays.stream(this.foregroundElements).forEach(f);
     }
 
     public static void renderElement(IGui gui, MatrixStack stack, int mouseX, int mouseY, float partialTicks, GuiElementInst e) {
@@ -216,8 +205,8 @@ public class GuiDefinition
         Arrays.stream(this.foregroundElements).forEach(e -> renderElement(gui, stack, mouseX, mouseY, partialTicks, e));
     }
 
-    private static GuiElementInst[] getPrioritizedElements(GuiElementInst[] elements, IGuiElement.PriorityTarget target) {
-        return Arrays.stream(elements).sorted(Comparator.comparing(e -> getPriority(e, target))).toArray(GuiElementInst[]::new);
+    private static GuiElement[] getPrioritizedElements(Collection<GuiElement> elements, GuiElement.PriorityTarget target) {
+        return elements.stream().sorted(Comparator.comparing(e -> getPriority(e, target))).toArray(GuiElement[]::new);
     }
 
     @Override
@@ -260,42 +249,58 @@ public class GuiDefinition
         doWorkV(e -> e.onClose(gui));
     }
 
-    boolean doWorkB(Predicate<IGuiElement> execElem, IGuiElement.PriorityTarget target) {
-        for( GuiElementInst e : (target != null ? this.prioritizedBgElements.get(target) : this.backgroundElements) ) {
-            if( e.isVisible() && execElem.test(e.get()) ) {
-                return true;
-            }
+    void elementsAccept(Consumer<GuiElement> execElem, boolean forceInvisible) {
+        this.backgroundElements.forEach((id, elem) -> { if( forceInvisible || elem.isVisible() ) execElem.accept(elem); });
+        this.foregroundElements.forEach((id, elem) -> { if( forceInvisible || elem.isVisible() ) execElem.accept(elem); });
+    }
+
+    boolean elementsTest(Predicate<GuiElement> execElem, boolean forceInvisible) {
+        for( Map.Entry<String, GuiElement> elem : this.backgroundElements.entrySet() ) {
+            if( (forceInvisible || elem.getValue().isVisible()) && execElem.test(elem.getValue()) ) return true;
         }
-        for( GuiElementInst e : (target != null ? this.prioritizedFgElements.get(target) : this.foregroundElements) ) {
-            if( e.isVisible() && execElem.test(e.get()) ) {
-                return true;
-            }
+        for( Map.Entry<String, GuiElement> elem : this.foregroundElements.entrySet() ) {
+            if( (forceInvisible || elem.getValue().isVisible()) && execElem.test(elem.getValue()) ) return true;
         }
 
         return false;
     }
 
-    void doWorkV(Consumer<IGuiElement> execElem) {
-        for( GuiElementInst e : this.backgroundElements ) {
-            if( e.isVisible() ) {
-                execElem.accept(e.get());
-            }
-        }
-        for( GuiElementInst e : this.foregroundElements ) {
-            if( e.isVisible() ) {
-                execElem.accept(e.get());
-            }
-        }
-    }
+//    boolean doWorkB(Predicate<IGuiElement> execElem, IGuiElement.PriorityTarget target) {
+//        for( GuiElementInst e : (target != null ? this.backgroundElementPrios.get(target) : this.backgroundElements) ) {
+//            if( e.isVisible() && execElem.test(e.get()) ) {
+//                return true;
+//            }
+//        }
+//        for( GuiElementInst e : (target != null ? this.foregroundElementPrios.get(target) : this.foregroundElements) ) {
+//            if( e.isVisible() && execElem.test(e.get()) ) {
+//                return true;
+//            }
+//        }
+//
+//        return false;
+//    }
 
-    private static EventPriority getPriority(GuiElementInst elem, IGuiElement.PriorityTarget target) {
-        IGuiElement.Priorities pAnnotation = elem.getClass().getAnnotation(IGuiElement.Priorities.class);
+//    void doWorkV(Consumer<IGuiElement> execElem) {
+//        for( GuiElementInst e : this.backgroundElements ) {
+//            if( e.isVisible() ) {
+//                execElem.accept(e.get());
+//            }
+//        }
+//        for( GuiElementInst e : this.foregroundElements ) {
+//            if( e.isVisible() ) {
+//                execElem.accept(e.get());
+//            }
+//        }
+//    }
+
+    private static EventPriority getPriority(GuiElement elem, GuiElement.PriorityTarget target) {
+        GuiElement.Priorities pAnnotation = elem.getClass().getAnnotation(GuiElement.Priorities.class);
         if( pAnnotation == null ) {
             return EventPriority.NORMAL;
         }
 
-        IGuiElement.Priority[] priorities = pAnnotation.value();
-        for( IGuiElement.Priority priority : priorities ) {
+        GuiElement.Priority[] priorities = pAnnotation.value();
+        for( GuiElement.Priority priority : priorities ) {
             if( priority.target() == target ) {
                 return priority.value();
             }
