@@ -1,6 +1,7 @@
 package dev.sanandrea.mods.sanlib.lib.client.gui2;
 
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import net.minecraftforge.eventbus.api.EventPriority;
 
@@ -13,11 +14,14 @@ import java.util.Locale;
 import java.util.function.Consumer;
 
 public abstract class GuiElement
+        implements IGuiReference
 {
     protected int posX = 0;
     protected int posY = 0;
     protected Alignment hAlignment = Alignment.LEFT;
     protected Alignment vAlignment = Alignment.TOP;
+    protected int width = 0;
+    protected int height = 0;
 
     protected boolean isVisible = true;
     private boolean updateState = true;
@@ -26,19 +30,21 @@ public abstract class GuiElement
         this.updateState = true;
     }
 
-    boolean tick() {
-        this.update();
+    boolean tick(IGui gui) {
+        this.update(gui);
 
         boolean b = updateState;
         this.updateState = false;
         return b;
     }
 
-    public abstract void update();
+    public abstract void update(IGui gui);
 
     public void load(IGui gui) { }
 
     public void unload(IGui gui) { }
+
+    public abstract void render(IGui gui, MatrixStack matrixStack, int x, int y, double mouseX, double mouseY, float partialTicks);
 
     void loadFromJson(IGui gui, JsonObject data) {
         this.setPosX(JsonUtils.getIntVal(data.get("posX"), 0));
@@ -53,7 +59,7 @@ public abstract class GuiElement
 
     public abstract void fromJson(IGui gui, JsonObject data);
 
-    //region Getters & Setters
+//region Getters & Setters
     public boolean isVisible() {
         return this.isVisible;
     }
@@ -81,6 +87,14 @@ public abstract class GuiElement
         this.updateState();
     }
 
+    public int getWidth() {
+        return this.width;
+    }
+
+    public int getHeight() {
+        return this.height;
+    }
+
     public Alignment getHorizontalAlignment() {
         return this.hAlignment.forHorizontal ? this.hAlignment : Alignment.LEFT;
     }
@@ -102,7 +116,7 @@ public abstract class GuiElement
             this.updateState();
         }
     }
-    //endregion
+//endregion
 
     public enum Alignment
     {
@@ -145,18 +159,19 @@ public abstract class GuiElement
     @interface Priority
     {
         EventPriority value();
-        PriorityTarget target();
+        InputPriority target();
     }
 
-    enum PriorityTarget
+    enum InputPriority
     {
+        NONE,
         MOUSE_INPUT,
         KEY_INPUT;
 
-        private static final PriorityTarget[] TARGETS = values();
+        private static final InputPriority[] TARGETS = values();
 
-        public static void forEach(Consumer<PriorityTarget> c) {
-            for( PriorityTarget t : TARGETS ) {
+        public static void forEach(Consumer<InputPriority> c) {
+            for( InputPriority t : TARGETS ) {
                 c.accept(t);
             }
         }

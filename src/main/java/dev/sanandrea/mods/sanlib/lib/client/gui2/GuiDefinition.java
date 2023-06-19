@@ -8,7 +8,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import dev.sanandrea.mods.sanlib.SanLib;
+import dev.sanandrea.mods.sanlib.lib.client.gui2.element.EmptyElement;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
+import dev.sanandrea.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.resources.IResource;
@@ -23,15 +25,18 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused", "java:S1104", "java:S2386"})
 public class GuiDefinition
@@ -39,14 +44,15 @@ public class GuiDefinition
 {
     public static final Map<ResourceLocation, Supplier<GuiElement>> TYPES = new HashMap<>();
     static {
+        TYPES.put(EmptyElement.ID, EmptyElement::new);
     }
 
     public int width;
     public int height;
     private ResourceLocation texture;
 
-    EnumMap<GuiElement.PriorityTarget, GuiElement[]> foregroundElementPrios = new EnumMap<>(GuiElement.PriorityTarget.class);
-    EnumMap<GuiElement.PriorityTarget, GuiElement[]> backgroundElementPrios = new EnumMap<>(GuiElement.PriorityTarget.class);
+    EnumMap<GuiElement.InputPriority, List<GuiElement>> foregroundElementPrios = new EnumMap<>(GuiElement.InputPriority.class);
+    EnumMap<GuiElement.InputPriority, List<GuiElement>> backgroundElementPrios = new EnumMap<>(GuiElement.InputPriority.class);
 
     private final Map<String, GuiElement> backgroundElements = new HashMap<>();
     private final Map<String, GuiElement> foregroundElements = new HashMap<>();
@@ -100,7 +106,7 @@ public class GuiDefinition
 
         this.elementsAccept(e -> e.load(gui), true);
 
-        GuiElement.PriorityTarget.forEach(tgt -> {
+        GuiElement.InputPriority.forEach(tgt -> {
             this.backgroundElementPrios.put(tgt, getPrioritizedElements(this.backgroundElements.values(), tgt));
             this.foregroundElementPrios.put(tgt, getPrioritizedElements(this.foregroundElements.values(), tgt));
         });
@@ -156,97 +162,93 @@ public class GuiDefinition
         return this.texture;
     }
 
-    public static void renderElement(IGui gui, MatrixStack stack, int mouseX, int mouseY, float partialTicks, GuiElementInst e) {
-        renderElement(gui, stack, e.pos[0], e.pos[1], mouseX, mouseY, partialTicks, e, true);
-    }
-
-    public static void renderElement(IGui gui, MatrixStack stack, int x, int y, double mouseX, double mouseY, float partialTicks, GuiElementInst e) {
-        renderElement(gui, stack, x, y, mouseX, mouseY, partialTicks, e, true);
-    }
-
-    public static void renderElement(IGui gui, MatrixStack stack, int mouseX, int mouseY, float partialTicks, GuiElementInst e, boolean doRenderTick) {
-        renderElement(gui, stack, e.pos[0], e.pos[1], mouseX, mouseY, partialTicks, e, doRenderTick);
-    }
-
-    public static void renderElement(IGui gui, MatrixStack stack, int x, int y, double mouseX, double mouseY, float partialTicks, GuiElementInst e, boolean doRenderTick) {
-        IGuiElement ie = e.get();
+    @SuppressWarnings("java:S107")
+    public static void renderElement(IGui gui, MatrixStack matrixStack, int offsetX, int offsetY, double mouseX, double mouseY, float partialTicks, GuiElement e) {
         if( e.isVisible() ) {
-            if( doRenderTick ) {
-                ie.renderTick(gui, stack, partialTicks, x, y, mouseX, mouseY, e);
-            }
+            offsetX += e.getPosX();
+            offsetY += e.getPosY();
 
-            switch( e.getAlignmentH() ) {
-                case RIGHT: x -= ie.getWidth(); break;
-                case CENTER: x -= ie.getWidth() / 2; break;
+            switch( e.getHorizontalAlignment() ) {
+                case RIGHT: offsetX -= e.getWidth(); break;
+                case CENTER: offsetX -= e.getWidth() / 2; break;
                 default: break;
             }
-            switch( e.getAlignmentV() ) {
-                case BOTTOM: y -= ie.getHeight(); break;
-                case CENTER: y -= ie.getHeight() / 2; break;
+            switch( e.getVerticalAlignment() ) {
+                case BOTTOM: offsetY -= e.getHeight(); break;
+                case CENTER: offsetY -= e.getHeight() / 2; break;
                 default: break;
             }
 
-            ie.render(gui, stack, partialTicks, x, y, mouseX, mouseY, e);
+            e.render(gui, matrixStack, offsetX, offsetY, mouseX, mouseY, partialTicks);
         }
     }
 
     public void drawBackground(IGui gui, MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
-        Arrays.stream(this.backgroundElements).forEach(e -> renderElement(gui, stack, mouseX, mouseY, partialTicks, e));
+        this.drawBackground(gui, stack, 0, 0, mouseX, mouseY, partialTicks);
+    }
+
+    public void drawBackground(IGui gui, MatrixStack stack, int offsetX, int offsetY, int mouseX, int mouseY, float partialTicks) {
+        this.backgroundElements.forEach((k, e) -> renderElement(gui, stack, offsetX, offsetY, mouseX, mouseY, partialTicks, e));
     }
 
     public void drawBackgroundContainer(IGui gui, MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
-        stack.pushPose();
-        stack.translate(gui.getScreenPosX(), gui.getScreenPosY(), 0.0F);
-        this.drawBackground(gui, stack, mouseX, mouseY, partialTicks);
-        stack.popPose();
+        this.drawBackground(gui, stack, gui.getPosX(), gui.getPosY(), mouseX, mouseY, partialTicks);
     }
 
     public void drawForeground(IGui gui, MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
-        Arrays.stream(this.foregroundElements).forEach(e -> renderElement(gui, stack, mouseX, mouseY, partialTicks, e));
+        this.drawForeground(gui, stack, 0, 0, mouseX, mouseY, partialTicks);
     }
 
-    private static GuiElement[] getPrioritizedElements(Collection<GuiElement> elements, GuiElement.PriorityTarget target) {
-        return elements.stream().sorted(Comparator.comparing(e -> getPriority(e, target))).toArray(GuiElement[]::new);
+    public void drawForeground(IGui gui, MatrixStack stack, int offsetX, int offsetY, int mouseX, int mouseY, float partialTicks) {
+        this.foregroundElements.forEach((k, e) -> renderElement(gui, stack, offsetX, offsetY, mouseX, mouseY, partialTicks, e));
+    }
+
+    private static List<GuiElement> getPrioritizedElements(Collection<GuiElement> elements, GuiElement.InputPriority target) {
+        return elements.stream().sorted(Comparator.comparing(e -> getPriority(e, target))).collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
     public boolean mouseClicked(IGui gui, double mouseX, double mouseY, int button) {
-        return doWorkB(e -> e.mouseClicked(gui, mouseX, mouseY, button), IGuiElement.PriorityTarget.MOUSE_INPUT);
+        return this.elementsTest(e -> e.mouseClicked(gui, mouseX, mouseY, button), GuiElement.InputPriority.MOUSE_INPUT);
     }
 
     @Override
     public boolean mouseScrolled(IGui gui, double mouseX, double mouseY, double scroll) {
-        return doWorkB(e -> e.mouseScrolled(gui, mouseX, mouseY, scroll), IGuiElement.PriorityTarget.MOUSE_INPUT);
+        return this.elementsTest(e -> e.mouseScrolled(gui, mouseX, mouseY, scroll), GuiElement.InputPriority.MOUSE_INPUT);
     }
 
     @Override
     public boolean mouseReleased(IGui gui, double mouseX, double mouseY, int button) {
-        return doWorkB(e -> e.mouseReleased(gui, mouseX, mouseY, button), IGuiElement.PriorityTarget.MOUSE_INPUT);
+        return this.elementsTest(e -> e.mouseReleased(gui, mouseX, mouseY, button), GuiElement.InputPriority.MOUSE_INPUT);
     }
 
     @Override
     public boolean mouseDragged(IGui gui, double mouseX, double mouseY, int button, double dragX, double dragY) {
-        return doWorkB(e -> e.mouseDragged(gui, mouseX, mouseY, button, dragX, dragY), IGuiElement.PriorityTarget.MOUSE_INPUT);
+        return this.elementsTest(e -> e.mouseDragged(gui, mouseX, mouseY, button, dragX, dragY), GuiElement.InputPriority.MOUSE_INPUT);
     }
 
     @Override
     public boolean keyPressed(IGui gui, int keyCode, int scanCode, int modifiers) {
-        return doWorkB(e -> e.keyPressed(gui, keyCode, scanCode, modifiers), IGuiElement.PriorityTarget.KEY_INPUT);
+        return this.elementsTest(e -> e.keyPressed(gui, keyCode, scanCode, modifiers), GuiElement.InputPriority.KEY_INPUT);
     }
 
     @Override
     public boolean keyReleased(IGui gui, int keyCode, int scanCode, int modifiers) {
-        return doWorkB(e -> e.keyReleased(gui, keyCode, scanCode, modifiers), IGuiElement.PriorityTarget.KEY_INPUT);
+        return this.elementsTest(e -> e.keyReleased(gui, keyCode, scanCode, modifiers), GuiElement.InputPriority.KEY_INPUT);
     }
 
     @Override
     public boolean charTyped(IGui gui, char typedChar, int keyCode) {
-        return doWorkB(e -> e.charTyped(gui, typedChar, keyCode), IGuiElement.PriorityTarget.KEY_INPUT);
+        return this.elementsTest(e -> e.charTyped(gui, typedChar, keyCode), GuiElement.InputPriority.KEY_INPUT);
     }
 
     @Override
     public void onClose(IGui gui) {
-        doWorkV(e -> e.onClose(gui));
+        elementsAccept(e -> e.onClose(gui));
+    }
+
+    void elementsAccept(Consumer<GuiElement> execElem) {
+        this.elementsAccept(execElem, false);
     }
 
     void elementsAccept(Consumer<GuiElement> execElem, boolean forceInvisible) {
@@ -254,46 +256,20 @@ public class GuiDefinition
         this.foregroundElements.forEach((id, elem) -> { if( forceInvisible || elem.isVisible() ) execElem.accept(elem); });
     }
 
-    boolean elementsTest(Predicate<GuiElement> execElem, boolean forceInvisible) {
-        for( Map.Entry<String, GuiElement> elem : this.backgroundElements.entrySet() ) {
-            if( (forceInvisible || elem.getValue().isVisible()) && execElem.test(elem.getValue()) ) return true;
+    boolean elementsTest(Predicate<GuiElement> execElem, GuiElement.InputPriority target) {
+        Collection<GuiElement> bgElem = target == GuiElement.InputPriority.NONE ? this.backgroundElements.values() : this.backgroundElementPrios.get(target);
+        for( GuiElement elem : bgElem ) {
+            if( elem.isVisible() && execElem.test(elem) ) return true;
         }
-        for( Map.Entry<String, GuiElement> elem : this.foregroundElements.entrySet() ) {
-            if( (forceInvisible || elem.getValue().isVisible()) && execElem.test(elem.getValue()) ) return true;
+        Collection<GuiElement> fgElem = target == GuiElement.InputPriority.NONE ? this.backgroundElements.values() : this.backgroundElementPrios.get(target);
+        for( GuiElement elem : fgElem ) {
+            if( elem.isVisible() && execElem.test(elem) ) return true;
         }
 
         return false;
     }
 
-//    boolean doWorkB(Predicate<IGuiElement> execElem, IGuiElement.PriorityTarget target) {
-//        for( GuiElementInst e : (target != null ? this.backgroundElementPrios.get(target) : this.backgroundElements) ) {
-//            if( e.isVisible() && execElem.test(e.get()) ) {
-//                return true;
-//            }
-//        }
-//        for( GuiElementInst e : (target != null ? this.foregroundElementPrios.get(target) : this.foregroundElements) ) {
-//            if( e.isVisible() && execElem.test(e.get()) ) {
-//                return true;
-//            }
-//        }
-//
-//        return false;
-//    }
-
-//    void doWorkV(Consumer<IGuiElement> execElem) {
-//        for( GuiElementInst e : this.backgroundElements ) {
-//            if( e.isVisible() ) {
-//                execElem.accept(e.get());
-//            }
-//        }
-//        for( GuiElementInst e : this.foregroundElements ) {
-//            if( e.isVisible() ) {
-//                execElem.accept(e.get());
-//            }
-//        }
-//    }
-
-    private static EventPriority getPriority(GuiElement elem, GuiElement.PriorityTarget target) {
+    private static EventPriority getPriority(GuiElement elem, GuiElement.InputPriority target) {
         GuiElement.Priorities pAnnotation = elem.getClass().getAnnotation(GuiElement.Priorities.class);
         if( pAnnotation == null ) {
             return EventPriority.NORMAL;
@@ -309,8 +285,8 @@ public class GuiDefinition
         return EventPriority.NORMAL;
     }
 
-    public GuiElementInst getElementById(String id) {
-        return this.backgroundElements.get(id);
+    public GuiElement getElementById(String id) {
+        return MiscUtils.get(this.backgroundElements.get(id), () -> this.foregroundElements.get(id));
     }
 
     @Override
@@ -323,13 +299,13 @@ public class GuiDefinition
     }
 
     public void tick(IGui gui) {
-        Consumer<GuiElementInst> f = e -> {
+        BiConsumer<String, GuiElement> f = (k, e) -> {
             if( e.isVisible() ) {
-                e.get().tick(gui, e);
+                e.tick(gui);
             }
         };
-        Arrays.stream(this.backgroundElements).forEach(f);
-        Arrays.stream(this.foregroundElements).forEach(f);
+        this.backgroundElements.forEach(f);
+        this.foregroundElements.forEach(f);
     }
 
 }
