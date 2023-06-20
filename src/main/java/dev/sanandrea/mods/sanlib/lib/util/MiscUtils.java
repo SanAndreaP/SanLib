@@ -348,6 +348,19 @@ public final class MiscUtils
         return defReturn;
     }
 
+    public static boolean isEmpty(Object o) {
+        if( o == null ) {
+            return true;
+        }
+
+        if( o instanceof String ) {
+            String s = (String) o;
+            return s.trim().length() < 1;
+        }
+
+        return false;
+    }
+
     public static Integer getInteger(String s) {
         try {
             s = s.startsWith("#") ? s.substring(1) : s;

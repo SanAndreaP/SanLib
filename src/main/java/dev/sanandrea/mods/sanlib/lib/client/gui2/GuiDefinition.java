@@ -8,7 +8,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import dev.sanandrea.mods.sanlib.SanLib;
-import dev.sanandrea.mods.sanlib.lib.client.gui2.element.EmptyElement;
+import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Empty;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import dev.sanandrea.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.Minecraft;
@@ -44,7 +44,7 @@ public class GuiDefinition
 {
     public static final Map<ResourceLocation, Supplier<GuiElement>> TYPES = new HashMap<>();
     static {
-        TYPES.put(EmptyElement.ID, EmptyElement::new);
+        TYPES.put(Empty.ID, Empty::new);
     }
 
     public int width;

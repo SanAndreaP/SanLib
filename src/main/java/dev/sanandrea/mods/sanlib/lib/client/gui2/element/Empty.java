@@ -6,7 +6,7 @@ import dev.sanandrea.mods.sanlib.lib.client.gui2.GuiElement;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.IGui;
 import net.minecraft.util.ResourceLocation;
 
-public class EmptyElement
+public class Empty
         extends GuiElement
 {
     public static final ResourceLocation ID = new ResourceLocation("empty");
