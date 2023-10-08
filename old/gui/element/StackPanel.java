@@ -33,7 +33,7 @@ public class StackPanel
     private int currPosMax;
 
     public StackPanel(int[] padding, boolean horizontal, GuiElementInst... elements) {
-        this.padding = adjustPadding(padding);
+        this.padding = ElementParent.adjustPadding(padding);
         this.horizontal = horizontal;
 
         for( GuiElementInst element : elements ) {

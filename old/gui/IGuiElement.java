@@ -98,14 +98,14 @@ public interface IGuiElement
          */
         T get(IGui gui);
 
-        /**
-         * Builds the element and returns its instance.
-         *
-         * @param gui the GUI instance in which the elements are being built
-         * @return the instance of the element being built
-         * @throws IllegalStateException if any field required by the element is not specified
-         */
-        IBuilder<T> loadFromJson(IGui gui, JsonObject json);
+//        /**
+//         * Builds the element and returns its instance.
+//         *
+//         * @param gui the GUI instance in which the elements are being built
+//         * @return the instance of the element being built
+//         * @throws IllegalStateException if any field required by the element is not specified
+//         */
+//        IBuilder<T> loadFromJson(IGui gui, JsonObject json);
 
         @SuppressWarnings({"java:S3011"})
         static <T extends IBuilder<? extends IGuiElement>, U extends T> U copyValues(@Nonnull T from, @Nonnull U to) {

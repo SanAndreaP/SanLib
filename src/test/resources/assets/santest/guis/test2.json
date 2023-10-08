@@ -1,0 +1,68 @@
+{
+  "width": 195,
+  "height": 136,
+  "texture": "santest:guis/test.png",
+  "backgroundElements": {
+    "bgTexture": {
+      "type": "texture",
+      "width": 195,
+      "height": 136
+    },
+    "testRectangle": {
+      "type": "rectangle",
+      "width": 50,
+      "height": 50,
+      "colors": ["0xFFFF0000", "0xFFFFFFFF", "0xFFFFCC00", "0xFFFFFFFF", "0xFFFF0000"],
+      "isGradientHorizontal": true
+    },
+    "testRectangle2": {
+      "type": "rectangle",
+      "x": 50,
+      "y": -25,
+      "width": 50,
+      "height": 50,
+      "colors": [
+        {
+          "color": "0xFF80C0FF",
+          "stop": 0
+        },
+        {
+          "color": "0xFF80C0FF",
+          "stop": 0.2
+        },
+        {
+          "color": "0xFFFFA0C0",
+          "stop": 0.2
+        },
+        {
+          "color": "0xFFFFA0C0",
+          "stop": 0.4
+        },
+        {
+          "color": "0xFFFFFFFF",
+          "stop": 0.4
+        },
+        {
+          "color": "0xFFFFFFFF",
+          "stop": 0.6
+        },
+        {
+          "color": "0xFFFFA0C0",
+          "stop": 0.6
+        },
+        {
+          "color": "0xFFFFA0C0",
+          "stop": 0.8
+        },
+        {
+          "color": "0xFF80C0FF",
+          "stop": 0.8
+        },
+        {
+          "color": "0xFF80C0FF",
+          "stop": 1
+        }],
+      "isGradientHorizontal": true
+    }
+  }
+}

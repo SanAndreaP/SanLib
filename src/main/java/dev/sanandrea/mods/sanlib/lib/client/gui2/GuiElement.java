@@ -26,19 +26,19 @@ public abstract class GuiElement
     protected boolean isVisible = true;
     private boolean updateState = true;
 
+    private final boolean isResizable = this.getClass().isAnnotationPresent(Resizable.class);
+
     public void updateState() {
         this.updateState = true;
     }
 
-    boolean tick(IGui gui) {
-        this.update(gui);
+    protected void tick(IGui gui) {
+        this.update(gui, this.updateState);
 
-        boolean b = updateState;
         this.updateState = false;
-        return b;
     }
 
-    public abstract void update(IGui gui);
+    public abstract void update(IGui gui, boolean updateState);
 
     public void load(IGui gui) { }
 
@@ -46,18 +46,19 @@ public abstract class GuiElement
 
     public abstract void render(IGui gui, MatrixStack matrixStack, int x, int y, double mouseX, double mouseY, float partialTicks);
 
-    void loadFromJson(IGui gui, JsonObject data) {
-        this.setPosX(JsonUtils.getIntVal(data.get("posX"), 0));
-        this.setPosY(JsonUtils.getIntVal(data.get("posY"), 0));
-        this.setHorizontalAlignment(Alignment.fromString(JsonUtils.getStringVal(data.get("horizontalAlign"), "")));
-        this.setVerticalAlignment(Alignment.fromString(JsonUtils.getStringVal(data.get("verticalAlign"), "")));
+    void loadFromJson(IGui gui, GuiDefinition guiDef, JsonObject data) {
+        this.setPosX(JsonUtils.getIntVal(data.get("x"), 0));
+        this.setPosY(JsonUtils.getIntVal(data.get("y"), 0));
+        this.setSize(JsonUtils.getIntVal(data.get("width"), 0), JsonUtils.getIntVal(data.get("height"), 0));
+        this.setHorizontalAlignment(Alignment.fromString(JsonUtils.getStringVal(data.get("horizontalAlign"), Alignment.LEFT.toString())));
+        this.setVerticalAlignment(Alignment.fromString(JsonUtils.getStringVal(data.get("verticalAlign"), Alignment.TOP.toString())));
 
         this.setVisible(JsonUtils.getBoolVal(data.get("visible"), true));
 
-        this.fromJson(gui, data);
+        this.fromJson(gui, guiDef, data);
     }
 
-    public abstract void fromJson(IGui gui, JsonObject data);
+    public abstract void fromJson(IGui gui, GuiDefinition guiDef, JsonObject data);
 
 //region Getters & Setters
     public boolean isVisible() {
@@ -91,8 +92,22 @@ public abstract class GuiElement
         return this.width;
     }
 
+    public void setWidth(int width) {
+        if( this.isResizable ) {
+            this.width = width;
+            this.updateState();
+        }
+    }
+
     public int getHeight() {
         return this.height;
+    }
+
+    public void setHeight(int height) {
+        if( this.isResizable ) {
+            this.height = height;
+            this.updateState();
+        }
     }
 
     public Alignment getHorizontalAlignment() {
@@ -115,6 +130,11 @@ public abstract class GuiElement
             this.vAlignment = alignment;
             this.updateState();
         }
+    }
+
+    protected void setSize(int width, int height) {
+        this.width = width;
+        this.height = height;
     }
 //endregion
 
@@ -148,7 +168,7 @@ public abstract class GuiElement
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
-    @interface Priorities
+    public @interface Priorities
     {
         Priority[] value();
     }
@@ -156,13 +176,13 @@ public abstract class GuiElement
     @Retention(RetentionPolicy.RUNTIME)
     @Repeatable(Priorities.class)
     @Target(ElementType.TYPE)
-    @interface Priority
+    public @interface Priority
     {
         EventPriority value();
         InputPriority target();
     }
 
-    enum InputPriority
+    public enum InputPriority
     {
         NONE,
         MOUSE_INPUT,
@@ -176,4 +196,8 @@ public abstract class GuiElement
             }
         }
     }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    public @interface Resizable { }
 }

@@ -208,13 +208,13 @@ public class GuiDefinition
             }
 
             switch( e.getAlignmentH() ) {
-                case RIGHT: x -= ie.getWidth(); break;
-                case CENTER: x -= ie.getWidth() / 2; break;
+                case Justify.RIGHT: x -= ie.getWidth(); break;
+                case Justify.CENTER: x -= ie.getWidth() / 2; break;
                 default: break;
             }
             switch( e.getAlignmentV() ) {
-                case BOTTOM: y -= ie.getHeight(); break;
-                case CENTER: y -= ie.getHeight() / 2; break;
+                case Justify.BOTTOM: y -= ie.getHeight(); break;
+                case Justify.CENTER: y -= ie.getHeight() / 2; break;
                 default: break;
             }
 

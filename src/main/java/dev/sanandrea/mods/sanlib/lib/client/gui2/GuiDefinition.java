@@ -9,6 +9,8 @@ import com.google.gson.JsonParser;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import dev.sanandrea.mods.sanlib.SanLib;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Empty;
+import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Rectangle;
+import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Texture;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import dev.sanandrea.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.Minecraft;
@@ -32,6 +34,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -45,6 +48,8 @@ public class GuiDefinition
     public static final Map<ResourceLocation, Supplier<GuiElement>> TYPES = new HashMap<>();
     static {
         TYPES.put(Empty.ID, Empty::new);
+        TYPES.put(Rectangle.ID, Rectangle::new);
+        TYPES.put(Texture.ID, Texture::new);
     }
 
     public int width;
@@ -54,8 +59,8 @@ public class GuiDefinition
     EnumMap<GuiElement.InputPriority, List<GuiElement>> foregroundElementPrios = new EnumMap<>(GuiElement.InputPriority.class);
     EnumMap<GuiElement.InputPriority, List<GuiElement>> backgroundElementPrios = new EnumMap<>(GuiElement.InputPriority.class);
 
-    private final Map<String, GuiElement> backgroundElements = new HashMap<>();
-    private final Map<String, GuiElement> foregroundElements = new HashMap<>();
+    private final Map<String, GuiElement> backgroundElements = new TreeMap<>();
+    private final Map<String, GuiElement> foregroundElements = new TreeMap<>();
 
     private final ResourceLocation     data;
     private Consumer<JsonObject> loadHandler;
@@ -90,6 +95,9 @@ public class GuiDefinition
 
             return false;
         }
+
+        // first tick upon initialization
+        guiDef.tick(gui);
 
         return true;
     }
@@ -132,12 +140,16 @@ public class GuiDefinition
                 this.texture = new ResourceLocation(jObj.get("texture").getAsString());
             }
 
-            JsonUtils.GSON.fromJson(jObj.get("backgroundElements"), JsonObject.class).entrySet().forEach(e ->
-                this.backgroundElements.put(e.getKey(), this.loadElement(e))
-            );
-            JsonUtils.GSON.fromJson(jObj.get("foregroundElements"), JsonObject.class).entrySet().forEach(e ->
-                this.foregroundElements.put(e.getKey(), this.loadElement(e))
-            );
+            if( jObj.has("backgroundElements") ) {
+                JsonUtils.GSON.fromJson(jObj.get("backgroundElements"), JsonObject.class).entrySet().forEach(e ->
+                    this.backgroundElements.put(e.getKey(), this.loadElement(e))
+                );
+            }
+            if( jObj.has("foregroundElements") ) {
+                JsonUtils.GSON.fromJson(jObj.get("foregroundElements"), JsonObject.class).entrySet().forEach(e ->
+                    this.foregroundElements.put(e.getKey(), this.loadElement(e))
+                );
+            }
 
             if( this.loadHandler != null ) {
                 this.loadHandler.accept(jObj);
@@ -146,10 +158,26 @@ public class GuiDefinition
     }
 
     private GuiElement loadElement(Map.Entry<String, JsonElement> e) {
-        JsonObject           v       = e.getValue().getAsJsonObject();
-        GuiElement           element = TYPES.get(new ResourceLocation(JsonUtils.getStringVal(v.get("type")))).get();
+        JsonObject v    = e.getValue().getAsJsonObject();
+        String     type = JsonUtils.getStringVal(v.get("type"));
+        if( type == null ) {
+            SanLib.LOG.warn("Element '{}' has no type defined", e.getKey());
+            type = Empty.ID.toString();
+        }
 
-        element.loadFromJson(this.gui, v);
+        Supplier<GuiElement> s = TYPES.get(new ResourceLocation(type));
+        if( s == null ) {
+            SanLib.LOG.warn("Unknown type '{}' for element '{}'", type, e.getKey());
+            s = TYPES.get(Empty.ID);
+        }
+
+        GuiElement element = s.get();
+        try {
+            element.loadFromJson(this.gui, this, v);
+        } catch( Exception ex ) {
+            SanLib.LOG.warn("Error loading element '{}'", e.getKey(), ex);
+            element = new Empty();
+        }
 
         return element;
     }

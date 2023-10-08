@@ -6,9 +6,9 @@
 package santest;
 
 import dev.sanandrea.mods.sanlib.SanLib;
-import dev.sanandrea.mods.sanlib.lib.client.gui.GuiDefinition;
-import dev.sanandrea.mods.sanlib.lib.client.gui.JsonGuiScreen;
-import dev.sanandrea.mods.sanlib.lib.client.gui.element.ProgressBar;
+import dev.sanandrea.mods.sanlib.lib.client.gui2.GuiDefinition;
+import dev.sanandrea.mods.sanlib.lib.client.gui2.JsonGuiScreen;
+//import dev.sanandrea.mods.sanlib.lib.client.gui2.element.ProgressBar;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
 import org.apache.logging.log4j.Level;
@@ -27,7 +27,8 @@ public class TestGui
     @Override
     protected GuiDefinition buildGuiDefinition() {
         try {
-            return GuiDefinition.getNewDefinition(new ResourceLocation("santest", "guis/test.json"));
+//            return GuiDefinition.getNewDefinition(this, new ResourceLocation("santest", "guis/test.json"));
+            return GuiDefinition.getNewDefinition(this, new ResourceLocation("santest", "guis/test2.json"));
         } catch( IOException ex ) {
             SanLib.LOG.log(Level.ERROR, ex);
 
@@ -50,10 +51,10 @@ public class TestGui
     protected void initGd() {
         double pd = this.getProcessDuration();
 
-        this.guiDefinition.getElementById("prog_ltr").get(ProgressBar.class).setPercentFunc(p -> this.ticksOpen / pd);
-        this.guiDefinition.getElementById("prog_rtl").get(ProgressBar.class).setPercentFunc(p -> this.ticksOpen / pd - 1.0D);
-        this.guiDefinition.getElementById("prog_ttb").get(ProgressBar.class).setPercentFunc(p -> this.ticksOpen / pd - 2.0D);
-        this.guiDefinition.getElementById("prog_btt").get(ProgressBar.class).setPercentFunc(p -> this.ticksOpen / pd - 3.0D);
+//        this.guiDefinition.getElementById("prog_ltr").get(ProgressBar.class).setPercentFunc(p -> this.ticksOpen / pd);
+//        this.guiDefinition.getElementById("prog_rtl").get(ProgressBar.class).setPercentFunc(p -> this.ticksOpen / pd - 1.0D);
+//        this.guiDefinition.getElementById("prog_ttb").get(ProgressBar.class).setPercentFunc(p -> this.ticksOpen / pd - 2.0D);
+//        this.guiDefinition.getElementById("prog_btt").get(ProgressBar.class).setPercentFunc(p -> this.ticksOpen / pd - 3.0D);
 
 //        this.guiDefinition.getElementById("test-scroll-area").get(ScrollArea.class).setEnabled(false);
     }

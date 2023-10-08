@@ -517,7 +517,11 @@ public class ButtonSL
             return null;
         }
 
-        @Override
+        public static ButtonSL fromJson(IGui gui, JsonObject json) {
+            return new Builder().loadFromJson(gui, json).get(gui);
+        }
+
+//        @Override
         public Builder loadFromJson(IGui gui, JsonObject json) {
             this.size(JsonUtils.getIntArray(json.get("size"), Range.is(2)));
 

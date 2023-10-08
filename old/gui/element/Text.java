@@ -175,18 +175,18 @@ public class Text
 
     protected void renderLine(MatrixStack stack, ITextProperties s, int x, int y) {
         switch( this.justify ) {
-            case JUSTIFY:
+            case Justify.JUSTIFY:
                 if( this.wrapWidth > 0 ) {
                     this.renderLineJustified(stack, s, x, y);
                     return;
                 }
                 break;
-            case LEFT:
+            case Justify.LEFT:
                 break;
-            case CENTER:
+            case Justify.CENTER:
                 x += (this.currWidth - this.fontRenderer.width(s)) / 2;
                 break;
-            case RIGHT:
+            case Justify.RIGHT:
                 x += this.currWidth - this.fontRenderer.width(s);
                 break;
             default:

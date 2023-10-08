@@ -118,7 +118,7 @@ public final class GuiUtils
      * @param color2 the ending color; vertically this is the right, horizontally the bottom color
      * @param isHorizontal whether this gradient will be horizontal (<tt>true</tt>) or vertical (<tt>false</tt>)
      */
-    public static void drawGradient(MatrixStack stack, int x, int y, int width, int height, int color1, int color2, boolean isHorizontal) {
+    public static void drawGradient(MatrixStack stack, float x, float y, float width, float height, int color1, int color2, boolean isHorizontal) {
         ColorObj startColor = new ColorObj(color1);
         ColorObj endColor = new ColorObj(color2);
         Matrix4f      matrix = stack.last().pose();
@@ -144,7 +144,7 @@ public final class GuiUtils
         RenderSystem.enableTexture();
     }
 
-    public static void buildColoredQuad(Matrix4f matrix, BufferBuilder bb, int x, int y, int width, int height, ColorObj... colors) {
+    public static void buildColoredQuad(Matrix4f matrix, BufferBuilder bb, float x, float y, float width, float height, ColorObj... colors) {
         if( colors == null || colors.length < 1 ) {
             return;
         }
