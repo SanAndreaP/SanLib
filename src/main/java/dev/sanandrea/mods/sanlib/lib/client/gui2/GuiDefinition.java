@@ -10,6 +10,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import dev.sanandrea.mods.sanlib.SanLib;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Empty;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Rectangle;
+import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Text;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Texture;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import dev.sanandrea.mods.sanlib.lib.util.MiscUtils;
@@ -50,6 +51,7 @@ public class GuiDefinition
         TYPES.put(Empty.ID, Empty::new);
         TYPES.put(Rectangle.ID, Rectangle::new);
         TYPES.put(Texture.ID, Texture::new);
+        TYPES.put(Text.ID, Text::new);
     }
 
     public int width;

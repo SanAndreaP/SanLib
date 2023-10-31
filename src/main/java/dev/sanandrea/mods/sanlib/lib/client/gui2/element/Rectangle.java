@@ -11,7 +11,9 @@ import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.util.ResourceLocation;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -45,6 +47,7 @@ import java.util.List;
  *     </tr>
  * </table>
  */
+@SuppressWarnings("unused")
 @GuiElement.Resizable
 public class Rectangle
         extends GuiElement
@@ -112,8 +115,44 @@ public class Rectangle
     public void fromJson(IGui gui, GuiDefinition guiDef, JsonObject data) {
         this.isGradientHorizontal = JsonUtils.getBoolVal(data.get("isGradientHorizontal"), false);
 
-        ColorDef.loadColors(data, this.colors);
+        ColorDef.loadColors(data, this.colors, null);
     }
+
+// region Getters & Setters
+    public ColorDef[] getColors() {
+        return this.colors.toArray(new ColorDef[0]);
+    }
+
+    public boolean isGradientHorizontal() {
+        return this.isGradientHorizontal;
+    }
+
+    public void setColors(@Nonnull ColorDef... colors) {
+        if( colors.length < 1 ) {
+            throw new IllegalArgumentException("at least one color must be passed");
+        }
+
+        List<ColorDef> colorsList = Arrays.asList(colors);
+
+        checkStops(colorsList, null);
+
+        this.colors.clear();
+        this.colors.addAll(colorsList);
+    }
+
+    public void setGradientHorizontal(boolean gradientHorizontal) {
+        this.isGradientHorizontal = gradientHorizontal;
+    }
+
+    private static Boolean checkStops(@Nonnull List<ColorDef> colors, Boolean hasStop) {
+        for( ColorDef c : colors ) {
+            hasStop = ColorDef.checkStop(c, hasStop);
+        }
+
+        return hasStop;
+    }
+
+    // endregion
 
     private static final class ColorEntry
     {
@@ -123,6 +162,53 @@ public class Rectangle
         ColorEntry(float relStop, ColorDef colorDef) {
             this.relStop = relStop;
             this.color = colorDef.color;
+        }
+    }
+
+    public static class Builder<T extends Rectangle>
+            extends GuiElement.Builder<T>
+    {
+        protected Builder(T elem) { super(elem); }
+
+        public Builder<T> withColor(ColorDef color) {
+            return this.withColors(color);
+        }
+
+        public Builder<T> withColor(int color) {
+            return this.withColors(new ColorDef(color));
+        }
+
+        public Builder<T> withColor(float stop, int color) {
+            return this.withColors(new ColorDef(stop, color));
+        }
+
+        public Builder<T> withColors(@Nonnull ColorDef... color) {
+            if( color.length < 1 ) {
+                return this;
+            }
+
+            List<ColorDef> colors = Arrays.asList(color);
+            Rectangle.checkStops(this.elem.colors, Rectangle.checkStops(colors, null));
+
+            this.elem.colors.addAll(colors);
+
+            return this;
+        }
+
+        public Builder<T> withHorizontalGradient() {
+            this.elem.isGradientHorizontal = true;
+
+            return this;
+        }
+
+        public Builder<T> withVerticalGradient() {
+            this.elem.isGradientHorizontal = false;
+
+            return this;
+        }
+
+        public static Builder<Rectangle> create() {
+            return new Builder<>(new Rectangle());
         }
     }
 }

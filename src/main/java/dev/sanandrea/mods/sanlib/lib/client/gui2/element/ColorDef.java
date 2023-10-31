@@ -10,6 +10,8 @@ import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -68,8 +70,8 @@ public class ColorDef
         this(-1, color);
     }
 
-    public ColorDef(JsonObject data) {
-        this(JsonUtils.getFloatVal(data.get("stop"), -1), getColorFromJson(data.get("color")));
+    public ColorDef(JsonObject data, Integer defaultColor) {
+        this(JsonUtils.getFloatVal(data.get("stop"), -1), getColorFromJson(data.get("color"), defaultColor));
     }
 
     public ColorDef(float stop, int color) {
@@ -81,11 +83,15 @@ public class ColorDef
         return this.stop >= 0.0F;
     }
 
-    public static int getColorFromJson(JsonElement data) {
+    public static int getColorFromJson(JsonElement data, Integer defaultColor) {
         String colorStr = JsonUtils.getStringVal(data);
 
         if( MiscUtils.isEmpty(colorStr) ) {
-            throw new JsonParseException("color cannot be empty");
+            if( defaultColor == null ) {
+                throw new JsonParseException("color cannot be empty");
+            } else {
+                return defaultColor;
+            }
         }
 
         if( colorStr.startsWith("#") || colorStr.startsWith("0x") ) {
@@ -118,42 +124,67 @@ public class ColorDef
                 .getColorInt();
     }
 
-    public static void loadColors(@Nonnull JsonObject data, @Nonnull List<ColorDef> colors) {
+    public static boolean checkStop(ColorDef color, Boolean prevHasStop) {
+        return checkStop(color, prevHasStop, IllegalArgumentException::new);
+    }
+
+    private static boolean checkStop(ColorDef color, Boolean prevHasStop, Function<String, RuntimeException> exCtor) {
+        if( prevHasStop == null ) {
+            return color.hasStop();
+        } else if( prevHasStop != color.hasStop() ) {
+            throw exCtor.apply("Colors with a 'stop' value and colors without cannot be mixed.");
+        }
+
+        return prevHasStop;
+    }
+
+    public static void loadColors(@Nonnull JsonObject data, @Nonnull List<ColorDef> colors, Integer defaultColor) {
         JsonElement colorData = data.get("colors");
         Boolean hasStops = null;
 
         if( colorData != null && !colorData.isJsonNull() ) {
             if( colorData.isJsonArray() ) {
                 for( JsonElement color : colorData.getAsJsonArray() ) {
-                    ColorDef def = loadColor(color, true);
-
-                    if( hasStops == null ) {
-                        hasStops = def.hasStop();
-                    } else if( hasStops != def.hasStop() ) {
-                        throw new JsonParseException("Colors containing the 'stop' value and colors without it cannot be mixed.");
-                    }
-
+                    ColorDef def = loadColor(color, true, defaultColor);
+                    hasStops = checkStop(def, hasStops, JsonParseException::new);
                     colors.add(def);
                 }
             } else {
                 throw new JsonParseException("'colors' value must be an array");
             }
         } else {
-            colors.add(new ColorDef(ColorDef.getColorFromJson(data.get("color"))));
+            colors.add(new ColorDef(ColorDef.getColorFromJson(data.get("color"), defaultColor)));
+        }
+    }
+
+    public static void loadKeyedColors(@Nonnull JsonObject data, @Nonnull Map<String, Integer> colors, String defaultKey, Integer defaultColor) {
+        JsonElement colorData = data.get("colors");
+
+        if( colorData != null && !colorData.isJsonNull() ) {
+            if( colorData.isJsonObject() ) {
+                for( Map.Entry<String, JsonElement> color : colorData.getAsJsonObject().entrySet() ) {
+                    ColorDef def = loadColor(color.getValue(), false, defaultColor);
+                    colors.put(color.getKey(), def.color);
+                }
+            } else {
+                throw new JsonParseException("'colors' value must be an object");
+            }
+        } else {
+            colors.put(defaultKey, ColorDef.getColorFromJson(data.get("color"), defaultColor));
         }
     }
 
     @Nonnull
-    public static ColorDef loadColor(@Nonnull JsonElement color, boolean allowStop) {
+    public static ColorDef loadColor(@Nonnull JsonElement color, boolean allowStop, Integer defaultColor) {
         ColorDef def;
         if( color.isJsonObject() ) {
             JsonObject colorObj = color.getAsJsonObject();
             if( !allowStop && colorObj.has("stop") ) {
                 throw new JsonParseException("color does not support 'stop' value");
             }
-            def = new ColorDef(colorObj);
+            def = new ColorDef(colorObj, defaultColor);
         } else if( color.isJsonPrimitive() ) {
-            def = new ColorDef(ColorDef.getColorFromJson(color));
+            def = new ColorDef(ColorDef.getColorFromJson(color, defaultColor));
         } else {
             throw new JsonParseException("color is an invalid type, must be either an ARGB hex string (# or 0x as prefix, e.g. 0xFFFF0000), a 'TextFormatting' color name or a color object.");
         }

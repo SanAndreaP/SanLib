@@ -2,6 +2,7 @@ package dev.sanandrea.mods.sanlib.lib.client.gui2;
 
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Texture;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import net.minecraftforge.eventbus.api.EventPriority;
 
@@ -27,6 +28,23 @@ public abstract class GuiElement
     private boolean updateState = true;
 
     private final boolean isResizable = this.getClass().isAnnotationPresent(Resizable.class);
+
+    protected GuiElement() {
+        this(0, 0, 0, 0, Alignment.LEFT, Alignment.TOP);
+    }
+
+    protected GuiElement(int posX, int posY, int width, int height) {
+        this(posX, posY, width, height, Alignment.LEFT, Alignment.TOP);
+    }
+
+    protected GuiElement(int posX, int posY, int width, int height, Alignment hAlignment, Alignment vAlignment) {
+        this.posX = posX;
+        this.posY = posY;
+        this.hAlignment = hAlignment;
+        this.vAlignment = vAlignment;
+        this.width = width;
+        this.height = height;
+    }
 
     public void updateState() {
         this.updateState = true;
@@ -200,4 +218,44 @@ public abstract class GuiElement
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
     public @interface Resizable { }
+
+    public abstract static class Builder<T extends GuiElement>
+    {
+        protected T elem;
+
+        protected Builder(T elem) {
+            this.elem = elem;
+        }
+
+        public Builder<T> withPos(int x, int y) {
+            this.elem.posX = x;
+            this.elem.posY = y;
+
+            return this;
+        }
+
+        public Builder<T> withSize(int width, int height) {
+            this.elem.width = width;
+            this.elem.height = height;
+
+            return this;
+        }
+
+        public Builder<T> withAlignment(Alignment horizontal, Alignment vertical) {
+            this.elem.hAlignment = horizontal;
+            this.elem.vAlignment = vertical;
+
+            return this;
+        }
+
+        public Builder<T> withVisibility(boolean visible) {
+            this.elem.isVisible = visible;
+
+            return this;
+        }
+
+        public T get() {
+            return elem;
+        }
+    }
 }

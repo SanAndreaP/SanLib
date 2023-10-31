@@ -9,6 +9,9 @@ package dev.sanandrea.mods.sanlib.lib;
 @SuppressWarnings("unused")
 public final class ColorObj
 {
+    public static final ColorObj WHITE = new ColorObj(0xFFFFFFFF);
+    public static final ColorObj BLACK = new ColorObj(0xFF000000);
+
     private int r;
     private int g;
     private int b;

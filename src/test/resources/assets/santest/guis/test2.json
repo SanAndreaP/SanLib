@@ -63,6 +63,22 @@
           "stop": 1
         }],
       "isGradientHorizontal": true
+    },
+    "testText": {
+      "type": "text",
+      "x": 20,
+      "y": 25,
+      "text": "a test text\nmultilined and\njust justified!",
+      "wrapWidth": 100,
+      "horizontalAlign": "left",
+      "shadow": true,
+      "colors": {
+        "default": "red",
+        "border": "yellow",
+        "shadow": "white"
+      },
+      "bordered": true,
+      "justifyLastLine": true
     }
   }
 }
