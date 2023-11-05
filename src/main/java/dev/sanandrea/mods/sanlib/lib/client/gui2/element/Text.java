@@ -80,23 +80,7 @@ public class Text
 
             boolean hasCustomShadowColor = this.colors.containsKey(SHADOW_COLOR);
             if( this.bordered ) {
-                if( this.shadow ) {
-                    if( hasCustomShadowColor ) {
-                        this.setColor(SHADOW_COLOR);
-                    } else {
-                        this.setColor(DEFAULT_SHADOW_COLOR);
-                    }
-                    this.renderLine(matrixStack, line, x+1, y+1, lastLine);
-                    this.renderLine(matrixStack, line, x+2, y+1, lastLine);
-                    this.renderLine(matrixStack, line, x+1, y+2, lastLine);
-                    this.resetColor();
-                }
-                this.setColor(BORDER_COLOR);
-                this.renderLine(matrixStack, line, x + 1, y, lastLine);
-                this.renderLine(matrixStack, line, x, y + 1, lastLine);
-                this.renderLine(matrixStack, line, x - 1, y, lastLine);
-                this.renderLine(matrixStack, line, x, y - 1, lastLine);
-                this.resetColor();
+                this.renderLineBordered(matrixStack, x, y, line, hasCustomShadowColor, lastLine);
             } else if( this.shadow ) {
                 if( hasCustomShadowColor ) {
                     this.setColor(SHADOW_COLOR);
@@ -207,6 +191,26 @@ public class Text
         }, Style.EMPTY);
     }
 
+    protected void renderLineBordered(MatrixStack matrixStack, int x, int y, ITextProperties line, boolean hasCustomShadowColor, boolean lastLine) {
+        if( this.shadow ) {
+            if( hasCustomShadowColor ) {
+                this.setColor(SHADOW_COLOR);
+            } else {
+                this.setColor(DEFAULT_SHADOW_COLOR);
+            }
+            this.renderLine(matrixStack, line, x+1, y+1, lastLine);
+            this.renderLine(matrixStack, line, x+2, y+1, lastLine);
+            this.renderLine(matrixStack, line, x+1, y+2, lastLine);
+            this.resetColor();
+        }
+        this.setColor(BORDER_COLOR);
+        this.renderLine(matrixStack, line, x + 1, y, lastLine);
+        this.renderLine(matrixStack, line, x, y + 1, lastLine);
+        this.renderLine(matrixStack, line, x - 1, y, lastLine);
+        this.renderLine(matrixStack, line, x, y - 1, lastLine);
+        this.resetColor();
+    }
+
     protected void renderLineJustified(MatrixStack stack, ITextProperties s, int x, int y) {
         final MutableInt mx = new MutableInt(x);
         s.visit((style, str) -> {
@@ -233,5 +237,97 @@ public class Text
 
             return Optional.empty();
         }, Style.EMPTY);
+    }
+
+    public static class Builder<T extends Text>
+            extends GuiElement.Builder<T>
+    {
+        protected Builder(T elem) { super(elem); }
+
+        public Builder<T> withText(ITextComponent text) {
+            this.elem.bakedText = text;
+
+            return this;
+        }
+
+        public Builder<T> withTranslatedText(String key) {
+            return this.withText(new TranslationTextComponent(key));
+        }
+
+        public Builder<T> withColor(String key, int color) {
+            this.elem.colors.put(key, color);
+
+            return this;
+        }
+
+        public Builder<T> withTextColor(int color) {
+            return this.withColor(DEFAULT_COLOR, color);
+        }
+
+        public Builder<T> withShadowColor(int color) {
+            return this.withColor(SHADOW_COLOR, color);
+        }
+
+        public Builder<T> withBorderColor(int color) {
+            return this.withColor(BORDER_COLOR, color);
+        }
+
+        public Builder<T> withShadow() {
+            this.elem.shadow = true;
+
+            return this;
+        }
+
+        public Builder<T> withoutShadow() {
+            this.elem.shadow = false;
+
+            return this;
+        }
+
+        public Builder<T> withBorder() {
+            this.elem.bordered = true;
+
+            return this;
+        }
+
+        public Builder<T> withoutBorder() {
+            this.elem.bordered = false;
+
+            return this;
+        }
+
+        public Builder<T> withWrapWidth(int wrapWidth) {
+            this.elem.wrapWidth = wrapWidth;
+
+            return this;
+        }
+
+        public Builder<T> withFontRenderer(FontRenderer fontRenderer) {
+            this.elem.fontRenderer = fontRenderer;
+
+            return this;
+        }
+
+        public Builder<T> withLineHeight(int lineHeight) {
+            this.elem.lineHeight = lineHeight;
+
+            return this;
+        }
+
+        public Builder<T> withLastLineJustified() {
+            this.elem.justifyLastLine = true;
+
+            return this;
+        }
+
+        public Builder<T> withoutLastLineJustified() {
+            this.elem.justifyLastLine = false;
+
+            return this;
+        }
+
+        public static Builder<Text> create() {
+            return new Builder<>(new Text());
+        }
     }
 }
