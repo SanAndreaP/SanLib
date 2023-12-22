@@ -168,6 +168,7 @@ publishing {
 
 import net.minecraftforge.gradle.common.tasks.SignJar
 
+import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
@@ -207,7 +208,9 @@ tasks.register('createSymlinks') {
                 panel.add(new JLabel("Please enter the root/admin password to create symbolic links:"))
                 panel.add(pass)
                 String[] options = [ "OK", "Cancel" ]
-                int option = JOptionPane.showOptionDialog(null, panel, "Enter the root password",
+                JFrame jf = new JFrame()
+                jf.setAlwaysOnTop(true)
+                int option = JOptionPane.showOptionDialog(jf, panel, "Enter the root password",
                                                           JOptionPane.NO_OPTION, JOptionPane.PLAIN_MESSAGE,
                                                           null, options, options[1])
                 if( option == 0 ) {
