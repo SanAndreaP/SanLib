@@ -60,13 +60,6 @@ public class Rectangle
     private final List<ColorEntry> colorCache = new ArrayList<>();
 
     @Override
-    public void update(IGui gui, boolean updateState) {
-        if( updateState ) {
-            this.buildColorCache();
-        }
-    }
-
-    @Override
     @SuppressWarnings("java:S3776")
     public void render(IGui gui, MatrixStack matrixStack, int x, int y, double mouseX, double mouseY, float partialTicks) {
         if( !this.colorCache.isEmpty() ) {
@@ -86,13 +79,13 @@ public class Rectangle
                     }
                 }
             } else {
-                AbstractGui.fill(matrixStack, x, y, this.getWidth(), this.getHeight(), this.colors.get(0).color);
+                AbstractGui.fill(matrixStack, x, y, x + this.getWidth(), y + this.getHeight(), this.colors.get(0).color);
             }
             RenderSystem.enableBlend();
         }
     }
 
-    private void buildColorCache() {
+    void buildColorCache() {
         this.colorCache.clear();
 
         int colorsSize = this.colors.size();
@@ -116,6 +109,7 @@ public class Rectangle
         this.isGradientHorizontal = JsonUtils.getBoolVal(data.get("isGradientHorizontal"), false);
 
         ColorDef.loadColors(data, this.colors, null);
+        this.buildColorCache();
     }
 
 // region Getters & Setters
@@ -138,6 +132,7 @@ public class Rectangle
 
         this.colors.clear();
         this.colors.addAll(colorsList);
+        this.buildColorCache();
     }
 
     public void setGradientHorizontal(boolean gradientHorizontal) {
@@ -150,6 +145,18 @@ public class Rectangle
         }
 
         return hasStop;
+    }
+
+    @Override
+    public void setWidth(int width) {
+        super.setWidth(width);
+        this.buildColorCache();
+    }
+
+    @Override
+    public void setHeight(int height) {
+        super.setHeight(height);
+        this.buildColorCache();
     }
 
     // endregion
@@ -191,6 +198,7 @@ public class Rectangle
             Rectangle.checkStops(this.elem.colors, Rectangle.checkStops(colors, null));
 
             this.elem.colors.addAll(colors);
+            this.elem.buildColorCache();
 
             return this;
         }

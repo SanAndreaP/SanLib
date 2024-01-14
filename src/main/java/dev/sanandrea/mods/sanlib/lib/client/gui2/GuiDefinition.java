@@ -9,7 +9,9 @@ import com.google.gson.JsonParser;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import dev.sanandrea.mods.sanlib.SanLib;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Empty;
+import dev.sanandrea.mods.sanlib.lib.client.gui2.element.IElementContainer;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Rectangle;
+import dev.sanandrea.mods.sanlib.lib.client.gui2.element.StackPanel;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Text;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Texture;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
@@ -35,6 +37,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -44,7 +47,7 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused", "java:S1104", "java:S2386"})
 public class GuiDefinition
-        implements ISelectiveResourceReloadListener, IGuiReference
+        implements ISelectiveResourceReloadListener, IGuiReference, IElementContainer
 {
     public static final Map<ResourceLocation, Supplier<GuiElement>> TYPES = new HashMap<>();
     static {
@@ -52,6 +55,7 @@ public class GuiDefinition
         TYPES.put(Rectangle.ID, Rectangle::new);
         TYPES.put(Texture.ID, Texture::new);
         TYPES.put(Text.ID, Text::new);
+        TYPES.put(StackPanel.ID, StackPanel::new);
     }
 
     public int width;
@@ -63,6 +67,7 @@ public class GuiDefinition
 
     private final Map<String, GuiElement> backgroundElements = new TreeMap<>();
     private final Map<String, GuiElement> foregroundElements = new TreeMap<>();
+    private final List<IElementContainer> childContainers = new ArrayList<>();
 
     private final ResourceLocation     data;
     private Consumer<JsonObject> loadHandler;
@@ -109,16 +114,22 @@ public class GuiDefinition
 
         this.backgroundElements.clear();
         this.foregroundElements.clear();
-        this.backgroundElementPrios.clear();
-        this.foregroundElementPrios.clear();
+        this.childContainers.clear();
 
         this.loadFile(this.data);
 
         this.elementsAccept(e -> e.load(gui), true);
 
+        this.updatePriorities(true, true);
+    }
+
+    private void updatePriorities(boolean updateBg, boolean updateFg) {
+        if( updateBg ) this.backgroundElementPrios.clear();
+        if( updateFg ) this.foregroundElementPrios.clear();
+
         GuiElement.InputPriority.forEach(tgt -> {
-            this.backgroundElementPrios.put(tgt, getPrioritizedElements(this.backgroundElements.values(), tgt));
-            this.foregroundElementPrios.put(tgt, getPrioritizedElements(this.foregroundElements.values(), tgt));
+            if( updateBg ) this.backgroundElementPrios.put(tgt, getPrioritizedElements(this.backgroundElements.values(), tgt));
+            if( updateFg ) this.foregroundElementPrios.put(tgt, getPrioritizedElements(this.foregroundElements.values(), tgt));
         });
     }
 
@@ -159,17 +170,17 @@ public class GuiDefinition
         }
     }
 
-    private GuiElement loadElement(Map.Entry<String, JsonElement> e) {
-        JsonObject v    = e.getValue().getAsJsonObject();
+    public GuiElement loadElement(String id, JsonObject data) {
+        JsonObject v    = data.getAsJsonObject();
         String     type = JsonUtils.getStringVal(v.get("type"));
         if( type == null ) {
-            SanLib.LOG.warn("Element '{}' has no type defined", e.getKey());
+            SanLib.LOG.warn("Element '{}' has no type defined", id);
             type = Empty.ID.toString();
         }
 
         Supplier<GuiElement> s = TYPES.get(new ResourceLocation(type));
         if( s == null ) {
-            SanLib.LOG.warn("Unknown type '{}' for element '{}'", type, e.getKey());
+            SanLib.LOG.warn("Unknown type '{}' for element '{}'", type, id);
             s = TYPES.get(Empty.ID);
         }
 
@@ -177,8 +188,18 @@ public class GuiDefinition
         try {
             element.loadFromJson(this.gui, this, v);
         } catch( Exception ex ) {
-            SanLib.LOG.warn("Error loading element '{}'", e.getKey(), ex);
+            SanLib.LOG.warn("Error loading element '{}'", id, ex);
             element = new Empty();
+        }
+
+        return element;
+    }
+
+    private GuiElement loadElement(Map.Entry<String, JsonElement> e) {
+        GuiElement element = loadElement(e.getKey(), e.getValue().getAsJsonObject());
+
+        if( element instanceof IElementContainer ) {
+            this.childContainers.add((IElementContainer) element);
         }
 
         return element;
@@ -315,8 +336,95 @@ public class GuiDefinition
         return EventPriority.NORMAL;
     }
 
-    public GuiElement getElementById(String id) {
-        return MiscUtils.get(this.backgroundElements.get(id), () -> this.foregroundElements.get(id));
+    @Override
+    public GuiElement putElement(String id, GuiElement child) {
+        throw new UnsupportedOperationException("This container has multiple types of child containers. Use \"putBackgroundElement\" or \"putForegroundElement\".");
+    }
+
+    public GuiElement putBackgroundElement(String id, GuiElement child) {
+        GuiElement prev = this.backgroundElements.put(id, child);
+        if( prev instanceof IElementContainer ) {
+            this.childContainers.remove(prev);
+        }
+        if( child instanceof IElementContainer ) {
+            this.childContainers.add((IElementContainer) child);
+        }
+
+        this.updatePriorities(true, false);
+
+        return prev;
+    }
+
+    public GuiElement putForegroundElement(String id, GuiElement child) {
+        GuiElement prev = this.foregroundElements.put(id, child);
+        if( prev instanceof IElementContainer ) {
+            this.childContainers.remove(prev);
+        }
+        if( child instanceof IElementContainer ) {
+            this.childContainers.add((IElementContainer) child);
+        }
+
+        this.updatePriorities(false, true);
+
+        return prev;
+    }
+
+    @Override
+    public GuiElement getElement(String id) {
+        return MiscUtils.get(MiscUtils.get(this.backgroundElements.get(id), () -> this.foregroundElements.get(id)),
+                             () -> MiscUtils.getFirst(this.childContainers, c -> c.getElement(id), Objects::nonNull));
+    }
+
+    @Override
+    public String getElementId(GuiElement child) {
+        for( Map.Entry<String, GuiElement> e : this.backgroundElements.entrySet() ) {
+            if( Objects.equals(e.getValue(), child) ) {
+                return e.getKey();
+            }
+        }
+        for( Map.Entry<String, GuiElement> e : this.foregroundElements.entrySet() ) {
+            if( Objects.equals(e.getValue(), child) ) {
+                return e.getKey();
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public GuiElement removeElement(String id) {
+        throw new UnsupportedOperationException("This container has multiple types of child containers. Use \"removeBackgroundElement\" or \"removeForegroundElement\".");
+    }
+
+    public GuiElement removeBackgroundElement(String id) {
+        GuiElement prev = this.backgroundElements.remove(id);
+        if( prev instanceof IElementContainer ) {
+            this.childContainers.remove(prev);
+        }
+
+        this.updatePriorities(true, false);
+
+        return prev;
+    }
+
+    public GuiElement removeForegroundElement(String id) {
+        GuiElement prev = this.backgroundElements.remove(id);
+        if( prev instanceof IElementContainer ) {
+            this.childContainers.remove(prev);
+        }
+
+        this.updatePriorities(true, false);
+
+        return prev;
+    }
+
+    @Override
+    public void clear() {
+        this.backgroundElements.clear();
+        this.foregroundElements.clear();
+        this.childContainers.clear();
+
+        this.updatePriorities(true, true);
     }
 
     @Override
@@ -328,6 +436,7 @@ public class GuiDefinition
         }
     }
 
+    @Override
     public void tick(IGui gui) {
         BiConsumer<String, GuiElement> f = (k, e) -> {
             if( e.isVisible() ) {
@@ -338,4 +447,8 @@ public class GuiDefinition
         this.foregroundElements.forEach(f);
     }
 
+    @Override
+    public boolean isImmutable() {
+        return true;
+    }
 }

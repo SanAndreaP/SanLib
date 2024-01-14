@@ -25,7 +25,6 @@ public abstract class GuiElement
     protected int height = 0;
 
     protected boolean isVisible = true;
-    private boolean updateState = true;
 
     private final boolean isResizable = this.getClass().isAnnotationPresent(Resizable.class);
 
@@ -46,25 +45,13 @@ public abstract class GuiElement
         this.height = height;
     }
 
-    public void updateState() {
-        this.updateState = true;
-    }
-
-    protected void tick(IGui gui) {
-        this.update(gui, this.updateState);
-
-        this.updateState = false;
-    }
-
-    public abstract void update(IGui gui, boolean updateState);
-
     public void load(IGui gui) { }
 
     public void unload(IGui gui) { }
 
     public abstract void render(IGui gui, MatrixStack matrixStack, int x, int y, double mouseX, double mouseY, float partialTicks);
 
-    void loadFromJson(IGui gui, GuiDefinition guiDef, JsonObject data) {
+    public void loadFromJson(IGui gui, GuiDefinition guiDef, JsonObject data) {
         this.setPosX(JsonUtils.getIntVal(data.get("x"), 0));
         this.setPosY(JsonUtils.getIntVal(data.get("y"), 0));
         this.setSize(JsonUtils.getIntVal(data.get("width"), 0), JsonUtils.getIntVal(data.get("height"), 0));
@@ -85,7 +72,6 @@ public abstract class GuiElement
 
     public void setVisible(boolean visible) {
         this.isVisible = visible;
-        this.updateState();
     }
 
     public int getPosX() {
@@ -94,7 +80,6 @@ public abstract class GuiElement
 
     public void setPosX(int x) {
         this.posX = x;
-        this.updateState();
     }
 
     public int getPosY() {
@@ -103,7 +88,6 @@ public abstract class GuiElement
 
     public void setPosY(int y) {
         this.posY = y;
-        this.updateState();
     }
 
     public int getWidth() {
@@ -113,7 +97,6 @@ public abstract class GuiElement
     public void setWidth(int width) {
         if( this.isResizable ) {
             this.width = width;
-            this.updateState();
         }
     }
 
@@ -124,7 +107,6 @@ public abstract class GuiElement
     public void setHeight(int height) {
         if( this.isResizable ) {
             this.height = height;
-            this.updateState();
         }
     }
 
@@ -135,7 +117,6 @@ public abstract class GuiElement
     public void setHorizontalAlignment(Alignment alignment) {
         if( alignment.forHorizontal ) {
             this.hAlignment = alignment;
-            this.updateState();
         }
     }
 
@@ -146,7 +127,6 @@ public abstract class GuiElement
     public void setVerticalAlignment(Alignment alignment) {
         if( alignment.forVertical ) {
             this.vAlignment = alignment;
-            this.updateState();
         }
     }
 
@@ -181,6 +161,22 @@ public abstract class GuiElement
          */
         public static Alignment fromString(String s) {
             return Alignment.valueOf(s.toUpperCase(Locale.ROOT));
+        }
+    }
+
+    public enum Orientation
+    {
+        HORIZONTAL,
+        VERTICAL;
+
+        /**
+         * a case-insensitive version of {@link Orientation#valueOf(String)}
+         * @param s the name of the constant to be fetched
+         * @return the enum constant of the specified name
+         * @throws IllegalArgumentException if this enum type has no constant with the specified name
+         */
+        public static Orientation fromString(String s) {
+            return Orientation.valueOf(s.toUpperCase(Locale.ROOT));
         }
     }
 

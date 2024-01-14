@@ -16,7 +16,7 @@
       "isGradientHorizontal": true
     },
     "testRectangle2": {
-      "type": "rectangle",
+      "type": "_rectangle",
       "x": 50,
       "y": -25,
       "width": 50,
@@ -70,7 +70,7 @@
       "y": 25,
       "text": "a test text\nmultilined and\njust justified!",
       "wrapWidth": 100,
-      "horizontalAlign": "left",
+      "horizontalAlign": "justify",
       "shadow": true,
       "colors": {
         "default": "red",
@@ -79,6 +79,28 @@
       },
       "bordered": true,
       "justifyLastLine": true
+    },
+    "testStackPanelHoriz": {
+      "type": "stack_panel",
+      "orientation": "vertical",
+      "x": 0,
+      "y": 80,
+      "padding": 5,
+      "children": [
+        {
+          "type": "rectangle",
+          "width": 10,
+          "height": 10,
+          "color": "0xFF00A0FF"
+        },{
+          "type": "rectangle",
+          "x": 2,
+          "y": 2,
+          "width": 10,
+          "height": 10,
+          "color": "0xFFA000FF"
+        }
+      ]
     }
   }
 }

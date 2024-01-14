@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -285,6 +286,17 @@ public final class MiscUtils
      */
     public static <T> T get(T val, Supplier<T> def) {
         return val != null ? val : def.get();
+    }
+
+    public static <T, R> R getFirst(Collection<T> collection, Function<T, R> getter, Predicate<R> returnChk) {
+        for( T item : collection ) {
+            R ret = getter.apply(item);
+            if( returnChk.test(ret) ) {
+                return ret;
+            }
+        }
+
+        return null;
     }
 
     /**

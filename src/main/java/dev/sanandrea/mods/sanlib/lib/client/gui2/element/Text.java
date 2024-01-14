@@ -62,9 +62,9 @@ public class Text
     private final List<ITextProperties> renderedLines = new ArrayList<>();
 
     @Override
-    public void update(IGui gui, boolean updateState) {
+    public void tick(IGui gui) {
         ITextComponent currText = this.getText.apply(gui, this.bakedText);
-        if( updateState || prevText != currText ) {
+        if( prevText != currText ) {
             this.updateText(currText);
             ColorObj clr = new ColorObj(colors.get(DEFAULT_COLOR));
             colors.put(DEFAULT_SHADOW_COLOR, new ColorObj(clr.fRed()*0.25F, clr.fGreen()*0.25F, clr.fBlue()*0.25F, clr.fAlpha()).getColorInt());
@@ -227,11 +227,7 @@ public class Text
 
             for( int i = 0; i < words.length; i++ ) {
                 IReorderingProcessor irp = IReorderingProcessor.forward(words[i], style);
-                if( this.shadow ) {
-                    this.fontRenderer.drawShadow(stack, irp, mx.getValue(), y, this.currColor);
-                } else {
-                    this.fontRenderer.draw(stack, irp, mx.getValue(), y, this.currColor);
-                }
+                this.fontRenderer.draw(stack, irp, mx.getValue(), y, this.currColor);
                 mx.add(wordWidths[i] + spaceDist);
             }
 

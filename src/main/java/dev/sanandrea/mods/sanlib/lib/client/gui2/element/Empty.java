@@ -13,9 +13,6 @@ public class Empty
     public static final ResourceLocation ID = new ResourceLocation("empty");
 
     @Override
-    public void update(IGui gui, boolean updateState) { /* no-op */ }
-
-    @Override
     public void render(IGui gui, MatrixStack matrixStack, int x, int y, double mouseX, double mouseY, float partialTicks) { /* no-op */ }
 
     @Override
