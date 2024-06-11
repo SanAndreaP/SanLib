@@ -7,10 +7,14 @@ import dev.sanandrea.mods.sanlib.lib.client.gui2.GuiElement;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.IGui;
 import net.minecraft.util.ResourceLocation;
 
+@SuppressWarnings("java:S6548")
 public class Empty
         extends GuiElement
 {
+    public static final Empty INSTANCE = new Empty();
     public static final ResourceLocation ID = new ResourceLocation("empty");
+
+    private Empty() { /* no-op */ }
 
     @Override
     public void render(IGui gui, MatrixStack matrixStack, int x, int y, double mouseX, double mouseY, float partialTicks) { /* no-op */ }

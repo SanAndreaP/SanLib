@@ -9,6 +9,7 @@ import dev.sanandrea.mods.sanlib.lib.client.gui2.GuiDefinition;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.GuiElement;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.IGui;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
+import dev.sanandrea.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.util.ResourceLocation;
 
@@ -24,6 +25,10 @@ public class Texture
     protected int              textureHeight = 256;
     protected int              posU = 0;
     protected int              posV = 0;
+    protected Integer          disabledPosU = null;
+    protected Integer          disabledPosV = null;
+    protected Integer          hoverPosU = null;
+    protected Integer          hoverPosV = null;
     protected float            scaleX = 1.0F;
     protected float            scaleY = 1.0F;
     protected ColorObj         color = ColorObj.WHITE;
@@ -31,6 +36,9 @@ public class Texture
     @Override
     @SuppressWarnings("deprecation")
     public void render(IGui gui, MatrixStack matrixStack, int x, int y, double mouseX, double mouseY, float partialTicks) {
+        boolean enabled = (this.disabledPosU == null && this.disabledPosV == null) || this.isEnabled();
+        boolean isHovering = (this.hoverPosU != null || this.hoverPosV != null) && enabled && this.isHovering(gui, x, y, mouseX, mouseY);
+
         gui.get().getMinecraft().getTextureManager().bind(this.textureLocation);
         matrixStack.pushPose();
         RenderSystem.enableBlend();
@@ -38,7 +46,7 @@ public class Texture
         matrixStack.translate(x, y, 0.0D);
         matrixStack.scale(this.scaleX, this.scaleY, 1.0F);
         RenderSystem.color4f(this.color.fRed(), this.color.fGreen(), this.color.fBlue(), this.color.fAlpha());
-        drawRect(gui, matrixStack);
+        drawRect(gui, matrixStack, enabled, isHovering);
         matrixStack.popPose();
     }
 
@@ -49,14 +57,23 @@ public class Texture
         this.textureHeight = JsonUtils.getIntVal(data.get("textureHeight"), 256);
         this.posU = JsonUtils.getIntVal(data.get("u"), 0);
         this.posV = JsonUtils.getIntVal(data.get("v"), 0);
+        JsonUtils.fetchInt(data.get("uDisabled"), u -> this.disabledPosU = u);
+        JsonUtils.fetchInt(data.get("vDisabled"), v -> this.disabledPosV = v);
+        JsonUtils.fetchInt(data.get("uHover"), u -> this.disabledPosU = u);
+        JsonUtils.fetchInt(data.get("vHover"), v -> this.disabledPosV = v);
         this.scaleX = JsonUtils.getFloatVal(data.get("scaleX"), 1.0F);
         this.scaleY = JsonUtils.getFloatVal(data.get("scaleY"), 1.0F);
         this.color = data.has("color") ? new ColorObj(ColorDef.loadColor(data.get("color"), false, null).color) : ColorObj.WHITE;
     }
 
     @SuppressWarnings("unused")
-    protected void drawRect(IGui gui, MatrixStack stack) {
-        AbstractGui.blit(stack, 0, 0, this.posU, this.posV, this.getWidth(), this.getHeight(), this.textureWidth, this.textureHeight);
+    protected void drawRect(IGui gui, MatrixStack stack, boolean enabled, boolean isHovering) {
+        int u = isHovering && this.hoverPosU != null ? this.hoverPosU : this.posU;
+        int v = isHovering && this.hoverPosV != null ? this.hoverPosV : this.posV;
+        u = enabled || this.disabledPosU == null ? u : this.disabledPosU;
+        v = enabled || this.disabledPosV == null ? v : this.disabledPosV;
+
+        AbstractGui.blit(stack, 0, 0, u, v, this.getWidth(), this.getHeight(), this.textureWidth, this.textureHeight);
     }
 
 //region Getters & Setters

@@ -7,7 +7,6 @@ import dev.sanandrea.mods.sanlib.lib.client.gui2.GuiElement;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.IGui;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.Spacing;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
-import dev.sanandrea.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.ArrayList;

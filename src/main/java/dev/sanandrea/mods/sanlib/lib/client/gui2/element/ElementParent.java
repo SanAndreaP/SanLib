@@ -32,10 +32,10 @@ public abstract class ElementParent
     }
 
     @Override
-    public GuiElement getElement(String id) {
+    public GuiElement getElement(String id, boolean recursive) {
         GuiElement child = this.children.get(id);
 
-        if( child == null ) {
+        if( child == null && recursive ) {
             return MiscUtils.getFirst(this.children.values(), c -> {
                 if( c instanceof IElementContainer ) {
                     return ((IElementContainer) c).getElement(id);

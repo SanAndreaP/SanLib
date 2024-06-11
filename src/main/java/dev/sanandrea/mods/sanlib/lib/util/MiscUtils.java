@@ -263,6 +263,20 @@ public final class MiscUtils
     }
 
     /**
+     * <p>This checks if <tt>val</tt> is between <tt>lo</tt> and <tt>hi</tt> (inclusive). If <tt>lo</tt> is greater than <tt>hi</tt>, both values switch around internally.</p>
+     * <p>It acts like (<tt>lo <= val <= hi</tt>) or more verbose (<tt>lo <= val && val <= hi</tt>)</p>
+     *
+     * @param lo the lower value of the range
+     * @param val the value that should be between <tt>lo</tt> and <tt>hi</tt>
+     * @param hi the higher value of the range
+     *
+     * @return <tt>true</tt>, if <tt>val</tt> is between <tt>lo</tt> and <tt>hi</tt>, <tt>false</tt> otherwise
+     */
+    public static boolean between(double lo, double val, double hi) {
+        return hi < lo ? hi <= val && val <= lo : lo <= val && val <= hi;
+    }
+
+    /**
      * <p>Checks if val is <tt>null</tt> and returns <tt>def</tt> if so, otherwise <tt>val</tt> is returned</p>
      *
      * @param val The value to be checked for null and eventually returned
@@ -352,6 +366,38 @@ public final class MiscUtils
         return angle < 0 ? wrap360(angle + 360.0F) : angle;
     }
 
+    public static float limitMin(float nr, float min, boolean abs) {
+        if( (nr > 0.0F && nr < min) || (abs && nr < 0.0F && nr > -min) ) {
+            return min * Math.signum(nr);
+        }
+
+        return nr;
+    }
+
+    public static double limitMin(double nr, double min, boolean abs) {
+        if( (nr > 0.0D && nr < min) || (abs && nr < 0.0D && nr > -min) ) {
+            return min * Math.signum(nr);
+        }
+
+        return nr;
+    }
+
+    public static int limitMin(int nr, int min, boolean abs) {
+        if( (nr > 0 && nr < min) || (abs && nr < 0 && nr > -min) ) {
+            return min * (int) Math.signum(nr);
+        }
+
+        return nr;
+    }
+
+    public static long limitMin(long nr, long min, boolean abs) {
+        if( (nr > 0L && nr < min) || (abs && nr < 0L && nr > -min) ) {
+            return min * (long) Math.signum(nr);
+        }
+
+        return nr;
+    }
+
     public static <T, R> R apply(T nullableObj, Function<T, R> onNonNull, R defReturn) {
         if( nullableObj != null ) {
             return onNonNull.apply(nullableObj);
@@ -371,6 +417,15 @@ public final class MiscUtils
         }
 
         return false;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T tryCast(Object o, Class<T> cls) {
+        if( cls.isInstance(o) ) {
+            return (T) o;
+        }
+
+        return null;
     }
 
     public static Integer getInteger(String s) {

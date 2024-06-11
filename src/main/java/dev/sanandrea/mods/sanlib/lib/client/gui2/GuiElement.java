@@ -2,17 +2,20 @@ package dev.sanandrea.mods.sanlib.lib.client.gui2;
 
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Texture;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import net.minecraftforge.eventbus.api.EventPriority;
 
+import javax.annotation.Nonnull;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public abstract class GuiElement
         implements IGuiReference
@@ -25,8 +28,13 @@ public abstract class GuiElement
     protected int height = 0;
 
     protected boolean isVisible = true;
+    protected boolean isEnabled = true;
 
-    private final boolean isResizable = this.getClass().isAnnotationPresent(Resizable.class);
+    public final boolean isResizable = this.getClass().isAnnotationPresent(Resizable.class);
+
+    protected final List<Runnable> geometryListeners = new ArrayList<>();
+
+    protected HoverCallback hoverCallback = GuiElement::isHovering;
 
     protected GuiElement() {
         this(0, 0, 0, 0, Alignment.LEFT, Alignment.TOP);
@@ -43,6 +51,14 @@ public abstract class GuiElement
         this.vAlignment = vAlignment;
         this.width = width;
         this.height = height;
+    }
+
+    public void addGeometryChangeListener(@Nonnull Runnable listener) {
+        this.geometryListeners.add(listener);
+    }
+
+    public void removeGeometryChangeListener(@Nonnull Runnable listener) {
+        this.geometryListeners.remove(listener);
     }
 
     public void load(IGui gui) { }
@@ -65,6 +81,16 @@ public abstract class GuiElement
 
     public abstract void fromJson(IGui gui, GuiDefinition guiDef, JsonObject data);
 
+    protected static boolean isHovering(IGui gui, int x, int y, double mouseX, double mouseY, int width, int height) {
+        mouseX -= gui.getPosX();
+        mouseY -= gui.getPosY();
+        return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
+    }
+
+    public boolean isHovering(IGui gui, int x, int y, double mouseX, double mouseY) {
+        return this.hoverCallback.check(gui, x, y, mouseX, mouseY, this.getWidth(), this.getHeight());
+    }
+
 //region Getters & Setters
     public boolean isVisible() {
         return this.isVisible;
@@ -72,6 +98,15 @@ public abstract class GuiElement
 
     public void setVisible(boolean visible) {
         this.isVisible = visible;
+        this.geometryListeners.forEach(Runnable::run);
+    }
+
+    public boolean isEnabled() {
+        return this.isEnabled;
+    }
+
+    public void setEnabled(boolean enable) {
+        this.isEnabled = enable;
     }
 
     public int getPosX() {
@@ -80,6 +115,7 @@ public abstract class GuiElement
 
     public void setPosX(int x) {
         this.posX = x;
+        this.geometryListeners.forEach(Runnable::run);
     }
 
     public int getPosY() {
@@ -88,6 +124,7 @@ public abstract class GuiElement
 
     public void setPosY(int y) {
         this.posY = y;
+        this.geometryListeners.forEach(Runnable::run);
     }
 
     public int getWidth() {
@@ -97,6 +134,7 @@ public abstract class GuiElement
     public void setWidth(int width) {
         if( this.isResizable ) {
             this.width = width;
+            this.geometryListeners.forEach(Runnable::run);
         }
     }
 
@@ -107,6 +145,7 @@ public abstract class GuiElement
     public void setHeight(int height) {
         if( this.isResizable ) {
             this.height = height;
+            this.geometryListeners.forEach(Runnable::run);
         }
     }
 
@@ -117,6 +156,7 @@ public abstract class GuiElement
     public void setHorizontalAlignment(Alignment alignment) {
         if( alignment.forHorizontal ) {
             this.hAlignment = alignment;
+            this.geometryListeners.forEach(Runnable::run);
         }
     }
 
@@ -127,12 +167,22 @@ public abstract class GuiElement
     public void setVerticalAlignment(Alignment alignment) {
         if( alignment.forVertical ) {
             this.vAlignment = alignment;
+            this.geometryListeners.forEach(Runnable::run);
         }
     }
 
     protected void setSize(int width, int height) {
         this.width = width;
         this.height = height;
+        this.geometryListeners.forEach(Runnable::run);
+    }
+
+    public void setHoverCallback(@Nonnull HoverCallback func) {
+        this.hoverCallback = func;
+    }
+
+    public void resetHoverCallback() {
+        this.hoverCallback = GuiElement::isHovering;
     }
 //endregion
 
@@ -211,6 +261,12 @@ public abstract class GuiElement
         }
     }
 
+    @FunctionalInterface
+    public interface HoverCallback
+    {
+        boolean check(IGui gui, int x, int y, double mouseX, double mouseY, int width, int height);
+    }
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
     public @interface Resizable { }
@@ -246,6 +302,12 @@ public abstract class GuiElement
 
         public Builder<T> withVisibility(boolean visible) {
             this.elem.isVisible = visible;
+
+            return this;
+        }
+
+        public Builder<T> withGeometryChangeListener(@Nonnull Runnable listener) {
+            this.elem.geometryListeners.add(listener);
 
             return this;
         }

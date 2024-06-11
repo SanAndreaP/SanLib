@@ -8,11 +8,17 @@ public interface IElementContainer
 {
     GuiElement putElement(String id, GuiElement child);
 
-    GuiElement getElement(String id);
+    GuiElement getElement(String id, boolean recursive);
 
     String getElementId(GuiElement child);
 
     GuiElement removeElement(String id);
+
+    void clear();
+
+    default GuiElement getElement(String id) {
+        return this.getElement(id, true);
+    }
 
     default GuiElement putElement(GuiElement child) {
         return this.putElement(UUID.randomUUID().toString(), child);
@@ -21,8 +27,6 @@ public interface IElementContainer
     default void removeElement(GuiElement child) {
         this.removeElement(this.getElementId(child));
     }
-
-    void clear();
 
     default boolean isImmutable() {
         return false;

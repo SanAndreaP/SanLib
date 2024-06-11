@@ -11,6 +11,7 @@ import dev.sanandrea.mods.sanlib.SanLib;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Empty;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.IElementContainer;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Rectangle;
+import dev.sanandrea.mods.sanlib.lib.client.gui2.element.ScrollPanel;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.StackPanel;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Text;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Texture;
@@ -49,13 +50,16 @@ import java.util.stream.Collectors;
 public class GuiDefinition
         implements ISelectiveResourceReloadListener, IGuiReference, IElementContainer
 {
+    public static final GuiElement EMPTY = Empty.INSTANCE;
+
     public static final Map<ResourceLocation, Supplier<GuiElement>> TYPES = new HashMap<>();
     static {
-        TYPES.put(Empty.ID, Empty::new);
+        TYPES.put(Empty.ID, () -> Empty.INSTANCE);
         TYPES.put(Rectangle.ID, Rectangle::new);
         TYPES.put(Texture.ID, Texture::new);
         TYPES.put(Text.ID, Text::new);
         TYPES.put(StackPanel.ID, StackPanel::new);
+        TYPES.put(ScrollPanel.ID, ScrollPanel::new);
     }
 
     public int width;
@@ -189,7 +193,7 @@ public class GuiDefinition
             element.loadFromJson(this.gui, this, v);
         } catch( Exception ex ) {
             SanLib.LOG.warn("Error loading element '{}'", id, ex);
-            element = new Empty();
+            element = Empty.INSTANCE;
         }
 
         return element;
@@ -312,7 +316,7 @@ public class GuiDefinition
         for( GuiElement elem : bgElem ) {
             if( elem.isVisible() && execElem.test(elem) ) return true;
         }
-        Collection<GuiElement> fgElem = target == GuiElement.InputPriority.NONE ? this.backgroundElements.values() : this.backgroundElementPrios.get(target);
+        Collection<GuiElement> fgElem = target == GuiElement.InputPriority.NONE ? this.foregroundElements.values() : this.foregroundElementPrios.get(target);
         for( GuiElement elem : fgElem ) {
             if( elem.isVisible() && execElem.test(elem) ) return true;
         }
@@ -344,7 +348,7 @@ public class GuiDefinition
     public GuiElement putBackgroundElement(String id, GuiElement child) {
         GuiElement prev = this.backgroundElements.put(id, child);
         if( prev instanceof IElementContainer ) {
-            this.childContainers.remove(prev);
+            this.childContainers.remove((IElementContainer) prev);
         }
         if( child instanceof IElementContainer ) {
             this.childContainers.add((IElementContainer) child);
@@ -358,7 +362,7 @@ public class GuiDefinition
     public GuiElement putForegroundElement(String id, GuiElement child) {
         GuiElement prev = this.foregroundElements.put(id, child);
         if( prev instanceof IElementContainer ) {
-            this.childContainers.remove(prev);
+            this.childContainers.remove((IElementContainer) prev);
         }
         if( child instanceof IElementContainer ) {
             this.childContainers.add((IElementContainer) child);
@@ -370,9 +374,13 @@ public class GuiDefinition
     }
 
     @Override
-    public GuiElement getElement(String id) {
-        return MiscUtils.get(MiscUtils.get(this.backgroundElements.get(id), () -> this.foregroundElements.get(id)),
-                             () -> MiscUtils.getFirst(this.childContainers, c -> c.getElement(id), Objects::nonNull));
+    public GuiElement getElement(String id, boolean recursive) {
+        GuiElement elem = MiscUtils.get(this.backgroundElements.get(id), () -> this.foregroundElements.get(id));
+        if( elem == null && recursive ) {
+            return MiscUtils.getFirst(this.childContainers, c -> c.getElement(id), Objects::nonNull);
+        }
+
+        return elem;
     }
 
     @Override
@@ -399,7 +407,7 @@ public class GuiDefinition
     public GuiElement removeBackgroundElement(String id) {
         GuiElement prev = this.backgroundElements.remove(id);
         if( prev instanceof IElementContainer ) {
-            this.childContainers.remove(prev);
+            this.childContainers.remove((IElementContainer) prev);
         }
 
         this.updatePriorities(true, false);
@@ -408,9 +416,9 @@ public class GuiDefinition
     }
 
     public GuiElement removeForegroundElement(String id) {
-        GuiElement prev = this.backgroundElements.remove(id);
+        GuiElement prev = this.foregroundElements.remove(id);
         if( prev instanceof IElementContainer ) {
-            this.childContainers.remove(prev);
+            this.childContainers.remove((IElementContainer) prev);
         }
 
         this.updatePriorities(true, false);

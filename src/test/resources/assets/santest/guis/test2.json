@@ -9,7 +9,7 @@
       "height": 136
     },
     "testRectangle": {
-      "type": "rectangle",
+      "type": "_rectangle",
       "width": 50,
       "height": 50,
       "colors": ["0xFFFF0000", "0xFFFFFFFF", "0xFFFFCC00", "0xFFFFFFFF", "0xFFFF0000"],
@@ -65,10 +65,10 @@
       "isGradientHorizontal": true
     },
     "testText": {
-      "type": "text",
+      "type": "_text",
       "x": 20,
       "y": 25,
-      "text": "a test text\nmultilined and\njust justified!",
+      "text": "a test text multilined and\njust justified!",
       "wrapWidth": 100,
       "horizontalAlign": "justify",
       "shadow": true,
@@ -78,10 +78,10 @@
         "shadow": "white"
       },
       "bordered": true,
-      "justifyLastLine": true
+      "justifyLastLine": false
     },
     "testStackPanelHoriz": {
-      "type": "stack_panel",
+      "type": "_stack_panel",
       "orientation": "vertical",
       "x": 0,
       "y": 80,
@@ -99,6 +99,156 @@
           "width": 10,
           "height": 10,
           "color": "0xFFA000FF"
+        }
+      ]
+    },
+    "testScrollPanel": {
+      "type": "scroll_panel",
+      "x": 9,
+      "y": 18,
+      "areaWidth": 160,
+      "areaHeight": 110,
+      "rasterized": true,
+      "scrollButton": {
+        "type": "texture",
+        "x": 175,
+        "y": 18,
+        "u": 232,
+        "width": 12,
+        "height": 15
+      },
+      "children": [
+        {
+          "type": "rectangle",
+          "width": 1000,
+          "height": 10,
+          "color": "0xFFFF00A0"
+        },
+        {
+          "type": "rectangle",
+          "width": 160,
+          "height": 10,
+          "color": "0xFFFFA0D0"
+        },
+        {
+          "type": "rectangle",
+          "width": 160,
+          "height": 10,
+          "color": "0xFFA080FF"
+        },
+        {
+          "type": "rectangle",
+          "width": 100,
+          "height": 10,
+          "color": "0xFFFFA0D0"
+        },
+        {
+          "type": "rectangle",
+          "width": 100,
+          "height": 10,
+          "color": "0xFFA080FF"
+        },
+        {
+          "type": "rectangle",
+          "width": 160,
+          "height": 10,
+          "color": "0xFFFFA0D0"
+        },
+        {
+          "type": "rectangle",
+          "width": 100,
+          "height": 10,
+          "color": "0xFFA080FF"
+        },
+        {
+          "type": "rectangle",
+          "width": 160,
+          "height": 17,
+          "color": "0xFFFFA0D0"
+        },
+        {
+          "type": "rectangle",
+          "width": 100,
+          "height": 10,
+          "color": "0xFFA080FF"
+        },
+        {
+          "type": "rectangle",
+          "width": 100,
+          "height": 10,
+          "color": "0xFFFFA0D0"
+        },
+        {
+          "type": "rectangle",
+          "width": 100,
+          "height": 10,
+          "color": "0xFFA080FF"
+        },
+        {
+          "type": "rectangle",
+          "width": 160,
+          "height": 10,
+          "color": "0xFFFFA0D0"
+        },
+        {
+          "type": "rectangle",
+          "width": 160,
+          "height": 10,
+          "color": "0xFFA080FF"
+        },
+        {
+          "type": "rectangle",
+          "width": 160,
+          "height": 10,
+          "color": "0xFFFFA0D0"
+        },
+        {
+          "type": "rectangle",
+          "width": 100,
+          "height": 10,
+          "color": "0xFFA080FF"
+        },
+        {
+          "type": "rectangle",
+          "width": 100,
+          "height": 10,
+          "color": "0xFFFFA0D0"
+        },
+        {
+          "type": "rectangle",
+          "width": 160,
+          "height": 10,
+          "color": "0xFFA080FF"
+        },
+        {
+          "type": "rectangle",
+          "width": 100,
+          "height": 10,
+          "color": "0xFFFFA0D0"
+        },
+        {
+          "type": "rectangle",
+          "width": 100,
+          "height": 10,
+          "color": "0xFFA080FF"
+        },
+        {
+          "type": "rectangle",
+          "width": 100,
+          "height": 10,
+          "color": "0xFFFFA0D0"
+        },
+        {
+          "type": "rectangle",
+          "width": 100,
+          "height": 10,
+          "color": "0xFFA080FF"
+        },
+        {
+          "type": "rectangle",
+          "width": 100,
+          "height": 16,
+          "color": "0xFF9030FF"
         }
       ]
     }
