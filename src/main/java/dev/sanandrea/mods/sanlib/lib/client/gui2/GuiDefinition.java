@@ -15,6 +15,7 @@ import dev.sanandrea.mods.sanlib.lib.client.gui2.element.ScrollPanel;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.StackPanel;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Text;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Texture;
+import dev.sanandrea.mods.sanlib.lib.client.gui2.element.TiledTexture;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import dev.sanandrea.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.Minecraft;
@@ -60,6 +61,7 @@ public class GuiDefinition
         TYPES.put(Text.ID, Text::new);
         TYPES.put(StackPanel.ID, StackPanel::new);
         TYPES.put(ScrollPanel.ID, ScrollPanel::new);
+        TYPES.put(TiledTexture.ID, TiledTexture::new);
     }
 
     public int width;
