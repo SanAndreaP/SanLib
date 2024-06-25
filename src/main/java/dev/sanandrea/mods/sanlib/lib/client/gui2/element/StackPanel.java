@@ -12,7 +12,9 @@ import net.minecraft.util.ResourceLocation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
+@SuppressWarnings("unused")
 public class StackPanel
         extends ElementParent
 {
@@ -22,6 +24,10 @@ public class StackPanel
 
     protected Orientation orientation;
     protected Spacing padding;
+
+    public StackPanel(String id) {
+        super(id);
+    }
 
     @Override
     public GuiElement putElement(String id, GuiElement child) {
@@ -72,7 +78,11 @@ public class StackPanel
         int cy = y + this.padding.getTop();
         for( GuiElement child : this.orderedChildren ) {
             if( child.isVisible() ) {
-                child.render(gui, matrixStack, cx + child.getPosX(), cy + child.getPosY(), mouseX, mouseY, partialTicks);
+                int offX = cx + child.getPosX();
+                int offY = cy + child.getPosY();
+
+                child.updateHovering(gui, offX, offY, mouseX, mouseY);
+                child.render(gui, matrixStack, offX, offY, mouseX, mouseY, partialTicks);
 
                 cx += this.orientation == Orientation.HORIZONTAL ? child.getPosX() + child.getWidth() : 0;
                 cy += this.orientation == Orientation.VERTICAL ? child.getPosY() + child.getHeight() : 0;
@@ -136,7 +146,11 @@ public class StackPanel
         }
 
         public static Builder<StackPanel> create() {
-            return new Builder<>(new StackPanel());
+            return create(UUID.randomUUID().toString());
+        }
+
+        public static Builder<StackPanel> create(String id) {
+            return new Builder<>(new StackPanel(id));
         }
     }
 }

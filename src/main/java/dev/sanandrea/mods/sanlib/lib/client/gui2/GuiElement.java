@@ -15,11 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public abstract class GuiElement
         implements IGuiReference
 {
+    protected final String id;
+
     protected int posX = 0;
     protected int posY = 0;
     protected Alignment hAlignment = Alignment.LEFT;
@@ -30,21 +31,21 @@ public abstract class GuiElement
     protected boolean isVisible = true;
     protected boolean isEnabled = true;
 
+    protected boolean isHovering = false;
+
     public final boolean isResizable = this.getClass().isAnnotationPresent(Resizable.class);
 
     protected final List<Runnable> geometryListeners = new ArrayList<>();
 
-    protected HoverCallback hoverCallback = GuiElement::isHovering;
+//    protected HoverCallback hoverCallback = GuiElement::isHovering;
 
-    protected GuiElement() {
-        this(0, 0, 0, 0, Alignment.LEFT, Alignment.TOP);
+    protected GuiElement(String id) {
+        this(id, 0, 0, 0, 0, Alignment.LEFT, Alignment.TOP);
     }
 
-    protected GuiElement(int posX, int posY, int width, int height) {
-        this(posX, posY, width, height, Alignment.LEFT, Alignment.TOP);
-    }
+    protected GuiElement(String id, int posX, int posY, int width, int height, Alignment hAlignment, Alignment vAlignment) {
+        this.id = id;
 
-    protected GuiElement(int posX, int posY, int width, int height, Alignment hAlignment, Alignment vAlignment) {
         this.posX = posX;
         this.posY = posY;
         this.hAlignment = hAlignment;
@@ -81,17 +82,37 @@ public abstract class GuiElement
 
     public abstract void fromJson(IGui gui, GuiDefinition guiDef, JsonObject data);
 
-    protected static boolean isHovering(IGui gui, int x, int y, double mouseX, double mouseY, int width, int height) {
+    protected static boolean checkHovering(IGui gui, int x, int y, double mouseX, double mouseY, int width, int height) {
         mouseX -= gui.getPosX();
         mouseY -= gui.getPosY();
         return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
     }
 
-    public boolean isHovering(IGui gui, int x, int y, double mouseX, double mouseY) {
-        return this.hoverCallback.check(gui, x, y, mouseX, mouseY, this.getWidth(), this.getHeight());
+    public boolean canHover(IGui gui, int x, int y, double mouseX, double mouseY) {
+        return checkHovering(gui, x, y, mouseX, mouseY, this.getWidth(), this.getHeight());
     }
 
+    public void updateHovering(IGui gui, int x, int y, double mouseX, double mouseY) {
+        this.isHovering = this.canHover(gui, x, y, mouseX, mouseY);
+    }
+
+    public boolean isHovering() {
+        return this.isHovering;
+    }
+
+    public void unhover() {
+        this.isHovering = false;
+    }
+
+    //    public boolean isHovering(IGui gui, int x, int y, double mouseX, double mouseY) {
+//        return this.hoverCallback.check(gui, x, y, mouseX, mouseY, this.getWidth(), this.getHeight());
+//    }
+
 //region Getters & Setters
+    public String getId() {
+        return this.id;
+    }
+
     public boolean isVisible() {
         return this.isVisible;
     }
@@ -177,13 +198,13 @@ public abstract class GuiElement
         this.geometryListeners.forEach(Runnable::run);
     }
 
-    public void setHoverCallback(@Nonnull HoverCallback func) {
-        this.hoverCallback = func;
-    }
-
-    public void resetHoverCallback() {
-        this.hoverCallback = GuiElement::isHovering;
-    }
+//    public void setHoverCallback(@Nonnull HoverCallback func) {
+//        this.hoverCallback = func;
+//    }
+//
+//    public void resetHoverCallback() {
+//        this.hoverCallback = GuiElement::isHovering;
+//    }
 //endregion
 
     public enum Alignment

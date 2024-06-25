@@ -9,9 +9,10 @@ import dev.sanandrea.mods.sanlib.lib.client.gui2.GuiDefinition;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.GuiElement;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.IGui;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
-import dev.sanandrea.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.util.ResourceLocation;
+
+import java.util.UUID;
 
 @SuppressWarnings("unused")
 @GuiElement.Resizable
@@ -33,11 +34,15 @@ public class Texture
     protected float            scaleY = 1.0F;
     protected ColorObj         color = ColorObj.WHITE;
 
+    public Texture(String id) {
+        super(id);
+    }
+
     @Override
     @SuppressWarnings("deprecation")
     public void render(IGui gui, MatrixStack matrixStack, int x, int y, double mouseX, double mouseY, float partialTicks) {
         boolean enabled = (this.disabledPosU == null && this.disabledPosV == null) || this.isEnabled();
-        boolean isHovering = (this.hoverPosU != null || this.hoverPosV != null) && enabled && this.isHovering(gui, x, y, mouseX, mouseY);
+        boolean isHovering = (this.hoverPosU != null || this.hoverPosV != null) && enabled && this.isHovering();
 
         gui.get().getMinecraft().getTextureManager().bind(this.textureLocation);
         matrixStack.pushPose();
@@ -59,8 +64,8 @@ public class Texture
         this.posV = JsonUtils.getIntVal(data.get("v"), 0);
         JsonUtils.fetchInt(data.get("uDisabled"), u -> this.disabledPosU = u);
         JsonUtils.fetchInt(data.get("vDisabled"), v -> this.disabledPosV = v);
-        JsonUtils.fetchInt(data.get("uHover"), u -> this.disabledPosU = u);
-        JsonUtils.fetchInt(data.get("vHover"), v -> this.disabledPosV = v);
+        JsonUtils.fetchInt(data.get("uHover"), u -> this.hoverPosU = u);
+        JsonUtils.fetchInt(data.get("vHover"), v -> this.hoverPosV = v);
         this.scaleX = JsonUtils.getFloatVal(data.get("scaleX"), 1.0F);
         this.scaleY = JsonUtils.getFloatVal(data.get("scaleY"), 1.0F);
         this.color = data.has("color") ? new ColorObj(ColorDef.loadColor(data.get("color"), false, null).color) : ColorObj.WHITE;
@@ -68,10 +73,8 @@ public class Texture
 
     @SuppressWarnings("unused")
     protected void drawRect(IGui gui, MatrixStack stack, boolean enabled, boolean isHovering) {
-        int u = isHovering && this.hoverPosU != null ? this.hoverPosU : this.posU;
-        int v = isHovering && this.hoverPosV != null ? this.hoverPosV : this.posV;
-        u = enabled || this.disabledPosU == null ? u : this.disabledPosU;
-        v = enabled || this.disabledPosV == null ? v : this.disabledPosV;
+        int u = this.getCurrentU(enabled, isHovering);
+        int v = this.getCurrentV(enabled, isHovering);
 
         AbstractGui.blit(stack, 0, 0, u, v, this.getWidth(), this.getHeight(), this.textureWidth, this.textureHeight);
     }
@@ -92,6 +95,19 @@ public class Texture
     public void setScaleX(float scaleX)             { this.scaleX = scaleX; }
     public void setScaleY(float scaleY)             { this.scaleY = scaleY; }
     public void setColor(int color)                 { this.color = new ColorObj(color); }
+
+    protected int getCurrentU(boolean enabled, boolean isHovering) {
+        int u = isHovering && this.hoverPosU != null ? this.hoverPosU : this.posU;
+        u = enabled || this.disabledPosU == null ? u : this.disabledPosU;
+
+        return u;
+    }
+    protected int getCurrentV(boolean enabled, boolean isHovering) {
+        int v = isHovering && this.hoverPosV != null ? this.hoverPosV : this.posV;
+        v = enabled || this.disabledPosV == null ? v : this.disabledPosV;
+
+        return v;
+    }
 //endregion
 
     public static class Builder<T extends Texture>
@@ -137,7 +153,11 @@ public class Texture
         }
 
         public static Builder<Texture> create() {
-            return new Builder<>(new Texture());
+            return create(UUID.randomUUID().toString());
+        }
+
+        public static Builder<Texture> create(String id) {
+            return new Builder<>(new Texture(id));
         }
     }
 }

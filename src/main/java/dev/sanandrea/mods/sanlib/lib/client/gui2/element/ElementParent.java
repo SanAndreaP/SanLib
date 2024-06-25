@@ -21,6 +21,10 @@ public abstract class ElementParent
 {
     protected BiMap<String, GuiElement> children = HashBiMap.create();
 
+    protected ElementParent(String id) {
+        super(id);
+    }
+
     @Override
     public void tick(IGui gui) {
         this.executeOnChildren(e -> e.tick(gui), true);
@@ -133,7 +137,7 @@ public abstract class ElementParent
         } else if( data.isJsonArray() ) {
             JsonArray arr = data.getAsJsonArray();
             for( int i = 0, max = arr.size(); i < max; i++ ) {
-                this.putElement(guiDef.loadElement(String.format("#%d", i), arr.get(i).getAsJsonObject()));
+                this.putElement(guiDef.loadElement(String.format("%s_#%d", this.id, i), arr.get(i).getAsJsonObject()));
             }
         }
     }

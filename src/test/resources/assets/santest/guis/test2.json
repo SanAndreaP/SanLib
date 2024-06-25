@@ -108,7 +108,7 @@
       "y": 18,
       "areaWidth": 160,
       "areaHeight": 110,
-      "rasterized": true,
+      "rasterized": false,
       "scrollButton": {
         "type": "texture",
         "x": 175,
@@ -118,6 +118,19 @@
         "height": 15
       },
       "children": [
+        {
+          "type": "tiled_texture",
+          "width": 100,
+          "height": 45,
+          "texture": "textures/gui/widgets.png",
+          "u": 0,
+          "v": 66,
+          "vHover": 86,
+          "tileTextureWidth": 200,
+          "tileTextureHeight": 20,
+          "centralWidth": 190,
+          "centralHeight": 14
+        },
         {
           "type": "rectangle",
           "width": 1000,
@@ -159,6 +172,19 @@
           "width": 100,
           "height": 10,
           "color": "0xFFA080FF"
+        },
+        {
+          "type": "tiled_texture",
+          "width": 100,
+          "height": 12,
+          "texture": "textures/gui/widgets.png",
+          "u": 0,
+          "v": 66,
+          "vHover": 86,
+          "tileTextureWidth": 200,
+          "tileTextureHeight": 20,
+          "centralWidth": 190,
+          "centralHeight": 14
         },
         {
           "type": "rectangle",

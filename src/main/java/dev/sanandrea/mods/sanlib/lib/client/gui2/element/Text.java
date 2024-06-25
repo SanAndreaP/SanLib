@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
@@ -60,6 +61,10 @@ public class Text
     private       int                   prevColor;
     private       ITextComponent        prevText;
     private final List<ITextProperties> renderedLines = new ArrayList<>();
+
+    public Text(String id) {
+        super(id);
+    }
 
     @Override
     public void tick(IGui gui) {
@@ -323,7 +328,11 @@ public class Text
         }
 
         public static Builder<Text> create() {
-            return new Builder<>(new Text());
+            return create(UUID.randomUUID().toString());
+        }
+
+        public static Builder<Text> create(String id) {
+            return new Builder<>(new Text(id));
         }
     }
 }

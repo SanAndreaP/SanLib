@@ -9,6 +9,8 @@ import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.util.ResourceLocation;
 
+import java.util.UUID;
+
 @SuppressWarnings("unused")
 @GuiElement.Resizable
 public class TiledTexture
@@ -20,6 +22,10 @@ public class TiledTexture
     protected int texTileHeight;
     protected int centralWidth;
     protected int centralHeight;
+
+    public TiledTexture(String id) {
+        super(id);
+    }
 
     @Override
     public void fromJson(IGui gui, GuiDefinition guiDef, JsonObject data) {
@@ -36,16 +42,8 @@ public class TiledTexture
         if( this.texTileWidth == this.width && this.texTileHeight == this.height ) {
             super.drawRect(gui, stack, enabled, isHovering);
         } else {
-            int u = this.disabledPosU;
-            int v = this.disabledPosV;
-
-            if( enabled && isHovering ) {
-                u = this.hoverPosU;
-                v = this.hoverPosV;
-            } else if( enabled ) {
-                u = this.posU;
-                v = this.posV;
-            }
+            int u = this.getCurrentU(enabled, isHovering);
+            int v = this.getCurrentV(enabled, isHovering);
 
             int cornerWidth  = (this.texTileWidth - this.centralWidth) / 2;
             int cornerHeight = (this.texTileHeight - this.centralHeight) / 2;
@@ -180,7 +178,11 @@ public class TiledTexture
         }
 
         public static Builder<TiledTexture> create() {
-            return new Builder<>(new TiledTexture());
+            return create(UUID.randomUUID().toString());
+        }
+
+        public static Builder<TiledTexture> create(String id) {
+            return new Builder<>(new TiledTexture(id));
         }
     }
 }

@@ -15,6 +15,7 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * A colored rectangle. This supports multicolor gradients with stop values.<br>
@@ -58,6 +59,10 @@ public class Rectangle
     protected boolean              isGradientHorizontal = false;
 
     private final List<ColorEntry> colorCache = new ArrayList<>();
+
+    public Rectangle(String id) {
+        super(id);
+    }
 
     @Override
     @SuppressWarnings("java:S3776")
@@ -216,7 +221,11 @@ public class Rectangle
         }
 
         public static Builder<Rectangle> create() {
-            return new Builder<>(new Rectangle());
+            return create(UUID.randomUUID().toString());
+        }
+
+        public static Builder<Rectangle> create(String id) {
+            return new Builder<>(new Rectangle(id));
         }
     }
 }

@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
@@ -52,6 +53,10 @@ public class ScrollPanel
 
     protected final Map<GuiElement, Integer> childOffsetsY = new HashMap<>();
 
+    public ScrollPanel(String id) {
+        super(id);
+    }
+
     @Override
     public GuiElement putElement(String id, GuiElement child) {
         GuiElement prev = super.putElement(id, child);
@@ -61,6 +66,9 @@ public class ScrollPanel
         }
         this.orderedChildren.add(child);
         child.addGeometryChangeListener(this::updateGeometry);
+//        child.setHoverCallback(((gui, x, y, mouseX, mouseY, width1, height1) ->
+//            this.isChildInFullView(child) && GuiElement.checkHovering(gui, x, y, mouseX, mouseY, width1, height1)
+//        ));
 
         this.updateGeometry();
 
@@ -154,13 +162,24 @@ public class ScrollPanel
         for( Map.Entry<GuiElement, Integer> childEntry : this.visibleChildren.entrySet() ) {
             GuiElement child = childEntry.getKey();
             if( child.isVisible() ) {
+                int cx = x + child.getPosX();
                 int cy = y + childEntry.getValue();
-                child.render(gui, matrixStack, x + child.getPosX(), cy, mouseX, mouseY, partialTicks);
+
+                if( this.isChildInFullView(child) ) {
+                    child.updateHovering(gui, cx, cy, mouseX, mouseY);
+                } else {
+                    child.unhover();
+                }
+                child.render(gui, matrixStack, cx, cy, mouseX, mouseY, partialTicks);
             }
         }
         RenderSystem.disableScissor();
 
-        this.scrollBtn.render(gui, matrixStack, this.scrollBtn.getPosX(), this.scrollBtn.getPosY() + this.scrollButtonOffsetY, mouseX, mouseY, partialTicks);
+        int scrollBtnX = this.scrollBtn.getPosX();
+        int scrollBtnY = this.scrollBtn.getPosY() + this.scrollButtonOffsetY;
+
+        this.scrollBtn.updateHovering(gui, scrollBtnX, scrollBtnY, mouseX, mouseY);
+        this.scrollBtn.render(gui, matrixStack, scrollBtnX, scrollBtnY, mouseX, mouseY, partialTicks);
     }
 
     @Override
@@ -301,10 +320,7 @@ public class ScrollPanel
         boolean capture = false;
 
         if( button == GLFW.GLFW_MOUSE_BUTTON_LEFT ) {
-            if( this.canScroll()
-                && (this.isMouseDownScrolling
-                    || this.scrollBtn.isHovering(gui, this.scrollBtn.getPosX(), this.scrollBtn.getPosY() + this.scrollButtonOffsetY, mouseX, mouseY)) )
-            {
+            if( this.canScroll() && (this.isMouseDownScrolling || this.scrollBtn.isHovering()) ) {
                 this.isMouseDownScrolling = true;
                 capture = true;
 
@@ -330,5 +346,15 @@ public class ScrollPanel
         }
 
         return super.mouseReleased(gui, mouseX, mouseY, button);
+    }
+
+    @Override
+    protected boolean evaluateChildren(Predicate<GuiElement> execElem) {
+        return super.evaluateChildren(elem -> this.isChildInFullView(elem) && execElem.test(elem));
+    }
+
+    protected boolean isChildInFullView(GuiElement elem) {
+        int offY = this.visibleChildren.getOrDefault(elem, -1);
+        return offY >= 0 && offY + elem.getHeight() <= this.areaHeight;
     }
 }

@@ -43,8 +43,8 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused", "java:S1104", "java:S2386"})
@@ -53,9 +53,9 @@ public class GuiDefinition
 {
     public static final GuiElement EMPTY = Empty.INSTANCE;
 
-    public static final Map<ResourceLocation, Supplier<GuiElement>> TYPES = new HashMap<>();
+    public static final Map<ResourceLocation, Function<String, GuiElement>> TYPES = new HashMap<>();
     static {
-        TYPES.put(Empty.ID, () -> Empty.INSTANCE);
+        TYPES.put(Empty.ID, id -> Empty.INSTANCE);
         TYPES.put(Rectangle.ID, Rectangle::new);
         TYPES.put(Texture.ID, Texture::new);
         TYPES.put(Text.ID, Text::new);
@@ -184,13 +184,13 @@ public class GuiDefinition
             type = Empty.ID.toString();
         }
 
-        Supplier<GuiElement> s = TYPES.get(new ResourceLocation(type));
+        Function<String, GuiElement> s = TYPES.get(new ResourceLocation(type));
         if( s == null ) {
             SanLib.LOG.warn("Unknown type '{}' for element '{}'", type, id);
             s = TYPES.get(Empty.ID);
         }
 
-        GuiElement element = s.get();
+        GuiElement element = s.apply(id);
         try {
             element.loadFromJson(this.gui, this, v);
         } catch( Exception ex ) {
@@ -225,17 +225,21 @@ public class GuiDefinition
             offsetX += e.getPosX();
             offsetY += e.getPosY();
 
+            int eWidth = e.getWidth();
+            int eHeight = e.getHeight();
+
             switch( e.getHorizontalAlignment() ) {
-                case RIGHT: offsetX -= e.getWidth(); break;
-                case CENTER: offsetX -= e.getWidth() / 2; break;
+                case RIGHT: offsetX -= eWidth; break;
+                case CENTER: offsetX -= eWidth / 2; break;
                 default: break;
             }
             switch( e.getVerticalAlignment() ) {
-                case BOTTOM: offsetY -= e.getHeight(); break;
-                case CENTER: offsetY -= e.getHeight() / 2; break;
+                case BOTTOM: offsetY -= eHeight; break;
+                case CENTER: offsetY -= eHeight / 2; break;
                 default: break;
             }
 
+            e.updateHovering(gui, offsetX, offsetY, mouseX, mouseY);
             e.render(gui, matrixStack, offsetX, offsetY, mouseX, mouseY, partialTicks);
         }
     }
