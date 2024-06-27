@@ -119,17 +119,18 @@
       },
       "children": [
         {
-          "type": "tiled_texture",
+          "type": "button",
           "width": 100,
           "height": 45,
-          "texture": "textures/gui/widgets.png",
-          "u": 0,
-          "v": 66,
-          "vHover": 86,
-          "tileTextureWidth": 200,
-          "tileTextureHeight": 20,
-          "centralWidth": 190,
-          "centralHeight": 14
+          "label": "TESTBUTTON"
+        },
+        {
+          "type": "button",
+          "width": 100,
+          "height": 45,
+          "clickSound": "block.bell.use",
+          "label": "TESTBUTTON2",
+          "background": null
         },
         {
           "type": "rectangle",

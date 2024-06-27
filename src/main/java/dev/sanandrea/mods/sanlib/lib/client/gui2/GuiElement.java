@@ -16,10 +16,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
+@SuppressWarnings("unused")
 public abstract class GuiElement
         implements IGuiReference
 {
-    protected final String id;
+    protected String id;
 
     protected int posX = 0;
     protected int posY = 0;
@@ -28,16 +29,14 @@ public abstract class GuiElement
     protected int width = 0;
     protected int height = 0;
 
-    protected boolean isVisible = true;
-    protected boolean isEnabled = true;
+    private boolean isVisible = true;
+    private boolean isEnabled = true;
 
     protected boolean isHovering = false;
 
     public final boolean isResizable = this.getClass().isAnnotationPresent(Resizable.class);
 
     protected final List<Runnable> geometryListeners = new ArrayList<>();
-
-//    protected HoverCallback hoverCallback = GuiElement::isHovering;
 
     protected GuiElement(String id) {
         this(id, 0, 0, 0, 0, Alignment.LEFT, Alignment.TOP);
@@ -100,17 +99,17 @@ public abstract class GuiElement
         return this.isHovering;
     }
 
-    public void unhover() {
-        this.isHovering = false;
+    public void setHovering(boolean hovering) {
+        this.isHovering = hovering;
     }
-
-    //    public boolean isHovering(IGui gui, int x, int y, double mouseX, double mouseY) {
-//        return this.hoverCallback.check(gui, x, y, mouseX, mouseY, this.getWidth(), this.getHeight());
-//    }
 
 //region Getters & Setters
     public String getId() {
         return this.id;
+    }
+
+    public void updateId(String newId) {
+        this.id = newId;
     }
 
     public boolean isVisible() {
@@ -197,14 +196,6 @@ public abstract class GuiElement
         this.height = height;
         this.geometryListeners.forEach(Runnable::run);
     }
-
-//    public void setHoverCallback(@Nonnull HoverCallback func) {
-//        this.hoverCallback = func;
-//    }
-//
-//    public void resetHoverCallback() {
-//        this.hoverCallback = GuiElement::isHovering;
-//    }
 //endregion
 
     public enum Alignment
@@ -322,7 +313,13 @@ public abstract class GuiElement
         }
 
         public Builder<T> withVisibility(boolean visible) {
-            this.elem.isVisible = visible;
+            this.elem.setVisible(visible);
+
+            return this;
+        }
+
+        public Builder<T> withEnabled(boolean enable) {
+            this.elem.setEnabled(enable);
 
             return this;
         }

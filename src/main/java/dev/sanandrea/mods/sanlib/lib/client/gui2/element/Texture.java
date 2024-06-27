@@ -135,6 +135,20 @@ public class Texture
             return this;
         }
 
+        public Builder<T> withHoverPosUV(int u, int v) {
+            this.elem.hoverPosU = u;
+            this.elem.hoverPosV = v;
+
+            return this;
+        }
+
+        public Builder<T> withDisabledPosUV(int u, int v) {
+            this.elem.disabledPosU = u;
+            this.elem.disabledPosV = v;
+
+            return this;
+        }
+
         public Builder<T> withScale(float x, float y) {
             this.elem.scaleX = x;
             this.elem.scaleY = y;
@@ -152,11 +166,11 @@ public class Texture
             return this.withColor(new ColorObj(color));
         }
 
-        public static Builder<Texture> create() {
-            return create(UUID.randomUUID().toString());
+        public static Builder<Texture> createTexture() {
+            return createTexture(UUID.randomUUID().toString());
         }
 
-        public static Builder<Texture> create(String id) {
+        public static Builder<Texture> createTexture(String id) {
             return new Builder<>(new Texture(id));
         }
     }

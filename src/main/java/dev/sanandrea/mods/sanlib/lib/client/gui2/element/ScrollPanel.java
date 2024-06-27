@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -37,18 +38,18 @@ public class ScrollPanel
 
     protected final List<GuiElement> orderedChildren = new ArrayList<>();
 
-    protected int      areaWidth;
-    protected int      areaHeight;
-    protected GuiElement scrollBtn;
-    protected int     scrollHeight;
-    protected double  minScrollDelta = 0.0F;
-    protected boolean rasterized;
-    protected Spacing padding;
+    protected int        areaWidth;
+    protected int        areaHeight;
+    protected GuiElement scrollBtn      = Empty.INSTANCE;
+    protected int        scrollHeight;
+    protected double     minScrollDelta = 0.0F;
+    protected boolean    rasterized;
+    protected Spacing    padding;
 
-    protected int scrollButtonOffsetY = 0;
-    protected boolean         isMouseDownScrolling;
+    protected int     scrollButtonOffsetY = 0;
+    protected boolean isMouseDownScrolling;
 
-    protected double scroll = 0.0D;
+    protected double                   scroll          = 0.0D;
     protected Map<GuiElement, Integer> visibleChildren = Collections.emptyMap();
 
     protected final Map<GuiElement, Integer> childOffsetsY = new HashMap<>();
@@ -66,9 +67,6 @@ public class ScrollPanel
         }
         this.orderedChildren.add(child);
         child.addGeometryChangeListener(this::updateGeometry);
-//        child.setHoverCallback(((gui, x, y, mouseX, mouseY, width1, height1) ->
-//            this.isChildInFullView(child) && GuiElement.checkHovering(gui, x, y, mouseX, mouseY, width1, height1)
-//        ));
 
         this.updateGeometry();
 
@@ -134,12 +132,12 @@ public class ScrollPanel
     }
 
     protected void updateVisibleChildren() {
-        final int minY = MathHelper.fastFloor((this.height - this.areaHeight) * this.scroll);
-        final int maxY = minY + this.areaHeight;
+        final int                      minY       = MathHelper.fastFloor((this.height - this.areaHeight) * this.scroll);
+        final int                      maxY       = minY + this.areaHeight;
         final Map<GuiElement, Integer> newVisible = new LinkedHashMap<>();
 
         this.getSortedChildOffsetsY().forEach(e -> {
-            int cy = e.getValue();
+            int        cy    = e.getValue();
             GuiElement child = e.getKey();
 
             if( child.isVisible() ) {
@@ -168,7 +166,7 @@ public class ScrollPanel
                 if( this.isChildInFullView(child) ) {
                     child.updateHovering(gui, cx, cy, mouseX, mouseY);
                 } else {
-                    child.unhover();
+                    child.setHovering(false);
                 }
                 child.render(gui, matrixStack, cx, cy, mouseX, mouseY, partialTicks);
             }
@@ -195,8 +193,6 @@ public class ScrollPanel
         JsonElement sbData = data.get("scrollButton");
         if( sbData != null && sbData.isJsonObject() ) {
             this.scrollBtn = guiDef.loadElement(SCROLL_BUTTON_ID, sbData.getAsJsonObject());
-        } else {
-            this.scrollBtn = Empty.INSTANCE;
         }
 
         this.loadChildren(guiDef, data.get("children"));
@@ -292,7 +288,7 @@ public class ScrollPanel
             GuiElement currChild = this.visibleChildren.keySet().stream().findFirst().orElse(null);
             int        currIdx   = this.orderedChildren.indexOf(currChild);
 
-            if( indexShift > 0 && currChild != null && currIdx >= 0 && currIdx < this.orderedChildren.size() - 1) {
+            if( indexShift > 0 && currChild != null && currIdx >= 0 && currIdx < this.orderedChildren.size() - 1 ) {
                 newScroll = this.getScrollPos(this.orderedChildren.get(currIdx + 1));
             } else if( indexShift < 0 && currChild != null && currIdx > 0 ) {
                 newScroll = this.getScrollPos(this.orderedChildren.get(currIdx - 1));
@@ -326,7 +322,7 @@ public class ScrollPanel
 
                 double scrollBtnHeight = this.scrollBtn.getHeight();
                 double scrollHeightMax = this.scrollHeight - scrollBtnHeight;
-                double mouseYBtn = Math.max(0.0D, mouseY - gui.getPosY() - this.scrollBtn.getPosY() - scrollBtnHeight / 2.0D);
+                double mouseYBtn       = Math.max(0.0D, mouseY - gui.getPosY() - this.scrollBtn.getPosY() - scrollBtnHeight / 2.0D);
                 mouseYBtn = Math.min(mouseYBtn, scrollHeightMax);
 
                 this.scrollButtonOffsetY = MathHelper.floor(mouseYBtn);
@@ -356,5 +352,74 @@ public class ScrollPanel
     protected boolean isChildInFullView(GuiElement elem) {
         int offY = this.visibleChildren.getOrDefault(elem, -1);
         return offY >= 0 && offY + elem.getHeight() <= this.areaHeight;
+    }
+
+    public static class Builder<T extends ScrollPanel>
+            extends GuiElement.Builder<T>
+    {
+        protected Builder(T elem) {
+            super(elem);
+        }
+
+        public Builder<T> withPadding(Spacing padding) {
+            this.elem.padding = padding;
+
+            return this;
+        }
+
+        public Builder<T> withAreaSize(int width, int height) {
+            this.elem.areaWidth = width;
+            this.elem.areaHeight = height;
+
+            return this;
+        }
+
+        public Builder<T> withScrollHeight(int height) {
+            this.elem.scrollHeight = height;
+
+            return this;
+        }
+
+        public Builder<T> withMinScrollDelta(double delta) {
+            this.elem.minScrollDelta = delta;
+
+            return this;
+        }
+
+        public Builder<T> withRasterized() {
+            this.elem.rasterized = true;
+
+            return this;
+        }
+
+        public Builder<T> withoutRasterized() {
+            this.elem.rasterized = false;
+
+            return this;
+        }
+
+        public Builder<T> withScrollButton(GuiElement button) {
+            this.elem.scrollBtn = button;
+
+            return this;
+        }
+
+        public Builder<T> withChild(String id, GuiElement child) {
+            this.elem.putElement(id, child);
+            return this;
+        }
+
+        public Builder<T> withChild(GuiElement child) {
+            this.elem.putElement(child);
+            return this;
+        }
+
+        public static Builder<ScrollPanel> createScrollPanel() {
+            return createScrollPanel(UUID.randomUUID().toString());
+        }
+
+        public static Builder<ScrollPanel> createScrollPanel(String id) {
+            return new Builder<>(new ScrollPanel(id));
+        }
     }
 }

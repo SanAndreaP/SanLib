@@ -145,11 +145,11 @@ public class StackPanel
             return this;
         }
 
-        public static Builder<StackPanel> create() {
-            return create(UUID.randomUUID().toString());
+        public static Builder<StackPanel> createStackPanel() {
+            return createStackPanel(UUID.randomUUID().toString());
         }
 
-        public static Builder<StackPanel> create(String id) {
+        public static Builder<StackPanel> createStackPanel(String id) {
             return new Builder<>(new StackPanel(id));
         }
     }

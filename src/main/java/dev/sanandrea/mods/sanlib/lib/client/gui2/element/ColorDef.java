@@ -101,7 +101,7 @@ public class ColorDef
             if( tf != null && tf.isColor() ) {
                 return MiscUtils.get(tf.getColor(), 0);
             } else if( Pattern.matches("-?\\d+", colorStr) ) {
-                return Integer.getInteger(colorStr);
+                return Integer.parseInt(colorStr);
             } else {
                 return getColorFromRgba(colorStr);
             }

@@ -159,7 +159,7 @@ public class TiledTexture
 //endregion
     
     public static class Builder<T extends TiledTexture>
-            extends GuiElement.Builder<T>
+            extends Texture.Builder<T>
     {
         protected Builder(T elem) { super(elem); }
 
@@ -177,11 +177,11 @@ public class TiledTexture
             return this;
         }
 
-        public static Builder<TiledTexture> create() {
-            return create(UUID.randomUUID().toString());
+        public static Builder<TiledTexture> createTiledTexture() {
+            return createTiledTexture(UUID.randomUUID().toString());
         }
 
-        public static Builder<TiledTexture> create(String id) {
+        public static Builder<TiledTexture> createTiledTexture(String id) {
             return new Builder<>(new TiledTexture(id));
         }
     }

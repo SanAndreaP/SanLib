@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import dev.sanandrea.mods.sanlib.SanLib;
+import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Button;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Empty;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.IElementContainer;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Rectangle;
@@ -62,6 +63,7 @@ public class GuiDefinition
         TYPES.put(StackPanel.ID, StackPanel::new);
         TYPES.put(ScrollPanel.ID, ScrollPanel::new);
         TYPES.put(TiledTexture.ID, TiledTexture::new);
+        TYPES.put(Button.ID, Button::new);
     }
 
     public int width;

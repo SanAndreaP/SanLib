@@ -137,7 +137,8 @@ public abstract class ElementParent
         } else if( data.isJsonArray() ) {
             JsonArray arr = data.getAsJsonArray();
             for( int i = 0, max = arr.size(); i < max; i++ ) {
-                this.putElement(guiDef.loadElement(String.format("%s_#%d", this.id, i), arr.get(i).getAsJsonObject()));
+                String key = String.format("%s_#%d", this.id, i);
+                this.putElement(key, guiDef.loadElement(key, arr.get(i).getAsJsonObject()));
             }
         }
     }

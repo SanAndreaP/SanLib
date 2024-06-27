@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import org.apache.commons.lang3.Range;
 
+@SuppressWarnings("unused")
 public class Spacing
 {
     private int top;
@@ -12,7 +13,7 @@ public class Spacing
     private int left;
     private int right;
 
-    private boolean isMutable = true;
+    private boolean isMutable;
 
     public int getTop() {
         return this.top;

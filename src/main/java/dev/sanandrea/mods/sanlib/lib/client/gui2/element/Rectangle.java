@@ -220,11 +220,11 @@ public class Rectangle
             return this;
         }
 
-        public static Builder<Rectangle> create() {
-            return create(UUID.randomUUID().toString());
+        public static Builder<Rectangle> createRectangle() {
+            return createRectangle(UUID.randomUUID().toString());
         }
 
-        public static Builder<Rectangle> create(String id) {
+        public static Builder<Rectangle> createRectangle(String id) {
             return new Builder<>(new Rectangle(id));
         }
     }

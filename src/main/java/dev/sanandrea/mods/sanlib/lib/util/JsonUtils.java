@@ -352,6 +352,12 @@ public final class JsonUtils
         }
     }
 
+    public static JsonObject addDefaultJsonProperty(JsonObject jobj, String name, JsonElement val) {
+        if( !jobj.has(name) ) { jobj.add(name, val); }
+
+        return jobj;
+    }
+
     public static JsonObject addDefaultJsonProperty(JsonObject jobj, String name, String val) {
         if( !jobj.has(name) ) { jobj.addProperty(name, val); }
 

@@ -30,6 +30,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 @SuppressWarnings("unused")
 public class Text
@@ -38,9 +39,20 @@ public class Text
     public static final ResourceLocation ID = new ResourceLocation("text");
 
     public static final String DEFAULT_COLOR = "default";
+    public static final String HOVER_COLOR = "hover";
+    public static final String DISABLED_COLOR = "disabled";
+
     public static final String BORDER_COLOR  = "border";
+    public static final String HOVER_BORDER_COLOR  = "borderHover";
+    public static final String DISABLED_BORDER_COLOR  = "borderDisabled";
+
     public static final String SHADOW_COLOR  = "shadow";
+    public static final String HOVER_SHADOW_COLOR  = "shadowHover";
+    public static final String DISABLED_SHADOW_COLOR  = "shadowDisabled";
+
     public static final String DEFAULT_SHADOW_COLOR = "default_shadow";
+    public static final String DEFAULT_HOVER_SHADOW_COLOR = "default_shadowHover";
+    public static final String DEFAULT_DISABLED_SHADOW_COLOR = "default_shadowDisabled";
 
     @Nonnull
     protected ITextComponent       bakedText       = StringTextComponent.EMPTY;
@@ -71,30 +83,34 @@ public class Text
         ITextComponent currText = this.getText.apply(gui, this.bakedText);
         if( prevText != currText ) {
             this.updateText(currText);
-            ColorObj clr = new ColorObj(colors.get(DEFAULT_COLOR));
-            colors.put(DEFAULT_SHADOW_COLOR, new ColorObj(clr.fRed()*0.25F, clr.fGreen()*0.25F, clr.fBlue()*0.25F, clr.fAlpha()).getColorInt());
         }
     }
 
     @Override
     public void render(IGui gui, MatrixStack matrixStack, int x, int y, double mouseX, double mouseY, float partialTicks) {
         Iterator<ITextProperties> lines = this.renderedLines.listIterator();
+
+        switch( this.vAlignment ) {
+            case CENTER:
+                y -= this.height / 2;
+                break;
+            case BOTTOM:
+                y -= this.height;
+                break;
+            default:
+        }
+
         while( lines.hasNext() ) {
             ITextProperties line = lines.next();
             boolean lastLine = !lines.hasNext();
 
-            boolean hasCustomShadowColor = this.colors.containsKey(SHADOW_COLOR);
             if( this.bordered ) {
-                this.renderLineBordered(matrixStack, x, y, line, hasCustomShadowColor, lastLine);
+                this.renderLineBordered(matrixStack, line, x, y, lastLine);
             } else if( this.shadow ) {
-                if( hasCustomShadowColor ) {
-                    this.setColor(SHADOW_COLOR);
-                } else {
-                    this.setColor(DEFAULT_SHADOW_COLOR);
-                }
-                this.renderLine(matrixStack, line, x+1, y+1, lastLine);
-                this.resetColor();
+                this.renderLineShadow(matrixStack, line, x, y, lastLine);
             }
+
+            this.setColor(this.getTextColorKey(DISABLED_COLOR, HOVER_COLOR, DEFAULT_COLOR, null, null));
             this.renderLine(matrixStack, line, x, y, lastLine);
             y += this.lineHeight;
         }
@@ -175,13 +191,11 @@ public class Text
                     return;
                 }
                 break;
-            case LEFT:
-                break;
             case CENTER:
-                x += (this.width - this.fontRenderer.width(s)) / 2;
+                x -= this.fontRenderer.width(s) / 2;
                 break;
             case RIGHT:
-                x += this.width - this.fontRenderer.width(s);
+                x -= this.fontRenderer.width(s);
                 break;
             default:
         }
@@ -196,23 +210,74 @@ public class Text
         }, Style.EMPTY);
     }
 
-    protected void renderLineBordered(MatrixStack matrixStack, int x, int y, ITextProperties line, boolean hasCustomShadowColor, boolean lastLine) {
+    protected void renderLineBordered(MatrixStack matrixStack, ITextProperties line, int x, int y, boolean lastLine) {
         if( this.shadow ) {
-            if( hasCustomShadowColor ) {
-                this.setColor(SHADOW_COLOR);
-            } else {
-                this.setColor(DEFAULT_SHADOW_COLOR);
-            }
-            this.renderLine(matrixStack, line, x+1, y+1, lastLine);
-            this.renderLine(matrixStack, line, x+2, y+1, lastLine);
-            this.renderLine(matrixStack, line, x+1, y+2, lastLine);
-            this.resetColor();
+            renderLineShadow(matrixStack, line, x, y, lastLine);
+            renderLineShadow(matrixStack, line, x+1, y, lastLine);
+            renderLineShadow(matrixStack, line, x, y+1, lastLine);
         }
-        this.setColor(BORDER_COLOR);
+
+        this.setColor(this.getTextColorKey(DISABLED_BORDER_COLOR, HOVER_BORDER_COLOR, BORDER_COLOR, null, null));
         this.renderLine(matrixStack, line, x + 1, y, lastLine);
         this.renderLine(matrixStack, line, x, y + 1, lastLine);
         this.renderLine(matrixStack, line, x - 1, y, lastLine);
         this.renderLine(matrixStack, line, x, y - 1, lastLine);
+        this.resetColor();
+    }
+
+    protected String getTextColorKey(String disabledKey, String hoverKey, String regularKey,
+                                     UnaryOperator<String> altDisabledComputor, UnaryOperator<String> altHoverComputor)
+    {
+        if( !this.isEnabled() ) {
+            if( this.colors.containsKey(disabledKey) ) {
+                return disabledKey;
+            } else if( altDisabledComputor != null ) {
+                return altDisabledComputor.apply(regularKey);
+            } else {
+                return regularKey;
+            }
+        } else if( this.isHovering() ) {
+            if( this.colors.containsKey(hoverKey) ) {
+                return hoverKey;
+            } else if( altHoverComputor != null ) {
+                return altHoverComputor.apply(regularKey);
+            } else {
+                return regularKey;
+            }
+        } else {
+            return regularKey;
+        }
+    }
+
+    protected int getShadowColor(String baseColorKey) {
+        ColorObj clr = new ColorObj(colors.get(baseColorKey));
+        return new ColorObj(clr.fRed() * 0.25F, clr.fGreen() * 0.25F, clr.fBlue() * 0.25F, clr.fAlpha()).getColorInt();
+    }
+
+    protected void renderLineShadow(MatrixStack matrixStack, ITextProperties line, int x, int y, boolean lastLine) {
+        String colorKey = this.getTextColorKey(DISABLED_SHADOW_COLOR, HOVER_SHADOW_COLOR, SHADOW_COLOR,
+                                               regularKey -> {
+                                                   if( this.colors.containsKey(DISABLED_COLOR) ) {
+                                                       this.colors.computeIfAbsent(DEFAULT_DISABLED_SHADOW_COLOR, key -> this.getShadowColor(DISABLED_COLOR));
+                                                       return DEFAULT_DISABLED_SHADOW_COLOR;
+                                                   }
+                                                   return regularKey;
+                                               }, regularKey -> {
+                                                   if( this.colors.containsKey(HOVER_COLOR) ) {
+                                                       this.colors.computeIfAbsent(DEFAULT_HOVER_SHADOW_COLOR, key -> this.getShadowColor(HOVER_COLOR));
+                                                       return DEFAULT_HOVER_SHADOW_COLOR;
+                                                   }
+                                                   return regularKey;
+                                               });
+
+        if( this.colors.containsKey(colorKey) ) {
+            this.setColor(colorKey);
+        } else {
+            this.colors.computeIfAbsent(DEFAULT_SHADOW_COLOR, key -> this.getShadowColor(DEFAULT_COLOR));
+            this.setColor(DEFAULT_SHADOW_COLOR);
+        }
+
+        this.renderLine(matrixStack, line, x+1, y+1, lastLine);
         this.resetColor();
     }
 
@@ -273,6 +338,30 @@ public class Text
             return this.withColor(BORDER_COLOR, color);
         }
 
+        public Builder<T> withHoverColor(int color) {
+            return this.withColor(HOVER_COLOR, color);
+        }
+
+        public Builder<T> withHoverShadowColor(int color) {
+            return this.withColor(HOVER_SHADOW_COLOR, color);
+        }
+
+        public Builder<T> withHoverBorderColor(int color) {
+            return this.withColor(HOVER_BORDER_COLOR, color);
+        }
+
+        public Builder<T> withDisabledColor(int color) {
+            return this.withColor(DISABLED_COLOR, color);
+        }
+
+        public Builder<T> withDisabledShadowColor(int color) {
+            return this.withColor(DISABLED_SHADOW_COLOR, color);
+        }
+
+        public Builder<T> withDisabledBorderColor(int color) {
+            return this.withColor(DISABLED_BORDER_COLOR, color);
+        }
+
         public Builder<T> withShadow() {
             this.elem.shadow = true;
 
@@ -327,11 +416,11 @@ public class Text
             return this;
         }
 
-        public static Builder<Text> create() {
-            return create(UUID.randomUUID().toString());
+        public static Builder<Text> createText() {
+            return createText(UUID.randomUUID().toString());
         }
 
-        public static Builder<Text> create(String id) {
+        public static Builder<Text> createText(String id) {
             return new Builder<>(new Text(id));
         }
     }
