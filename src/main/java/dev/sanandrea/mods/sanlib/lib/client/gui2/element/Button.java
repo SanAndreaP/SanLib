@@ -41,7 +41,7 @@ public class Button
     protected static final int DEFAULT_TEXT_COLOR = 0xFFFFFFFF;
     protected static final int DEFAULT_DISABLED_TEXT_COLOR = 0xFFA0A0A0;
 
-    protected Consumer<Button> onClick;
+    protected Consumer<Button> onClickListener;
 
     public Button(String id) {
         super(id);
@@ -137,8 +137,8 @@ public class Button
     @Override
     public boolean mouseClicked(IGui gui, double mouseX, double mouseY, int button) {
         if( this.isEnabled() && this.isHovering() ) {
-            if( this.onClick != null ) {
-                this.onClick.accept(this);
+            if( this.onClickListener != null ) {
+                this.onClickListener.accept(this);
             }
 
             if( this.customSoundID != null ) {
@@ -146,6 +146,8 @@ public class Button
             }
 
             Minecraft.getInstance().getSoundManager().play(SimpleSound.forUI(MiscUtils.get(this.customSound, SoundEvents.UI_BUTTON_CLICK), 1.0F));
+
+            return true;
         }
 
         return super.mouseClicked(gui, mouseX, mouseY, button);
@@ -178,6 +180,10 @@ public class Button
 
         MiscUtils.accept(this.getElement(backgroundId), bkg -> bkg.setEnabled(isEnabled));
         MiscUtils.accept(this.getElement(labelId), lbl -> lbl.setEnabled(isEnabled));
+    }
+
+    public void setOnClickListener(Consumer<Button> listener) {
+        this.onClickListener = listener;
     }
 
     public static class Builder<T extends Button>

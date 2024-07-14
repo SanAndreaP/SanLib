@@ -9,6 +9,7 @@ import dev.sanandrea.mods.sanlib.lib.client.gui2.Spacing;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -23,7 +24,8 @@ public class StackPanel
     protected final List<GuiElement> orderedChildren = new ArrayList<>();
 
     protected Orientation orientation;
-    protected Spacing padding;
+    @Nonnull
+    protected Spacing padding = Spacing.NONE;
 
     public StackPanel(String id) {
         super(id);
@@ -91,9 +93,28 @@ public class StackPanel
     }
 
     @Override
+    public void renderDebug(IGui gui, MatrixStack matrixStack, int x, int y, double mouseX, double mouseY, float partialTicks, int level) {
+        super.renderDebug(gui, matrixStack, x, y, mouseX, mouseY, partialTicks, level);
+
+        int cx = x + this.padding.getLeft();
+        int cy = y + this.padding.getTop();
+        for( GuiElement child : this.orderedChildren ) {
+            if( child.isVisible() ) {
+                int offX = cx + child.getPosX();
+                int offY = cy + child.getPosY();
+
+                child.renderDebug(gui, matrixStack, offX, offY, mouseX, mouseY, partialTicks, level + 1);
+
+                cx += this.orientation == Orientation.HORIZONTAL ? child.getPosX() + child.getWidth() : 0;
+                cy += this.orientation == Orientation.VERTICAL ? child.getPosY() + child.getHeight() : 0;
+            }
+        }
+    }
+
+    @Override
     public void fromJson(IGui gui, GuiDefinition guiDef, JsonObject data) {
         this.orientation = Orientation.fromString(JsonUtils.getStringVal(data.get("orientation"), Orientation.VERTICAL.toString()));
-        this.padding = Spacing.loadSpacing(data.get("padding"));
+        this.padding = Spacing.loadSpacing(data.get("padding"), false);
 
         this.loadChildren(guiDef, data.get("children"));
     }

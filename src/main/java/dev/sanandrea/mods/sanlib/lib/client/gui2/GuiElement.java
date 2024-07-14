@@ -2,8 +2,17 @@ package dev.sanandrea.mods.sanlib.lib.client.gui2;
 
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
+import dev.sanandrea.mods.sanlib.lib.ColorObj;
+import dev.sanandrea.mods.sanlib.lib.client.gui2.element.ColorDef;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraftforge.eventbus.api.EventPriority;
+import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
 import java.lang.annotation.ElementType;
@@ -14,6 +23,7 @@ import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 @SuppressWarnings("unused")
@@ -33,8 +43,10 @@ public abstract class GuiElement
     private boolean isEnabled = true;
 
     protected boolean isHovering = false;
+    protected boolean isFocused = false;
 
     public final boolean isResizable = this.getClass().isAnnotationPresent(Resizable.class);
+    public final boolean isFocusable = this.getClass().isAnnotationPresent(Focusable.class);
 
     protected final List<Runnable> geometryListeners = new ArrayList<>();
 
@@ -79,6 +91,29 @@ public abstract class GuiElement
         this.fromJson(gui, guiDef, data);
     }
 
+    public void renderDebug(IGui gui, MatrixStack matrixStack, int x, int y, double mouseX, double mouseY, float partialTicks, int level) {
+        int maxX = x + this.getWidth();
+        int maxY = y + this.getHeight();
+        Matrix4f pose = matrixStack.last().pose();
+        Tessellator   tessellator   = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuilder();
+
+        ColorObj color = ColorObj.fromHSLA(MathHelper.clamp(level * 360.0F / 10.0F, 0, 360.0F), 1.0F, 0.5F, 1.0F);
+        RenderSystem.color4f(color.fRed(), color.fGreen(), color.fBlue(), color.fAlpha());
+        RenderSystem.disableTexture();
+        bufferbuilder.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION);
+        bufferbuilder.vertex(pose, x,    y,    0.0F).endVertex();
+        bufferbuilder.vertex(pose, maxX, y,    0.0F).endVertex();
+        bufferbuilder.vertex(pose, maxX, y,    0.0F).endVertex();
+        bufferbuilder.vertex(pose, maxX, maxY, 0.0F).endVertex();
+        bufferbuilder.vertex(pose, maxX, maxY, 0.0F).endVertex();
+        bufferbuilder.vertex(pose, x,    maxY, 0.0F).endVertex();
+        bufferbuilder.vertex(pose, x,    maxY, 0.0F).endVertex();
+        bufferbuilder.vertex(pose, x,    y,    0.0F).endVertex();
+        tessellator.end();
+        RenderSystem.enableTexture();
+    }
+
     public abstract void fromJson(IGui gui, GuiDefinition guiDef, JsonObject data);
 
     protected static boolean checkHovering(IGui gui, int x, int y, double mouseX, double mouseY, int width, int height) {
@@ -87,6 +122,7 @@ public abstract class GuiElement
         return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
     }
 
+    //region Getters & Setters
     public boolean canHover(IGui gui, int x, int y, double mouseX, double mouseY) {
         return checkHovering(gui, x, y, mouseX, mouseY, this.getWidth(), this.getHeight());
     }
@@ -96,14 +132,35 @@ public abstract class GuiElement
     }
 
     public boolean isHovering() {
-        return this.isHovering;
+        return this.isHovering || this.isFocused;
     }
 
     public void setHovering(boolean hovering) {
         this.isHovering = hovering;
     }
 
-//region Getters & Setters
+    public void setFocus(GuiDefinition def, boolean focus) {
+        if( this.isFocusable ) {
+            if( isFocused && !focus ) {
+                def.setFocusedElement(null);
+            } else if( !isFocused && focus ) {
+                def.setFocusedElement(this);
+            }
+        }
+    }
+
+    public void setFocus(GuiDefinition def, boolean focus, UUID defID) {
+        if( def.checkID(defID) ) {
+            this.isFocused = focus;
+        }
+    }
+
+    public boolean isFocused() {
+        return this.isFocused;
+    }
+
+    public void onFocusChange(boolean focus) { }
+
     public String getId() {
         return this.id;
     }
@@ -282,6 +339,10 @@ public abstract class GuiElement
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
     public @interface Resizable { }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    public @interface Focusable { }
 
     public abstract static class Builder<T extends GuiElement>
     {

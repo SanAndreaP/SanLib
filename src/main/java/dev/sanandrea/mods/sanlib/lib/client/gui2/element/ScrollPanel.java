@@ -7,6 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.GuiDefinition;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.GuiElement;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.IGui;
+import dev.sanandrea.mods.sanlib.lib.client.gui2.IGuiReference;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.Spacing;
 import dev.sanandrea.mods.sanlib.lib.client.util.GuiUtils;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
@@ -15,6 +16,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -44,7 +46,8 @@ public class ScrollPanel
     protected int        scrollHeight;
     protected double     minScrollDelta = 0.0F;
     protected boolean    rasterized;
-    protected Spacing    padding;
+    @Nonnull
+    protected Spacing    padding = Spacing.NONE;
 
     protected int     scrollButtonOffsetY = 0;
     protected boolean isMouseDownScrolling;
@@ -181,8 +184,27 @@ public class ScrollPanel
     }
 
     @Override
+    public void renderDebug(IGui gui, MatrixStack matrixStack, int x, int y, double mouseX, double mouseY, float partialTicks, int level) {
+        super.renderDebug(gui, matrixStack, x, y, mouseX, mouseY, partialTicks, level);
+
+        x += this.padding.getLeft();
+        for( Map.Entry<GuiElement, Integer> childEntry : this.visibleChildren.entrySet() ) {
+            GuiElement child = childEntry.getKey();
+            if( child.isVisible() ) {
+                int cx = x + child.getPosX();
+                int cy = y + childEntry.getValue();
+                child.renderDebug(gui, matrixStack, cx, cy, mouseX, mouseY, partialTicks, level+1);
+            }
+        }
+        int scrollBtnX = this.scrollBtn.getPosX();
+        int scrollBtnY = this.scrollBtn.getPosY() + this.scrollButtonOffsetY;
+
+        this.scrollBtn.renderDebug(gui, matrixStack, scrollBtnX, scrollBtnY, mouseX, mouseY, partialTicks, level+1);
+    }
+
+    @Override
     public void fromJson(IGui gui, GuiDefinition guiDef, JsonObject data) {
-        this.padding = Spacing.loadSpacing(data.get("padding"));
+        this.padding = Spacing.loadSpacing(data.get("padding"), false);
         this.areaWidth = JsonUtils.getIntVal(data.get("areaWidth"));
         this.areaHeight = JsonUtils.getIntVal(data.get("areaHeight"));
         this.scrollHeight = JsonUtils.getIntVal(data.get("scrollHeight"), this.areaHeight);

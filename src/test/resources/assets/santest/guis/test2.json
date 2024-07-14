@@ -8,6 +8,11 @@
       "width": 195,
       "height": 136
     },
+    "testTextField": {
+      "type": "textfield",
+      "width": 100,
+      "height": 20
+    },
     "testRectangle": {
       "type": "_rectangle",
       "width": 50,

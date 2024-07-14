@@ -15,10 +15,12 @@ import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Rectangle;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.ScrollPanel;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.StackPanel;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Text;
+import dev.sanandrea.mods.sanlib.lib.client.gui2.element.TextField;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.Texture;
 import dev.sanandrea.mods.sanlib.lib.client.gui2.element.TiledTexture;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import dev.sanandrea.mods.sanlib.lib.util.MiscUtils;
+import dev.sanandrea.mods.sanlib.lib.util.UuidUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.resources.IResource;
@@ -42,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -64,6 +67,7 @@ public class GuiDefinition
         TYPES.put(ScrollPanel.ID, ScrollPanel::new);
         TYPES.put(TiledTexture.ID, TiledTexture::new);
         TYPES.put(Button.ID, Button::new);
+        TYPES.put(TextField.ID, TextField::new);
     }
 
     public int width;
@@ -81,6 +85,10 @@ public class GuiDefinition
     private Consumer<JsonObject> loadHandler;
 
     private final IGui gui;
+
+    private final UUID currentInstID = UUID.randomUUID();
+
+    private GuiElement currentFocus = null;
 
     GuiDefinition(IGui gui, ResourceLocation data) throws IOException {
         this.gui = gui;
@@ -243,6 +251,7 @@ public class GuiDefinition
 
             e.updateHovering(gui, offsetX, offsetY, mouseX, mouseY);
             e.render(gui, matrixStack, offsetX, offsetY, mouseX, mouseY, partialTicks);
+            e.renderDebug(gui, matrixStack, offsetX, offsetY, mouseX, mouseY, partialTicks, 0);
         }
     }
 
@@ -381,6 +390,20 @@ public class GuiDefinition
         return prev;
     }
 
+    public void setFocusedElement(GuiElement element) {
+        if( element == null || element.isFocusable ) {
+            MiscUtils.accept(this.currentFocus, e -> {
+                e.setFocus(this, false, this.currentInstID);
+                e.onFocusChange(false);
+            });
+            this.currentFocus = element;
+            MiscUtils.accept(element, e -> {
+                e.setFocus(this, true, this.currentInstID);
+                e.onFocusChange(true);
+            });
+        }
+    }
+
     @Override
     public GuiElement getElement(String id, boolean recursive) {
         GuiElement elem = MiscUtils.get(this.backgroundElements.get(id), () -> this.foregroundElements.get(id));
@@ -389,6 +412,10 @@ public class GuiDefinition
         }
 
         return elem;
+    }
+
+    public GuiElement getFocusedElement() {
+        return this.currentFocus;
     }
 
     @Override
@@ -466,5 +493,9 @@ public class GuiDefinition
     @Override
     public boolean isImmutable() {
         return true;
+    }
+
+    public boolean checkID(UUID defID) {
+        return UuidUtils.areUuidsEqual(this.currentInstID, defID);
     }
 }

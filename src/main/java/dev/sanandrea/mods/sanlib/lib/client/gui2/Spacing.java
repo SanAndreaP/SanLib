@@ -8,6 +8,7 @@ import org.apache.commons.lang3.Range;
 @SuppressWarnings("unused")
 public class Spacing
 {
+    public static final Spacing NONE = new Spacing(0, false);
     private int top;
     private int bottom;
     private int left;
@@ -99,21 +100,21 @@ public class Spacing
         this(all, all, all, all);
     }
 
-    public static Spacing loadSpacing(JsonElement data) {
+    public static Spacing loadSpacing(JsonElement data, boolean isMutable) {
         if( data == null ) {
-            return new Spacing(0);
+            return new Spacing(0, isMutable);
         }
 
         if( data.isJsonPrimitive() ) {
-            return new Spacing(JsonUtils.getIntVal(data, 0));
+            return new Spacing(JsonUtils.getIntVal(data, 0), isMutable);
         } else if( data.isJsonArray() ) {
             int[] arr = JsonUtils.getIntArray(data, new int[] {0}, Range.between(1, 4));
 
             switch( arr.length ) {
-                case 4: return new Spacing(arr[0], arr[1], arr[2], arr[3]);
-                case 3: return new Spacing(arr[0], arr[1], arr[2]);
-                case 2: return new Spacing(arr[0], arr[1]);
-                case 1: return new Spacing(arr[0]);
+                case 4: return new Spacing(arr[0], arr[1], arr[2], arr[3], isMutable);
+                case 3: return new Spacing(arr[0], arr[1], arr[2], isMutable);
+                case 2: return new Spacing(arr[0], arr[1], isMutable);
+                case 1: return new Spacing(arr[0], isMutable);
                 default: // return default at end of method
             }
         } else if( data.isJsonObject() ) {
@@ -140,9 +141,9 @@ public class Spacing
                 }
             }
 
-            return new Spacing(top, right, bottom, left);
+            return new Spacing(top, right, bottom, left, isMutable);
         }
 
-        return new Spacing(0);
+        return new Spacing(0, isMutable);
     }
 }

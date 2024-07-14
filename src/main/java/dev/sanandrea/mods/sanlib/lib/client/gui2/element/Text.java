@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
@@ -60,7 +61,7 @@ public class Text
     protected boolean              shadow          = true;
     protected int                  wrapWidth       = 0;
     protected FontRenderer         fontRenderer    = Minecraft.getInstance().font;
-    protected int                  lineHeight      = 9;
+    protected int                  lineHeight      = 10;
     protected boolean              bordered        = false;
     protected boolean              justifyLastLine = false;
 
@@ -69,6 +70,7 @@ public class Text
     @Nonnull
     private BiFunction<IGui, ITextComponent, ITextComponent> getText = (gui, origText) -> origText;
 
+    private       String                currColorId = DEFAULT_COLOR;
     private       int                   currColor;
     private       int                   prevColor;
     private       ITextComponent        prevText;
@@ -110,8 +112,9 @@ public class Text
                 this.renderLineShadow(matrixStack, line, x, y, lastLine);
             }
 
-            this.setColor(this.getTextColorKey(DISABLED_COLOR, HOVER_COLOR, DEFAULT_COLOR, null, null));
+            this.setColor(this.getTextColorKey(DISABLED_COLOR, HOVER_COLOR, this.currColorId, null, null), false);
             this.renderLine(matrixStack, line, x, y, lastLine);
+
             y += this.lineHeight;
         }
     }
@@ -168,11 +171,21 @@ public class Text
     }
 
     public void setColor(String colorId) {
+        this.setColor(colorId, true);
+    }
+
+    protected void setColor(String colorId, boolean updateCurrColorId) {
         this.prevColor = this.currColor;
 
         if( colorId == null || !this.colors.containsKey(colorId) ) {
-            this.currColor = this.colors.getOrDefault(DEFAULT_COLOR, 0xFF000000);
+            if( updateCurrColorId ) {
+                this.currColorId = DEFAULT_COLOR;
+            }
+            this.currColor = this.getColor(DEFAULT_COLOR);
         } else {
+            if( updateCurrColorId ) {
+                this.currColorId = colorId;
+            }
             this.currColor = this.colors.get(colorId);
         }
     }
@@ -181,6 +194,10 @@ public class Text
         int clr = this.currColor;
         this.currColor = this.prevColor;
         this.prevColor = clr;
+    }
+
+    public FontRenderer getFont() {
+        return this.fontRenderer;
     }
 
     protected void renderLine(MatrixStack stack, ITextProperties s, int x, int y, boolean lastLine) {
@@ -217,7 +234,7 @@ public class Text
             renderLineShadow(matrixStack, line, x, y+1, lastLine);
         }
 
-        this.setColor(this.getTextColorKey(DISABLED_BORDER_COLOR, HOVER_BORDER_COLOR, BORDER_COLOR, null, null));
+        this.setColor(this.getTextColorKey(DISABLED_BORDER_COLOR, HOVER_BORDER_COLOR, BORDER_COLOR, null, null), false);
         this.renderLine(matrixStack, line, x + 1, y, lastLine);
         this.renderLine(matrixStack, line, x, y + 1, lastLine);
         this.renderLine(matrixStack, line, x - 1, y, lastLine);
@@ -250,8 +267,12 @@ public class Text
     }
 
     protected int getShadowColor(String baseColorKey) {
-        ColorObj clr = new ColorObj(colors.get(baseColorKey));
+        ColorObj clr = new ColorObj(this.getColor(baseColorKey));
         return new ColorObj(clr.fRed() * 0.25F, clr.fGreen() * 0.25F, clr.fBlue() * 0.25F, clr.fAlpha()).getColorInt();
+    }
+
+    public int getColor(String colorKey) {
+        return colors.getOrDefault(colorKey, 0xFF000000);
     }
 
     protected void renderLineShadow(MatrixStack matrixStack, ITextProperties line, int x, int y, boolean lastLine) {
@@ -271,10 +292,10 @@ public class Text
                                                });
 
         if( this.colors.containsKey(colorKey) ) {
-            this.setColor(colorKey);
+            this.setColor(colorKey, false);
         } else {
             this.colors.computeIfAbsent(DEFAULT_SHADOW_COLOR, key -> this.getShadowColor(DEFAULT_COLOR));
-            this.setColor(DEFAULT_SHADOW_COLOR);
+            this.setColor(DEFAULT_SHADOW_COLOR, false);
         }
 
         this.renderLine(matrixStack, line, x+1, y+1, lastLine);
