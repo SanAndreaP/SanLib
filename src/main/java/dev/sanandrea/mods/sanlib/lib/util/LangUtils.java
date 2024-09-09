@@ -4,26 +4,30 @@
 package dev.sanandrea.mods.sanlib.lib.util;
 
 import dev.sanandrea.mods.sanlib.Constants;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.LanguageMap;
+import net.minecraft.locale.Language;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Arrays;
 
 @SuppressWarnings({ "unused", "WeakerAccess" })
 public final class LangUtils
 {
-    public static final TranslateKey LEXICON_GROUP_NAME = newKey("%s.lexicon.%%s.%%s.name").format(Constants.ID).build();
-    public static final TranslateKey LEXICON_ENTRY_NAME = newKey("%s.lexicon.%%s.%%s.%%s.name").format(Constants.ID).build();
-    public static final TranslateKey LEXICON_ENTRY_TEXT = newKey("%s.lexicon.%%s.%%s.%%s.text").format(Constants.ID).build();
+    public static final TranslateKey LEXICON_GROUP_NAME      = newKey("%s.lexicon.%%s.%%s.name").format(Constants.ID).build();
+    public static final TranslateKey LEXICON_ENTRY_NAME      = newKey("%s.lexicon.%%s.%%s.%%s.name").format(Constants.ID).build();
+    public static final TranslateKey LEXICON_ENTRY_TEXT      = newKey("%s.lexicon.%%s.%%s.%%s.text").format(Constants.ID).build();
     public static final TranslateKey LEXICON_SRC_ENTRY_TITLE = newKey("%s.lexicon.%%s.search.title").format(Constants.ID).build();
-    public static final TranslateKey LEXICON_SRC_ENTRY_TEXT = newKey("%s.lexicon.%%s.search.text").format(Constants.ID).build();
+    public static final TranslateKey LEXICON_SRC_ENTRY_TEXT  = newKey("%s.lexicon.%%s.search.text").format(Constants.ID).build();
 
     public static final TranslateKey ENTITY_NAME   = newKey("entity.%s").withoutRlColon().build();
     public static final TranslateKey CONTAINER_INV = newKey("container.inventory").build();
 
+    private LangUtils() {}
+
     /**
      * translates the language key to a string and formats it with the specified arguments, if any.
+     *
      * @param langKey language key to be translated
+     *
      * @return translated key or langKey, if translation fails
      */
     public static String translate(String langKey, Object... args) {
@@ -36,8 +40,8 @@ public final class LangUtils
 
     public static String translateOrDefault(String langKey, String defaultVal, Object... args) {
         final String s;
-        if( LanguageMap.getInstance().has(langKey) ) {
-            String l = LanguageMap.getInstance().getOrDefault(langKey);
+        if( Language.getInstance().has(langKey) ) {
+            String l = Language.getInstance().getOrDefault(langKey);
             s = args == null || args.length < 1 ? l : String.format(l, args);
         } else {
             s = defaultVal;
@@ -56,7 +60,7 @@ public final class LangUtils
 
     public static final class TKeyBuilder
     {
-        String key;
+        String  key;
         boolean noRlColonFormat;
 
         private TKeyBuilder(String key) {
@@ -82,7 +86,7 @@ public final class LangUtils
 
     public static final class TranslateKey
     {
-        private final String key;
+        private final String  key;
         private final boolean noRlColonFormat;
 
         private TranslateKey(String key, boolean noRlColonFormat) {
@@ -97,7 +101,7 @@ public final class LangUtils
         public String get(Object... args) {
             if( this.noRlColonFormat ) {
                 args = Arrays.stream(args)
-                             .map(a -> a instanceof ResourceLocation ? a.toString().replaceAll(":", ".") : a)
+                             .map(a -> a instanceof ResourceLocation ? a.toString().replace(":", ".") : a)
                              .toArray();
             }
 

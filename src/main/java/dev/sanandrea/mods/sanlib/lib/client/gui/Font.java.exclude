@@ -1,0 +1,110 @@
+package dev.sanandrea.mods.sanlib.client.gui;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.mojang.blaze3d.font.GlyphProvider;
+import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.font.FontSet;
+import net.minecraft.resources.ResourceLocation;
+
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Objects;
+
+public final class Font
+{
+    public static final String STANDARD_FONT = "standard";
+
+    private final String texture;
+    private final JsonObject glyphProviderData;
+
+    private        WeakReference<net.minecraft.client.gui.Font> frInst;
+    private static net.minecraft.client.gui.Font                frGalactic;
+
+    public Font(String tx) {
+        this(tx, null);
+    }
+
+    public Font(String tx, JsonObject gpd) {
+        this.texture = tx;
+        this.glyphProviderData = gpd;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.texture);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if( this == o ) {
+            return true;
+        }
+
+        if( o == null || this.getClass() != o.getClass() ) {
+            return false;
+        }
+
+        Font font = (Font) o;
+        return Objects.equals(this.texture, font.texture);
+    }
+
+    private static void initGalactic(Minecraft mc) {
+        if( frGalactic == null ) {
+            net.minecraft.client.gui.Font f = getMcFont(mc, Minecraft.ALT_FONT);
+            frGalactic = new net.minecraft.client.gui.Font(r -> f, false);
+        }
+    }
+
+    public net.minecraft.client.gui.Font get(Minecraft mc) {
+        if( STANDARD_FONT.equals(this.texture) ) {
+            return mc.font;
+        } else if( "galactic".equals(this.texture) ) {
+            initGalactic(mc);
+
+            return frGalactic;
+        } else {
+            FontRenderer fr = this.frInst == null ? null : this.frInst.get();
+            if( fr == null ) {
+                IGlyphProvider p = null;
+                if( this.glyphProviderData != null ) {
+                    p = TextureGlyphProvider.Factory.fromJson(this.glyphProviderData).create(mc.getResourceManager());
+                }
+
+                net.minecraft.client.gui.fonts.Font f = getMcFont(mc, new ResourceLocation(this.texture), p);
+                this.frInst = new WeakReference<>(new FontRenderer(r -> f));
+            }
+
+            return fr;
+        }
+    }
+
+    public static FontSet getMcFont(Minecraft mc, ResourceLocation rl, GlyphProvider glyphProvider) {
+        FontSet f = new FontSet(mc.getTextureManager(), rl);
+        f.reload(new ArrayList<>(Collections.singleton(glyphProvider)));
+
+        return f;
+    }
+
+    public static net.minecraft.client.gui.fonts.Font getMcFont(Minecraft mc, ResourceLocation rl) {
+        return getMcFont(mc, rl, new DefaultGlyphProvider());
+    }
+
+    public static Font loadFont(JsonObject data) {
+        JsonElement cstFont = data.get("font");
+
+        if( cstFont == null ) {
+            return new Font(STANDARD_FONT);
+        } else if( cstFont.isJsonPrimitive() ) {
+            return new Font(cstFont.getAsString());
+        } else if( cstFont.isJsonObject() ) {
+            JsonObject cstFontObj = (JsonObject) cstFont;
+            return new Font(JsonUtils.getStringVal(cstFontObj.get("texture"), STANDARD_FONT), cstFontObj.getAsJsonObject("glyphProvider"));
+        } else {
+            throw new JsonParseException("font must either be an object or a string");
+        }
+    }
+}

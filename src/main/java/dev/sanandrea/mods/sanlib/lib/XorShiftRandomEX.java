@@ -6,6 +6,7 @@ package dev.sanandrea.mods.sanlib.lib;
 import java.util.Random;
 import java.util.Spliterator;
 import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
@@ -161,7 +162,7 @@ public class XorShiftRandomEX
         }
     }
 
-    private static abstract class RandomPrimitiveSpliterator<T>
+    private abstract static class RandomPrimitiveSpliterator<T>
             implements Spliterator<T>
     {
         long index;
@@ -170,7 +171,7 @@ public class XorShiftRandomEX
         final T bound;
         private final BiFunction<T, T, T> rng;
 
-        RandomPrimitiveSpliterator(long index, long fence, T origin, T bound, BiFunction<T, T, T> rng) {
+        RandomPrimitiveSpliterator(long index, long fence, T origin, T bound, BinaryOperator<T> rng) {
             this.index = index;
             this.fence = fence;
             this.origin = origin;
@@ -217,7 +218,8 @@ public class XorShiftRandomEX
 
         @Override
         public RandomIntsSpliterator trySplit() {
-            long i = this.index, m = (i + this.fence) >>> 1;
+            long i = this.index;
+            long m = (i + this.fence) >>> 1;
             return (m <= i) ? null : new RandomIntsSpliterator(i, this.index = m, this.origin, this.bound);
         }
 
@@ -242,7 +244,8 @@ public class XorShiftRandomEX
 
         @Override
         public RandomLongsSpliterator trySplit() {
-            long i = this.index, m = (i + this.fence) >>> 1;
+            long i = this.index;
+            long m = (i + this.fence) >>> 1;
             return (m <= i) ? null : new RandomLongsSpliterator(i, this.index = m, this.origin, this.bound);
         }
 
@@ -267,7 +270,8 @@ public class XorShiftRandomEX
 
         @Override
         public RandomDoublesSpliterator trySplit() {
-            long i = this.index, m = (i + this.fence) >>> 1;
+            long i = this.index;
+            long m = (i + this.fence) >>> 1;
             return (m <= i) ? null : new RandomDoublesSpliterator(i, this.index = m, this.origin, this.bound);
         }
 

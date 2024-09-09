@@ -3,17 +3,23 @@
  * Full license text can be found within the LICENSE.md file */
 package dev.sanandrea.mods.sanlib.lib.util;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.world.World;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeInput;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
 
 @SuppressWarnings("unused")
 public final class CraftingUtils
 {
-    public static <C extends IInventory, T extends IRecipe<C>> T findRecipe(World level, IRecipeType<T> type, final ItemStack result) {
-        return level.getRecipeManager().getAllRecipesFor(type).stream().filter(r -> ItemStackUtils.areEqual(result, r.getResultItem(), result.hasTag()))
+    private CraftingUtils() {}
+
+    public static <C extends RecipeInput, T extends Recipe<C>> RecipeHolder<T> findRecipe(Level level, RecipeType<T> type,
+                                                                                          final ItemStack result)
+    {
+        return level.getRecipeManager().getAllRecipesFor(type).stream()
+                    .filter(r -> ItemStack.isSameItemSameComponents(r.value().getResultItem(level.registryAccess()), result))
                     .findFirst().orElse(null);
     }
 }

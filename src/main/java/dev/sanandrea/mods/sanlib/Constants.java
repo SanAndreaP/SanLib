@@ -12,14 +12,10 @@ public class Constants
     static final        String VERSION                 = "2.0.0";
     static final        String VENDOR                  = "SanAndreaP";
 
-    static final String BUILD_MCVER    = "1.16.5";
+    static final String BUILD_MCVER    = "1.21.1";
     static final String BUILD_FORGEVER = "1.16.5-36.2.34";
     static final String BUILD_MAPPINGS_CHANNEL = "official";
     static final String BUILD_MAPPINGS_VERSION = "1.16.5";
-
-    public static final String PM_ID                  = "sanplayermodel";
-    public static final String PM_NAME                = "San's Player Model";
-    public static final String PM_VERSION             = "2.0.0";
 
     private Constants() { }
 }

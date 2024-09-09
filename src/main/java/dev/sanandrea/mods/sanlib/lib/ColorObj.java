@@ -3,6 +3,8 @@
  * Full license text can be found within the LICENSE.md file */
 package dev.sanandrea.mods.sanlib.lib;
 
+import java.util.Objects;
+
 /**
  * A class that contains color values
  */
@@ -20,15 +22,21 @@ public final class ColorObj
 
     /**
      * Creates a new color object from the passed HSLA values.
-     * @param hue The hue value, from {@code 0.0F} - {@code 360.0F}
+     *
+     * @param hue        The hue value, from {@code 0.0F} - {@code 360.0F}
      * @param saturation The saturation value, from {@code 0.0F} - {@code 1.0F}
-     * @param luminance The luminance value, from {@code 0.0F} - {@code 1.0F}
-     * @param alpha The alpha value, from  {@code 0.0F} - {@code 1.0F}
+     * @param luminance  The luminance value, from {@code 0.0F} - {@code 1.0F}
+     * @param alpha      The alpha value, from  {@code 0.0F} - {@code 1.0F}
      */
     public static ColorObj fromHSLA(float hue, float saturation, float luminance, float alpha) {
         ColorObj obj = new ColorObj();
         obj.calcAndSetRgbFromHsl(hue, saturation, luminance);
-        obj.a = (int) (alpha < 0.0F ? 0.0F : alpha > 1.0F ? 255.0F : alpha * 255.0F);
+
+        if( alpha < 0.0F ) {
+            obj.a = 0;
+        } else {
+            obj.a = alpha > 1.0F ? 255 : (int) (alpha * 255.0F);
+        }
 
         return obj;
     }
@@ -37,12 +45,12 @@ public final class ColorObj
         return new ColorObj(rgb | 0xFF000000);
     }
 
-    private ColorObj() { }
+    private ColorObj() {}
 
     /**
-     * Creates a new instance with an integer as its color value.<br>
-     * The integer can be written as hexadecimal number, {@code 0xAARRGGBB}, where as A is alpha, R is red, G is green and B is blue.<br>
-     * If you have integers of format 0xRRGGBB, then it's recommended to add the desired alpha with a bitwise OR, like: {@code clr | 0xAA000000}.
+     * Creates a new instance with an integer as its color value.<br> The integer can be written as hexadecimal number, {@code 0xAARRGGBB}, where as A is alpha, R is red, G is
+     * green and B is blue.<br> If you have integers of format 0xRRGGBB, then it's recommended to add the desired alpha with a bitwise OR, like: {@code clr | 0xAA000000}.
+     *
      * @param argb The color value as integer
      */
     public ColorObj(int argb) {
@@ -53,11 +61,11 @@ public final class ColorObj
     }
 
     /**
-     * Creates a new instance with each color component as integer value.<br>
-     * Each value has a range of {@code 0 - 255}. Anything lower / higher will be adjusted.
-     * @param red The value for the red color component
+     * Creates a new instance with each color component as integer value.<br> Each value has a range of {@code 0 - 255}. Anything lower / higher will be adjusted.
+     *
+     * @param red   The value for the red color component
      * @param green The value for the green color component
-     * @param blue The value for the blue color component
+     * @param blue  The value for the blue color component
      * @param alpha The value for the alpha color component (transparency)
      */
     public ColorObj(int red, int green, int blue, int alpha) {
@@ -68,23 +76,24 @@ public final class ColorObj
     }
 
     /**
-     * Creates a new instance with each color component as floating point value.<br>
-     * Each value has a range of {@code 0.0F - 1.0F}. Anything lower / higher will be adjusted.
-     * @param red The value for the red color component
+     * Creates a new instance with each color component as floating point value.<br> Each value has a range of {@code 0.0F - 1.0F}. Anything lower / higher will be adjusted.
+     *
+     * @param red   The value for the red color component
      * @param green The value for the green color component
-     * @param blue The value for the blue color component
+     * @param blue  The value for the blue color component
      * @param alpha The value for the alpha color component (transparency)
      */
+    @SuppressWarnings("java:S3358")
     public ColorObj(float red, float green, float blue, float alpha) {
-        this.r = (int) (red < 0.0F ? 0.0F : red > 1.0F ? 255.0F : red * 255.0F);
-        this.g = (int) (green < 0.0F ? 0.0F : green > 1.0F ? 255.0F : green * 255.0F);
-        this.b = (int) (blue < 0.0F ? 0.0F : blue > 1.0F ? 255.0F : blue * 255.0F);
-        this.a = (int) (alpha < 0.0F ? 0.0F : alpha > 1.0F ? 255.0F : alpha * 255.0F);
+        this.r = (int) (red < 0.0F ? 0.0F : (red > 1.0F ? 255.0F : red * 255.0F));
+        this.g = (int) (green < 0.0F ? 0.0F : (green > 1.0F ? 255.0F : green * 255.0F));
+        this.b = (int) (blue < 0.0F ? 0.0F : (blue > 1.0F ? 255.0F : blue * 255.0F));
+        this.a = (int) (alpha < 0.0F ? 0.0F : (alpha > 1.0F ? 255.0F : alpha * 255.0F));
     }
 
     /**
-     * Creates a new instance with all color components from the passed color object.<br>
-     * This will basically be an independent copy of the original.
+     * Creates a new instance with all color components from the passed color object.<br> This will basically be an independent copy of the original.
+     *
      * @param orig the color object to be copied
      */
     public ColorObj(ColorObj orig) {
@@ -96,6 +105,7 @@ public final class ColorObj
 
     /**
      * Getter for the red color component
+     *
      * @return The red color value
      */
     public int red() {
@@ -104,6 +114,7 @@ public final class ColorObj
 
     /**
      * Getter for the red color component
+     *
      * @return The red color value as floating point number
      */
     public float fRed() {
@@ -112,13 +123,16 @@ public final class ColorObj
 
     /**
      * Getter for the green color component
+     *
      * @return The green color value
      */
     public int green() {
         return this.g;
     }
+
     /**
      * Getter for the green color component
+     *
      * @return The green color value as floating point number
      */
     public float fGreen() {
@@ -127,6 +141,7 @@ public final class ColorObj
 
     /**
      * Getter for the blue color component
+     *
      * @return The blue color value
      */
     public int blue() {
@@ -135,6 +150,7 @@ public final class ColorObj
 
     /**
      * Getter for the blue color component
+     *
      * @return The blue color value as floating point number
      */
     public float fBlue() {
@@ -143,6 +159,7 @@ public final class ColorObj
 
     /**
      * Getter for the alpha component (transparency)
+     *
      * @return The alpha value
      */
     public int alpha() {
@@ -151,6 +168,7 @@ public final class ColorObj
 
     /**
      * Getter for the alpha component (transparency)
+     *
      * @return The alpha value as floating point number
      */
     public float fAlpha() {
@@ -163,38 +181,43 @@ public final class ColorObj
 
     /**
      * Setter for the red color component
+     *
      * @param red The red color value
      */
     public void setRed(int red) {
-        this.r = Math.max(0, Math.min(red, 255));
+        this.r = Math.clamp(red, 0, 255);
     }
 
     /**
      * Setter for the green color component
+     *
      * @param green The green color value
      */
     public void setGreen(int green) {
-        this.g = Math.max(0, Math.min(green, 255));
+        this.g = Math.clamp(green, 0, 255);
     }
 
     /**
      * Setter for the blue color component
+     *
      * @param blue The blue color value
      */
     public void setBlue(int blue) {
-        this.b = Math.max(0, Math.min(blue, 255));
+        this.b = Math.clamp(blue, 0, 255);
     }
 
     /**
      * Setter for the alpha component (transparency)
+     *
      * @param alpha The alpha value
      */
     public void setAlpha(int alpha) {
-        this.a = Math.max(0, Math.min(alpha, 255));
+        this.a = Math.clamp(alpha, 0, 255);
     }
 
     /**
      * Returns the color object as an integer. As a hexadecimal number, it looks like {@code 0xAARRGGBB}, where as A is alpha, R is red, G is green and B is blue.
+     *
      * @return this color object as integer
      */
     public int getColorInt() {
@@ -203,12 +226,13 @@ public final class ColorObj
 
     /**
      * Converts this color object into the HSL colorspace.
+     *
      * @return a floating point array containing the hue, saturation and luminance values, in this order.
      */
     public float[] calcHSL() {
         float[] hsl = new float[3];
-        int min = Math.min(this.r, Math.min(this.g, this.b));
-        int max = Math.max(this.r, Math.max(this.g, this.b));
+        int     min = Math.min(this.r, Math.min(this.g, this.b));
+        int     max = Math.max(this.r, Math.max(this.g, this.b));
 
         hsl[2] = (min + max) / 510.0F;
 
@@ -240,9 +264,10 @@ public final class ColorObj
 
     /**
      * Calculates the RGB values from the passed HSL values. This overrides the RGB components from this color object with the new colors.
-     * @param hue The new hue value, from {@code 0.0F} - {@code 360.0F}
+     *
+     * @param hue        The new hue value, from {@code 0.0F} - {@code 360.0F}
      * @param saturation The new saturation value, from {@code 0.0F} - {@code 1.0F}
-     * @param luminance The new luminance value, from {@code 0.0F} - {@code 1.0F}
+     * @param luminance  The new luminance value, from {@code 0.0F} - {@code 1.0F}
      */
     public void calcAndSetRgbFromHsl(float hue, float saturation, float luminance) {
         hue %= 360.0F;
@@ -266,7 +291,7 @@ public final class ColorObj
             rgb = new float[] { c, 0, x };
         }
 
-        rgb = new float[] { (rgb[0] + m) * 255.0F, ( rgb[1] + m ) *255.0F,( rgb[2] + m ) * 255.0F };
+        rgb = new float[] { (rgb[0] + m) * 255.0F, (rgb[1] + m) * 255.0F, (rgb[2] + m) * 255.0F };
 
         this.r = Math.round(rgb[0]);
         this.g = Math.round(rgb[1]);
@@ -276,8 +301,8 @@ public final class ColorObj
     @Override
     @SuppressWarnings("NonFinalFieldReferenceInEquals")
     public boolean equals(Object obj) {
-        if( obj instanceof ColorObj ) {
-            return this.equals((ColorObj) obj, this.a == 255);
+        if( obj instanceof ColorObj colorObj ) {
+            return this.equals(colorObj, this.a == 255);
         } else {
             return super.equals(obj);
         }
@@ -285,5 +310,10 @@ public final class ColorObj
 
     public boolean equals(ColorObj clr, boolean checkAlpha) {
         return this.r == clr.r && this.g == clr.g && this.b == clr.b && (!checkAlpha || this.a == clr.a);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(r, g, b, a);
     }
 }

@@ -4,7 +4,6 @@
 package dev.sanandrea.mods.sanlib.lib;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import net.minecraft.util.math.vector.Vector3d;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -19,7 +18,7 @@ import java.util.concurrent.atomic.AtomicLong;
 @SuppressWarnings({"unused"})
 public final class XorShiftRandom
 {
-    private final AtomicLong   seed = new AtomicLong(0xdeadbeef);
+    private final AtomicLong   seed = new AtomicLong(0xdeadbeefL);
     private final AtomicDouble        nextGaussian = new AtomicDouble();
     private final AtomicBoolean hasNextGaussian = new AtomicBoolean();
 
@@ -51,7 +50,7 @@ public final class XorShiftRandom
      */
     public void setSeed(long seed) {
         if( seed == 0 ) {
-            seed = 0xdeadbeef;
+            seed = 0xdeadbeefL;
         }
 
         this.seed.set(seed);
@@ -144,6 +143,7 @@ public final class XorShiftRandom
      * @param bytes the array to be randomized
      * @implNote similar to {@link java.util.Random#nextBytes(byte[])}
      */
+    @SuppressWarnings("java:S127")
     public void randomBytes(@Nonnull byte[] bytes) {
         for( int i = 0, max = bytes.length; i < max; ) {
             for( int r = randomInt(), n = Integer.SIZE / Byte.SIZE; n > 0 && i < max; r >>= 8, n-- ) {
@@ -242,12 +242,5 @@ public final class XorShiftRandom
             this.hasNextGaussian.set(true);
             return currNr * multiplier;
         }
-    }
-
-    public Vector3d randomVector(Vector3d from, Vector3d to) {
-        Vector3d distVec = from.vectorTo(to);
-        distVec.scale(this.randomDouble());
-
-        return from.add(distVec);
     }
 }

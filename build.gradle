@@ -1,17 +1,17 @@
-//file:noinspection GroovyAssignabilityCheck
-//file:noinspection GrUnresolvedAccess
-buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-    }
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'net.neoforged.moddev' version '1.0.17'
 }
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
+
+tasks.named('wrapper', Wrapper).configure {
+    // Define wrapper values here so as to not have to always do so when updating gradlew.properties.
+    // Switching this to Wrapper.DistributionType.ALL will download the full gradle sources that comes with
+    // documentation attached on cursor hover of gradle classes and methods. However, this comes with increased
+    // file size for Gradle. If you do switch this to ALL, run the Gradle wrapper task twice afterwards.
+    // (Verify by checking gradle/wrapper/gradle-wrapper.properties to see if distributionUrl now points to `-all`)
+    distributionType = Wrapper.DistributionType.BIN
+}
 
 Object grabConstant = { String name ->
     name = name.toUpperCase(Locale.ROOT)
@@ -24,201 +24,197 @@ Object grabConstant = { String name ->
     }
 } as Object
 
-boolean isSnapshots = true
-version = "${grabConstant('BUILD_MCVER')}-${grabConstant('VERSION')}"
-group = 'dev.sanandrea.mods'
-archivesBaseName = 'SanLib'
-String[] excludes = ['*.psd', '*.bbmodel', '*.ps1', 'santest/**', 'assets/santest/**']
+version = grabConstant('VERSION')
+group = mod_group_id
 
-java {
-    withSourcesJar()
-    toolchain.languageVersion = JavaLanguageVersion.of(8)
-}
-compileJava {
-    sourceCompatibility = targetCompatibility = '1.8'
-    options.debug = true
-    options.debugOptions.debugLevel = 'source,lines,vars'
+repositories {
+    mavenLocal()
 }
 
-println("Java: ${System.getProperty('java.version')} | JVM: ${System.getProperty('java.vm.version')} (${System.getProperty('java.vendor')}) | Arch: ${System.getProperty('os.arch')}")
-minecraft {
-    mappings channel: grabConstant('BUILD_MAPPINGS_CHANNEL'), version: grabConstant('BUILD_MAPPINGS_VERSION')
-    
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+base {
+    archivesName = grabConstant('ID')
+}
 
+// Mojang ships Java 21 to end users starting in 1.20.5, so mods should target Java 21.
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+neoForge {
+    // Specify the version of NeoForge to use.
+    version = project.neo_version
+
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
+
+    // This line is optional. Access Transformers are automatically detected
+    // accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
+
+    // Default run configurations.
+    // These can be tweaked, removed, or duplicated as needed.
     runs {
         client {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'info'
-            ideaModule "${project.group}.${project.name}.main" //fix for new IntelliJ versions
+            client()
 
-            mods {
-                sanlib {
-                    source sourceSets.main
-                }
-            }
+            programArguments.addAll '--uuid', '044d980d-5c2a-4030-95cf-cbfde69ea3cb', '--username', 'SanAndreaP'
+            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+            systemProperty 'neoforge.enabledGameTestNamespaces', grabConstant('ID')
         }
 
         server {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            ideaModule "${project.group}.${project.name}.main" //fix for new IntelliJ versions
-
-            mods {
-                sanlib {
-                    source sourceSets.main
-                }
-            }
+            server()
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', grabConstant('ID')
         }
 
-        test {
-            parent minecraft.runs.client
-
-            property 'forge.logging.console.level', 'debug'
-            args '--uuid', '044d980d-5c2a-4030-95cf-cbfde69ea3cb'
-            environment 'MOD_CLASSES', "sanlib%%${project.projectDir}/build/resources/test:sanlib%%${project.projectDir}/build/classes/java/main:sanlib%%${project.projectDir}/build/classes/java/test"
-            ideaModule "${project.group}.${project.name}.test"
-
-            mods {
-                sanlib {
-                    source sourceSets.main
-                }
-            }
+        // This run config launches GameTestServer and runs all registered gametests, then exits.
+        // By default, the server will crash when no gametests are provided.
+        // The gametest system is also enabled by default for other run configs under the /test command.
+        gameTestServer {
+            type = "gameTestServer"
+            systemProperty 'neoforge.enabledGameTestNamespaces', grabConstant('ID')
         }
 
         data {
-            workingDirectory project.file('run')
+            data()
 
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            ideaModule "${project.group}.${project.name}.main" //fix for new IntelliJ versions
+            // example of overriding the workingDirectory set in configureEach above, uncomment if you want to use it
+            // gameDirectory = project.file('run-data')
 
-            args '--mod', grabConstant('ID'), '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-
-            mods {
-                sanlib {
-                    source sourceSets.main
-                }
-            }
+            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
+            programArguments.addAll '--mod', grabConstant('ID'), '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
+
+        // applies to all the run configs above
+        configureEach {
+            // Recommended logging data for a userdev environment
+            // The markers can be added/remove as needed separated by commas.
+            // "SCAN": For mods scan.
+            // "REGISTRIES": For firing of registry events.
+            // "REGISTRYDUMP": For getting the contents of all registries.
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+
+            // Recommended logging level for the console
+            // You can set various levels here.
+            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+    }
+
+    mods {
+        // define mod <-> source bindings
+        // these are used to tell the game which sources are for which mod
+        // mostly optional in a single mod project
+        // but multi mod projects should define one per mod
+        "${grabConstant('ID')}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+
+    accessTransformers {
+        file('src/main/resources/META-INF/accesstransformer.cfg')
     }
 }
 
-sourceSets.main.resources {
-    srcDir 'src/generated/resources'
+// Include resources generated by data generators.
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+// Sets up a dependency configuration called 'localRuntime'.
+// This configuration should be used instead of 'runtimeOnly' to declare
+// a dependency that will be present for runtime testing but that is
+// "optional", meaning it will not be pulled by dependents of this mod.
+configurations {
+    runtimeClasspath.extendsFrom localRuntime
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${grabConstant('BUILD_FORGEVER')}"
+    // Example optional mod dependency with JEI
+    // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
+    // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
+    // compileOnly "mezz.jei:jei-${mc_version}-neoforge-api:${jei_version}"
+    // We add the full version to localRuntime, not runtimeOnly, so that we do not publish a dependency on it
+    // localRuntime "mezz.jei:jei-${mc_version}-neoforge:${jei_version}"
+
+    // Example mod dependency using a mod jar from ./libs with a flat dir repository
+    // This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar
+    // The group id is ignored when searching -- in this case, it is "blank"
+    // implementation "blank:coolmod-${mc_version}:${coolmod_version}"
+
+    // Example mod dependency using a file as dependency
+    // implementation files("libs/coolmod-${mc_version}-${coolmod_version}.jar")
+
+    // Example project dependency using a sister or child project:
+    // implementation project(":myproject")
+
+    // For more info:
+    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
+    // http://www.gradle.org/docs/current/userguide/dependency_management.html
 }
 
-processResources {
-    outputs.upToDateWhen { false } // ensure resources are copied properly
-    filesMatching('META-INF/mods.toml') {
-        expand (version: grabConstant('VERSION'),
-                name: grabConstant('NAME'),
-                pm_version: grabConstant('PM_VERSION'),
-                pm_name: grabConstant('PM_NAME'))
-    }
+// This block of code expands all declared replace properties in the specified resource targets.
+// A missing property will result in an error. Properties are expanded using ${} Groovy notation.
+var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            neo_version_range      : neo_version_range,
+            loader_version_range   : loader_version_range,
+            mod_id                 : grabConstant('ID'),
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : grabConstant('VERSION'),
+            mod_authors            : mod_authors,
+            mod_description        : mod_description
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
 }
+// Include the output of "generateModMetadata" as an input directory for the build
+// this works with both building through Gradle and the IDE.
+sourceSets.main.resources.srcDir generateModMetadata
+// To avoid having to run "generateModMetadata" manually, make it run on every project reload
+neoForge.ideSyncTask generateModMetadata
 
-jar {
-    exclude(excludes)
-    manifest {
-        attributes([
-            'Specification-Title' : grabConstant('ID'),
-            'Specification-Vendor' : grabConstant('VENDOR'),
-            'Specification-Version' : '1', // We are version 1 of ourselves
-            'Implementation-Title' : grabConstant('ID'),
-            'Implementation-Version' : archiveVersion,
-            'Implementation-Vendor' : grabConstant('VENDOR'),
-            'Implementation-Timestamp' : new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        ])
-    }
-
-    finalizedBy('reobfJar')
-}
-
+// Example configuration to allow publishing using the maven-publish plugin
 publishing {
     publications {
-        maven(MavenPublication) {
-            artifactId archivesBaseName.toLowerCase(Locale.ROOT)
-            artifact jar
-            artifact sourcesJar
+        register('mavenJava', MavenPublication) {
+            from components.java
         }
     }
     repositories {
         maven {
-            name "Repo"
-            url uri(project.findProperty("repo.url"))
-            version project.version + (isSnapshots ? "-SNAPSHOT" : "")
-            allowInsecureProtocol true
-            credentials {
-                username project.findProperty("repo.user")
-                password project.findProperty("repo.key")
-            }
-            authentication {
-                basic(BasicAuthentication)
-            }
+            url "file://${project.projectDir}/repo"
         }
     }
 }
 
-import net.minecraftforge.gradle.common.tasks.SignJar
-
-import javax.swing.JFrame
-import javax.swing.JLabel
-import javax.swing.JOptionPane
-import javax.swing.JPanel
-import javax.swing.JPasswordField
-import java.nio.file.Files
-
-tasks.register('signJar', SignJar) {
-    dependsOn jar
-    onlyIf {
-        project.hasProperty('keyStore')
-    }
-
-    keyStore = project.findProperty('keyStore')
-    alias = project.findProperty('keyStoreAlias')
-    storePass = project.findProperty('keyStorePass')
-    keyPass = project.findProperty('keyStoreKeyPass')
-    inputFile = jar.archiveFile
-    outputFile = jar.archiveFile
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
 
-build.finalizedBy signJar
-if( project.hasProperty("repo.key") ) {
-    signJar.finalizedBy publish
-}
-
-tasks.register('createSymlinks') {
-    if( !Files.exists(new File("${project.projectDir}/src/test/resources/assets/sanlib").toPath()) ) {
-        try {
-            Files.createSymbolicLink(new File("${project.projectDir}/src/test/resources/assets/sanlib").toPath(),
-                    new File("${project.projectDir}/src/main/resources/assets/sanlib").toPath())
-            Files.createSymbolicLink(new File("${project.projectDir}/src/test/resources/assets/sanplayermodel").toPath(),
-                    new File("${project.projectDir}/src/main/resources/assets/sanplayermodel").toPath())
-        } catch (ex) {
-            try {
-                JPanel panel = new JPanel()
-                JPasswordField pass = new JPasswordField(10)
-                panel.add(new JLabel("Please enter the root/admin password to create symbolic links:"))
-                panel.add(pass)
-                String[] options = [ "OK", "Cancel" ]
-                JFrame jf = new JFrame()
-                jf.setAlwaysOnTop(true)
-                int option = JOptionPane.showOptionDialog(jf, panel, "Enter the root password",
-                                                          JOptionPane.NO_OPTION, JOptionPane.PLAIN_MESSAGE,
-                                                          null, options, options[1])
-                if( option == 0 ) {
-                    char[] password = pass.getPassword()
-                    exec { commandLine "sh", "${project.projectDir}/dev/symlink.sh", new String(password) }
-                }
-            } catch (ex2) {
-            }
-        }
+// IDEA no longer automatically downloads sources/javadoc jars for dependencies, so we need to explicitly enable the behavior.
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
     }
 }
+
+//import net.neoforged.gradle.common.tasks.
+//tasks.register('signJar', SignJar) {
+//    dependsOn jar
+//    onlyIf {
+//        project.hasProperty('keyStore')
+//    }
+//
+//    keyStore = project.findProperty('keyStore')
+//    alias = project.findProperty('keyStoreAlias')
+//    storePass = project.findProperty('keyStorePass')
+//    keyPass = project.findProperty('keyStoreKeyPass')
+//    inputFile = jar.archiveFile
+//    outputFile = jar.archiveFile
+//}

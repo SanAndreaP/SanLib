@@ -1,0 +1,224 @@
+//file:noinspection GroovyAssignabilityCheck
+//file:noinspection GrUnresolvedAccess
+buildscript {
+    repositories {
+        maven { url = 'https://maven.minecraftforge.net' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+    }
+}
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
+
+Object grabConstant = { String name ->
+    name = name.toUpperCase(Locale.ROOT)
+    def f = new File("${project.projectDir}/src/main/java/dev/sanandrea/mods/sanlib/Constants.java").text
+    def m = f =~ name + /\s*=\s*"(.*?)"/
+    if( m.find() ) {
+        return m.group(1)
+    } else {
+        throw new IllegalArgumentException("Cannot grab constant ${name}!")
+    }
+} as Object
+
+boolean isSnapshots = true
+version = "${grabConstant('BUILD_MCVER')}-${grabConstant('VERSION')}"
+group = 'dev.sanandrea.mods'
+archivesBaseName = 'SanLib'
+String[] excludes = ['*.psd', '*.bbmodel', '*.ps1', 'santest/**', 'assets/santest/**']
+
+java {
+    withSourcesJar()
+    toolchain.languageVersion = JavaLanguageVersion.of(8)
+}
+compileJava {
+    sourceCompatibility = targetCompatibility = '1.8'
+    options.debug = true
+    options.debugOptions.debugLevel = 'source,lines,vars'
+}
+
+println("Java: ${System.getProperty('java.version')} | JVM: ${System.getProperty('java.vm.version')} (${System.getProperty('java.vendor')}) | Arch: ${System.getProperty('os.arch')}")
+minecraft {
+    mappings channel: grabConstant('BUILD_MAPPINGS_CHANNEL'), version: grabConstant('BUILD_MAPPINGS_VERSION')
+    
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'info'
+            ideaModule "${project.group}.${project.name}.main" //fix for new IntelliJ versions
+
+            mods {
+                sanlib {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            ideaModule "${project.group}.${project.name}.main" //fix for new IntelliJ versions
+
+            mods {
+                sanlib {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        test {
+            parent minecraft.runs.client
+
+            property 'forge.logging.console.level', 'debug'
+            args '--uuid', '044d980d-5c2a-4030-95cf-cbfde69ea3cb'
+            environment 'MOD_CLASSES', "sanlib%%${project.projectDir}/build/resources/test:sanlib%%${project.projectDir}/build/classes/java/main:sanlib%%${project.projectDir}/build/classes/java/test"
+            ideaModule "${project.group}.${project.name}.test"
+
+            mods {
+                sanlib {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        data {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            ideaModule "${project.group}.${project.name}.main" //fix for new IntelliJ versions
+
+            args '--mod', grabConstant('ID'), '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+
+            mods {
+                sanlib {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+sourceSets.main.resources {
+    srcDir 'src/generated/resources'
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${grabConstant('BUILD_FORGEVER')}"
+}
+
+processResources {
+    outputs.upToDateWhen { false } // ensure resources are copied properly
+    filesMatching('META-INF/mods.toml') {
+        expand (version: grabConstant('VERSION'),
+                name: grabConstant('NAME'),
+                pm_version: grabConstant('PM_VERSION'),
+                pm_name: grabConstant('PM_NAME'))
+    }
+}
+
+jar {
+    exclude(excludes)
+    manifest {
+        attributes([
+            'Specification-Title' : grabConstant('ID'),
+            'Specification-Vendor' : grabConstant('VENDOR'),
+            'Specification-Version' : '1', // We are version 1 of ourselves
+            'Implementation-Title' : grabConstant('ID'),
+            'Implementation-Version' : archiveVersion,
+            'Implementation-Vendor' : grabConstant('VENDOR'),
+            'Implementation-Timestamp' : new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+
+    finalizedBy('reobfJar')
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId archivesBaseName.toLowerCase(Locale.ROOT)
+            artifact jar
+            artifact sourcesJar
+        }
+    }
+    repositories {
+        maven {
+            name "Repo"
+            url uri(project.findProperty("repo.url"))
+            version project.version + (isSnapshots ? "-SNAPSHOT" : "")
+            allowInsecureProtocol true
+            credentials {
+                username project.findProperty("repo.user")
+                password project.findProperty("repo.key")
+            }
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
+    }
+}
+
+import net.minecraftforge.gradle.common.tasks.SignJar
+
+import javax.swing.JFrame
+import javax.swing.JLabel
+import javax.swing.JOptionPane
+import javax.swing.JPanel
+import javax.swing.JPasswordField
+import java.nio.file.Files
+
+tasks.register('signJar', SignJar) {
+    dependsOn jar
+    onlyIf {
+        project.hasProperty('keyStore')
+    }
+
+    keyStore = project.findProperty('keyStore')
+    alias = project.findProperty('keyStoreAlias')
+    storePass = project.findProperty('keyStorePass')
+    keyPass = project.findProperty('keyStoreKeyPass')
+    inputFile = jar.archiveFile
+    outputFile = jar.archiveFile
+}
+
+build.finalizedBy signJar
+if( project.hasProperty("repo.key") ) {
+    signJar.finalizedBy publish
+}
+
+tasks.register('createSymlinks') {
+    if( !Files.exists(new File("${project.projectDir}/src/test/resources/assets/sanlib").toPath()) ) {
+        try {
+            Files.createSymbolicLink(new File("${project.projectDir}/src/test/resources/assets/sanlib").toPath(),
+                    new File("${project.projectDir}/src/main/resources/assets/sanlib").toPath())
+            Files.createSymbolicLink(new File("${project.projectDir}/src/test/resources/assets/sanplayermodel").toPath(),
+                    new File("${project.projectDir}/src/main/resources/assets/sanplayermodel").toPath())
+        } catch (ex) {
+            try {
+                JPanel panel = new JPanel()
+                JPasswordField pass = new JPasswordField(10)
+                panel.add(new JLabel("Please enter the root/admin password to create symbolic links:"))
+                panel.add(pass)
+                String[] options = [ "OK", "Cancel" ]
+                JFrame jf = new JFrame()
+                jf.setAlwaysOnTop(true)
+                int option = JOptionPane.showOptionDialog(jf, panel, "Enter the root password",
+                                                          JOptionPane.NO_OPTION, JOptionPane.PLAIN_MESSAGE,
+                                                          null, options, options[1])
+                if( option == 0 ) {
+                    char[] password = pass.getPassword()
+                    exec { commandLine "sh", "${project.projectDir}/dev/symlink.sh", new String(password) }
+                }
+            } catch (ex2) {
+            }
+        }
+    }
+}

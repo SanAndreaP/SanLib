@@ -5,21 +5,19 @@ package dev.sanandrea.mods.sanlib.lib.util;
 
 import dev.sanandrea.mods.sanlib.SanLib;
 import dev.sanandrea.mods.sanlib.lib.XorShiftRandom;
-import net.minecraft.resources.IResource;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Level;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -212,13 +210,13 @@ public final class MiscUtils
             sb.append(String.format("%dh", hours));
         }
         if( minutes > 0 ) {
-            if( sb.length() > 0 ) {
+            if( !sb.isEmpty() ) {
                 sb.append(' ');
             }
             sb.append(String.format("%dm", minutes));
         }
         if( seconds > 0.0F ) {
-            if( sb.length() > 0 ) {
+            if( !sb.isEmpty() ) {
                 sb.append(' ');
             }
             DecimalFormat df = new DecimalFormat("#.#");
@@ -240,12 +238,12 @@ public final class MiscUtils
             return nrStr + "th";
         }
         char lastNum = nrStr.charAt(nrStr.length() - 1);
-        switch( lastNum ) {
-            case '1': return nrStr + "st";
-            case '2': return nrStr + "nd";
-            case '3': return nrStr + "rd";
-            default: return nrStr + "th";
-        }
+        return switch( lastNum ) {
+            case '1' -> nrStr + "st";
+            case '2' -> nrStr + "nd";
+            case '3' -> nrStr + "rd";
+            default -> nrStr + "th";
+        };
     }
 
     /**
@@ -339,17 +337,15 @@ public final class MiscUtils
         return obj != null ? onNonNull.apply(obj) : null;
     }
 
-    public static void findFiles(String dataFolder, IResourceManager resMgr, boolean idNoExtension, Predicate<String> fileNameFilter,
+    public static void findFiles(String dataFolder, ResourceManager resMgr, boolean idNoExtension, Predicate<ResourceLocation> fileNameFilter,
                                  FileProcessor processor)
             throws IOException
     {
-        for( ResourceLocation rl : resMgr.listResources(dataFolder, fileNameFilter) ) {
-            ResourceLocation conversionId = new ResourceLocation(rl.getNamespace(), getFilename(dataFolder, rl.getPath(), idNoExtension));
-            for( IResource r : resMgr.getResources(rl) ) {
-                try( InputStream is = r.getInputStream() ) {
-                    processor.accept(conversionId, is);
-                }
-                IOUtils.closeQuietly(r);
+        for( Map.Entry<ResourceLocation, Resource> file : resMgr.listResources(dataFolder, fileNameFilter).entrySet() ) {
+            ResourceLocation rl = file.getKey();
+            ResourceLocation conversionId = ResourceLocation.fromNamespaceAndPath(rl.getNamespace(), getFilename(dataFolder, rl.getPath(), idNoExtension));
+            try( InputStream is = file.getValue().open() ) {
+                processor.accept(conversionId, is);
             }
         }
     }
@@ -411,9 +407,8 @@ public final class MiscUtils
             return true;
         }
 
-        if( o instanceof String ) {
-            String s = (String) o;
-            return s.trim().length() < 1;
+        if( o instanceof String s ) {
+            return s.trim().isEmpty();
         }
 
         return false;
@@ -496,16 +491,6 @@ public final class MiscUtils
         }
 
         return getNumberFormat(precision, false, langCode).format(number) + ' ';
-    }
-
-    /**
-     * @deprecated I don't know where this is used now, it was used before the MC recipe refactoring...
-     */
-    @Deprecated
-    public static ResourceLocation getPathedRL(String domain, Path root, Path file) {
-        Path filePath = Paths.get(FilenameUtils.getPathNoEndSeparator(root.relativize(file).toString()),
-                                  FilenameUtils.removeExtension(file.getFileName().toString()));
-        return new ResourceLocation(domain, FilenameUtils.separatorsToUnix(filePath.toString()));
     }
 
     @FunctionalInterface

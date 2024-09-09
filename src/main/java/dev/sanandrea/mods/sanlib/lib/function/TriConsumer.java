@@ -8,7 +8,7 @@ import java.util.Objects;
 /**
  * Represents an operation that accepts three input arguments and returns no result.
  * This is the three-arity specialization of {@link java.util.function.Consumer}.
- * Unlike most other functional interfaces, {@code TriConsumer} is expected to operate via side-effects.
+ * Unlike most other functional interfaces, {@code TriConsumer} is expected to operate via side effects.
  * <p>This is a <a href="package-summary.html">functional interface</a> whose functional method is {@link #accept(Object, Object, Object)}.</p>
  * @param <T> the type of the first argument to the operation
  * @param <U> the type of the second argument to the operation

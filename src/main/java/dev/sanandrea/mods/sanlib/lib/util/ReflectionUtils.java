@@ -6,6 +6,7 @@ package dev.sanandrea.mods.sanlib.lib.util;
 import com.google.common.collect.Maps;
 import org.objectweb.asm.Type;
 
+import java.io.Serial;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -14,11 +15,13 @@ import java.util.Arrays;
 import java.util.Map;
 
 /**
- * An utility class for Java reflection.
+ * A utility class for Java reflection.
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({ "unused", "java:S3011", "java:S1181" })
 public final class ReflectionUtils
 {
+    private ReflectionUtils() {}
+
     /**
      * A map of cached Methods, used to make reflection more efficient. The key is the class
      * name, followed by the SRG method name and an underscore in between.
@@ -41,7 +44,7 @@ public final class ReflectionUtils
      * A simple check to see if a class exists without initializing it.
      * 
      * @param className: The name of the class you are looking for.
-     * @return boolean: Whether or not the specified class exists in the current environment.
+     * @return boolean: Whether the specified class exists in the current environment.
      */
     public static boolean doesClassExist(String className) {
         try {
@@ -287,6 +290,7 @@ public final class ReflectionUtils
     public static class UnableToSetFieldException
             extends RuntimeException
     {
+        @Serial
         private static final long serialVersionUID = -9156919529246923057L;
 
         /**
@@ -303,6 +307,7 @@ public final class ReflectionUtils
     public static class UnableToGetFieldException
             extends RuntimeException
     {
+        @Serial
         private static final long serialVersionUID = -4541085527693869891L;
 
         /**
@@ -318,6 +323,7 @@ public final class ReflectionUtils
     public static class UnableToInvokeMethodException
             extends RuntimeException
     {
+        @Serial
         private static final long serialVersionUID = -784953849174764940L;
 
         /**
@@ -333,6 +339,7 @@ public final class ReflectionUtils
     public static class UnableToFindMethodException
             extends RuntimeException
     {
+        @Serial
         private static final long serialVersionUID = -8564063759409317615L;
 
         /**
@@ -349,6 +356,7 @@ public final class ReflectionUtils
     public static class UnableToFindFieldException
             extends RuntimeException
     {
+        @Serial
         private static final long serialVersionUID = -8782108462439942148L;
 
         /**
@@ -365,6 +373,7 @@ public final class ReflectionUtils
     public static class UnableToAccessCtorException
             extends RuntimeException
     {
+        @Serial
         private static final long serialVersionUID = -8782108462439942148L;
 
         /**
@@ -380,6 +389,7 @@ public final class ReflectionUtils
     public static class UnableToInstantiateException
             extends RuntimeException
     {
+        @Serial
         private static final long serialVersionUID = -8782108462439942148L;
 
         /**
