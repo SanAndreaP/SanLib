@@ -1,0 +1,8 @@
+{
+  "package": "dev.sanandrea.mods.sanlib.mixin",
+  "required": false,
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "MixinMinecraft"
+  ]
+}

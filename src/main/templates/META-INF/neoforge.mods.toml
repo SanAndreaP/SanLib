@@ -22,3 +22,6 @@ issueTrackerURL="https://github.com/SanAndreaP/SanLib/issues"
         versionRange="${minecraft_version_range}"
         ordering="NONE"
         side="BOTH"
+
+[[mixins]]
+    config="${mod_id}.mixins.json"
