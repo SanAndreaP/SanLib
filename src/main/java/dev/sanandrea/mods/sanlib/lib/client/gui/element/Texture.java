@@ -7,6 +7,7 @@ import dev.sanandrea.mods.sanlib.lib.client.gui.GuiDefinition;
 import dev.sanandrea.mods.sanlib.lib.client.gui.GuiElement;
 import dev.sanandrea.mods.sanlib.lib.client.gui.IGui;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
+import dev.sanandrea.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 
@@ -19,18 +20,13 @@ public class Texture
 {
     public static final ResourceLocation ID = ResourceLocation.withDefaultNamespace("texture");
 
-    protected ResourceLocation textureLocation;
-    protected int              textureWidth = 256;
-    protected int              textureHeight = 256;
-    protected int              posU = 0;
-    protected int              posV = 0;
-    protected Integer          disabledPosU = null;
-    protected Integer          disabledPosV = null;
-    protected Integer          hoverPosU = null;
-    protected Integer          hoverPosV = null;
-    protected float            scaleX = 1.0F;
-    protected float            scaleY = 1.0F;
-    protected ColorObj         color = ColorObj.WHITE;
+    protected TextureData data;
+    protected TextureData dataHover;
+    protected TextureData dataDisabled;
+    protected float       scaleX   = 1.0F;
+    protected float       scaleY   = 1.0F;
+    protected ColorObj    color    = ColorObj.WHITE;
+    protected boolean     asSprite = false;
 
     public Texture(String id) {
         super(id);
@@ -38,34 +34,22 @@ public class Texture
 
     @Override
     public void render(IGui gui, GuiGraphics graphics, int x, int y, double mouseX, double mouseY, float partialTicks) {
-        boolean enabled = (this.disabledPosU == null && this.disabledPosV == null) || this.isEnabled();
-        boolean isHovering = (this.hoverPosU != null || this.hoverPosV != null) && enabled && this.isHovering();
+        boolean enabled    = this.dataDisabled == null || this.isEnabled();
+        boolean isHovering = this.dataHover != null && enabled && this.isHovering();
 
-//        graphics.blit(this.textureLocation, x, y, )
-//        gui.get().getMinecraft().getTextureManager().bind(this.textureLocation);
-//        graphics.pushPose();
-//        RenderSystem.enableBlend();
-//        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-//        graphics.translate(x, y, 0.0D);
-//        graphics.scale(this.scaleX, this.scaleY, 1.0F);
-//        RenderSystem.color4f(this.color.fRed(), this.color.fGreen(), this.color.fBlue(), this.color.fAlpha());
         RenderSystem.setShaderColor(this.color.fRed(), this.color.fGreen(), this.color.fBlue(), this.color.fAlpha());
         drawRect(gui, graphics, x, y, enabled, isHovering);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-//        graphics.popPose();
     }
 
     @Override
     public void fromJson(IGui gui, GuiDefinition guiDef, JsonObject data) {
-        this.textureLocation = guiDef.getTexture(data.get("texture"));
-        this.textureWidth = JsonUtils.getIntVal(data.get("textureWidth"), 256);
-        this.textureHeight = JsonUtils.getIntVal(data.get("textureHeight"), 256);
-        this.posU = JsonUtils.getIntVal(data.get("u"), 0);
-        this.posV = JsonUtils.getIntVal(data.get("v"), 0);
-        JsonUtils.fetchInt(data.get("uDisabled"), u -> this.disabledPosU = u);
-        JsonUtils.fetchInt(data.get("vDisabled"), v -> this.disabledPosV = v);
-        JsonUtils.fetchInt(data.get("uHover"), u -> this.hoverPosU = u);
-        JsonUtils.fetchInt(data.get("vHover"), v -> this.hoverPosV = v);
+        this.data = TextureData.parse(guiDef, data);
+        this.dataHover = MiscUtils.apply(data.getAsJsonObject("hover"), d -> TextureData.parse(d, this.data));
+        this.dataDisabled = MiscUtils.apply(data.getAsJsonObject("disabled"), d -> TextureData.parse(d, this.data));
+
+        this.asSprite = JsonUtils.getBoolVal(data.get("isSprite"), false);
+
         this.scaleX = JsonUtils.getFloatVal(data.get("scaleX"), 1.0F);
         this.scaleY = JsonUtils.getFloatVal(data.get("scaleY"), 1.0F);
         this.color = data.has("color") ? new ColorObj(ColorDef.loadColor(data.get("color"), false, null).color) : ColorObj.WHITE;
@@ -73,79 +57,62 @@ public class Texture
 
     @SuppressWarnings("unused")
     protected void drawRect(IGui gui, GuiGraphics graphics, int x, int y, boolean enabled, boolean isHovering) {
-        int u = this.getCurrentU(enabled, isHovering);
-        int v = this.getCurrentV(enabled, isHovering);
+        TextureData data = this.getCurrentData(enabled, isHovering);
 
-        graphics.blit(this.textureLocation, x, y, this.getWidth(), this.getHeight(), this.textureWidth, this.textureHeight);
-//        AbstractGui.blit(stack, 0, 0, u, v, this.getWidth(), this.getHeight(), this.textureWidth, this.textureHeight);
+        if( this.asSprite ) {
+            graphics.blitSprite(data.texture, x, y, this.getWidth(), this.getHeight());
+        } else {
+            graphics.blit(data.texture, x, y, data.posU, data.posV, this.getWidth(), this.getHeight(), data.textureWidth, data.textureHeight);
+        }
     }
 
-//region Getters & Setters
-    public int   getTextureWidth()  { return this.textureWidth; }
-    public int   getTextureHeight() { return this.textureHeight; }
-    public int   getPosU()          { return this.posU; }
-    public int   getPosV()          { return this.posV; }
-    public float getScaleX()        { return this.scaleX; }
-    public float getScaleY()        { return this.scaleY; }
-    public int   getColor()         { return this.color.getColorInt(); }
+    //region Getters & Setters
 
-    public void setTextureWidth(int textureWidth)   { this.textureWidth = textureWidth; }
-    public void setTextureHeight(int textureHeight) { this.textureHeight = textureHeight; }
-    public void setPosU(int posU)                   { this.posU = posU; }
-    public void setPosV(int posV)                   { this.posV = posV; }
-    public void setScaleX(float scaleX)             { this.scaleX = scaleX; }
-    public void setScaleY(float scaleY)             { this.scaleY = scaleY; }
-    public void setColor(int color)                 { this.color = new ColorObj(color); }
+    public float getScaleX() {return this.scaleX;}
 
-    protected int getCurrentU(boolean enabled, boolean isHovering) {
-        int u = isHovering && this.hoverPosU != null ? this.hoverPosU : this.posU;
-        u = enabled || this.disabledPosU == null ? u : this.disabledPosU;
+    public float getScaleY() {return this.scaleY;}
 
-        return u;
-    }
-    protected int getCurrentV(boolean enabled, boolean isHovering) {
-        int v = isHovering && this.hoverPosV != null ? this.hoverPosV : this.posV;
-        v = enabled || this.disabledPosV == null ? v : this.disabledPosV;
+    public int getColor() {return this.color.getColorInt();}
 
-        return v;
+    public void setScaleX(float scaleX) {this.scaleX = scaleX;}
+
+    public void setScaleY(float scaleY) {this.scaleY = scaleY;}
+
+    public void setColor(int color) {this.color = new ColorObj(color);}
+
+    public TextureData getData() {return this.data;}
+
+    public TextureData getHoverData() {return this.dataHover;}
+
+    public TextureData getDisabledData() {return this.dataDisabled;}
+
+    protected TextureData getCurrentData(boolean enabled, boolean isHovering) {
+        TextureData data = isHovering && this.dataHover != null ? this.dataHover : this.data;
+        data = enabled || this.dataDisabled == null ? data : this.dataDisabled;
+
+        return data;
     }
 //endregion
 
     public static class Builder<T extends Texture>
             extends GuiElement.Builder<T>
     {
-        protected Builder(T elem) { super(elem); }
+        protected Builder(T elem) {super(elem);}
 
-        public Builder<T> withLocation(ResourceLocation texture) {
-            this.elem.textureLocation = texture;
-
-            return this;
-        }
-
-        public Builder<T> withTextureSize(int width, int height) {
-            this.elem.textureWidth = width;
-            this.elem.textureHeight = height;
+        public Builder<T> withData(TextureData data) {
+            this.elem.data = data;
 
             return this;
         }
 
-        public Builder<T> withPosUV(int u, int v) {
-            this.elem.posU = u;
-            this.elem.posV = v;
+        public Builder<T> withHoverData(TextureData data) {
+            this.elem.dataHover = data;
 
             return this;
         }
 
-        public Builder<T> withHoverPosUV(int u, int v) {
-            this.elem.hoverPosU = u;
-            this.elem.hoverPosV = v;
-
-            return this;
-        }
-
-        public Builder<T> withDisabledPosUV(int u, int v) {
-            this.elem.disabledPosU = u;
-            this.elem.disabledPosV = v;
+        public Builder<T> withDisabledData(TextureData data) {
+            this.elem.dataDisabled = data;
 
             return this;
         }
@@ -167,12 +134,51 @@ public class Texture
             return this.withColor(new ColorObj(color));
         }
 
+        public Builder<T> asSprite() {
+            this.elem.asSprite = true;
+
+            return this;
+        }
+
         public static Builder<Texture> createTexture() {
             return createTexture(UUID.randomUUID().toString());
         }
 
         public static Builder<Texture> createTexture(String id) {
             return new Builder<>(new Texture(id));
+        }
+    }
+
+    public record TextureData(ResourceLocation texture, int posU, int posV, int textureWidth, int textureHeight)
+    {
+        public TextureData(ResourceLocation texture) {this(texture, 0, 0, 256, 256);}
+
+        public TextureData(ResourceLocation texture, int posU, int posV) {this(texture, posU, posV, 256, 256);}
+
+        public TextureData changeTexture(ResourceLocation texture) {return new TextureData(texture, this.posU, this.posV, this.textureWidth, this.textureHeight);}
+
+        public TextureData changePosU(int posU) {return new TextureData(this.texture, posU, this.posV, this.textureWidth, this.textureHeight);}
+
+        public TextureData changePosV(int posV) {return new TextureData(this.texture, this.posU, posV, this.textureWidth, this.textureHeight);}
+
+        public TextureData changeTextureWidth(int textureWidth) {return new TextureData(this.texture, this.posU, this.posV, textureWidth, this.textureHeight);}
+
+        public TextureData changeTextureHeight(int textureHeight) {return new TextureData(this.texture, this.posU, this.posV, this.textureWidth, textureHeight);}
+
+        public static TextureData parse(GuiDefinition guiDef, JsonObject data) {
+            return new TextureData(guiDef.getTexture(data.get("texture")),
+                                   JsonUtils.getIntVal(data.get("u"), 0),
+                                   JsonUtils.getIntVal(data.get("v"), 0),
+                                   JsonUtils.getIntVal(data.get("textureWidth"), 256),
+                                   JsonUtils.getIntVal(data.get("textureHeight"), 256));
+        }
+
+        public static TextureData parse(JsonObject data, TextureData base) {
+            return new TextureData(JsonUtils.getLocation(data.get("texture"), base.texture),
+                                   JsonUtils.getIntVal(data.get("u"), base.posU),
+                                   JsonUtils.getIntVal(data.get("v"), base.posV),
+                                   JsonUtils.getIntVal(data.get("textureWidth"), base.textureWidth),
+                                   JsonUtils.getIntVal(data.get("textureHeight"), base.textureHeight));
         }
     }
 }

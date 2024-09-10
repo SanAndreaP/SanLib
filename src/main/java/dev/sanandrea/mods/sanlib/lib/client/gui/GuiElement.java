@@ -1,14 +1,14 @@
 package dev.sanandrea.mods.sanlib.lib.client.gui;
 
 import com.google.gson.JsonObject;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.sanandrea.mods.sanlib.lib.ColorObj;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.neoforged.bus.api.EventPriority;
 import org.joml.Matrix4f;
@@ -22,6 +22,7 @@ import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.OptionalDouble;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -29,20 +30,34 @@ import java.util.function.Consumer;
 public abstract class GuiElement
         implements IGuiReference
 {
+
+    public static final RenderType GUI_DEBUG_LINES = RenderType.create(
+            "sangui_debug_lines",
+            DefaultVertexFormat.POSITION_COLOR,
+            VertexFormat.Mode.DEBUG_LINES,
+            1536,
+            RenderType.CompositeState.builder()
+                                     .setShaderState(RenderType.RENDERTYPE_GUI_SHADER)
+                                     .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
+                                     .setDepthTestState(RenderType.LEQUAL_DEPTH_TEST)
+                                     .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(1.0D)))
+                                     .createCompositeState(false)
+    );
+
     protected String id;
 
-    protected int posX = 0;
-    protected int posY = 0;
-    protected Alignment hAlignment = Alignment.LEFT;
-    protected Alignment vAlignment = Alignment.TOP;
-    protected int width = 0;
-    protected int height = 0;
+    protected int       posX;
+    protected int       posY;
+    protected Alignment hAlignment;
+    protected Alignment vAlignment;
+    protected int       width;
+    protected int       height;
 
     private boolean isVisible = true;
     private boolean isEnabled = true;
 
     protected boolean isHovering = false;
-    protected boolean isFocused = false;
+    protected boolean isFocused  = false;
 
     public final boolean isResizable = this.getClass().isAnnotationPresent(Resizable.class);
     public final boolean isFocusable = this.getClass().isAnnotationPresent(Focusable.class);
@@ -72,9 +87,9 @@ public abstract class GuiElement
         this.geometryListeners.remove(listener);
     }
 
-    public void load(IGui gui) { }
+    public void load(IGui gui) {}
 
-    public void unload(IGui gui) { }
+    public void unload(IGui gui) {}
 
     public abstract void render(IGui gui, GuiGraphics graphics, int x, int y, double mouseX, double mouseY, float partialTicks);
 
@@ -91,22 +106,26 @@ public abstract class GuiElement
     }
 
     public void renderDebug(IGui gui, GuiGraphics graphics, int x, int y, double mouseX, double mouseY, float partialTicks, int level) {
-        int maxX = x + this.getWidth();
-        int           maxY          = y + this.getHeight();
-        Matrix4f      pose          = graphics.pose().last().pose();
-        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR);
+        int            maxX = x + this.getWidth();
+        int            maxY = y + this.getHeight();
+        Matrix4f       pose = graphics.pose().last().pose();
+        VertexConsumer vc   = graphics.bufferSource().getBuffer(GUI_DEBUG_LINES);
 
         int color = ColorObj.fromHSLA(Mth.clamp(level * 360.0F / 10.0F, 0, 360.0F), 1.0F, 0.5F, 1.0F).getColorInt();
 
-        bufferBuilder.addVertex(pose, x,    y,    0.0F).setColor(color);
-        bufferBuilder.addVertex(pose, maxX, y,    0.0F).setColor(color);
-        bufferBuilder.addVertex(pose, maxX, y,    0.0F).setColor(color);
-        bufferBuilder.addVertex(pose, maxX, maxY, 0.0F).setColor(color);
-        bufferBuilder.addVertex(pose, maxX, maxY, 0.0F).setColor(color);
-        bufferBuilder.addVertex(pose, x,    maxY, 0.0F).setColor(color);
-        bufferBuilder.addVertex(pose, x,    maxY, 0.0F).setColor(color);
-        bufferBuilder.addVertex(pose, x,    y,    0.0F).setColor(color);
-        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+        vc.addVertex(pose, x, y, 0.0F).setColor(color);
+        vc.addVertex(pose, maxX, y, 0.0F).setColor(color);
+
+        vc.addVertex(pose, maxX, y, 0.0F).setColor(color);
+        vc.addVertex(pose, maxX, maxY, 0.0F).setColor(color);
+
+        vc.addVertex(pose, maxX, maxY, 0.0F).setColor(color);
+        vc.addVertex(pose, x, maxY, 0.0F).setColor(color);
+
+        vc.addVertex(pose, x, maxY, 0.0F).setColor(color);
+        vc.addVertex(pose, x, y, 0.0F).setColor(color);
+
+        graphics.flush();
     }
 
     public abstract void fromJson(IGui gui, GuiDefinition guiDef, JsonObject data);
@@ -154,7 +173,7 @@ public abstract class GuiElement
         return this.isFocused;
     }
 
-    public void onFocusChange(boolean focus) { }
+    public void onFocusChange(boolean focus) {}
 
     public String getId() {
         return this.id;
@@ -269,8 +288,11 @@ public abstract class GuiElement
 
         /**
          * a case-insensitive version of {@link Alignment#valueOf(String)}
+         *
          * @param s the name of the constant to be fetched
+         *
          * @return the enum constant of the specified name
+         *
          * @throws IllegalArgumentException if this enum type has no constant with the specified name
          */
         public static Alignment fromString(String s) {
@@ -285,8 +307,11 @@ public abstract class GuiElement
 
         /**
          * a case-insensitive version of {@link Orientation#valueOf(String)}
+         *
          * @param s the name of the constant to be fetched
+         *
          * @return the enum constant of the specified name
+         *
          * @throws IllegalArgumentException if this enum type has no constant with the specified name
          */
         public static Orientation fromString(String s) {
@@ -307,6 +332,7 @@ public abstract class GuiElement
     public @interface Priority
     {
         EventPriority value();
+
         InputPriority target();
     }
 
@@ -333,11 +359,15 @@ public abstract class GuiElement
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
-    public @interface Resizable { }
+    public @interface Resizable
+    {
+    }
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
-    public @interface Focusable { }
+    public @interface Focusable
+    {
+    }
 
     public abstract static class Builder<T extends GuiElement>
     {

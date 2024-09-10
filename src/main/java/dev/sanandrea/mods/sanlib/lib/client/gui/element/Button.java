@@ -30,7 +30,7 @@ public class Button
     public static final ResourceLocation ID = ResourceLocation.withDefaultNamespace("button");
 
     protected final String backgroundId = String.format("%s_background", this.id);
-    protected final String labelId = String.format("%s_labelId", this.id);
+    protected final String labelId      = String.format("%s_labelId", this.id);
 
     protected GuiElement background;
     protected GuiElement label;
@@ -38,7 +38,7 @@ public class Button
     protected ResourceLocation customSoundID;
     protected SoundEvent       customSound;
 
-    protected static final int DEFAULT_TEXT_COLOR = 0xFFFFFFFF;
+    protected static final int DEFAULT_TEXT_COLOR          = 0xFFFFFFFF;
     protected static final int DEFAULT_DISABLED_TEXT_COLOR = 0xFFA0A0A0;
 
     protected Consumer<Button> onClickListener;
@@ -66,20 +66,28 @@ public class Button
     public void fromJson(IGui gui, GuiDefinition guiDef, JsonObject data) {
         this.customSoundID = JsonUtils.getLocation(data.get("clickSound"), null);
 
-        JsonObject bgDataObj = null;
-        JsonElement bgData = data.get("background");
+        JsonObject  bgDataObj = null;
+        JsonElement bgData    = data.get("background");
         if( bgData == null ) {
-            bgDataObj = new JsonObject();
+            bgDataObj = JsonUtils.ObjectBuilder.create()
+                                               .value("type", Texture.ID.toString())
+                                               .value("texture", "widget/button")
+                                               .value("textureWidth", 200)
+                                               .value("textureHeight", 20)
+                                               .value("isSprite", true)
+                                               .value("hover", JsonUtils.ObjectBuilder.create().value("texture", "widget/button_highlighted").get())
+                                               .value("disabled", JsonUtils.ObjectBuilder.create().value("texture", "widget/button_disabled").get())
+                                               .get();
 
-            JsonUtils.addDefaultJsonProperty(bgDataObj, "type", TiledTexture.ID.toString());
-            JsonUtils.addDefaultJsonProperty(bgDataObj, "texture", "textures/gui/widgets.png");
-            JsonUtils.addDefaultJsonProperty(bgDataObj, "v", 66);
-            JsonUtils.addDefaultJsonProperty(bgDataObj, "vHover", 86);
-            JsonUtils.addDefaultJsonProperty(bgDataObj, "vDisabled", 46);
-            JsonUtils.addDefaultJsonProperty(bgDataObj, "tileTextureWidth", 200);
-            JsonUtils.addDefaultJsonProperty(bgDataObj, "tileTextureHeight", 20);
-            JsonUtils.addDefaultJsonProperty(bgDataObj, "centralWidth", 190);
-            JsonUtils.addDefaultJsonProperty(bgDataObj, "centralHeight", 14);
+//            JsonUtils.addDefaultJsonProperty(bgDataObj, "type", TiledTexture.ID.toString());
+//            JsonUtils.addDefaultJsonProperty(bgDataObj, "texture", "textures/gui/widget/button.png");
+//            JsonUtils.addDefaultJsonProperty(bgDataObj, "v", 66);
+//            JsonUtils.addDefaultJsonProperty(bgDataObj, "vHover", 86);
+//            JsonUtils.addDefaultJsonProperty(bgDataObj, "vDisabled", 46);
+//            JsonUtils.addDefaultJsonProperty(bgDataObj, "tileTextureWidth", 200);
+//            JsonUtils.addDefaultJsonProperty(bgDataObj, "tileTextureHeight", 20);
+//            JsonUtils.addDefaultJsonProperty(bgDataObj, "centralWidth", 190);
+//            JsonUtils.addDefaultJsonProperty(bgDataObj, "centralHeight", 14);
         } else if( bgData.isJsonObject() ) {
             bgDataObj = bgData.getAsJsonObject();
         }
@@ -201,14 +209,21 @@ public class Button
         }
 
         public Builder<T> withDefaultBackground() {
-            TiledTexture bg = TiledTexture.Builder.createTiledTexture(this.elem.backgroundId)
-                                                  .withTileTextureSize(200, 20)
-                                                  .withCentralTextureSize(190, 14)
-                                                  .withLocation(ResourceLocation.withDefaultNamespace("textures/gui/widgets.png"))
-                                                  .withPosUV(0, 66)
-                                                  .withHoverPosUV(0, 86)
-                                                  .withDisabledPosUV(0, 46)
-                                                  .get();
+//            TiledTexture bg = TiledTexture.Builder.createTiledTexture(this.elem.backgroundId)
+//                                                  .withTileTextureSize(200, 20)
+//                                                  .withCentralTextureSize(190, 14)
+//                                                  .withData(ResourceLocation.withDefaultNamespace("textures/gui/widgets.png"))
+//                                                  .withPosUV(0, 66)
+//                                                  .withHoverPosUV(0, 86)
+//                                                  .withDisabledPosUV(0, 46)
+//                                                  .get();
+            Texture bg = Texture.Builder.createTexture()
+                                        .asSprite()
+                                        .withData(new Texture.TextureData(ResourceLocation.withDefaultNamespace("widget/button")))
+                                        .withHoverData(new Texture.TextureData(ResourceLocation.withDefaultNamespace("widget/button_highlighted")))
+                                        .withDisabledData(new Texture.TextureData(ResourceLocation.withDefaultNamespace("widget/button_disabled")))
+                                        .withSize(200, 20)
+                                        .get();
 
             this.elem.putElement(this.elem.backgroundId, bg);
 

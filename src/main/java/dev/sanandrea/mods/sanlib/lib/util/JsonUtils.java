@@ -574,4 +574,90 @@ public final class JsonUtils
     public static JsonObject deepCopy(JsonObject obj) {
         return JsonUtils.GSON.fromJson(JsonUtils.GSON.toJson(obj), JsonObject.class);
     }
+
+    public static final class ObjectBuilder
+    {
+        private final JsonObject obj;
+
+        private ObjectBuilder(JsonObject obj) {
+            this.obj = obj;
+        }
+
+        public static ObjectBuilder create() {
+            return new ObjectBuilder(new JsonObject());
+        }
+
+        public static ObjectBuilder create(JsonObject base) {
+            return new ObjectBuilder(base);
+        }
+
+        public ObjectBuilder value(String key, Number value) {
+            return value(key, value, true);
+        }
+        public ObjectBuilder value(String key, Number value, boolean overwrite) {
+            if( overwrite ) {
+                this.obj.addProperty(key, value);
+            } else {
+                addDefaultJsonProperty(this.obj, key, value);
+            }
+
+            return this;
+        }
+
+        public ObjectBuilder value(String key, Boolean value) {
+            return value(key, value, true);
+        }
+        public ObjectBuilder value(String key, Boolean value, boolean overwrite) {
+            if( overwrite ) {
+                this.obj.addProperty(key, value);
+            } else {
+                addDefaultJsonProperty(this.obj, key, value);
+            }
+
+            return this;
+        }
+
+        public ObjectBuilder value(String key, String value) {
+            return value(key, value, true);
+        }
+        public ObjectBuilder value(String key, String value, boolean overwrite) {
+            if( overwrite ) {
+                this.obj.addProperty(key, value);
+            } else {
+                addDefaultJsonProperty(this.obj, key, value);
+            }
+
+            return this;
+        }
+
+        public ObjectBuilder value(String key, Character value) {
+            return value(key, value, true);
+        }
+        public ObjectBuilder value(String key, Character value, boolean overwrite) {
+            if( overwrite ) {
+                this.obj.addProperty(key, value);
+            } else {
+                addDefaultJsonProperty(this.obj, key, value);
+            }
+
+            return this;
+        }
+
+        public ObjectBuilder value(String key, JsonElement value) {
+            return value(key, value, true);
+        }
+        public ObjectBuilder value(String key, JsonElement value, boolean overwrite) {
+            if( overwrite ) {
+                this.obj.add(key, value);
+            } else {
+                addDefaultJsonProperty(this.obj, key, value);
+            }
+
+            return this;
+        }
+
+        public JsonObject get() {
+            return this.obj;
+        }
+    }
 }

@@ -16,7 +16,6 @@ import dev.sanandrea.mods.sanlib.lib.client.gui.element.StackPanel;
 import dev.sanandrea.mods.sanlib.lib.client.gui.element.Text;
 import dev.sanandrea.mods.sanlib.lib.client.gui.element.TextField;
 import dev.sanandrea.mods.sanlib.lib.client.gui.element.Texture;
-import dev.sanandrea.mods.sanlib.lib.client.gui.element.TiledTexture;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import dev.sanandrea.mods.sanlib.lib.util.MiscUtils;
 import dev.sanandrea.mods.sanlib.lib.util.UuidUtils;
@@ -65,7 +64,6 @@ public class GuiDefinition
         TYPES.put(Text.ID, Text::new);
         TYPES.put(StackPanel.ID, StackPanel::new);
         TYPES.put(ScrollPanel.ID, ScrollPanel::new);
-        TYPES.put(TiledTexture.ID, TiledTexture::new);
         TYPES.put(Button.ID, Button::new);
         TYPES.put(TextField.ID, TextField::new);
     }

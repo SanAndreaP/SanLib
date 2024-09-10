@@ -64,7 +64,7 @@ public abstract class JsonGuiScreen
 
     @Override
     public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(graphics, mouseX, mouseY, partialTick);
+        super.render(graphics, mouseX, mouseY, partialTick);
 
         graphics.pose().pushPose();
         graphics.pose().translate(this.getPosX(), this.getPosY(), 0);
@@ -72,8 +72,6 @@ public abstract class JsonGuiScreen
         this.renderGd(graphics, mouseX, mouseY, partialTick);
         this.guiDefinition.drawForeground(this, graphics, mouseX, mouseY, partialTick);
         graphics.pose().popPose();
-
-        super.render(graphics, mouseX, mouseY, partialTick);
     }
 
     protected void renderGd(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) { }

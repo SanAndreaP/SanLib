@@ -1,7 +1,7 @@
 {
   "width": 195,
   "height": 136,
-  "texture": "santest:guis/test.png",
+  "texture": "sanlib:guis/test.png",
   "backgroundElements": {
     "bgTexture": {
       "type": "texture",
@@ -69,22 +69,7 @@
         }],
       "isGradientHorizontal": true
     },
-    "testText": {
-      "type": "_text",
-      "x": 20,
-      "y": 25,
-      "text": "a test text multilined and\njust justified!",
-      "wrapWidth": 100,
-      "horizontalAlign": "justify",
-      "shadow": true,
-      "colors": {
-        "default": "red",
-        "border": "yellow",
-        "shadow": "white"
-      },
-      "bordered": true,
-      "justifyLastLine": false
-    },
+
     "testStackPanelHoriz": {
       "type": "_stack_panel",
       "orientation": "vertical",
@@ -113,7 +98,7 @@
       "y": 18,
       "areaWidth": 160,
       "areaHeight": 110,
-      "rasterized": false,
+      "rasterized": true,
       "scrollButton": {
         "type": "texture",
         "x": 175,
@@ -123,6 +108,20 @@
         "height": 15
       },
       "children": [
+        {
+          "type": "_text",
+          "text": "a test text multilined and\njust justified!",
+          "wrapWidth": 100,
+          "horizontalAlign": "justify",
+          "shadow": true,
+          "colors": {
+            "default": "red",
+            "border": "yellow",
+            "shadow": "white"
+          },
+          "bordered": true,
+          "justifyLastLine": false
+        },
         {
           "type": "button",
           "width": 100,
@@ -180,17 +179,14 @@
           "color": "0xFFA080FF"
         },
         {
-          "type": "tiled_texture",
+          "type": "texture",
+          "isSprite": true,
           "width": 100,
           "height": 12,
-          "texture": "textures/gui/widgets.png",
-          "u": 0,
-          "v": 66,
-          "vHover": 86,
-          "tileTextureWidth": 200,
-          "tileTextureHeight": 20,
-          "centralWidth": 190,
-          "centralHeight": 14
+          "texture": "widget/button",
+          "hover": {
+            "texture": "widget/button_highlighted"
+          }
         },
         {
           "type": "rectangle",

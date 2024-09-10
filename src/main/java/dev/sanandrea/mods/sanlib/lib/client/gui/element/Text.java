@@ -219,7 +219,7 @@ public class Text
 
         final MutableInt mx = new MutableInt(x);
         s.visit((style, str) -> {
-            Component tc = Component.literal(str).withStyle(MiscUtils.apply(globalFontID, style::withFont));
+            Component tc = Component.literal(str).withStyle(MiscUtils.apply(globalFontID, style::withFont, style));
             this.font.drawInBatch(tc, mx.getValue(), y, this.currColor, false, pose, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
             mx.add(this.font.width(tc));
 
@@ -317,7 +317,7 @@ public class Text
             spaceDist /= words.length - 1;
 
             for( int i = 0; i < words.length; i++ ) {
-                this.font.drawInBatch(Component.literal(words[i]).withStyle(MiscUtils.apply(globalFontID, style::withFont)), mx.getValue(), y, this.currColor, false, pose, bufferSource,
+                this.font.drawInBatch(Component.literal(words[i]).withStyle(MiscUtils.apply(globalFontID, style::withFont, style)), mx.getValue(), y, this.currColor, false, pose, bufferSource,
                                       Font.DisplayMode.NORMAL, 0, 0xF000F0);
                 mx.add(wordWidths[i] + spaceDist);
             }

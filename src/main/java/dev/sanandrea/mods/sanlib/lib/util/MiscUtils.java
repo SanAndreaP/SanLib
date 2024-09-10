@@ -334,7 +334,7 @@ public final class MiscUtils
      * @param <R> The type of the return value
      */
     public static <T, R> R apply(T obj, Function<T, R> onNonNull) {
-        return obj != null ? onNonNull.apply(obj) : null;
+        return apply(obj, onNonNull, null);
     }
 
     public static void findFiles(String dataFolder, ResourceManager resMgr, boolean idNoExtension, Predicate<ResourceLocation> fileNameFilter,
@@ -395,11 +395,7 @@ public final class MiscUtils
     }
 
     public static <T, R> R apply(T nullableObj, Function<T, R> onNonNull, R defReturn) {
-        if( nullableObj != null ) {
-            return onNonNull.apply(nullableObj);
-        }
-
-        return defReturn;
+        return nullableObj != null ? onNonNull.apply(nullableObj) : defReturn;
     }
 
     public static boolean isEmpty(Object o) {

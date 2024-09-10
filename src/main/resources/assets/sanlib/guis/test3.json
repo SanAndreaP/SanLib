@@ -1,0 +1,13 @@
+{
+  "width": 195,
+  "height": 136,
+  "texture": "sanlib:guis/test.png",
+  "backgroundElements": {
+    "bgTexture": {
+      "type": "texture",
+      "width": 195,
+      "height": 136,
+      "color": "#FF0000"
+    }
+  }
+}

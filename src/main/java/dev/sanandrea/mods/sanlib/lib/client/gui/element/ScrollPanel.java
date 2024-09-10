@@ -323,7 +323,7 @@ public class ScrollPanel
 
     @Override
     public boolean mouseScrolled(IGui gui, double mouseX, double mouseY, double scrollX, double scrollY) {
-        double dir = -1.0D * scrollX / Math.abs(scrollX);
+        double dir = -1.0D * scrollY / Math.abs(scrollY);
         if( this.rasterized ) {
             this.rasterScroll(Math.round((float) dir));
         } else {
