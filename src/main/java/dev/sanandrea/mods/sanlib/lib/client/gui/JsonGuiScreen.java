@@ -3,10 +3,10 @@
  * Full license text can be found within the LICENSE.md file */
 package dev.sanandrea.mods.sanlib.lib.client.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import dev.sanandrea.mods.sanlib.SanLib;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -24,7 +24,7 @@ public abstract class JsonGuiScreen
     protected int leftPos;
     protected int topPos;
 
-    public JsonGuiScreen(ITextComponent title) {
+    public JsonGuiScreen(Component title) {
         super(title);
 
         this.guiDefinition = buildGuiDefinition();
@@ -63,20 +63,20 @@ public abstract class JsonGuiScreen
     }
 
     @Override
-    public void render(@Nonnull MatrixStack mStack, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(mStack);
+    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        this.renderBackground(graphics, mouseX, mouseY, partialTick);
 
-        mStack.pushPose();
-        mStack.translate(this.getPosX(), this.getPosY(), 0);
-        this.guiDefinition.drawBackground(this, mStack, mouseX, mouseY, partialTicks);
-        this.renderGd(mStack, mouseX, mouseY, partialTicks);
-        this.guiDefinition.drawForeground(this, mStack, mouseX, mouseY, partialTicks);
-        mStack.popPose();
+        graphics.pose().pushPose();
+        graphics.pose().translate(this.getPosX(), this.getPosY(), 0);
+        this.guiDefinition.drawBackground(this, graphics, mouseX, mouseY, partialTick);
+        this.renderGd(graphics, mouseX, mouseY, partialTick);
+        this.guiDefinition.drawForeground(this, graphics, mouseX, mouseY, partialTick);
+        graphics.pose().popPose();
 
-        super.render(mStack, mouseX, mouseY, partialTicks);
+        super.render(graphics, mouseX, mouseY, partialTick);
     }
 
-    protected void renderGd(@Nonnull MatrixStack mStack, int mouseX, int mouseY, float partialTicks) { }
+    protected void renderGd(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) { }
 
     @Override
     public boolean mouseClicked(double mx, double my, int btn) {
@@ -94,8 +94,8 @@ public abstract class JsonGuiScreen
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double scroll) {
-        return this.guiDefinition.mouseScrolled(this, mx, my, scroll) || super.mouseScrolled(mx, my, scroll);
+    public boolean mouseScrolled(double mx, double my, double scrollX, double scrollY) {
+        return this.guiDefinition.mouseScrolled(this, mx, my, scrollX, scrollY) || super.mouseScrolled(mx, my, scrollX, scrollY);
     }
 
     @Override

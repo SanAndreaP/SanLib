@@ -291,8 +291,8 @@ public class GuiDefinition
     }
 
     @Override
-    public boolean mouseScrolled(IGui gui, double mouseX, double mouseY, double scroll) {
-        return this.elementsTest(e -> e.mouseScrolled(gui, mouseX, mouseY, scroll), GuiElement.InputPriority.MOUSE_INPUT);
+    public boolean mouseScrolled(IGui gui, double mouseX, double mouseY, double scrollX, double scrollY) {
+        return this.elementsTest(e -> e.mouseScrolled(gui, mouseX, mouseY, scrollX, scrollY), GuiElement.InputPriority.MOUSE_INPUT);
     }
 
     @Override

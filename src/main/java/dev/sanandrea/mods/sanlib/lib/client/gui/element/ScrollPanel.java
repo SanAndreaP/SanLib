@@ -265,7 +265,7 @@ public class ScrollPanel
 
         int elemOffset = this.childOffsetsY.get(element);
 
-        return Math.max(0.0D, Math.min(1.0D, 1.0D / (this.height - this.areaHeight) * elemOffset));
+        return Math.clamp(1.0D / (this.height - this.areaHeight) * elemOffset, 0.0D, 1.0D);
     }
 
     protected GuiElement getElementAtPos(double scroll) {
@@ -322,14 +322,14 @@ public class ScrollPanel
     }
 
     @Override
-    public boolean mouseScrolled(IGui gui, double mouseX, double mouseY, double scroll) {
-        double dir = -1.0D * scroll / Math.abs(scroll);
+    public boolean mouseScrolled(IGui gui, double mouseX, double mouseY, double scrollX, double scrollY) {
+        double dir = -1.0D * scrollX / Math.abs(scrollX);
         if( this.rasterized ) {
             this.rasterScroll(Math.round((float) dir));
         } else {
             this.addScroll(dir / this.visibleChildren.size());
         }
-        return super.mouseScrolled(gui, mouseX, mouseY, scroll);
+        return super.mouseScrolled(gui, mouseX, mouseY, scrollX, scrollY);
     }
 
     @Override

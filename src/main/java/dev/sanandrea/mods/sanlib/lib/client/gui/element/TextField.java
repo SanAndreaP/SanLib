@@ -1,27 +1,21 @@
 package dev.sanandrea.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonObject;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import dev.sanandrea.mods.sanlib.lib.client.gui2.GuiDefinition;
-import dev.sanandrea.mods.sanlib.lib.client.gui2.GuiElement;
-import dev.sanandrea.mods.sanlib.lib.client.gui2.IGui;
-import dev.sanandrea.mods.sanlib.lib.client.gui2.Spacing;
+import dev.sanandrea.mods.sanlib.lib.client.gui.GuiDefinition;
+import dev.sanandrea.mods.sanlib.lib.client.gui.GuiElement;
+import dev.sanandrea.mods.sanlib.lib.client.gui.IGui;
+import dev.sanandrea.mods.sanlib.lib.client.gui.Spacing;
 import dev.sanandrea.mods.sanlib.lib.util.MiscUtils;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SharedConstants;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.util.StringUtil;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nonnull;
@@ -36,7 +30,7 @@ import java.util.function.Predicate;
 public class TextField
         extends GuiElement
 {
-    public static final ResourceLocation ID = new ResourceLocation("textfield");
+    public static final ResourceLocation ID = ResourceLocation.withDefaultNamespace("textfield");
 
     protected Text text = Text.Builder.createText().withColor(Text.DEFAULT_COLOR, 0xFFFF80D0).get();
     protected Text suggestedText = Text.Builder.createText().withColor(Text.DEFAULT_COLOR, 0xFFA0A0A0).get();
@@ -77,39 +71,39 @@ public class TextField
     }
 
     protected String getVisibleText() {
-        FontRenderer font = this.text.getFont();
+        Font font = this.text.getFont();
         return font.plainSubstrByWidth(this.value.substring(this.displayIndex), this.getWidth() - this.padding.getWidth() - font.width("_"));
     }
 
     protected void loadTextElement() {
-        this.text.setTextFunc((gui, defStr) -> new StringTextComponent(this.getVisibleText()));
-        this.suggestedText.setTextFunc((gui, defStr) -> new StringTextComponent(this.suggestion));
+        this.text.setTextFunc((gui, defStr) -> Component.literal(this.getVisibleText()));
+        this.suggestedText.setTextFunc((gui, defStr) -> Component.literal(this.suggestion));
     }
 
     @Override
-    public void render(IGui gui, MatrixStack matrixStack, int x, int y, double mouseX, double mouseY, float partialTicks) {
+    public void render(IGui gui, GuiGraphics graphics, int x, int y, double mouseX, double mouseY, float partialTicks) {
         this.renderOffsetX = x + gui.getPosX();
         this.renderOffsetY = y + gui.getPosY();
 
         if( this.value.isEmpty() ) {
-            this.suggestedText.render(gui, matrixStack, x + this.padding.getLeft(), y + this.padding.getTop(), mouseX, mouseY, partialTicks);
+            this.suggestedText.render(gui, graphics, x + this.padding.getLeft(), y + this.padding.getTop(), mouseX, mouseY, partialTicks);
         } else {
-            this.text.render(gui, matrixStack, x + this.padding.getLeft(), y + this.padding.getTop(), mouseX, mouseY, partialTicks);
+            this.text.render(gui, graphics, x + this.padding.getLeft(), y + this.padding.getTop(), mouseX, mouseY, partialTicks);
         }
 
-        this.text.render(gui, matrixStack, x + this.padding.getLeft(), y + this.padding.getTop(), mouseX, mouseY, partialTicks);
+        this.text.render(gui, graphics, x + this.padding.getLeft(), y + this.padding.getTop(), mouseX, mouseY, partialTicks);
 
-        this.renderCursor(matrixStack, x, y);
-        this.renderHighlight(matrixStack, x, y);
+        this.renderCursor(graphics, x, y);
+        this.renderHighlight(graphics, x, y);
     }
 
     @Override
-    public void renderDebug(IGui gui, MatrixStack matrixStack, int x, int y, double mouseX, double mouseY, float partialTicks, int level) {
-        super.renderDebug(gui, matrixStack, x, y, mouseX, mouseY, partialTicks, level);
+    public void renderDebug(IGui gui, GuiGraphics graphics, int x, int y, double mouseX, double mouseY, float partialTicks, int level) {
+        super.renderDebug(gui, graphics, x, y, mouseX, mouseY, partialTicks, level);
         if( this.value.isEmpty() ) {
-            this.suggestedText.renderDebug(gui, matrixStack, x + this.padding.getLeft(), y + this.padding.getTop(), mouseX, mouseY, partialTicks, level + 1);
+            this.suggestedText.renderDebug(gui, graphics, x + this.padding.getLeft(), y + this.padding.getTop(), mouseX, mouseY, partialTicks, level + 1);
         } else {
-            this.text.renderDebug(gui, matrixStack, x + this.padding.getLeft(), y + this.padding.getTop(), mouseX, mouseY, partialTicks, level + 1);
+            this.text.renderDebug(gui, graphics, x + this.padding.getLeft(), y + this.padding.getTop(), mouseX, mouseY, partialTicks, level + 1);
         }
     }
 
@@ -149,16 +143,16 @@ public class TextField
                 return true;
             } else {
                 switch( keyCode ) {
-                    case GLFW.GLFW_KEY_DELETE:
-                    case GLFW.GLFW_KEY_BACKSPACE:
+                    case GLFW.GLFW_KEY_DELETE,
+                         GLFW.GLFW_KEY_BACKSPACE:
                         if( this.isEditable ) {
                             this.isShiftPressed = false;
                             this.deleteText(keyCode == GLFW.GLFW_KEY_BACKSPACE ? -1 : 1);
                             this.isShiftPressed = Screen.hasShiftDown();
                         }
                         return true;
-                    case GLFW.GLFW_KEY_LEFT:
-                    case GLFW.GLFW_KEY_RIGHT:
+                    case GLFW.GLFW_KEY_LEFT,
+                         GLFW.GLFW_KEY_RIGHT:
                         int shiftId = keyCode == GLFW.GLFW_KEY_LEFT ? -1 : 1;
                         if( Screen.hasControlDown() ) {
                             this.moveCursorTo(this.getWordPosition(shiftId));
@@ -166,8 +160,8 @@ public class TextField
                             this.moveCursor(shiftId);
                         }
                         return true;
-                    case GLFW.GLFW_KEY_HOME:
-                    case GLFW.GLFW_KEY_END:
+                    case GLFW.GLFW_KEY_HOME,
+                         GLFW.GLFW_KEY_END:
                         this.moveCursorTo(keyCode == GLFW.GLFW_KEY_END ? -1 : 0);
                         return true;
                     default:
@@ -179,7 +173,7 @@ public class TextField
 
     @Override
     public boolean charTyped(IGui gui, char typedChar, int keyCode) {
-        if( this.isActive() && SharedConstants.isAllowedChatCharacter(typedChar) ) {
+        if( this.isActive() && StringUtil.isAllowedChatCharacter(typedChar) ) {
             if( this.isEditable ) {
                 this.insertText(Character.toString(typedChar));
             }
@@ -198,9 +192,9 @@ public class TextField
             }
 
             if( this.isFocused() && this.isHovering && button == GLFW.GLFW_MOUSE_BUTTON_LEFT ) {
-                int cursorPos = MathHelper.floor(mouseX) - this.renderOffsetX - this.padding.getLeft();
+                int cursorPos = Mth.floor(mouseX) - this.renderOffsetX - this.padding.getLeft();
 
-                FontRenderer font = this.text.getFont();
+                Font font = this.text.getFont();
                 String       s    = this.getVisibleText();
                 this.moveCursorTo(font.plainSubstrByWidth(s, cursorPos).length() + this.displayIndex);
 
@@ -262,7 +256,7 @@ public class TextField
         int max = Math.max(this.cursorIndex, this.highlightIndex);
 
         if( useInternalFilter ) {
-            text = SharedConstants.filterText(text);
+            text = StringUtil.filterText(text);
         }
 
         if( this.filter.test(text) ) {
@@ -336,7 +330,7 @@ public class TextField
     }
 
     public void setCursorIndex(int index) {
-        this.cursorIndex = MathHelper.clamp(index, 0, this.value.length());
+        this.cursorIndex = Mth.clamp(index, 0, this.value.length());
     }
 
     public void moveCursorTo(int index) {
@@ -357,40 +351,24 @@ public class TextField
         this.moveCursorTo(this.getCursorIndex(amount));
     }
 
-    public void renderHighlight(MatrixStack stack, int x, int y) {
+    public void renderHighlight(GuiGraphics graphics, int x, int y) {
         if( this.cursorIndex != this.highlightIndex ) {
-            Matrix4f pose = stack.last().pose();
-
             int minIdx = Math.min(this.cursorIndex, this.highlightIndex) - displayIndex;
             int maxIdx = Math.max(this.cursorIndex, this.highlightIndex) - displayIndex;
 
-            FontRenderer font = this.text.getFont();
+            Font font = this.text.getFont();
             String visible = this.getVisibleText();
 
-            int start = font.width(visible.substring(0, MathHelper.clamp(minIdx, 0, visible.length())));
-            int end = font.width(visible.substring(0, MathHelper.clamp(maxIdx, 0, visible.length())));
+            int start = font.width(visible.substring(0, Mth.clamp(minIdx, 0, visible.length())));
+            int end = font.width(visible.substring(0, Mth.clamp(maxIdx, 0, visible.length())));
 
             if( start != end ) {
-                Tessellator tessellator   = Tessellator.getInstance();
-                BufferBuilder         bufferbuilder = tessellator.getBuilder();
-
-                RenderSystem.color4f(0.0F, 0.0F, 255.0F, 255.0F);
-                RenderSystem.disableTexture();
-                RenderSystem.enableColorLogicOp();
-                RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-                bufferbuilder.begin(7, DefaultVertexFormats.POSITION);
-                bufferbuilder.vertex(pose, (float) x + start, (float) y + this.getHeight(), 0.0F).endVertex();
-                bufferbuilder.vertex(pose, (float) x + end, (float) y + this.getHeight(), 0.0F).endVertex();
-                bufferbuilder.vertex(pose, (float) x + end, y, 0.0F).endVertex();
-                bufferbuilder.vertex(pose, (float) x + start, y, 0.0F).endVertex();
-                tessellator.end();
-                RenderSystem.disableColorLogicOp();
-                RenderSystem.enableTexture();
+                graphics.fill(RenderType.guiTextHighlight(), x + start, y, x + end, y + this.getHeight(), 0xFF0000FF);
             }
         }
     }
 
-    public void renderCursor(MatrixStack stack, int x, int y) {
+    public void renderCursor(GuiGraphics graphics, int x, int y) {
         String visible = this.getVisibleText();
         int visibleLength = visible.length();
         int localCursorIndex = this.cursorIndex - this.displayIndex;
@@ -398,14 +376,14 @@ public class TextField
         if( this.isFocused() && this.ticksExisted / 6 % 2 == 0
             && MiscUtils.between(0, localCursorIndex, visibleLength) )
         {
-            FontRenderer font = this.text.getFont();
-            int cx = font.width(visible.substring(0, MathHelper.clamp(localCursorIndex, 0, visibleLength)));
+            Font font = this.text.getFont();
+            int cx = font.width(visible.substring(0, Mth.clamp(localCursorIndex, 0, visibleLength)));
             int textColor = this.text.getColor(Text.DEFAULT_COLOR);
 
             if( this.cursorIndex < this.value.length() ) {
-                AbstractGui.fill(stack, x + cx, y - 1, x + cx + 1, y + font.lineHeight, textColor);
+                graphics.fill(x + cx, y - 1, x + cx + 1, y + font.lineHeight, textColor);
             } else {
-                AbstractGui.fill(stack, x + cx, y + font.lineHeight - 2, x + cx + 5, y + font.lineHeight - 1, textColor);
+                graphics.fill(x + cx, y + font.lineHeight - 2, x + cx + 5, y + font.lineHeight - 1, textColor);
             }
         }
     }
@@ -420,8 +398,8 @@ public class TextField
             indexHighlight = len + highlightIndex + 1;
         }
 
-        this.cursorIndex = MathHelper.clamp(indexCursor, 0, len);
-        this.highlightIndex = MathHelper.clamp(indexHighlight, 0, len);
+        this.cursorIndex = Mth.clamp(indexCursor, 0, len);
+        this.highlightIndex = Mth.clamp(indexHighlight, 0, len);
 
         if( this.displayIndex > len ) {
             this.displayIndex = len;
@@ -435,7 +413,7 @@ public class TextField
             this.displayIndex += 4;
         }
 
-        this.displayIndex = MathHelper.clamp(this.displayIndex, 0, len);
+        this.displayIndex = Mth.clamp(this.displayIndex, 0, len);
     }
 
     public boolean isEditable() {

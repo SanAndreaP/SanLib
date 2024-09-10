@@ -7,7 +7,7 @@ public interface IGuiReference
 {
     default void tick(IGui gui) {}
 
-    default boolean mouseScrolled(IGui gui, double mouseX, double mouseY, double scroll) { return false; }
+    default boolean mouseScrolled(IGui gui, double mouseX, double mouseY, double scrollX, double scrollY) { return false; }
 
     default boolean mouseClicked(IGui gui, double mouseX, double mouseY, int button) { return false; }
 

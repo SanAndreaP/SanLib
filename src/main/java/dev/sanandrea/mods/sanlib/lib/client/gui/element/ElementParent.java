@@ -80,9 +80,9 @@ public abstract class ElementParent
     }
 
     @Override
-    public boolean mouseScrolled(IGui gui, double mouseX, double mouseY, double scroll) {
-        return this.evaluateChildren(c -> c.mouseScrolled(gui, mouseX, mouseY, scroll))
-               || super.mouseScrolled(gui, mouseX, mouseY, scroll);
+    public boolean mouseScrolled(IGui gui, double mouseX, double mouseY, double scrollX, double scrollY) {
+        return this.evaluateChildren(c -> c.mouseScrolled(gui, mouseX, mouseY, scrollX, scrollY))
+               || super.mouseScrolled(gui, mouseX, mouseY, scrollX, scrollY);
     }
 
     @Override

@@ -12,6 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -225,7 +226,7 @@ public class Button
             return this.withLabel(b -> b.withTranslatedText(lbl));
         }
 
-        public Builder<T> withLabel(Text lbl) {
+        public Builder<T> withLabel(Component lbl) {
             return this.withLabel(b -> b.withText(lbl));
         }
 
