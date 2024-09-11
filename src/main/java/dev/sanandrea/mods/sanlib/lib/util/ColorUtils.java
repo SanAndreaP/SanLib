@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: BSD-3-Clause                     *
  * Copyright © 2016-2023 SanAndreaP                          *
  * Full license text can be found within the LICENSE.md file */
-package dev.sanandrea.mods.sanlib.lib.client.util;
+package dev.sanandrea.mods.sanlib.lib.util;
 
 import dev.sanandrea.mods.sanlib.lib.ColorObj;
 
@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * An utility class for colors
+ * A utility class for colors
  */
 @SuppressWarnings("unused")
 public final class ColorUtils

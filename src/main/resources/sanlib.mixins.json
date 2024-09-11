@@ -3,6 +3,10 @@
   "required": false,
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "MixinMinecraft"
+  ],
+  "client": [
+    "MixinMinecraft",
+    "MixinPlayerModel",
+    "MixinPlayerRenderer"
   ]
 }

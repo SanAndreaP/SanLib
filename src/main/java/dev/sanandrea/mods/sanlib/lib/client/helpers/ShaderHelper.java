@@ -5,7 +5,7 @@ package dev.sanandrea.mods.sanlib.lib.client.helpers;
 
 import dev.sanandrea.mods.sanlib.SanLib;
 import dev.sanandrea.mods.sanlib.SanLibConfig;
-import dev.sanandrea.mods.sanlib.client.event.ClientTickEventHandler;
+import dev.sanandrea.mods.sanlib.client.event.ClientTickHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -37,7 +37,7 @@ public final class ShaderHelper
 
         if( shader != 0 ) {
             int time = ARBShaderObjects.glGetUniformLocationARB(shader, "time");
-            ARBShaderObjects.glUniform1iARB(time, (int)(ClientTickEventHandler.getClientTicks() % (long) Integer.MAX_VALUE));
+            ARBShaderObjects.glUniform1iARB(time, (int)(ClientTickHandler.getClientTicks() % (long) Integer.MAX_VALUE));
 
             if( callback != null ) {
                 callback.accept(shader);

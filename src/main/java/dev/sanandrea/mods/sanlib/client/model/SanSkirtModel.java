@@ -66,7 +66,7 @@ public class SanSkirtModel
                 amt = 1.0F;
             }
 
-            swing = Mth.abs(Mth.cos(limbSwing * 0.6662F) * limbSwingAmount) / amt;
+            swing = Mth.abs(Mth.cos(limbSwing * 0.6662F) * limbSwingAmount) / amt * 0.75F;
         }
 
         this.skirt1.zScale = 1.0F + swing * 0.5F;
