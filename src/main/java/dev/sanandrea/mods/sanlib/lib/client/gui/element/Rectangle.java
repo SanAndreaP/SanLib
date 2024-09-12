@@ -54,7 +54,7 @@ public class Rectangle
     public static final ResourceLocation ID = ResourceLocation.withDefaultNamespace("rectangle");
 
     protected final List<ColorDef> colors               = new ArrayList<>();
-    protected       boolean        isGradientHorizontal = false;
+    protected       Orientation        orientation = Orientation.VERTICAL;
 
     private final List<ColorEntry> colorCache = new ArrayList<>();
 
@@ -73,12 +73,12 @@ public class Rectangle
                     float      size = next.relStop - curr.relStop;
 
                     if( size > 0.0F ) {
-                        float fx = !this.isGradientHorizontal ? curr.relStop : 0;
-                        float fy = this.isGradientHorizontal ? curr.relStop : 0;
-                        float fw = !this.isGradientHorizontal ? size : this.getWidth();
-                        float fh = this.isGradientHorizontal ? size : this.getHeight();
+                        float fx = this.orientation == Orientation.VERTICAL ? curr.relStop : 0;
+                        float fy = this.orientation == Orientation.HORIZONTAL ? curr.relStop : 0;
+                        float fw = this.orientation == Orientation.VERTICAL ? size : this.getWidth();
+                        float fh = this.orientation == Orientation.HORIZONTAL ? size : this.getHeight();
 
-                        GuiUtils.drawGradient(graphics, x + fx, y + fy, fw, fh, curr.color, next.color, this.isGradientHorizontal);
+                        GuiUtils.drawGradient(graphics, x + fx, y + fy, fw, fh, curr.color, next.color, this.orientation == Orientation.HORIZONTAL);
                     }
                 }
             } else {
@@ -93,7 +93,7 @@ public class Rectangle
 
         int colorsSize = this.colors.size();
         if( colorsSize > 1 ) {
-            float maxSize    = this.isGradientHorizontal ? this.getWidth() : this.getHeight();
+            float maxSize    = this.orientation == Orientation.HORIZONTAL ? this.getWidth() : this.getHeight();
             Float linearStop = this.colors.getFirst().hasStop() ? null : maxSize / (colorsSize - 1);
 
             for( int i = 0; i < colorsSize; i++ ) {
@@ -109,7 +109,7 @@ public class Rectangle
 
     @Override
     public void fromJson(IGui gui, GuiDefinition guiDef, JsonObject data) {
-        this.isGradientHorizontal = JsonUtils.getBoolVal(data.get("isGradientHorizontal"), false);
+        this.orientation = Orientation.fromString(JsonUtils.getStringVal(data.get("orientation"), Orientation.VERTICAL.toString()));
 
         ColorDef.loadColors(data, this.colors, null);
         this.buildColorCache();
@@ -120,8 +120,8 @@ public class Rectangle
         return this.colors.toArray(new ColorDef[0]);
     }
 
-    public boolean isGradientHorizontal() {
-        return this.isGradientHorizontal;
+    public Orientation getOrientation() {
+        return this.orientation;
     }
 
     public void setColors(@Nonnull ColorDef... colors) {
@@ -138,8 +138,8 @@ public class Rectangle
         this.buildColorCache();
     }
 
-    public void setGradientHorizontal(boolean gradientHorizontal) {
-        this.isGradientHorizontal = gradientHorizontal;
+    public void setOrientation(Orientation orientation) {
+        this.orientation = orientation;
     }
 
     private static Boolean checkStops(@Nonnull List<ColorDef> colors, Boolean hasStop) {
@@ -206,14 +206,8 @@ public class Rectangle
             return this;
         }
 
-        public Builder<T> withHorizontalGradient() {
-            this.elem.isGradientHorizontal = true;
-
-            return this;
-        }
-
-        public Builder<T> withVerticalGradient() {
-            this.elem.isGradientHorizontal = false;
+        public Builder<T> withOrientation(Orientation orientation) {
+            this.elem.orientation = orientation;
 
             return this;
         }

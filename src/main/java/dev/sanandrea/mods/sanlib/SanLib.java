@@ -6,6 +6,7 @@ package dev.sanandrea.mods.sanlib;
 import dev.sanandrea.mods.sanlib.lib.network.MessageRegistrar;
 import dev.sanandrea.mods.sanlib.network.NetworkTestMain;
 import dev.sanandrea.mods.sanlib.network.NetworkTestNetwork;
+import dev.sanandrea.mods.sanlib.network.OpenTestGUI;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -24,7 +25,8 @@ public class SanLib
         modContainer.registerConfig(ModConfig.Type.COMMON, SanLibConfig.SPEC);
 
         MessageRegistrar.create(modEventBus, "1.0").withBidiPayload(NetworkTestMain.TYPE, NetworkTestMain.STREAM_CODEC, HandlerThread.MAIN)
-                                                   .withBidiPayload(NetworkTestNetwork.TYPE, NetworkTestNetwork.STREAM_CODEC, HandlerThread.NETWORK);
+                                                   .withBidiPayload(NetworkTestNetwork.TYPE, NetworkTestNetwork.STREAM_CODEC, HandlerThread.NETWORK)
+                                                   .withClientPayload(OpenTestGUI.TYPE, OpenTestGUI.STREAM_CODEC, HandlerThread.MAIN);
     }
 
 }

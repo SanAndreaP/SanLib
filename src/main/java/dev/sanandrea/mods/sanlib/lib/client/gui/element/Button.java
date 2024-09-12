@@ -209,14 +209,6 @@ public class Button
         }
 
         public Builder<T> withDefaultBackground() {
-//            TiledTexture bg = TiledTexture.Builder.createTiledTexture(this.elem.backgroundId)
-//                                                  .withTileTextureSize(200, 20)
-//                                                  .withCentralTextureSize(190, 14)
-//                                                  .withData(ResourceLocation.withDefaultNamespace("textures/gui/widgets.png"))
-//                                                  .withPosUV(0, 66)
-//                                                  .withHoverPosUV(0, 86)
-//                                                  .withDisabledPosUV(0, 46)
-//                                                  .get();
             Texture bg = Texture.Builder.createTexture()
                                         .asSprite()
                                         .withData(new Texture.TextureData(ResourceLocation.withDefaultNamespace("widget/button")))

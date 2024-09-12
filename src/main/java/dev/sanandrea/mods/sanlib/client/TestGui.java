@@ -2,7 +2,7 @@
 // This file is subject to the terms and conditions defined in the             /
 // file '.github/LICENSE.md', which is part of this source code package.       /
 ////////////////////////////////////////////////////////////////////////////////
-package test;
+package dev.sanandrea.mods.sanlib.client;
 
 import dev.sanandrea.mods.sanlib.Constants;
 import dev.sanandrea.mods.sanlib.SanLib;
@@ -19,14 +19,14 @@ public class TestGui
 {
 //    private int ticksOpen = 0;
 
-    protected TestGui() {
+    public TestGui() {
         super(Component.literal("test gui"));
     }
 
     @Override
     protected GuiDefinition buildGuiDefinition() {
         try {
-            return GuiDefinition.getNewDefinition(this, ResourceLocation.fromNamespaceAndPath(Constants.ID, "guis/test2.json"));
+            return GuiDefinition.getNewDefinition(this, ResourceLocation.fromNamespaceAndPath(Constants.ID, "guis/test3.json"));
         } catch( IOException ex ) {
             SanLib.LOG.log(Level.ERROR, ex);
 

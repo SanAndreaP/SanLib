@@ -20,6 +20,7 @@ import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import dev.sanandrea.mods.sanlib.lib.util.MiscUtils;
 import dev.sanandrea.mods.sanlib.lib.util.UuidUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
@@ -29,13 +30,16 @@ import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.neoforged.bus.api.EventPriority;
 import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Matrix4f;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Deque;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -50,15 +54,14 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"unused", "java:S1104", "java:S2386"})
+@SuppressWarnings({ "unused", "java:S1104", "java:S2386" })
 public class GuiDefinition
         implements ResourceManagerReloadListener, IGuiReference, IElementContainer
 {
-    public static final GuiElement EMPTY = Empty.INSTANCE;
-
     public static final Map<ResourceLocation, Function<String, GuiElement>> TYPES = new HashMap<>();
+
     static {
-        TYPES.put(Empty.ID, id -> Empty.INSTANCE);
+        TYPES.put(Empty.ID, Empty::new);
         TYPES.put(Rectangle.ID, Rectangle::new);
         TYPES.put(Texture.ID, Texture::new);
         TYPES.put(Text.ID, Text::new);
@@ -68,19 +71,22 @@ public class GuiDefinition
         TYPES.put(TextField.ID, TextField::new);
     }
 
-    public int width;
-    public int height;
-    private ResourceLocation texture;
+    static final Deque<org.apache.commons.lang3.tuple.Triple<Integer, String, Integer>> debugList = new ArrayDeque<>();
+
+    public    int              width;
+    public    int              height;
+    private   ResourceLocation texture;
+    protected boolean          debug = false;
 
     EnumMap<GuiElement.InputPriority, List<GuiElement>> foregroundElementPrios = new EnumMap<>(GuiElement.InputPriority.class);
     EnumMap<GuiElement.InputPriority, List<GuiElement>> backgroundElementPrios = new EnumMap<>(GuiElement.InputPriority.class);
 
     private final Map<String, GuiElement> backgroundElements = new TreeMap<>();
     private final Map<String, GuiElement> foregroundElements = new TreeMap<>();
-    private final List<IElementContainer> childContainers = new ArrayList<>();
+    private final List<IElementContainer> childContainers    = new ArrayList<>();
 
     private final ResourceLocation     data;
-    private Consumer<JsonObject> loadHandler;
+    private       Consumer<JsonObject> loadHandler;
 
     private final IGui gui;
 
@@ -140,12 +146,20 @@ public class GuiDefinition
     }
 
     private void updatePriorities(boolean updateBg, boolean updateFg) {
-        if( updateBg ) this.backgroundElementPrios.clear();
-        if( updateFg ) this.foregroundElementPrios.clear();
+        if( updateBg ) {
+            this.backgroundElementPrios.clear();
+        }
+        if( updateFg ) {
+            this.foregroundElementPrios.clear();
+        }
 
         GuiElement.InputPriority.forEach(tgt -> {
-            if( updateBg ) this.backgroundElementPrios.put(tgt, getPrioritizedElements(this.backgroundElements.values(), tgt));
-            if( updateFg ) this.foregroundElementPrios.put(tgt, getPrioritizedElements(this.foregroundElements.values(), tgt));
+            if( updateBg ) {
+                this.backgroundElementPrios.put(tgt, getPrioritizedElements(this.backgroundElements.values(), tgt));
+            }
+            if( updateFg ) {
+                this.foregroundElementPrios.put(tgt, getPrioritizedElements(this.foregroundElements.values(), tgt));
+            }
         });
     }
 
@@ -154,9 +168,8 @@ public class GuiDefinition
         if( optRes.isEmpty() ) {
             throw new IOException(String.format("Cannot read GUI file %s", data));
         }
-        
-        try( InputStreamReader reader = new InputStreamReader(optRes.get().open(), StandardCharsets.UTF_8) )
-        {
+
+        try( InputStreamReader reader = new InputStreamReader(optRes.get().open(), StandardCharsets.UTF_8) ) {
             JsonElement json = JsonParser.parseReader(reader);
             if( !json.isJsonObject() ) {
                 throw new IOException(String.format("Cannot read JSON of data-driven GUI %s as it isn't an object", data));
@@ -172,15 +185,18 @@ public class GuiDefinition
             if( jObj.has("texture") ) {
                 this.texture = ResourceLocation.parse(jObj.get("texture").getAsString());
             }
+            this.debug = JsonUtils.getBoolVal(jObj.get("debug"), false);
 
             if( jObj.has("backgroundElements") ) {
                 JsonUtils.GSON.fromJson(jObj.get("backgroundElements"), JsonObject.class).entrySet().forEach(e ->
-                    this.backgroundElements.put(e.getKey(), this.loadElement(e))
+                                                                                                                     this.backgroundElements.put(e.getKey(),
+                                                                                                                                                 this.loadElement(e))
                 );
             }
             if( jObj.has("foregroundElements") ) {
                 JsonUtils.GSON.fromJson(jObj.get("foregroundElements"), JsonObject.class).entrySet().forEach(e ->
-                    this.foregroundElements.put(e.getKey(), this.loadElement(e))
+                                                                                                                     this.foregroundElements.put(e.getKey(),
+                                                                                                                                                 this.loadElement(e))
                 );
             }
 
@@ -209,7 +225,7 @@ public class GuiDefinition
             element.loadFromJson(this.gui, this, v);
         } catch( Exception ex ) {
             SanLib.LOG.warn("Error loading element '{}'", id, ex);
-            element = Empty.INSTANCE;
+            element = new Empty(id);
         }
 
         return element;
@@ -234,29 +250,31 @@ public class GuiDefinition
     }
 
     @SuppressWarnings("java:S107")
-    public static void renderElement(IGui gui, GuiGraphics graphics, int offsetX, int offsetY, double mouseX, double mouseY, float partialTicks, GuiElement e) {
+    public static OffsetShift renderElement(IGui gui, GuiGraphics graphics, int offsetX, int offsetY, double mouseX, double mouseY, float partialTicks, GuiElement e, boolean debug, Integer debugLevel, Boolean overwriteHover) {
         if( e.isVisible() ) {
-            offsetX += e.getPosX();
-            offsetY += e.getPosY();
-
-            int eWidth = e.getWidth();
+            int eWidth  = e.getWidth();
             int eHeight = e.getHeight();
 
-            switch( e.getHorizontalAlignment() ) {
-                case RIGHT: offsetX -= eWidth; break;
-                case CENTER: offsetX -= eWidth / 2; break;
-                default: break;
+            OffsetShift shift = new OffsetShift(e.getHorizontalAlignment().shift(e.getPosX(), eWidth), e.getVerticalAlignment().shift(e.getPosY(), eHeight));
+            offsetX += shift.x;
+            offsetY += shift.y;
+
+            if( debugLevel == null ) {
+                if( overwriteHover != null ) {
+                    e.setHovering(overwriteHover);
+                } else {
+                    e.updateHovering(gui, offsetX, offsetY, mouseX, mouseY);
+                }
+                e.render(gui, graphics, offsetX, offsetY, mouseX, mouseY, partialTicks);
             }
-            switch( e.getVerticalAlignment() ) {
-                case BOTTOM: offsetY -= eHeight; break;
-                case CENTER: offsetY -= eHeight / 2; break;
-                default: break;
+            if( debugLevel != null || debug ) {
+                e.renderDebug(gui, graphics, offsetX, offsetY, mouseX, mouseY, partialTicks, MiscUtils.get(debugLevel, 0));
             }
 
-            e.updateHovering(gui, offsetX, offsetY, mouseX, mouseY);
-            e.render(gui, graphics, offsetX, offsetY, mouseX, mouseY, partialTicks);
-            e.renderDebug(gui, graphics, offsetX, offsetY, mouseX, mouseY, partialTicks, 0);
+            return shift;
         }
+
+        return OffsetShift.NONE;
     }
 
     public void drawBackground(IGui gui, GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
@@ -264,7 +282,7 @@ public class GuiDefinition
     }
 
     public void drawBackground(IGui gui, GuiGraphics graphics, int offsetX, int offsetY, int mouseX, int mouseY, float partialTicks) {
-        this.backgroundElements.forEach((k, e) -> renderElement(gui, graphics, offsetX, offsetY, mouseX, mouseY, partialTicks, e));
+        this.backgroundElements.forEach((k, e) -> renderElement(gui, graphics, offsetX, offsetY, mouseX, mouseY, partialTicks, e, this.debug, null, null));
     }
 
     public void drawBackgroundContainer(IGui gui, GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
@@ -276,7 +294,27 @@ public class GuiDefinition
     }
 
     public void drawForeground(IGui gui, GuiGraphics graphics, int offsetX, int offsetY, int mouseX, int mouseY, float partialTicks) {
-        this.foregroundElements.forEach((k, e) -> renderElement(gui, graphics, offsetX, offsetY, mouseX, mouseY, partialTicks, e));
+        this.foregroundElements.forEach((k, e) -> renderElement(gui, graphics, offsetX, offsetY, mouseX, mouseY, partialTicks, e, this.debug, null, null));
+
+        int debugOffY = 0;
+        while( !debugList.isEmpty() ) {
+            var   debugElem = debugList.reversed().pop();
+            float txtScale  = 0.5F;
+
+            graphics.pose().pushPose();
+
+            Matrix4f pose  = graphics.pose().last().pose();
+            Font     font  = Minecraft.getInstance().font;
+            int      level = debugElem.getLeft();
+
+            pose.translate(-gui.getPosX(), -gui.getPosY(), 0);
+            pose.scale(txtScale);
+            font.drawInBatch(String.format("%d: %s", level, debugElem.getMiddle()), level * 8, debugOffY, debugElem.getRight(), true,
+                             pose, graphics.bufferSource(), Font.DisplayMode.NORMAL, 0x0, 0xF000F0);
+            debugOffY += font.lineHeight;
+
+            graphics.pose().popPose();
+        }
     }
 
     private static List<GuiElement> getPrioritizedElements(Collection<GuiElement> elements, GuiElement.InputPriority target) {
@@ -328,18 +366,30 @@ public class GuiDefinition
     }
 
     void elementsAccept(Consumer<GuiElement> execElem, boolean forceInvisible) {
-        this.backgroundElements.forEach((id, elem) -> { if( forceInvisible || elem.isVisible() ) execElem.accept(elem); });
-        this.foregroundElements.forEach((id, elem) -> { if( forceInvisible || elem.isVisible() ) execElem.accept(elem); });
+        this.backgroundElements.forEach((id, elem) -> {
+            if( forceInvisible || elem.isVisible() ) {
+                execElem.accept(elem);
+            }
+        });
+        this.foregroundElements.forEach((id, elem) -> {
+            if( forceInvisible || elem.isVisible() ) {
+                execElem.accept(elem);
+            }
+        });
     }
 
     boolean elementsTest(Predicate<GuiElement> execElem, GuiElement.InputPriority target) {
         Collection<GuiElement> bgElem = target == GuiElement.InputPriority.NONE ? this.backgroundElements.values() : this.backgroundElementPrios.get(target);
         for( GuiElement elem : bgElem ) {
-            if( elem.isVisible() && execElem.test(elem) ) return true;
+            if( elem.isVisible() && execElem.test(elem) ) {
+                return true;
+            }
         }
         Collection<GuiElement> fgElem = target == GuiElement.InputPriority.NONE ? this.foregroundElements.values() : this.foregroundElementPrios.get(target);
         for( GuiElement elem : fgElem ) {
-            if( elem.isVisible() && execElem.test(elem) ) return true;
+            if( elem.isVisible() && execElem.test(elem) ) {
+                return true;
+            }
         }
 
         return false;
@@ -501,5 +551,9 @@ public class GuiDefinition
 
     public boolean checkID(UUID defID) {
         return UuidUtils.areUuidsEqual(this.currentInstID, defID);
+    }
+
+    public record OffsetShift(int x, int y) {
+        public static final OffsetShift NONE = new OffsetShift(0, 0);
     }
 }

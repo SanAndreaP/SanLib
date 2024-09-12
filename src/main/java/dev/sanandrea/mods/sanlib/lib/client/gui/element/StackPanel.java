@@ -25,7 +25,7 @@ public class StackPanel
 
     protected Orientation orientation;
     @Nonnull
-    protected Spacing padding = Spacing.NONE;
+    protected Spacing     padding = Spacing.NONE;
 
     public StackPanel(String id) {
         super(id);
@@ -78,16 +78,14 @@ public class StackPanel
     public void render(IGui gui, GuiGraphics graphics, int x, int y, double mouseX, double mouseY, float partialTicks) {
         int cx = x + this.padding.getLeft();
         int cy = y + this.padding.getTop();
+        Boolean overwriteHover = !this.isHovering() ? false : null;
+
         for( GuiElement child : this.orderedChildren ) {
             if( child.isVisible() ) {
-                int offX = cx + child.getPosX();
-                int offY = cy + child.getPosY();
+                GuiDefinition.OffsetShift shift = GuiDefinition.renderElement(gui, graphics, cx, cy, mouseX, mouseY, partialTicks, child, false, null, overwriteHover);
 
-                child.updateHovering(gui, offX, offY, mouseX, mouseY);
-                child.render(gui, graphics, offX, offY, mouseX, mouseY, partialTicks);
-
-                cx += this.orientation == Orientation.HORIZONTAL ? child.getPosX() + child.getWidth() : 0;
-                cy += this.orientation == Orientation.VERTICAL ? child.getPosY() + child.getHeight() : 0;
+                cx += shift.x() + (this.orientation == Orientation.HORIZONTAL ? child.getPosX() + child.getWidth() : 0);
+                cy += shift.y() + (this.orientation == Orientation.VERTICAL ? child.getPosY() + child.getHeight() : 0);
             }
         }
     }
@@ -98,15 +96,13 @@ public class StackPanel
 
         int cx = x + this.padding.getLeft();
         int cy = y + this.padding.getTop();
+
         for( GuiElement child : this.orderedChildren ) {
             if( child.isVisible() ) {
-                int offX = cx + child.getPosX();
-                int offY = cy + child.getPosY();
+                GuiDefinition.OffsetShift shift = GuiDefinition.renderElement(gui, graphics, cx, cy, mouseX, mouseY, partialTicks, child, true, level + 1, null);
 
-                child.renderDebug(gui, graphics, offX, offY, mouseX, mouseY, partialTicks, level + 1);
-
-                cx += this.orientation == Orientation.HORIZONTAL ? child.getPosX() + child.getWidth() : 0;
-                cy += this.orientation == Orientation.VERTICAL ? child.getPosY() + child.getHeight() : 0;
+                cx += shift.x() + (this.orientation == Orientation.HORIZONTAL ? child.getPosX() + child.getWidth() : 0);
+                cy += shift.y() + (this.orientation == Orientation.VERTICAL ? child.getPosY() + child.getHeight() : 0);
             }
         }
     }
@@ -120,8 +116,10 @@ public class StackPanel
     }
 
     protected void calcSize() {
-        int pw = this.padding.getWidth();
-        int ph = this.padding.getHeight();
+        int pw         = this.padding.getWidth();
+        int ph         = this.padding.getHeight();
+        int prevWidth  = this.width;
+        int prevHeight = this.height;
 
         this.width = pw;
         this.height = ph;
@@ -130,12 +128,16 @@ public class StackPanel
             if( child.isVisible() ) {
                 if( this.orientation == Orientation.HORIZONTAL ) {
                     this.width += child.getPosX() + child.getWidth();
-                    this.height = Math.max(this.height, child.getHeight() + ph);
+                    this.height = Math.max(this.height, child.getHeight() + child.getPosY() + ph);
                 } else {
-                    this.width = Math.max(this.width, child.getWidth() + pw);
+                    this.width = Math.max(this.width, child.getWidth() + child.getPosX() + pw);
                     this.height += child.getPosY() + child.getHeight();
                 }
             }
+        }
+
+        if( prevWidth != this.width || prevHeight != this.height ) {
+            this.runGeometryListeners();
         }
     }
 
@@ -145,7 +147,7 @@ public class StackPanel
         protected Builder(T elem) {
             super(elem);
         }
-        
+
         public Builder<T> withPadding(Spacing padding) {
             this.elem.padding = padding;
             return this;

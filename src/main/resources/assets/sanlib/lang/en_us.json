@@ -1,4 +1,5 @@
 {
   "commands.sanlib.errorArgs": "Not enough arguments provided!",
-  "commands.sanlib.networkTest": "Network test packets sent to console."
+  "commands.sanlib.networkTest": "Network test packets sent to console.",
+  "commands.sanlib.openTestGUI": "Opened test GUI."
 }

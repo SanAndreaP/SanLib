@@ -15,9 +15,9 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
 @EventBusSubscriber(value = Dist.CLIENT, modid = Constants.ID, bus = EventBusSubscriber.Bus.MOD)
-public class RegistryEvents
+public class RegistryHandler
 {
-    private RegistryEvents() {}
+    private RegistryHandler() {}
 
     @SubscribeEvent
     public static void registerModel(EntityRenderersEvent.RegisterLayerDefinitions event) {

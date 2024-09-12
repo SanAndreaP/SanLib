@@ -62,6 +62,7 @@ public class Text
     protected boolean              bordered        = false;
     protected boolean              justifyLastLine = false;
     protected ResourceLocation     globalFontID    = null;
+    protected Alignment            textAlign       = Alignment.LEFT;
 
     protected Consumer<Text> onTextChange;
 
@@ -91,16 +92,6 @@ public class Text
     public void render(IGui gui, GuiGraphics graphics, int x, int y, double mouseX, double mouseY, float partialTicks) {
         Iterator<FormattedText> lines = this.renderedLines.listIterator();
 
-        switch( this.vAlignment ) {
-            case CENTER:
-                y -= this.height / 2;
-                break;
-            case BOTTOM:
-                y -= this.height;
-                break;
-            default:
-        }
-
         Matrix4f                       pose         = graphics.pose().last().pose();
         MultiBufferSource.BufferSource bufferSource = graphics.bufferSource();
         while( lines.hasNext() ) {
@@ -118,6 +109,8 @@ public class Text
 
             y += this.lineHeight;
         }
+
+        graphics.flush();
     }
 
     @Override
@@ -131,6 +124,7 @@ public class Text
         this.wrapWidth = JsonUtils.getIntVal(data.get("wrapWidth"), 0);
         this.lineHeight = JsonUtils.getIntVal(data.get("lineHeight"), 9);
         this.globalFontID = JsonUtils.getLocation(data.get("font"), null);
+        this.textAlign = Alignment.fromString(JsonUtils.getStringVal(data.get("textAlign"), Alignment.LEFT.toString()));
 
         this.setColor(DEFAULT_COLOR);
     }
@@ -144,13 +138,16 @@ public class Text
     }
 
     public void updateText(Component text) {
+        int prevWidth = width;
+        int prevHeight = height;
+
         this.renderedLines.clear();
 
         this.renderedLines.addAll(Arrays.asList(this.font.getSplitter()
                                                          .splitLines(text, this.wrapWidth > 0 ? this.wrapWidth : Integer.MAX_VALUE, text.getStyle())
                                                          .toArray(new FormattedText[0])));
 
-        this.width = this.hAlignment == Alignment.JUSTIFY && this.wrapWidth > 0
+        this.width = this.getTextAlignment() == Alignment.JUSTIFY && this.wrapWidth > 0
                      ? this.wrapWidth
                      : this.renderedLines.stream().map(this.font::width).max(Integer::compareTo).orElse(0);
 
@@ -167,6 +164,10 @@ public class Text
 
         if( this.onTextChange != null ) {
             this.onTextChange.accept(this);
+        }
+
+        if( prevWidth != this.width || prevHeight != this.height ) {
+            this.runGeometryListeners();
         }
     }
 
@@ -201,18 +202,16 @@ public class Text
     }
 
     protected void renderLine(FormattedText s, int x, int y, Matrix4f pose, MultiBufferSource bufferSource, boolean lastLine) {
-        switch( this.hAlignment ) {
+        Alignment textAlignment = this.getTextAlignment();
+        switch( textAlignment ) {
             case JUSTIFY:
                 if( this.wrapWidth > 0 && (this.justifyLastLine || !lastLine) ) {
                     this.renderLineJustified(s, x, y, pose, bufferSource);
                     return;
                 }
                 break;
-            case CENTER:
-                x -= this.font.width(s) / 2;
-                break;
-            case RIGHT:
-                x -= this.font.width(s);
+            case CENTER, RIGHT:
+                x = textAlignment.shift(textAlignment.shift(x, this.font.width(s)), -this.width);
                 break;
             default:
         }
@@ -273,6 +272,10 @@ public class Text
 
     public int getColor(String colorKey) {
         return colors.getOrDefault(colorKey, 0xFF000000);
+    }
+
+    public Alignment getTextAlignment() {
+        return this.textAlign.forHorizontal ? this.textAlign : Alignment.LEFT;
     }
 
     protected void renderLineShadow(FormattedText line, int x, int y, Matrix4f pose, MultiBufferSource bufferSource, boolean lastLine) {

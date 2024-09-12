@@ -41,7 +41,7 @@ public class ScrollPanel
 
     protected int        areaWidth;
     protected int        areaHeight;
-    protected GuiElement scrollBtn      = Empty.INSTANCE;
+    protected GuiElement scrollBtn = new Empty(SCROLL_BUTTON_ID);
     protected int        scrollHeight;
     protected double     minScrollDelta = 0.0F;
     protected boolean    rasterized;
@@ -157,23 +157,17 @@ public class ScrollPanel
 
     @Override
     public void render(IGui gui, GuiGraphics graphics, int x, int y, double mouseX, double mouseY, float partialTicks) {
-        GuiUtils.enableScissor(gui.getPosX() + x, gui.getPosY() + y, this.areaWidth, this.areaHeight);
+        GuiUtils.enableScissor(graphics, gui.getPosX() + x, gui.getPosY() + y, this.areaWidth, this.areaHeight);
         x += this.padding.getLeft();
         for( Map.Entry<GuiElement, Integer> childEntry : this.visibleChildren.entrySet() ) {
             GuiElement child = childEntry.getKey();
             if( child.isVisible() ) {
-                int cx = x + child.getPosX();
-                int cy = y + childEntry.getValue();
+                Boolean overwriteHover = this.isChildInFullView(child) ? null : false;
 
-                if( this.isChildInFullView(child) ) {
-                    child.updateHovering(gui, cx, cy, mouseX, mouseY);
-                } else {
-                    child.setHovering(false);
-                }
-                child.render(gui, graphics, cx, cy, mouseX, mouseY, partialTicks);
+                GuiDefinition.renderElement(gui, graphics, x, y + childEntry.getValue() - child.getPosY(), mouseX, mouseY, partialTicks, child, false, null, overwriteHover);
             }
         }
-        RenderSystem.disableScissor();
+        graphics.disableScissor();
 
         int scrollBtnX = this.scrollBtn.getPosX();
         int scrollBtnY = this.scrollBtn.getPosY() + this.scrollButtonOffsetY;
@@ -190,9 +184,7 @@ public class ScrollPanel
         for( Map.Entry<GuiElement, Integer> childEntry : this.visibleChildren.entrySet() ) {
             GuiElement child = childEntry.getKey();
             if( child.isVisible() ) {
-                int cx = x + child.getPosX();
-                int cy = y + childEntry.getValue();
-                child.renderDebug(gui, graphics, cx, cy, mouseX, mouseY, partialTicks, level+1);
+                GuiDefinition.renderElement(gui, graphics, x, y + childEntry.getValue() - child.getPosY(), mouseX, mouseY, partialTicks, child, true, level + 1, null);
             }
         }
         int scrollBtnX = this.scrollBtn.getPosX();

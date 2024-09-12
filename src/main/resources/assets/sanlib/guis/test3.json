@@ -2,12 +2,177 @@
   "width": 195,
   "height": 136,
   "texture": "sanlib:guis/test.png",
+  "debug": true,
   "backgroundElements": {
     "bgTexture": {
       "type": "texture",
       "width": 195,
-      "height": 136,
-      "color": "#FF0000"
+      "height": 136
+    },
+    "testScrollPanel": {
+      "type": "scroll_panel",
+      "x": 9,
+      "y": 18,
+      "areaWidth": 160,
+      "areaHeight": 110,
+      "rasterized": true,
+      "scrollButton": {
+        "type": "texture",
+        "x": 175,
+        "y": 18,
+        "u": 232,
+        "width": 12,
+        "height": 15
+      },
+      "children": {
+        "stack_panel_rects": {
+          "type": "stack_panel",
+          "orientation": "horizontal",
+          "children": {
+            "rectangle_solid": {
+              "type": "rectangle",
+              "width": 10,
+              "height": 10,
+              "color": "#FFFF6060"
+            },
+            "rectangle_gradient_vertical": {
+              "type": "rectangle",
+              "width": 10,
+              "height": 10,
+              "colors": [
+                "#FFFF3030",
+                "#FF3030FF"
+              ]
+            },
+            "rectangle_gradient_horizontal": {
+              "type": "rectangle",
+              "width": 10,
+              "height": 10,
+              "orientation": "horizontal",
+              "colors": [
+                "#FF30FF30",
+                "#FFFF30FF"
+              ]
+            },
+            "rectangle_gradient_stops": {
+              "type": "rectangle",
+              "width": 10,
+              "height": 10,
+              "orientation": "horizontal",
+              "colors": [
+                { "color": "#FF5BCEFA", "stop": 0 },
+                { "color": "#FF5BCEFA", "stop": 0.2 },
+                { "color": "#FFF5A9B8", "stop": 0.2 },
+                { "color": "#FFF5A9B8", "stop": 0.4 },
+                { "color": "#FFFFFFFF", "stop": 0.4 },
+                { "color": "#FFFFFFFF", "stop": 0.6 },
+                { "color": "#FFF5A9B8", "stop": 0.6 },
+                { "color": "#FFF5A9B8", "stop": 0.8 },
+                { "color": "#FF5BCEFA", "stop": 0.8 },
+                { "color": "#FF5BCEFA", "stop": 1.0 }
+              ]
+            }
+          }
+        },
+        "stack_panel_textures": {
+          "type": "stack_panel",
+          "y": 5,
+          "orientation": "horizontal",
+          "children": {
+            "texture_simple": {
+              "type": "texture",
+              "texture": "textures/entity/cow/cow.png",
+              "width": 8,
+              "height": 8,
+              "textureWidth": 64,
+              "textureHeight": 32,
+              "u": 6,
+              "v": 6
+            },
+            "texture_hover": {
+              "type": "texture",
+              "texture": "textures/entity/creeper/creeper.png",
+              "width": 8,
+              "height": 8,
+              "textureWidth": 64,
+              "textureHeight": 32,
+              "u": 24,
+              "v": 8,
+              "hover": {
+                "u": 8
+              }
+            },
+            "texture_sprite_short": {
+              "type": "texture",
+              "isSprite": true,
+              "texture": "widget/button_disabled",
+              "width": 8,
+              "height": 8
+            },
+            "texture_sprite_long": {
+              "type": "texture",
+              "isSprite": true,
+              "texture": "widget/button_disabled",
+              "width": 96,
+              "height": 8
+            }
+          }
+        },
+        "stack_panel_simple_text": {
+          "type": "stack_panel",
+          "y": 5,
+          "orientation": "horizontal",
+          "children": {
+            "text_simple": {
+              "type": "text",
+              "text": "simple text",
+              "color": "green"
+            },
+            "text_simple_noshadow": {
+              "type": "text",
+              "x": 5,
+              "text": "shadowless text",
+              "color": "yellow",
+              "shadow": false
+            }
+          }
+        },
+        "text_newline": {
+          "type": "text",
+          "y": 2,
+          "text": "text with newline\nnewline is here",
+          "color": "#FFFF8800"
+        },
+        "stack_panel_aligned_text": {
+          "type": "stack_panel",
+          "y": 2,
+          "orientation": "horizontal",
+          "children": {
+            "text_centered": {
+              "type": "text",
+              "textAlign": "center",
+              "text": "a\ncentered\ntext",
+              "color": "#FF0088FF"
+            },
+            "text_right": {
+              "type": "text",
+              "x": 20,
+              "textAlign": "right",
+              "text": "a\nright\ntext",
+              "color": "#FFFF88FF"
+            }
+          }
+        },
+        "text_justify": {
+          "type": "text",
+          "y": 2,
+          "textAlign": "justify",
+          "wrapWidth": 100,
+          "text": "This is a wrapped, justified text only found in the deepest of lore books.",
+          "shadow": false,
+          "color": "#FF000000"
+        }
+      }
     }
   }
 }

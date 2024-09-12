@@ -1,16 +1,21 @@
 package dev.sanandrea.mods.sanlib.lib.client.gui;
 
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.sanandrea.mods.sanlib.lib.ColorObj;
+import dev.sanandrea.mods.sanlib.lib.client.gui.element.Texture;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.neoforged.bus.api.EventPriority;
+import org.apache.commons.lang3.tuple.MutableTriple;
 import org.joml.Matrix4f;
 
 import javax.annotation.Nonnull;
@@ -87,6 +92,10 @@ public abstract class GuiElement
         this.geometryListeners.remove(listener);
     }
 
+    protected void runGeometryListeners() {
+        this.geometryListeners.forEach(Runnable::run);
+    }
+
     public void load(IGui gui) {}
 
     public void unload(IGui gui) {}
@@ -111,7 +120,7 @@ public abstract class GuiElement
         Matrix4f       pose = graphics.pose().last().pose();
         VertexConsumer vc   = graphics.bufferSource().getBuffer(GUI_DEBUG_LINES);
 
-        int color = ColorObj.fromHSLA(Mth.clamp(level * 360.0F / 10.0F, 0, 360.0F), 1.0F, 0.5F, 1.0F).getColorInt();
+        int color = ColorObj.fromHSLA(Mth.clamp(level * 360.0F / 12.0F, 0, 360.0F), 1.0F, 0.5F, 1.0F).getColorInt();
 
         vc.addVertex(pose, x, y, 0.0F).setColor(color);
         vc.addVertex(pose, maxX, y, 0.0F).setColor(color);
@@ -124,8 +133,16 @@ public abstract class GuiElement
 
         vc.addVertex(pose, x, maxY, 0.0F).setColor(color);
         vc.addVertex(pose, x, y, 0.0F).setColor(color);
+
+        if( this.isHovering() ) {
+            this.addDebugHover(level, String.format(Locale.ROOT, "%s (%s)", this.getId(), this.getClass()), color);
+        }
 
         graphics.flush();
+    }
+
+    protected void addDebugHover(int level, String debugStr, int color) {
+        GuiDefinition.debugList.push(new MutableTriple<>(level, debugStr, color));
     }
 
     public abstract void fromJson(IGui gui, GuiDefinition guiDef, JsonObject data);
@@ -189,7 +206,7 @@ public abstract class GuiElement
 
     public void setVisible(boolean visible) {
         this.isVisible = visible;
-        this.geometryListeners.forEach(Runnable::run);
+        this.runGeometryListeners();
     }
 
     public boolean isEnabled() {
@@ -206,7 +223,7 @@ public abstract class GuiElement
 
     public void setPosX(int x) {
         this.posX = x;
-        this.geometryListeners.forEach(Runnable::run);
+        this.runGeometryListeners();
     }
 
     public int getPosY() {
@@ -215,7 +232,7 @@ public abstract class GuiElement
 
     public void setPosY(int y) {
         this.posY = y;
-        this.geometryListeners.forEach(Runnable::run);
+        this.runGeometryListeners();
     }
 
     public int getWidth() {
@@ -225,7 +242,7 @@ public abstract class GuiElement
     public void setWidth(int width) {
         if( this.isResizable ) {
             this.width = width;
-            this.geometryListeners.forEach(Runnable::run);
+            this.runGeometryListeners();
         }
     }
 
@@ -236,7 +253,7 @@ public abstract class GuiElement
     public void setHeight(int height) {
         if( this.isResizable ) {
             this.height = height;
-            this.geometryListeners.forEach(Runnable::run);
+            this.runGeometryListeners();
         }
     }
 
@@ -247,7 +264,7 @@ public abstract class GuiElement
     public void setHorizontalAlignment(Alignment alignment) {
         if( alignment.forHorizontal ) {
             this.hAlignment = alignment;
-            this.geometryListeners.forEach(Runnable::run);
+            this.runGeometryListeners();
         }
     }
 
@@ -258,14 +275,14 @@ public abstract class GuiElement
     public void setVerticalAlignment(Alignment alignment) {
         if( alignment.forVertical ) {
             this.vAlignment = alignment;
-            this.geometryListeners.forEach(Runnable::run);
+            this.runGeometryListeners();
         }
     }
 
     protected void setSize(int width, int height) {
         this.width = width;
         this.height = height;
-        this.geometryListeners.forEach(Runnable::run);
+        this.runGeometryListeners();
     }
 //endregion
 
@@ -297,6 +314,14 @@ public abstract class GuiElement
          */
         public static Alignment fromString(String s) {
             return Alignment.valueOf(s.toUpperCase(Locale.ROOT));
+        }
+
+        public int shift(int pos, int size) {
+            return switch( this ) {
+                case CENTER -> pos - size / 2;
+                case RIGHT, BOTTOM -> pos - size;
+                default -> pos;
+            };
         }
     }
 

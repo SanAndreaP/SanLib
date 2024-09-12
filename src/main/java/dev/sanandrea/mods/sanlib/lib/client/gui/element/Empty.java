@@ -12,11 +12,10 @@ import net.minecraft.resources.ResourceLocation;
 public class Empty
         extends GuiElement
 {
-    public static final Empty            INSTANCE = new Empty();
     public static final ResourceLocation ID       = ResourceLocation.withDefaultNamespace("empty");
 
-    private Empty() {
-        super(UuidUtils.EMPTY_UUID.toString());
+    public Empty(String id) {
+        super(id);
     }
 
     @Override

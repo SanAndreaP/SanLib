@@ -35,14 +35,8 @@ public final class GuiUtils
      * @param width The width of the scissor box.
      * @param height The height of the scissor box.
      */
-    public static void enableScissor(int x, int y, int width, int height) {
-        Minecraft mc = Minecraft.getInstance();
-
-        Window window      = mc.getWindow();
-        double scaleFactor = window.getGuiScale();
-
-        RenderSystem.enableScissor((int) (x * scaleFactor), (int) (window.getHeight() - (y + height) * scaleFactor),
-                                   (int) (width * scaleFactor), (int) (height * scaleFactor));
+    public static void enableScissor(GuiGraphics graphics, int x, int y, int width, int height) {
+        graphics.enableScissor(x, y, x + width, y + height);
     }
 
     public static void disableScissor() {
