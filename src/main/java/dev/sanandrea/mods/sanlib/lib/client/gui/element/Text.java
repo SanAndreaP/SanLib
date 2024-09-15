@@ -149,7 +149,7 @@ public class Text
 
         this.width = this.getTextAlignment() == Alignment.JUSTIFY && this.wrapWidth > 0
                      ? this.wrapWidth
-                     : this.renderedLines.stream().map(this.font::width).max(Integer::compareTo).orElse(0);
+                     : this.renderedLines.stream().map(this.font::width).max(Integer::compareTo).orElse(0) - (this.shadow ? 0 : 1);
 
         this.height = Math.max(1, this.renderedLines.size()) * this.lineHeight;
         if( this.bordered ) {
@@ -211,7 +211,7 @@ public class Text
                 }
                 break;
             case CENTER, RIGHT:
-                x = textAlignment.shift(textAlignment.shift(x, this.font.width(s)), -this.width);
+                x = textAlignment.shift(textAlignment.shift(x, this.font.width(s)), -this.width - (this.shadow ? 0 : 1));
                 break;
             default:
         }
@@ -309,20 +309,23 @@ public class Text
         final MutableInt mx = new MutableInt(x);
         s.visit((style, str) -> {
             String[] words      = str.split("\\s");
-            float    spaceDist  = this.wrapWidth;
+            int    spaceDist  = this.wrapWidth;
             int[]    wordWidths = new int[words.length];
+            int lastId = words.length - 1;
 
-            for( int i = 0; i < words.length; i++ ) {
-                wordWidths[i] = this.font.width(words[i]);
+            for( int i = 0; i <= lastId; i++ ) {
+                wordWidths[i] = this.font.width(words[i]) - (this.shadow ? 0 : 1);
                 spaceDist -= wordWidths[i];
             }
 
-            spaceDist /= words.length - 1;
+            int totalSpace = spaceDist;
+            spaceDist /= lastId;
+            int lastDistAdd = totalSpace - (spaceDist * lastId);
 
-            for( int i = 0; i < words.length; i++ ) {
+            for( int i = 0; i <= lastId; i++ ) {
                 this.font.drawInBatch(Component.literal(words[i]).withStyle(MiscUtils.apply(globalFontID, style::withFont, style)), mx.getValue(), y, this.currColor, false, pose, bufferSource,
                                       Font.DisplayMode.NORMAL, 0, 0xF000F0);
-                mx.add(wordWidths[i] + spaceDist);
+                mx.add(wordWidths[i] + spaceDist + (i == (lastId-1) ? lastDistAdd : 0));
             }
 
             return Optional.empty();

@@ -15,7 +15,7 @@
       "y": 18,
       "areaWidth": 160,
       "areaHeight": 110,
-      "rasterized": true,
+      "rasterized": false,
       "scrollButton": {
         "type": "texture",
         "x": 175,
@@ -150,12 +150,14 @@
           "children": {
             "text_centered": {
               "type": "text",
+              "shadow": false,
               "textAlign": "center",
               "text": "a\ncentered\ntext",
               "color": "#FF0088FF"
             },
             "text_right": {
               "type": "text",
+              "shadow": false,
               "x": 20,
               "textAlign": "right",
               "text": "a\nright\ntext",
@@ -171,6 +173,14 @@
           "text": "This is a wrapped, justified text only found in the deepest of lore books.",
           "shadow": false,
           "color": "#FF000000"
+        },
+        "text_bordered": {
+          "type": "text",
+          "y": 2,
+          "text": "This is a bordered text.",
+          "shadow": false,
+          "bordered": true,
+          "color": "#FFFFFF00"
         }
       }
     }

@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.serialization.DataResult;
 import dev.sanandrea.mods.sanlib.lib.ColorObj;
+import dev.sanandrea.mods.sanlib.lib.util.ColorUtils;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import dev.sanandrea.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.network.chat.TextColor;
@@ -58,21 +59,19 @@ import java.util.regex.Pattern;
 @SuppressWarnings("unused")
 public class ColorDef
 {
-    private static final String RGB_REGEX = "\\s*(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)\\s*";
-    private static final Pattern REGEX_RGB_FUNC = Pattern.compile("^rgb\\(" + RGB_REGEX + "," + RGB_REGEX + "," + RGB_REGEX + "\\)$",
-                                                                  Pattern.CASE_INSENSITIVE);
-    private static final Pattern REGEX_RGBA_FUNC = Pattern.compile("^rgba\\(" + RGB_REGEX + "," + RGB_REGEX + "," + RGB_REGEX + ",\\s*(1(?:\\.0+)?|0(?:\\.\\d+)?)\\s*\\)$",
-                                                                   Pattern.CASE_INSENSITIVE);
-
     public final float stop;
-    public final int   color;
+    public final StatedColor   color;
 
     public ColorDef(int color) {
         this(-1, color);
     }
 
+    public ColorDef(ColorObj color) {
+        this(color.getColorInt());
+    }
+
     public ColorDef(JsonObject data, Integer defaultColor) {
-        this(JsonUtils.getFloatVal(data.get("stop"), -1), getColorFromJson(data.get("color"), defaultColor));
+        this(JsonUtils.getFloatVal(data.get("stop"), -1), getColorFromJson(data.get("color"), defaultColor).color);
     }
 
     public ColorDef(float stop, int color) {
@@ -84,45 +83,29 @@ public class ColorDef
         return this.stop >= 0.0F;
     }
 
-    public static int getColorFromJson(JsonElement data, Integer defaultColor) {
+    public static ColorDef getColorFromJson(JsonElement data, Integer defaultColor) {
         String colorStr = JsonUtils.getStringVal(data);
 
         if( MiscUtils.isEmpty(colorStr) ) {
             if( defaultColor == null ) {
                 throw new JsonParseException("color cannot be empty");
             } else {
-                return defaultColor;
+                return new ColorDef(defaultColor);
             }
         }
 
         if( colorStr.startsWith("#") || colorStr.startsWith("0x") ) {
-            return MiscUtils.hexToInt(colorStr);
+            return new ColorDef(MiscUtils.hexToInt(colorStr));
         } else {
             DataResult<TextColor> tf = TextColor.parseColor(colorStr);
             if( tf.isSuccess() ) {
-                return tf.getOrThrow().getValue();
+                return new ColorDef(tf.getOrThrow().getValue());
             } else if( Pattern.matches("-?\\d+", colorStr) ) {
-                return Integer.parseInt(colorStr);
+                return new ColorDef(Integer.parseInt(colorStr));
             } else {
-                return getColorFromRgba(colorStr);
+                return new ColorDef(ColorUtils.getColorFromRgba(colorStr));
             }
         }
-    }
-
-    protected static int getColorFromRgba(String rgbaText) {
-        Matcher rgbaMatcher = REGEX_RGBA_FUNC.matcher(rgbaText);
-        if( !rgbaMatcher.matches() ) {
-            rgbaMatcher = REGEX_RGB_FUNC.matcher(rgbaText);
-            if( !rgbaMatcher.matches() ) {
-                throw new JsonParseException(String.format("color value is invalid: %s", rgbaText));
-            }
-        }
-
-        return new ColorObj(Integer.parseInt(rgbaMatcher.group(1)),
-                                  Integer.parseInt(rgbaMatcher.group(2)),
-                                  Integer.parseInt(rgbaMatcher.group(3)),
-                                  rgbaMatcher.groupCount() > 3 ? Math.round(Float.parseFloat(rgbaMatcher.group(4)) * 255.0F) : 255)
-                .getColorInt();
     }
 
     public static boolean checkStop(ColorDef color, Boolean prevHasStop) {
@@ -154,10 +137,11 @@ public class ColorDef
                 throw new JsonParseException("'colors' value must be an array");
             }
         } else {
-            colors.add(new ColorDef(ColorDef.getColorFromJson(data.get("color"), defaultColor)));
+            colors.add(ColorDef.getColorFromJson(data.get("color"), defaultColor));
         }
     }
 
+    @Deprecated
     public static void loadKeyedColors(@Nonnull JsonObject data, @Nonnull Map<String, Integer> colors, String defaultKey, Integer defaultColor) {
         JsonElement colorData = data.get("colors");
 
@@ -171,7 +155,7 @@ public class ColorDef
                 throw new JsonParseException("'colors' value must be an object");
             }
         } else {
-            colors.put(defaultKey, ColorDef.getColorFromJson(data.get("color"), defaultColor));
+            colors.put(defaultKey, ColorDef.getColorFromJson(data.get("color"), defaultColor).color);
         }
     }
 
@@ -185,11 +169,38 @@ public class ColorDef
             }
             def = new ColorDef(colorObj, defaultColor);
         } else if( color.isJsonPrimitive() ) {
-            def = new ColorDef(ColorDef.getColorFromJson(color, defaultColor));
+            def = ColorDef.getColorFromJson(color, defaultColor);
         } else {
             throw new JsonParseException("color is an invalid type, must be either an ARGB hex string (# or 0x as prefix, e.g. 0xFFFF0000), a 'TextFormatting' color name or a color object.");
         }
 
         return def;
+    }
+
+    public record StatedColor(int defaultColor, int hoverColor, int disabledColor)
+    {
+        public StatedColor(int color) {
+            this(color, color, color);
+        }
+
+        public static StatedColor getShadowColor(StatedColor base) {
+            return new StatedColor(ColorUtils.getShadowColor(base.defaultColor),
+                                   ColorUtils.getShadowColor(base.hoverColor),
+                                   ColorUtils.getShadowColor(base.disabledColor));
+        }
+
+        public static StatedColor getBorderColor(StatedColor base) {
+            
+        }
+
+        public int getColor(boolean disabled, boolean hovering) {
+            if( disabled ) {
+                return this.disabledColor;
+            }
+
+            return hovering ? this.hoverColor : this.defaultColor;
+        }
+
+
     }
 }

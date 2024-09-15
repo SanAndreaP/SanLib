@@ -2,7 +2,6 @@ package dev.sanandrea.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.blaze3d.systems.RenderSystem;
 import dev.sanandrea.mods.sanlib.lib.client.gui.GuiDefinition;
 import dev.sanandrea.mods.sanlib.lib.client.gui.GuiElement;
 import dev.sanandrea.mods.sanlib.lib.client.gui.IGui;
@@ -41,12 +40,12 @@ public class ScrollPanel
 
     protected int        areaWidth;
     protected int        areaHeight;
-    protected GuiElement scrollBtn = new Empty(SCROLL_BUTTON_ID);
+    protected GuiElement scrollBtn      = new Empty(SCROLL_BUTTON_ID);
     protected int        scrollHeight;
     protected double     minScrollDelta = 0.0F;
     protected boolean    rasterized;
     @Nonnull
-    protected Spacing    padding = Spacing.NONE;
+    protected Spacing    padding        = Spacing.NONE;
 
     protected int     scrollButtonOffsetY = 0;
     protected boolean isMouseDownScrolling;
@@ -190,7 +189,7 @@ public class ScrollPanel
         int scrollBtnX = this.scrollBtn.getPosX();
         int scrollBtnY = this.scrollBtn.getPosY() + this.scrollButtonOffsetY;
 
-        this.scrollBtn.renderDebug(gui, graphics, scrollBtnX, scrollBtnY, mouseX, mouseY, partialTicks, level+1);
+        this.scrollBtn.renderDebug(gui, graphics, scrollBtnX, scrollBtnY, mouseX, mouseY, partialTicks, level + 1);
     }
 
     @Override
@@ -227,6 +226,10 @@ public class ScrollPanel
     }
 
     public boolean canScroll() {
+        if( this.height > this.areaHeight ) {
+            return true;
+        }
+
         int count = this.children.size();
         return count > 0 && this.visibleChildren.size() < count;
     }
@@ -298,13 +301,13 @@ public class ScrollPanel
         Double newScroll = null;
 
         if( indexShift != 0 ) {
-            GuiElement currChild = this.visibleChildren.keySet().stream().findFirst().orElse(null);
-            int        currIdx   = this.orderedChildren.indexOf(currChild);
+            var currChild = this.visibleChildren.entrySet().stream().findFirst().orElse(null);
+            int currIdx   = this.orderedChildren.indexOf(MiscUtils.apply(currChild, Map.Entry::getKey));
 
             if( indexShift > 0 && currChild != null && currIdx >= 0 && currIdx < this.orderedChildren.size() - 1 ) {
                 newScroll = this.getScrollPos(this.orderedChildren.get(currIdx + 1));
             } else if( indexShift < 0 && currChild != null && currIdx > 0 ) {
-                newScroll = this.getScrollPos(this.orderedChildren.get(currIdx - 1));
+                newScroll = this.getScrollPos(this.orderedChildren.get(currChild.getValue() < 0 ? currIdx : currIdx - 1));
             }
         }
 
