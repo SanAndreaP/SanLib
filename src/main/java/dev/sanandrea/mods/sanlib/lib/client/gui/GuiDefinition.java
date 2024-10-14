@@ -208,7 +208,7 @@ public class GuiDefinition
 
     public GuiElement loadElement(String id, JsonObject data) {
         JsonObject v    = data.getAsJsonObject();
-        String     type = JsonUtils.getStringVal(v.get("type"));
+        String     type = JsonUtils.getStringVal(v.get(GuiElement.JSON_TYPE));
         if( type == null ) {
             SanLib.LOG.warn("Element '{}' has no type defined", id);
             type = Empty.ID.toString();
@@ -234,19 +234,19 @@ public class GuiDefinition
     private GuiElement loadElement(Map.Entry<String, JsonElement> e) {
         GuiElement element = loadElement(e.getKey(), e.getValue().getAsJsonObject());
 
-        if( element instanceof IElementContainer ) {
-            this.childContainers.add((IElementContainer) element);
+        if( element instanceof IElementContainer iec ) {
+            this.childContainers.add(iec);
         }
 
         return element;
     }
 
     public ResourceLocation getTexture(JsonElement texture) {
-        if( texture != null ) {
-            return ResourceLocation.parse(texture.getAsString());
-        }
+        return this.getTexture(texture, null);
+    }
 
-        return this.texture;
+    public ResourceLocation getTexture(JsonElement texture, ResourceLocation def) {
+        return JsonUtils.getLocation(texture, MiscUtils.get(def, this.texture));
     }
 
     @SuppressWarnings("java:S107")
@@ -309,7 +309,7 @@ public class GuiDefinition
 
             pose.translate(-gui.getPosX(), -gui.getPosY(), 0);
             pose.scale(txtScale);
-            font.drawInBatch(String.format("%d: %s", level, debugElem.getMiddle()), level * 8, debugOffY, debugElem.getRight(), true,
+            font.drawInBatch(String.format("%d: %s", level, debugElem.getMiddle()), level * 8.0F, debugOffY, debugElem.getRight(), true,
                              pose, graphics.bufferSource(), Font.DisplayMode.NORMAL, 0x0, 0xF000F0);
             debugOffY += font.lineHeight;
 
@@ -418,11 +418,11 @@ public class GuiDefinition
 
     public GuiElement putBackgroundElement(String id, GuiElement child) {
         GuiElement prev = this.backgroundElements.put(id, child);
-        if( prev instanceof IElementContainer ) {
-            this.childContainers.remove((IElementContainer) prev);
+        if( prev instanceof IElementContainer iec ) {
+            this.childContainers.remove(iec);
         }
-        if( child instanceof IElementContainer ) {
-            this.childContainers.add((IElementContainer) child);
+        if( child instanceof IElementContainer iec ) {
+            this.childContainers.add(iec);
         }
 
         this.updatePriorities(true, false);
@@ -432,11 +432,11 @@ public class GuiDefinition
 
     public GuiElement putForegroundElement(String id, GuiElement child) {
         GuiElement prev = this.foregroundElements.put(id, child);
-        if( prev instanceof IElementContainer ) {
-            this.childContainers.remove((IElementContainer) prev);
+        if( prev instanceof IElementContainer iec ) {
+            this.childContainers.remove(iec);
         }
-        if( child instanceof IElementContainer ) {
-            this.childContainers.add((IElementContainer) child);
+        if( child instanceof IElementContainer iec ) {
+            this.childContainers.add(iec);
         }
 
         this.updatePriorities(false, true);
@@ -495,8 +495,8 @@ public class GuiDefinition
 
     public GuiElement removeBackgroundElement(String id) {
         GuiElement prev = this.backgroundElements.remove(id);
-        if( prev instanceof IElementContainer ) {
-            this.childContainers.remove((IElementContainer) prev);
+        if( prev instanceof IElementContainer iec ) {
+            this.childContainers.remove(iec);
         }
 
         this.updatePriorities(true, false);
@@ -506,8 +506,8 @@ public class GuiDefinition
 
     public GuiElement removeForegroundElement(String id) {
         GuiElement prev = this.foregroundElements.remove(id);
-        if( prev instanceof IElementContainer ) {
-            this.childContainers.remove((IElementContainer) prev);
+        if( prev instanceof IElementContainer iec ) {
+            this.childContainers.remove(iec);
         }
 
         this.updatePriorities(true, false);

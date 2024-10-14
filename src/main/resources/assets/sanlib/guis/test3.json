@@ -20,7 +20,7 @@
         "type": "texture",
         "x": 175,
         "y": 18,
-        "u": 232,
+        "texture": { "u": 232 },
         "width": 12,
         "height": 15
       },
@@ -81,26 +81,28 @@
           "children": {
             "texture_simple": {
               "type": "texture",
-              "texture": "textures/entity/cow/cow.png",
+              "texture": {
+                "location": "textures/entity/cow/cow.png",
+                "u": 6,
+                "v": 6,
+                "textureWidth": 64,
+                "textureHeight": 32
+              },
               "width": 8,
-              "height": 8,
-              "textureWidth": 64,
-              "textureHeight": 32,
-              "u": 6,
-              "v": 6
+              "height": 8
             },
             "texture_hover": {
               "type": "texture",
-              "texture": "textures/entity/creeper/creeper.png",
+              "texture": {
+                "location": "textures/entity/creeper/creeper.png",
+                "u": 24,
+                "v": 8,
+                "hover": { "u": 8 },
+                "textureWidth": 64,
+                "textureHeight": 32
+              },
               "width": 8,
-              "height": 8,
-              "textureWidth": 64,
-              "textureHeight": 32,
-              "u": 24,
-              "v": 8,
-              "hover": {
-                "u": 8
-              }
+              "height": 8
             },
             "texture_sprite_short": {
               "type": "texture",

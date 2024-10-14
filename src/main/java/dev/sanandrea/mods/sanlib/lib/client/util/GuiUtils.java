@@ -62,15 +62,15 @@ public final class GuiUtils
 //    }
 
 //    /**
-//     * draws a rectangular texture with the fixed resolution 256x256 or a multiple of it.
+//     * draws a rectangular location with the fixed resolution 256x256 or a multiple of it.
 //     *
-//     * @param xPos The X coordinate on screen for the texture to appear at.
-//     * @param yPos The Y coordinate on screen for the texture to appear at.
-//     * @param z The Z index of the texture
-//     * @param u The X coordinate on the texture sheet
-//     * @param v The Y coordinate on the texture sheet
-//     * @param width The width of the texture
-//     * @param height The height of the texture
+//     * @param xPos The X coordinate on screen for the location to appear at.
+//     * @param yPos The Y coordinate on screen for the location to appear at.
+//     * @param z The Z index of the location
+//     * @param u The X coordinate on the location sheet
+//     * @param v The Y coordinate on the location sheet
+//     * @param width The width of the location
+//     * @param height The height of the location
 //     */
 //    @Deprecated
 //    public static void drawTexture(GuiGraphics graphics, int xPos, int yPos, float z, int u, int v, int width, int height) {
@@ -78,17 +78,17 @@ public final class GuiUtils
 //    }
 //
 //    /**
-//     * draws a rectangular texture with a custom resolution scale.
+//     * draws a rectangular location with a custom resolution scale.
 //     *
-//     * @param xPos The X coordinate on screen for the texture to appear at.
-//     * @param yPos The Y coordinate on screen for the texture to appear at.
-//     * @param z The Z index of the texture
-//     * @param u The X coordinate on the texture sheet
-//     * @param v The Y coordinate on the texture sheet
-//     * @param width The width of the texture
-//     * @param height The height of the texture
-//     * @param resScaleX The resolution scale on the X axis. Can be calculated via {@code 1F / texture width in pixel}, e.g. {@code 1F / 256F = 0.00390625F}
-//     * @param resScaleY The resolution scale on the Y axis. Can be calculated via {@code 1F / texture height in pixel}, e.g. {@code 1F / 256F = 0.00390625F}
+//     * @param xPos The X coordinate on screen for the location to appear at.
+//     * @param yPos The Y coordinate on screen for the location to appear at.
+//     * @param z The Z index of the location
+//     * @param u The X coordinate on the location sheet
+//     * @param v The Y coordinate on the location sheet
+//     * @param width The width of the location
+//     * @param height The height of the location
+//     * @param resScaleX The resolution scale on the X axis. Can be calculated via {@code 1F / location width in pixel}, e.g. {@code 1F / 256F = 0.00390625F}
+//     * @param resScaleY The resolution scale on the Y axis. Can be calculated via {@code 1F / location height in pixel}, e.g. {@code 1F / 256F = 0.00390625F}
 //     */
 //    @Deprecated
 //    public static void drawTexture(GuiGraphics stack, int xPos, int yPos, float z, int u, int v, int width, int height, float resScaleX, float resScaleY) {
@@ -118,8 +118,8 @@ public final class GuiUtils
      * @param isHorizontal whether this gradient will be horizontal (<tt>true</tt>) or vertical (<tt>false</tt>)
      */
     public static void drawGradient(GuiGraphics graphics, float x, float y, float width, float height, int color1, int color2, boolean isHorizontal) {
-        ColorObj startColor = new ColorObj(color1);
-        ColorObj endColor = new ColorObj(color2);
+        ColorObj startColor = ColorObj.fromARGB(color1);
+        ColorObj endColor = ColorObj.fromARGB(color2);
 
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         RenderSystem.enableBlend();

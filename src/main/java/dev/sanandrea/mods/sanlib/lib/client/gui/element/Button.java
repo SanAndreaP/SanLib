@@ -32,14 +32,13 @@ public class Button
     protected final String backgroundId = String.format("%s_background", this.id);
     protected final String labelId      = String.format("%s_labelId", this.id);
 
+    protected static final ColorData DEFAULT_LABEL_COLOR = new ColorData(new ColorData.StatedColor(0xFFFFFFFF, 0xFFFFFFFF, 0xFFA0A0A0));
+
     protected GuiElement background;
     protected GuiElement label;
 
     protected ResourceLocation customSoundID;
     protected SoundEvent       customSound;
-
-    protected static final int DEFAULT_TEXT_COLOR          = 0xFFFFFFFF;
-    protected static final int DEFAULT_DISABLED_TEXT_COLOR = 0xFFA0A0A0;
 
     protected Consumer<Button> onClickListener;
 
@@ -69,25 +68,17 @@ public class Button
         JsonObject  bgDataObj = null;
         JsonElement bgData    = data.get("background");
         if( bgData == null ) {
+            TextureData texture = new TextureData(new TextureData.TextureDef("widget/button"),
+                                                  new TextureData.TextureDef("widget/button_highlighted"),
+                                                  new TextureData.TextureDef("widget/button_disabled"),
+                                                  200, 20);
+
             bgDataObj = JsonUtils.ObjectBuilder.create()
-                                               .value("type", Texture.ID.toString())
-                                               .value("texture", "widget/button")
-                                               .value("textureWidth", 200)
-                                               .value("textureHeight", 20)
-                                               .value("isSprite", true)
-                                               .value("hover", JsonUtils.ObjectBuilder.create().value("texture", "widget/button_highlighted").get())
-                                               .value("disabled", JsonUtils.ObjectBuilder.create().value("texture", "widget/button_disabled").get())
+                                               .value(JSON_TYPE, Texture.ID.toString())
+                                               .value(Texture.JSON_TEXTURE, texture.toJson())
+                                               .value(Texture.JSON_IS_SPRITE, true)
                                                .get();
 
-//            JsonUtils.addDefaultJsonProperty(bgDataObj, "type", TiledTexture.ID.toString());
-//            JsonUtils.addDefaultJsonProperty(bgDataObj, "texture", "textures/gui/widget/button.png");
-//            JsonUtils.addDefaultJsonProperty(bgDataObj, "v", 66);
-//            JsonUtils.addDefaultJsonProperty(bgDataObj, "vHover", 86);
-//            JsonUtils.addDefaultJsonProperty(bgDataObj, "vDisabled", 46);
-//            JsonUtils.addDefaultJsonProperty(bgDataObj, "tileTextureWidth", 200);
-//            JsonUtils.addDefaultJsonProperty(bgDataObj, "tileTextureHeight", 20);
-//            JsonUtils.addDefaultJsonProperty(bgDataObj, "centralWidth", 190);
-//            JsonUtils.addDefaultJsonProperty(bgDataObj, "centralHeight", 14);
         } else if( bgData.isJsonObject() ) {
             bgDataObj = bgData.getAsJsonObject();
         }
@@ -100,21 +91,16 @@ public class Button
         if( lblData != null ) {
             if( lblData.isJsonPrimitive() ) {
                 String txt = lblData.getAsString();
-                lblData = new JsonObject();
-                JsonUtils.addJsonProperty((JsonObject) lblData, "type", "text");
-                JsonUtils.addJsonProperty((JsonObject) lblData, "text", txt);
+                lblData = JsonUtils.ObjectBuilder.create().value("type", Text.ID).value("text", txt).get();
             }
 
             if( lblData.isJsonObject() ) {
                 JsonObject lblDataObj = (JsonObject) lblData;
 
-                JsonObject defaultColors = new JsonObject();
-                defaultColors.addProperty(Text.DEFAULT_COLOR, DEFAULT_TEXT_COLOR);
-                defaultColors.addProperty(Text.DISABLED_COLOR, DEFAULT_DISABLED_TEXT_COLOR);
-                JsonUtils.addDefaultJsonProperty(lblDataObj, "colors", defaultColors);
-                JsonUtils.addDefaultJsonProperty(lblDataObj, "shadow", true);
-                JsonUtils.addDefaultJsonProperty(lblDataObj, "horizontalAlign", Alignment.CENTER.toString());
-                JsonUtils.addDefaultJsonProperty(lblDataObj, "verticalAlign", Alignment.CENTER.toString());
+                JsonUtils.addDefaultJsonProperty(lblDataObj, Text.JSON_COLOR, DEFAULT_LABEL_COLOR.toJson());
+                JsonUtils.addDefaultJsonProperty(lblDataObj, Text.JSON_SHADOW, true);
+                JsonUtils.addDefaultJsonProperty(lblDataObj, JSON_HORIZONTAL_ALIGN, Alignment.CENTER.toString());
+                JsonUtils.addDefaultJsonProperty(lblDataObj, JSON_VERTICAL_ALIGN, Alignment.CENTER.toString());
 
                 this.putElement(this.labelId, guiDef.loadElement(this.labelId, lblDataObj));
             }
@@ -153,7 +139,8 @@ public class Button
                 this.customSound = MiscUtils.get(this.customSound, () -> BuiltInRegistries.SOUND_EVENT.get(this.customSoundID));
             }
 
-            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(MiscUtils.get(this.customSound, SoundEvents.UI_BUTTON_CLICK.value()), 1.0F));
+            Minecraft.getInstance().getSoundManager()
+                     .play(SimpleSoundInstance.forUI(MiscUtils.get(this.customSound, SoundEvents.UI_BUTTON_CLICK.value()), 1.0F));
 
             return true;
         }
@@ -211,10 +198,10 @@ public class Button
         public Builder<T> withDefaultBackground() {
             Texture bg = Texture.Builder.createTexture()
                                         .asSprite()
-                                        .withData(new Texture.TextureData(ResourceLocation.withDefaultNamespace("widget/button")))
-                                        .withHoverData(new Texture.TextureData(ResourceLocation.withDefaultNamespace("widget/button_highlighted")))
-                                        .withDisabledData(new Texture.TextureData(ResourceLocation.withDefaultNamespace("widget/button_disabled")))
-                                        .withSize(200, 20)
+                                        .withData(new TextureData(new TextureData.TextureDef("widget/button"),
+                                                                  new TextureData.TextureDef("widget/button_highlighted"),
+                                                                  new TextureData.TextureDef("widget/button_disabled"),
+                                                                  200, 20))
                                         .get();
 
             this.elem.putElement(this.elem.backgroundId, bg);
@@ -240,8 +227,7 @@ public class Button
         protected Builder<T> withLabel(Consumer<Text.Builder<Text>> lblTxtSetter) {
             Text.Builder<Text> b = Text.Builder.createText(this.elem.labelId);
             lblTxtSetter.accept(b);
-            Text txt = b.withTextColor(DEFAULT_TEXT_COLOR)
-                        .withDisabledColor(DEFAULT_DISABLED_TEXT_COLOR)
+            Text txt = b.withTextColor(DEFAULT_LABEL_COLOR.color())
                         .withShadow()
                         .withAlignment(Alignment.CENTER, Alignment.CENTER)
                         .get();

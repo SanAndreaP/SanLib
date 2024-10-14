@@ -3,7 +3,6 @@
  * Full license text can be found within the LICENSE.md file */
 package dev.sanandrea.mods.sanlib.lib.util;
 
-import com.google.gson.JsonParseException;
 import dev.sanandrea.mods.sanlib.lib.ColorObj;
 
 import javax.imageio.ImageIO;
@@ -53,17 +52,17 @@ public final class ColorUtils
      * @throws java.io.IOException when the InputStream cannot be read as an image
      */
     public static ColorObj getAverageColor(InputStream is, ColorObj maskClr) throws IOException {
-        // read texture as BufferedImage from InputStream
+        // read location as BufferedImage from InputStream
         BufferedImage bi = ImageIO.read(is);
 
-        // holds the added RGB values of the whole texture and pixel counter
+        // holds the added RGB values of the whole location and pixel counter
         double red   = 0.0D;
         double green = 0.0D;
         double blue  = 0.0D;
         double count = 0.0D;
         for( int x = 0; x < bi.getWidth(); x++ ) {          // loop through the pixels
             for( int y = 0; y < bi.getHeight(); y++ ) {
-                ColorObj color = new ColorObj(bi.getRGB(x, y));
+                ColorObj color = ColorObj.fromARGB(bi.getRGB(x, y));
 
                 if( maskClr != null ) {
                     if( color.equals(maskClr) ) {
@@ -82,7 +81,7 @@ public final class ColorUtils
         int avgGreen = (int) (green / count);
         int avgBlue  = (int) (blue / count);
 
-        return new ColorObj(avgRed, avgGreen, avgBlue, 255); // return combined RGB channels
+        return ColorObj.fromRGBA(avgRed, avgGreen, avgBlue, 255); // return combined RGB channels
     }
 
     public static ColorObj getColorFromRgba(String rgbaText) {
@@ -94,17 +93,25 @@ public final class ColorUtils
             }
         }
 
-        return new ColorObj(Integer.parseInt(rgbaMatcher.group(1)),
-                            Integer.parseInt(rgbaMatcher.group(2)),
-                            Integer.parseInt(rgbaMatcher.group(3)),
-                            rgbaMatcher.groupCount() > 3 ? Math.round(Float.parseFloat(rgbaMatcher.group(4)) * 255.0F) : 255);
+        return ColorObj.fromRGBA(Integer.parseInt(rgbaMatcher.group(1)),
+                                 Integer.parseInt(rgbaMatcher.group(2)),
+                                 Integer.parseInt(rgbaMatcher.group(3)),
+                                 rgbaMatcher.groupCount() > 3 ? Math.round(Float.parseFloat(rgbaMatcher.group(4)) * 255.0F) : 255);
     }
 
     public static ColorObj getShadowColor(ColorObj baseColor) {
-        return new ColorObj(baseColor.fRed() * 0.25F, baseColor.fGreen() * 0.25F, baseColor.fBlue() * 0.25F, baseColor.fAlpha());
+        return ColorObj.fromRGBA(baseColor.fRed() * 0.25F, baseColor.fGreen() * 0.25F, baseColor.fBlue() * 0.25F, baseColor.fAlpha());
     }
 
     public static int getShadowColor(int baseColor) {
-        return getShadowColor(new ColorObj(baseColor)).getColorInt();
+        return getShadowColor(ColorObj.fromARGB(baseColor)).getColorInt();
+    }
+
+    public static ColorObj getBorderColor(ColorObj baseColor) {
+        return baseColor.getPerceptiveLuminance() > 0.5F ? ColorObj.BLACK : ColorObj.WHITE;
+    }
+
+    public static int getBorderColor(int baseColor) {
+        return getBorderColor(ColorObj.fromARGB(baseColor)).getColorInt();
     }
 }

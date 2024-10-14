@@ -17,9 +17,15 @@ import org.apache.commons.lang3.Range;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Arrays;
+import java.util.function.BiFunction;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
+import java.util.function.Function;
 import java.util.function.IntConsumer;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
 
 @SuppressWarnings({ "unused", "WeakerAccess" })
@@ -38,6 +44,14 @@ public final class JsonUtils
         } catch( IOException e ) {
             throw new JsonParseException(e);
         }
+    }
+
+    public static <T> T apply(JsonObject json, String key, Function<JsonElement, T> onFound, T defaultValue) {
+        if( json.has(key) ) {
+            return onFound.apply(json.get(key));
+        }
+
+        return defaultValue;
     }
 
     public static float getFloatVal(JsonElement json) {
@@ -603,6 +617,12 @@ public final class JsonUtils
 
             return this;
         }
+        public ObjectBuilder valueIf(String key, Number value, BooleanSupplier test) {
+            return valueIf(b -> b.value(key, value), test);
+        }
+        public ObjectBuilder valueIf(String key, Number value, boolean overwrite, BooleanSupplier test) {
+            return valueIf(b -> b.value(key, value, overwrite), test);
+        }
 
         public ObjectBuilder value(String key, Boolean value) {
             return value(key, value, true);
@@ -615,6 +635,25 @@ public final class JsonUtils
             }
 
             return this;
+        }
+        public ObjectBuilder valueIf(String key, Boolean value, BooleanSupplier test) {
+            return valueIf(b -> b.value(key, value), test);
+        }
+        public ObjectBuilder valueIf(String key, Boolean value, boolean overwrite, BooleanSupplier test) {
+            return valueIf(b -> b.value(key, value, overwrite), test);
+        }
+
+        public ObjectBuilder value(String key, ResourceLocation value) {
+            return value(key, value, true);
+        }
+        public ObjectBuilder value(String key, ResourceLocation value, boolean overwrite) {
+            return value(key, value.toString(), overwrite);
+        }
+        public ObjectBuilder valueIf(String key, ResourceLocation value, BooleanSupplier test) {
+            return valueIf(b -> b.value(key, value), test);
+        }
+        public ObjectBuilder valueIf(String key, ResourceLocation value, boolean overwrite, BooleanSupplier test) {
+            return valueIf(b -> b.value(key, value, overwrite), test);
         }
 
         public ObjectBuilder value(String key, String value) {
@@ -629,6 +668,12 @@ public final class JsonUtils
 
             return this;
         }
+        public ObjectBuilder valueIf(String key, String value, BooleanSupplier test) {
+            return valueIf(b -> b.value(key, value), test);
+        }
+        public ObjectBuilder valueIf(String key, String value, boolean overwrite, BooleanSupplier test) {
+            return valueIf(b -> b.value(key, value, overwrite), test);
+        }
 
         public ObjectBuilder value(String key, Character value) {
             return value(key, value, true);
@@ -642,6 +687,12 @@ public final class JsonUtils
 
             return this;
         }
+        public ObjectBuilder valueIf(String key, Character value, BooleanSupplier test) {
+            return valueIf(b -> b.value(key, value), test);
+        }
+        public ObjectBuilder valueIf(String key, Character value, boolean overwrite, BooleanSupplier test) {
+            return valueIf(b -> b.value(key, value, overwrite), test);
+        }
 
         public ObjectBuilder value(String key, JsonElement value) {
             return value(key, value, true);
@@ -651,6 +702,20 @@ public final class JsonUtils
                 this.obj.add(key, value);
             } else {
                 addDefaultJsonProperty(this.obj, key, value);
+            }
+
+            return this;
+        }
+        public ObjectBuilder valueIf(String key, JsonElement value, BooleanSupplier test) {
+            return valueIf(b -> b.value(key, value), test);
+        }
+        public ObjectBuilder valueIf(String key, JsonElement value, boolean overwrite, BooleanSupplier test) {
+            return valueIf(b -> b.value(key, value, overwrite), test);
+        }
+
+        private ObjectBuilder valueIf(UnaryOperator<ObjectBuilder> setter, BooleanSupplier test) {
+            if( test.getAsBoolean() ) {
+                return setter.apply(this);
             }
 
             return this;

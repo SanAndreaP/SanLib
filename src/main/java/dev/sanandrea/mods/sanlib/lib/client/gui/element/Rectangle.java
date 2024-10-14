@@ -2,6 +2,7 @@ package dev.sanandrea.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.systems.RenderSystem;
+import dev.sanandrea.mods.sanlib.lib.ColorObj;
 import dev.sanandrea.mods.sanlib.lib.client.gui.GuiDefinition;
 import dev.sanandrea.mods.sanlib.lib.client.gui.GuiElement;
 import dev.sanandrea.mods.sanlib.lib.client.gui.IGui;
@@ -35,13 +36,13 @@ import java.util.UUID;
  *         <td>color</td>
  *         <td>if <tt>colors</tt> isn't defined</td>
  *         <td>string</td>
- *         <td>A color value as defined in {@link ColorDef}.</td>
+ *         <td>A color value as defined in {@link ColorData}.</td>
  *     </tr>
  *     <tr>
  *         <td>colors</td>
  *         <td>if <tt>color</tt> isn't defined</td>
  *         <td>array(ColorDef)</td>
- *         <td>An array of multiple {@link ColorDef} objects.
+ *         <td>An array of multiple {@link ColorData} objects.
  *             Note, if you define a 'stop' value for one object, all other objects must also have it defined.</td>
  *     </tr>
  * </table>
@@ -53,8 +54,8 @@ public class Rectangle
 {
     public static final ResourceLocation ID = ResourceLocation.withDefaultNamespace("rectangle");
 
-    protected final List<ColorDef> colors               = new ArrayList<>();
-    protected       Orientation        orientation = Orientation.VERTICAL;
+    protected final List<ColorData> colors      = new ArrayList<>();
+    protected       Orientation     orientation = Orientation.VERTICAL;
 
     private final List<ColorEntry> colorCache = new ArrayList<>();
 
@@ -65,6 +66,9 @@ public class Rectangle
     @Override
     @SuppressWarnings("java:S3776")
     public void render(IGui gui, GuiGraphics graphics, int x, int y, double mouseX, double mouseY, float partialTicks) {
+        boolean disabled = !this.isEnabled();
+        boolean hovering = this.isHovering();
+
         if( !this.colorCache.isEmpty() ) {
             if( this.colorCache.size() > 1 ) {
                 for( int i = 0, max = this.colorCache.size() - 1; i < max; i++ ) {
@@ -78,11 +82,13 @@ public class Rectangle
                         float fw = this.orientation == Orientation.VERTICAL ? size : this.getWidth();
                         float fh = this.orientation == Orientation.HORIZONTAL ? size : this.getHeight();
 
-                        GuiUtils.drawGradient(graphics, x + fx, y + fy, fw, fh, curr.color, next.color, this.orientation == Orientation.HORIZONTAL);
+                        int currColor = curr.color.getColor(disabled, hovering);
+                        int nextColor = next.color.getColor(disabled, hovering);
+                        GuiUtils.drawGradient(graphics, x + fx, y + fy, fw, fh, currColor, nextColor, this.orientation == Orientation.HORIZONTAL);
                     }
                 }
             } else {
-                graphics.fill(x, y, x + this.getWidth(), y + getHeight(), this.colors.getFirst().color);
+                graphics.fill(x, y, x + this.getWidth(), y + getHeight(), this.colors.getFirst().getColor(disabled, hovering));
             }
             RenderSystem.enableBlend();
         }
@@ -97,8 +103,8 @@ public class Rectangle
             Float linearStop = this.colors.getFirst().hasStop() ? null : maxSize / (colorsSize - 1);
 
             for( int i = 0; i < colorsSize; i++ ) {
-                ColorDef def  = this.colors.get(i);
-                float    stop = linearStop != null ? linearStop * i : def.stop * maxSize;
+                ColorData def  = this.colors.get(i);
+                float     stop = linearStop != null ? linearStop * i : def.stop() * maxSize;
 
                 this.colorCache.add(new ColorEntry(stop, def));
             }
@@ -111,25 +117,25 @@ public class Rectangle
     public void fromJson(IGui gui, GuiDefinition guiDef, JsonObject data) {
         this.orientation = Orientation.fromString(JsonUtils.getStringVal(data.get("orientation"), Orientation.VERTICAL.toString()));
 
-        ColorDef.loadColors(data, this.colors, null);
+        ColorData.loadColors(data, this.colors, ColorData.WHITE.color());
         this.buildColorCache();
     }
 
     // region Getters & Setters
-    public ColorDef[] getColors() {
-        return this.colors.toArray(new ColorDef[0]);
+    public ColorData[] getColors() {
+        return this.colors.toArray(new ColorData[0]);
     }
 
     public Orientation getOrientation() {
         return this.orientation;
     }
 
-    public void setColors(@Nonnull ColorDef... colors) {
+    public void setColors(@Nonnull ColorData... colors) {
         if( colors.length < 1 ) {
             throw new IllegalArgumentException("at least one color must be passed");
         }
 
-        List<ColorDef> colorsList = Arrays.asList(colors);
+        List<ColorData> colorsList = Arrays.asList(colors);
 
         checkStops(colorsList, null);
 
@@ -142,9 +148,9 @@ public class Rectangle
         this.orientation = orientation;
     }
 
-    private static Boolean checkStops(@Nonnull List<ColorDef> colors, Boolean hasStop) {
-        for( ColorDef c : colors ) {
-            hasStop = ColorDef.checkStop(c, hasStop);
+    private static Boolean checkStops(@Nonnull List<ColorData> colors, Boolean hasStop) {
+        for( ColorData c : colors ) {
+            hasStop = ColorData.checkStop(c, hasStop);
         }
 
         return hasStop;
@@ -166,12 +172,12 @@ public class Rectangle
 
     private static final class ColorEntry
     {
-        float relStop;
-        int   color;
+        float     relStop;
+        ColorData color;
 
-        ColorEntry(float relStop, ColorDef colorDef) {
+        ColorEntry(float relStop, ColorData colorData) {
             this.relStop = relStop;
-            this.color = colorDef.color;
+            this.color = colorData;
         }
     }
 
@@ -180,24 +186,32 @@ public class Rectangle
     {
         protected Builder(T elem) {super(elem);}
 
-        public Builder<T> withColor(ColorDef color) {
+        public Builder<T> withColor(ColorData color) {
             return this.withColors(color);
         }
 
         public Builder<T> withColor(int color) {
-            return this.withColors(new ColorDef(color));
+            return this.withColors(new ColorData(color));
         }
 
         public Builder<T> withColor(float stop, int color) {
-            return this.withColors(new ColorDef(stop, color));
+            return this.withColors(new ColorData(stop, color));
         }
 
-        public Builder<T> withColors(@Nonnull ColorDef... color) {
+        public Builder<T> withColor(int color, int hoverColor, int disabledColor) {
+            return this.withColors(new ColorData(new ColorData.StatedColor(color, hoverColor, disabledColor)));
+        }
+
+        public Builder<T> withColor(float stop, int color, int hoverColor, int disabledColor) {
+            return this.withColors(new ColorData(stop, new ColorData.StatedColor(color, hoverColor, disabledColor)));
+        }
+
+        public Builder<T> withColors(@Nonnull ColorData... color) {
             if( color.length < 1 ) {
                 return this;
             }
 
-            List<ColorDef> colors = Arrays.asList(color);
+            List<ColorData> colors = Arrays.asList(color);
             Rectangle.checkStops(this.elem.colors, Rectangle.checkStops(colors, null));
 
             this.elem.colors.addAll(colors);

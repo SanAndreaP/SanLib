@@ -1,15 +1,11 @@
 package dev.sanandrea.mods.sanlib.lib.client.gui;
 
 import com.google.gson.JsonObject;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.sanandrea.mods.sanlib.lib.ColorObj;
-import dev.sanandrea.mods.sanlib.lib.client.gui.element.Texture;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
@@ -35,19 +31,27 @@ import java.util.function.Consumer;
 public abstract class GuiElement
         implements IGuiReference
 {
-
     public static final RenderType GUI_DEBUG_LINES = RenderType.create(
             "sangui_debug_lines",
             DefaultVertexFormat.POSITION_COLOR,
             VertexFormat.Mode.DEBUG_LINES,
             1536,
             RenderType.CompositeState.builder()
-                                     .setShaderState(RenderType.RENDERTYPE_GUI_SHADER)
-                                     .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
-                                     .setDepthTestState(RenderType.LEQUAL_DEPTH_TEST)
+                                     .setShaderState(RenderStateShard.RENDERTYPE_GUI_SHADER)
+                                     .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+                                     .setDepthTestState(RenderStateShard.LEQUAL_DEPTH_TEST)
                                      .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(1.0D)))
                                      .createCompositeState(false)
     );
+
+    public static final String JSON_TYPE             = "type";
+    public static final String JSON_X                = "x";
+    public static final String JSON_Y                = "y";
+    public static final String JSON_WIDTH            = "width";
+    public static final String JSON_HEIGHT           = "height";
+    public static final String JSON_HORIZONTAL_ALIGN = "horizontalAlign";
+    public static final String JSON_VERTICAL_ALIGN   = "verticalAlign";
+    public static final String JSON_VISIBLE          = "visible";
 
     protected String id;
 
@@ -103,24 +107,25 @@ public abstract class GuiElement
     public abstract void render(IGui gui, GuiGraphics graphics, int x, int y, double mouseX, double mouseY, float partialTicks);
 
     public void loadFromJson(IGui gui, GuiDefinition guiDef, JsonObject data) {
-        this.setPosX(JsonUtils.getIntVal(data.get("x"), 0));
-        this.setPosY(JsonUtils.getIntVal(data.get("y"), 0));
-        this.setSize(JsonUtils.getIntVal(data.get("width"), 0), JsonUtils.getIntVal(data.get("height"), 0));
-        this.setHorizontalAlignment(Alignment.fromString(JsonUtils.getStringVal(data.get("horizontalAlign"), Alignment.LEFT.toString())));
-        this.setVerticalAlignment(Alignment.fromString(JsonUtils.getStringVal(data.get("verticalAlign"), Alignment.TOP.toString())));
+        this.setPosX(JsonUtils.getIntVal(data.get(JSON_X), 0));
+        this.setPosY(JsonUtils.getIntVal(data.get(JSON_Y), 0));
+        this.setSize(JsonUtils.getIntVal(data.get(JSON_WIDTH), 0), JsonUtils.getIntVal(data.get(JSON_HEIGHT), 0));
+        this.setHorizontalAlignment(Alignment.fromString(JsonUtils.getStringVal(data.get(JSON_HORIZONTAL_ALIGN), Alignment.LEFT.toString())));
+        this.setVerticalAlignment(Alignment.fromString(JsonUtils.getStringVal(data.get(JSON_VERTICAL_ALIGN), Alignment.TOP.toString())));
 
-        this.setVisible(JsonUtils.getBoolVal(data.get("visible"), true));
+        this.setVisible(JsonUtils.getBoolVal(data.get(JSON_VISIBLE), true));
 
         this.fromJson(gui, guiDef, data);
     }
 
+    @SuppressWarnings({ "unused", "java:S107" })
     public void renderDebug(IGui gui, GuiGraphics graphics, int x, int y, double mouseX, double mouseY, float partialTicks, int level) {
         int            maxX = x + this.getWidth();
         int            maxY = y + this.getHeight();
         Matrix4f       pose = graphics.pose().last().pose();
         VertexConsumer vc   = graphics.bufferSource().getBuffer(GUI_DEBUG_LINES);
 
-        int color = ColorObj.fromHSLA(Mth.clamp(level * 360.0F / 12.0F, 0, 360.0F), 1.0F, 0.5F, 1.0F).getColorInt();
+        int color = ColorObj.fromHSLA(level * 50.0F, 1.0F, 0.5F, 1.0F).getColorInt();
 
         vc.addVertex(pose, x, y, 0.0F).setColor(color);
         vc.addVertex(pose, maxX, y, 0.0F).setColor(color);
@@ -163,7 +168,11 @@ public abstract class GuiElement
     }
 
     public boolean isHovering() {
-        return this.isHovering || this.isFocused;
+        return this.isHoveringNoFocus() || this.isFocused;
+    }
+
+    public boolean isHoveringNoFocus() {
+        return this.isHovering;
     }
 
     public void setHovering(boolean hovering) {

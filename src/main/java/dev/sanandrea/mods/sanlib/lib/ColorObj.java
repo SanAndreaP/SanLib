@@ -11,72 +11,108 @@ import java.util.Objects;
 @SuppressWarnings("unused")
 public final class ColorObj
 {
-    public static final ColorObj WHITE = new ColorObj(0xFFFFFFFF);
-    public static final ColorObj BLACK = new ColorObj(0xFF000000);
+    public static final ColorObj WHITE = fromARGB(0xFFFFFFFF);
+    public static final ColorObj BLACK = fromARGB(0xFF000000);
 
-    private int r;
-    private int g;
-    private int b;
-    private int a;
+    private final int r;
+    private final int g;
+    private final int b;
+    private final int a;
 
+    public static ColorObj fromRGB(int red, int green, int blue) {return fromRGBA(red, green, blue, 255);}
 
-    /**
-     * Creates a new color object from the passed HSLA values.
-     *
-     * @param hue        The hue value, from {@code 0.0F} - {@code 360.0F}
-     * @param saturation The saturation value, from {@code 0.0F} - {@code 1.0F}
-     * @param luminance  The luminance value, from {@code 0.0F} - {@code 1.0F}
-     * @param alpha      The alpha value, from  {@code 0.0F} - {@code 1.0F}
-     */
-    public static ColorObj fromHSLA(float hue, float saturation, float luminance, float alpha) {
-        ColorObj obj = new ColorObj();
-        obj.calcAndSetRgbFromHsl(hue, saturation, luminance);
+    public static ColorObj fromRGB(float red, float green, float blue) {return fromRGBA(red, green, blue, 1.0F);}
 
-        if( alpha < 0.0F ) {
-            obj.a = 0;
-        } else {
-            obj.a = alpha > 1.0F ? 255 : (int) (alpha * 255.0F);
-        }
+    public static ColorObj fromRGBA(int red, int green, int blue, int alpha) {return new ColorObj(red, green, blue, alpha);}
 
-        return obj;
-    }
+    public static ColorObj fromRGBA(float red, float green, float blue, float alpha) {return new ColorObj(red, green, blue, alpha);}
 
-    public static ColorObj fromRGB(int rgb) {
-        return new ColorObj(rgb | 0xFF000000);
-    }
-
-    private ColorObj() {}
+    public static ColorObj fromRGB(int rgb) {return fromARGB(rgb | 0xFF000000);}
 
     /**
-     * Creates a new instance with an integer as its color value.<br> The integer can be written as hexadecimal number, {@code 0xAARRGGBB}, where as A is alpha, R is red, G is
-     * green and B is blue.<br> If you have integers of format 0xRRGGBB, then it's recommended to add the desired alpha with a bitwise OR, like: {@code clr | 0xAA000000}.
+     * Creates a new instance with an integer as its color value.<br> The integer can be written as hexadecimal number, {@code 0xAARRGGBB}, whereas A
+     * is alpha, R is red, G is green and B is blue.<br> If you have integers of format 0xRRGGBB, then it's recommended to add the desired alpha with
+     * a bitwise OR, like: {@code clr | 0xAA000000}.
      *
      * @param argb The color value as integer
      */
-    public ColorObj(int argb) {
-        this.a = (argb >> 24) & 0xFF;
-        this.r = (argb >> 16) & 0xFF;
-        this.g = (argb >> 8) & 0xFF;
-        this.b = argb & 0xFF;
-    }
+    public static ColorObj fromARGB(int argb) {return new ColorObj((argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF, (argb >> 24) & 0xFF);}
+
+    public static ColorObj fromHSL(float hue, float saturation, float luminance) {return fromHSLA(hue, saturation, luminance, 1.0F);}
 
     /**
-     * Creates a new instance with each color component as integer value.<br> Each value has a range of {@code 0 - 255}. Anything lower / higher will be adjusted.
+     * Calculates the RGB values from the passed HSL values. This overrides the RGB components from this color object with the new colors.
+     *
+     * @param hue        The new hue value, from {@code 0.0F} - {@code 360.0F}
+     * @param saturation The new saturation value, from {@code 0.0F} - {@code 1.0F}
+     * @param luminance  The new luminance value, from {@code 0.0F} - {@code 1.0F}
+     * @param alpha      The alpha value, from  {@code 0.0F} - {@code 1.0F}
+     */
+    public static ColorObj fromHSLA(float hue, float saturation, float luminance, float alpha) {
+        hue %= 360.0F;
+
+        float c = (1.0F - Math.abs(2.0F * luminance - 1.0F)) * saturation;
+        float h = (hue / 60.0F);
+        float x = c * (1.0F - Math.abs((h % 2.0F) - 1.0F));
+        float m = luminance - c / 2.0F;
+
+        float[] rgb = new float[] { 0, 0, 0 };
+        if( h < 1.0F ) {
+            rgb = new float[] { c, x, 0 };
+        } else if( h < 2.0F ) {
+            rgb = new float[] { x, c, 0 };
+        } else if( h < 3.0F ) {
+            rgb = new float[] { 0, c, x };
+        } else if( h < 4.0F ) {
+            rgb = new float[] { 0, x, c };
+        } else if( h < 5.0F ) {
+            rgb = new float[] { x, 0, c };
+        } else if( h < 6.0F ) {
+            rgb = new float[] { c, 0, x };
+        }
+
+        rgb = new float[] { (rgb[0] + m) * 255.0F, (rgb[1] + m) * 255.0F, (rgb[2] + m) * 255.0F };
+
+        return new ColorObj(Math.round(rgb[0]), Math.round(rgb[1]), Math.round(rgb[2]), Math.round(alpha * 255.0F));
+    }
+
+    public ColorObj copy() {return new ColorObj(this.r, this.g, this.b, this.a);}
+
+    public ColorObj copyWithRed(int red) {return new ColorObj(red, this.g, this.b, this.a);}
+
+    public ColorObj copyWithRed(float red) {return new ColorObj(Math.round(red * 255.0F), this.g, this.b, this.a);}
+
+    public ColorObj copyWithGreen(int green) {return new ColorObj(this.r, green, this.b, this.a);}
+
+    public ColorObj copyWithGreen(float green) {return new ColorObj(this.r, Math.round(green * 255.0F), this.b, this.a);}
+
+    public ColorObj copyWithBlue(int blue) {return new ColorObj(this.r, this.g, blue, this.a);}
+
+    public ColorObj copyWithBlue(float blue) {return new ColorObj(this.r, this.g, Math.round(blue * 255.0F), this.a);}
+
+    public ColorObj copyWithAlpha(int alpha) {return new ColorObj(this.r, this.g, this.b, alpha);}
+
+    public ColorObj copyWithAlpha(float alpha) {return new ColorObj(this.r, this.g, this.b, Math.round(alpha * 255.0F));}
+
+    /**
+     * Creates a new instance with each color component as integer value.<br> Each value has a range of {@code 0 - 255}. Anything lower / higher will
+     * be adjusted.
      *
      * @param red   The value for the red color component
      * @param green The value for the green color component
      * @param blue  The value for the blue color component
      * @param alpha The value for the alpha color component (transparency)
      */
-    public ColorObj(int red, int green, int blue, int alpha) {
-        this.setRed(red);
-        this.setGreen(green);
-        this.setBlue(blue);
-        this.setAlpha(alpha);
+    private ColorObj(int red, int green, int blue, int alpha) {
+        this.r = Math.clamp(red, 0, 255);
+        this.g = Math.clamp(green, 0, 255);
+        this.b = Math.clamp(blue, 0, 255);
+        this.a = Math.clamp(alpha, 0, 255);
     }
 
     /**
-     * Creates a new instance with each color component as floating point value.<br> Each value has a range of {@code 0.0F - 1.0F}. Anything lower / higher will be adjusted.
+     * Creates a new instance with each color component as floating point value.<br> Each value has a range of {@code 0.0F - 1.0F}. Anything lower /
+     * higher will be adjusted.
      *
      * @param red   The value for the red color component
      * @param green The value for the green color component
@@ -84,23 +120,8 @@ public final class ColorObj
      * @param alpha The value for the alpha color component (transparency)
      */
     @SuppressWarnings("java:S3358")
-    public ColorObj(float red, float green, float blue, float alpha) {
-        this.r = (int) (red < 0.0F ? 0.0F : (red > 1.0F ? 255.0F : red * 255.0F));
-        this.g = (int) (green < 0.0F ? 0.0F : (green > 1.0F ? 255.0F : green * 255.0F));
-        this.b = (int) (blue < 0.0F ? 0.0F : (blue > 1.0F ? 255.0F : blue * 255.0F));
-        this.a = (int) (alpha < 0.0F ? 0.0F : (alpha > 1.0F ? 255.0F : alpha * 255.0F));
-    }
-
-    /**
-     * Creates a new instance with all color components from the passed color object.<br> This will basically be an independent copy of the original.
-     *
-     * @param orig the color object to be copied
-     */
-    public ColorObj(ColorObj orig) {
-        this.r = orig.r;
-        this.g = orig.g;
-        this.b = orig.b;
-        this.a = orig.a;
+    private ColorObj(float red, float green, float blue, float alpha) {
+        this(Math.round(red * 255), Math.round(green * 255), Math.round(blue * 255), Math.round(alpha * 255));
     }
 
     /**
@@ -108,128 +129,71 @@ public final class ColorObj
      *
      * @return The red color value
      */
-    public int red() {
-        return this.r;
-    }
+    public int red() { return this.r; }
 
     /**
      * Getter for the red color component
      *
      * @return The red color value as floating point number
      */
-    public float fRed() {
-        return this.r / 255.0F;
-    }
+    public float fRed() { return this.r / 255.0F; }
 
     /**
      * Getter for the green color component
      *
      * @return The green color value
      */
-    public int green() {
-        return this.g;
-    }
+    public int green() { return this.g; }
 
     /**
      * Getter for the green color component
      *
      * @return The green color value as floating point number
      */
-    public float fGreen() {
-        return this.g / 255.0F;
-    }
+    public float fGreen() { return this.g / 255.0F; }
 
     /**
      * Getter for the blue color component
      *
      * @return The blue color value
      */
-    public int blue() {
-        return this.b;
-    }
+    public int blue() { return this.b; }
 
     /**
      * Getter for the blue color component
      *
      * @return The blue color value as floating point number
      */
-    public float fBlue() {
-        return this.b / 255.0F;
-    }
+    public float fBlue() { return this.b / 255.0F; }
 
     /**
      * Getter for the alpha component (transparency)
      *
      * @return The alpha value
      */
-    public int alpha() {
-        return this.a;
-    }
+    public int alpha() { return this.a; }
 
     /**
      * Getter for the alpha component (transparency)
      *
      * @return The alpha value as floating point number
      */
-    public float fAlpha() {
-        return this.a / 255.0F;
-    }
-
-    public float fAlpha(float min) {
-        return Math.max(min, this.a / 255.0F);
-    }
+    public float fAlpha() { return this.a / 255.0F; }
 
     /**
-     * Setter for the red color component
-     *
-     * @param red The red color value
-     */
-    public void setRed(int red) {
-        this.r = Math.clamp(red, 0, 255);
-    }
-
-    /**
-     * Setter for the green color component
-     *
-     * @param green The green color value
-     */
-    public void setGreen(int green) {
-        this.g = Math.clamp(green, 0, 255);
-    }
-
-    /**
-     * Setter for the blue color component
-     *
-     * @param blue The blue color value
-     */
-    public void setBlue(int blue) {
-        this.b = Math.clamp(blue, 0, 255);
-    }
-
-    /**
-     * Setter for the alpha component (transparency)
-     *
-     * @param alpha The alpha value
-     */
-    public void setAlpha(int alpha) {
-        this.a = Math.clamp(alpha, 0, 255);
-    }
-
-    /**
-     * Returns the color object as an integer. As a hexadecimal number, it looks like {@code 0xAARRGGBB}, where as A is alpha, R is red, G is green and B is blue.
+     * Returns the color object as an integer. As a hexadecimal number, it looks like {@code 0xAARRGGBB}, whereas A is alpha, R is red, G is green and
+     * B is blue.
      *
      * @return this color object as integer
      */
-    public int getColorInt() {
-        return (this.a << 24) | (this.r << 16) | (this.g << 8) | this.b;
-    }
+    public int getColorInt() { return (this.a << 24) | (this.r << 16) | (this.g << 8) | this.b; }
 
     /**
      * Converts this color object into the HSL colorspace.
      *
      * @return a floating point array containing the hue, saturation and luminance values, in this order.
      */
-    public float[] calcHSL() {
+    public float[] convertToHSL() {
         float[] hsl = new float[3];
         int     min = Math.min(this.r, Math.min(this.g, this.b));
         int     max = Math.max(this.r, Math.max(this.g, this.b));
@@ -262,40 +226,8 @@ public final class ColorObj
         return hsl;
     }
 
-    /**
-     * Calculates the RGB values from the passed HSL values. This overrides the RGB components from this color object with the new colors.
-     *
-     * @param hue        The new hue value, from {@code 0.0F} - {@code 360.0F}
-     * @param saturation The new saturation value, from {@code 0.0F} - {@code 1.0F}
-     * @param luminance  The new luminance value, from {@code 0.0F} - {@code 1.0F}
-     */
-    public void calcAndSetRgbFromHsl(float hue, float saturation, float luminance) {
-        hue %= 360.0F;
-
-        float c = (1.0F - Math.abs(2.0F * luminance - 1.0F)) * saturation;
-        float x = c * (1.0F - Math.abs((hue / 60.0F) % 2.0F - 1.0F));
-        float m = luminance - c / 2.0F;
-
-        float[] rgb = new float[] { 0, 0, 0 };
-        if( hue < 60.0F ) {
-            rgb = new float[] { c, x, 0 };
-        } else if( hue < 120.0F ) {
-            rgb = new float[] { x, c, 0 };
-        } else if( hue < 180.0F ) {
-            rgb = new float[] { 0, c, x };
-        } else if( hue < 240.0F ) {
-            rgb = new float[] { 0, x, c };
-        } else if( hue < 300.0F ) {
-            rgb = new float[] { x, 0, c };
-        } else if( hue < 360.0F ) {
-            rgb = new float[] { c, 0, x };
-        }
-
-        rgb = new float[] { (rgb[0] + m) * 255.0F, (rgb[1] + m) * 255.0F, (rgb[2] + m) * 255.0F };
-
-        this.r = Math.round(rgb[0]);
-        this.g = Math.round(rgb[1]);
-        this.b = Math.round(rgb[2]);
+    public float getPerceptiveLuminance() {
+        return ((0.299f * this.r) + (0.587f * this.g) + (0.114f * this.b)) / 255.0F;
     }
 
     @Override

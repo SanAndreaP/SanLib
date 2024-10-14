@@ -32,8 +32,8 @@ public class TextField
 {
     public static final ResourceLocation ID = ResourceLocation.withDefaultNamespace("textfield");
 
-    protected Text text = Text.Builder.createText().withColor(Text.DEFAULT_COLOR, 0xFFFF80D0).get();
-    protected Text suggestedText = Text.Builder.createText().withColor(Text.DEFAULT_COLOR, 0xFFA0A0A0).get();
+    protected Text text = Text.Builder.createText().withTextColor(new ColorData.StatedColor(0xFFFF80D0)).get();
+    protected Text suggestedText = Text.Builder.createText().withTextColor(new ColorData.StatedColor(0xFFA0A0A0)).get();
 
     protected int                  maxLength    = 32;
     protected boolean              canLoseFocus = true;
@@ -82,6 +82,9 @@ public class TextField
 
     @Override
     public void render(IGui gui, GuiGraphics graphics, int x, int y, double mouseX, double mouseY, float partialTicks) {
+        boolean isDisabled = !this.isEnabled();
+        boolean isHovering = this.isHoveringNoFocus();
+
         this.renderOffsetX = x + gui.getPosX();
         this.renderOffsetY = y + gui.getPosY();
 
@@ -93,7 +96,7 @@ public class TextField
 
         this.text.render(gui, graphics, x + this.padding.getLeft(), y + this.padding.getTop(), mouseX, mouseY, partialTicks);
 
-        this.renderCursor(graphics, x, y);
+        this.renderCursor(graphics, x, y, isHovering, isDisabled);
         this.renderHighlight(graphics, x, y);
     }
 
@@ -368,7 +371,7 @@ public class TextField
         }
     }
 
-    public void renderCursor(GuiGraphics graphics, int x, int y) {
+    public void renderCursor(GuiGraphics graphics, int x, int y, boolean isHovering, boolean isDisabled) {
         String visible = this.getVisibleText();
         int visibleLength = visible.length();
         int localCursorIndex = this.cursorIndex - this.displayIndex;
@@ -378,7 +381,7 @@ public class TextField
         {
             Font font = this.text.getFont();
             int cx = font.width(visible.substring(0, Mth.clamp(localCursorIndex, 0, visibleLength)));
-            int textColor = this.text.getColor(Text.DEFAULT_COLOR);
+            int textColor = this.text.getColor().getColor(isDisabled, isHovering);
 
             if( this.cursorIndex < this.value.length() ) {
                 graphics.fill(x + cx, y - 1, x + cx + 1, y + font.lineHeight, textColor);

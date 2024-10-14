@@ -21,57 +21,49 @@ import org.joml.Matrix4f;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
 
 @SuppressWarnings("unused")
 public class Text
         extends GuiElement
 {
-    public static final ResourceLocation ID = ResourceLocation.withDefaultNamespace("text");
+    public static final String           JSON_TEXT = "text";
+    public static final ResourceLocation ID        = ResourceLocation.withDefaultNamespace(JSON_TEXT);
 
-    public static final String DEFAULT_COLOR  = "default";
-    public static final String HOVER_COLOR    = "hover";
-    public static final String DISABLED_COLOR = "disabled";
-
-    public static final String BORDER_COLOR          = "border";
-    public static final String HOVER_BORDER_COLOR    = "borderHover";
-    public static final String DISABLED_BORDER_COLOR = "borderDisabled";
-
-    public static final String SHADOW_COLOR          = "shadow";
-    public static final String HOVER_SHADOW_COLOR    = "shadowHover";
-    public static final String DISABLED_SHADOW_COLOR = "shadowDisabled";
-
-    public static final String DEFAULT_SHADOW_COLOR          = "default_shadow";
-    public static final String DEFAULT_HOVER_SHADOW_COLOR    = "default_shadowHover";
-    public static final String DEFAULT_DISABLED_SHADOW_COLOR = "default_shadowDisabled";
+    public static final String JSON_COLOR             = "color";
+    public static final String JSON_SHADOW_COLOR      = "shadowColor";
+    public static final String JSON_BORDER_COLOR      = "borderColor";
+    public static final String JSON_SHADOW            = "shadow";
+    public static final String JSON_BORDERED          = "bordered";
+    public static final String JSON_JUSTIFY_LAST_LINE = "justifyLastLine";
+    public static final String JSON_WRAP_WIDTH        = "wrapWidth";
+    public static final String JSON_LINE_HEIGHT       = "lineHeight";
+    public static final String JSON_FONT              = "font";
+    public static final String JSON_TEXT_ALIGN        = "textAlign";
 
     @Nonnull
-    protected Component            bakedText       = Component.empty();
-    protected Map<String, Integer> colors          = new HashMap<>();
-    protected boolean              shadow          = true;
-    protected int                  wrapWidth       = 0;
-    protected int                  lineHeight      = 10;
-    protected boolean              bordered        = false;
-    protected boolean              justifyLastLine = false;
-    protected ResourceLocation     globalFontID    = null;
-    protected Alignment            textAlign       = Alignment.LEFT;
+    protected Component bakedText   = Component.empty();
+    protected ColorData color       = ColorData.BLACK;
+    protected ColorData shadowColor = new ColorData(ColorData.StatedColor.getShadowColor(color.color()));
+    protected ColorData borderColor = new ColorData(ColorData.StatedColor.getBorderColor(color.color()));
+    protected boolean   shadow      = true;
+    protected int              wrapWidth       = 0;
+    protected int              lineHeight      = 10;
+    protected boolean          bordered        = false;
+    protected boolean          justifyLastLine = false;
+    protected ResourceLocation globalFontID    = null;
+    protected Alignment        textAlign       = Alignment.LEFT;
 
     protected Consumer<Text> onTextChange;
 
     @Nonnull
     protected BiFunction<IGui, Component, Component> getText = (gui, origText) -> origText;
 
-    protected       String              currColorId   = DEFAULT_COLOR;
-    protected       int                 currColor;
-    protected       int                 prevColor;
     protected       Component           prevText;
     protected final List<FormattedText> renderedLines = new ArrayList<>();
     protected final Font                font          = Minecraft.getInstance().font;
@@ -90,22 +82,29 @@ public class Text
 
     @Override
     public void render(IGui gui, GuiGraphics graphics, int x, int y, double mouseX, double mouseY, float partialTicks) {
-        Iterator<FormattedText> lines = this.renderedLines.listIterator();
+        boolean                 disabled = !this.isEnabled();
+        boolean                 hovering = this.isHovering();
+        Iterator<FormattedText> lines    = this.renderedLines.listIterator();
 
         Matrix4f                       pose         = graphics.pose().last().pose();
         MultiBufferSource.BufferSource bufferSource = graphics.bufferSource();
+
+        int colorInt       = this.color.getColor(disabled, hovering);
+        int shadowColorInt = this.shadow ? this.shadowColor.getColor(disabled, hovering) : 0;
+        int borderColorInt = this.bordered ? this.borderColor.getColor(disabled, hovering) : 0;
         while( lines.hasNext() ) {
             FormattedText line     = lines.next();
             boolean       lastLine = !lines.hasNext();
 
             if( this.bordered ) {
-                this.renderLineBordered(line, x, y, pose, bufferSource, lastLine);
+                x += 1;
+                y += 1;
+                this.renderLineBordered(line, x, y, pose, bufferSource, lastLine, borderColorInt, shadowColorInt);
             } else if( this.shadow ) {
-                this.renderLineShadow(line, x, y, pose, bufferSource, lastLine);
+                this.renderLineShadow(line, x, y, pose, bufferSource, lastLine, shadowColorInt);
             }
 
-            this.setColor(this.getTextColorKey(DISABLED_COLOR, HOVER_COLOR, this.currColorId, null, null), false);
-            this.renderLine(line, x, y, pose, bufferSource, lastLine);
+            this.renderLine(line, x, y, pose, bufferSource, lastLine, colorInt);
 
             y += this.lineHeight;
         }
@@ -116,17 +115,17 @@ public class Text
     @Override
     @SuppressWarnings("java:S1192")
     public void fromJson(IGui gui, GuiDefinition guiDef, JsonObject data) {
-        this.bakedText = data.has("text") ? Component.translatable(JsonUtils.getStringVal(data.get("text"))) : Component.empty();
-        ColorDef.loadKeyedColors(data, this.colors, DEFAULT_COLOR, ColorObj.BLACK.getColorInt());
-        this.shadow = JsonUtils.getBoolVal(data.get("shadow"), true);
-        this.bordered = JsonUtils.getBoolVal(data.get("bordered"), false);
-        this.justifyLastLine = JsonUtils.getBoolVal(data.get("justifyLastLine"), false);
-        this.wrapWidth = JsonUtils.getIntVal(data.get("wrapWidth"), 0);
-        this.lineHeight = JsonUtils.getIntVal(data.get("lineHeight"), 9);
-        this.globalFontID = JsonUtils.getLocation(data.get("font"), null);
-        this.textAlign = Alignment.fromString(JsonUtils.getStringVal(data.get("textAlign"), Alignment.LEFT.toString()));
-
-        this.setColor(DEFAULT_COLOR);
+        this.bakedText = data.has(JSON_TEXT) ? Component.translatable(JsonUtils.getStringVal(data.get(JSON_TEXT))) : Component.empty();
+        this.color = ColorData.loadColor(data.get(JSON_COLOR), false, ColorData.BLACK.color());
+        this.shadowColor = ColorData.loadColor(data.get(JSON_SHADOW_COLOR), false, ColorData.StatedColor.getShadowColor(this.color.color()));
+        this.borderColor = ColorData.loadColor(data.get(JSON_BORDER_COLOR), false, ColorData.StatedColor.getBorderColor(this.color.color()));
+        this.shadow = JsonUtils.getBoolVal(data.get(JSON_SHADOW), true);
+        this.bordered = JsonUtils.getBoolVal(data.get(JSON_BORDERED), false);
+        this.justifyLastLine = JsonUtils.getBoolVal(data.get(JSON_JUSTIFY_LAST_LINE), false);
+        this.wrapWidth = JsonUtils.getIntVal(data.get(JSON_WRAP_WIDTH), 0);
+        this.lineHeight = JsonUtils.getIntVal(data.get(JSON_LINE_HEIGHT), 9);
+        this.globalFontID = JsonUtils.getLocation(data.get(JSON_FONT), null);
+        this.textAlign = Alignment.fromString(JsonUtils.getStringVal(data.get(JSON_TEXT_ALIGN), Alignment.LEFT.toString()));
     }
 
     public void setOnTextChange(Consumer<Text> onTextChange) {
@@ -138,7 +137,7 @@ public class Text
     }
 
     public void updateText(Component text) {
-        int prevWidth = width;
+        int prevWidth  = width;
         int prevHeight = height;
 
         this.renderedLines.clear();
@@ -153,12 +152,13 @@ public class Text
 
         this.height = Math.max(1, this.renderedLines.size()) * this.lineHeight;
         if( this.bordered ) {
-            this.height += 1;
+            this.width += 2;
+            this.height += 2;
         }
         if( this.shadow ) {
             this.height += 1;
         }
-        this.height -= 2;
+        this.height -= 1;
 
         this.prevText = text;
 
@@ -171,42 +171,28 @@ public class Text
         }
     }
 
-    public void setColor(String colorId) {
-        this.setColor(colorId, true);
-    }
-
-    protected void setColor(String colorId, boolean updateCurrColorId) {
-        this.prevColor = this.currColor;
-
-        if( colorId == null || !this.colors.containsKey(colorId) ) {
-            if( updateCurrColorId ) {
-                this.currColorId = DEFAULT_COLOR;
-            }
-            this.currColor = this.getColor(DEFAULT_COLOR);
-        } else {
-            if( updateCurrColorId ) {
-                this.currColorId = colorId;
-            }
-            this.currColor = this.colors.get(colorId);
-        }
-    }
-
-    public void resetColor() {
-        int clr = this.currColor;
-        this.currColor = this.prevColor;
-        this.prevColor = clr;
-    }
-
     public Font getFont() {
         return this.font;
     }
 
-    protected void renderLine(FormattedText s, int x, int y, Matrix4f pose, MultiBufferSource bufferSource, boolean lastLine) {
+    public ColorData getColor() {
+        return this.color;
+    }
+
+    public ColorData getShadowColor() {
+        return this.shadowColor;
+    }
+
+    public ColorData getBorderColor() {
+        return this.borderColor;
+    }
+
+    protected void renderLine(FormattedText s, int x, int y, Matrix4f pose, MultiBufferSource bufferSource, boolean lastLine, int color) {
         Alignment textAlignment = this.getTextAlignment();
         switch( textAlignment ) {
             case JUSTIFY:
                 if( this.wrapWidth > 0 && (this.justifyLastLine || !lastLine) ) {
-                    this.renderLineJustified(s, x, y, pose, bufferSource);
+                    this.renderLineJustified(s, x, y, pose, bufferSource, color);
                     return;
                 }
                 break;
@@ -219,99 +205,41 @@ public class Text
         final MutableInt mx = new MutableInt(x);
         s.visit((style, str) -> {
             Component tc = Component.literal(str).withStyle(MiscUtils.apply(globalFontID, style::withFont, style));
-            this.font.drawInBatch(tc, mx.getValue(), y, this.currColor, false, pose, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
+            this.font.drawInBatch(tc, mx.getValue(), y, color, false, pose, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
             mx.add(this.font.width(tc));
 
             return Optional.empty();
         }, Style.EMPTY);
     }
 
-    protected void renderLineBordered(FormattedText line, int x, int y, Matrix4f pose, MultiBufferSource bufferSource, boolean lastLine) {
+    protected void renderLineBordered(FormattedText line, int x, int y, Matrix4f pose, MultiBufferSource bufferSource, boolean lastLine, int color, int shadowColor) {
         if( this.shadow ) {
-            renderLineShadow(line, x, y, pose, bufferSource, lastLine);
-            renderLineShadow(line, x + 1, y, pose, bufferSource, lastLine);
-            renderLineShadow(line, x, y + 1, pose, bufferSource, lastLine);
+            renderLineShadow(line, x, y, pose, bufferSource, lastLine, shadowColor);
+            renderLineShadow(line, x + 1, y, pose, bufferSource, lastLine, shadowColor);
+            renderLineShadow(line, x, y + 1, pose, bufferSource, lastLine, shadowColor);
         }
 
-        this.setColor(this.getTextColorKey(DISABLED_BORDER_COLOR, HOVER_BORDER_COLOR, BORDER_COLOR, null, null), false);
-        this.renderLine(line, x + 1, y, pose, bufferSource, lastLine);
-        this.renderLine(line, x, y + 1, pose, bufferSource, lastLine);
-        this.renderLine(line, x - 1, y, pose, bufferSource, lastLine);
-        this.renderLine(line, x, y - 1, pose, bufferSource, lastLine);
-        this.resetColor();
-    }
-
-    protected String getTextColorKey(String disabledKey, String hoverKey, String regularKey,
-                                     UnaryOperator<String> altDisabledComputor, UnaryOperator<String> altHoverComputor)
-    {
-        if( !this.isEnabled() ) {
-            if( this.colors.containsKey(disabledKey) ) {
-                return disabledKey;
-            } else if( altDisabledComputor != null ) {
-                return altDisabledComputor.apply(regularKey);
-            } else {
-                return regularKey;
-            }
-        } else if( this.isHovering() ) {
-            if( this.colors.containsKey(hoverKey) ) {
-                return hoverKey;
-            } else if( altHoverComputor != null ) {
-                return altHoverComputor.apply(regularKey);
-            } else {
-                return regularKey;
-            }
-        } else {
-            return regularKey;
-        }
-    }
-
-    protected int getShadowColor(String baseColorKey) {
-        ColorObj clr = new ColorObj(this.getColor(baseColorKey));
-        return new ColorObj(clr.fRed() * 0.25F, clr.fGreen() * 0.25F, clr.fBlue() * 0.25F, clr.fAlpha()).getColorInt();
-    }
-
-    public int getColor(String colorKey) {
-        return colors.getOrDefault(colorKey, 0xFF000000);
+        this.renderLine(line, x + 1, y, pose, bufferSource, lastLine, color);
+        this.renderLine(line, x, y + 1, pose, bufferSource, lastLine, color);
+        this.renderLine(line, x - 1, y, pose, bufferSource, lastLine, color);
+        this.renderLine(line, x, y - 1, pose, bufferSource, lastLine, color);
     }
 
     public Alignment getTextAlignment() {
         return this.textAlign.forHorizontal ? this.textAlign : Alignment.LEFT;
     }
 
-    protected void renderLineShadow(FormattedText line, int x, int y, Matrix4f pose, MultiBufferSource bufferSource, boolean lastLine) {
-        String colorKey = this.getTextColorKey(DISABLED_SHADOW_COLOR, HOVER_SHADOW_COLOR, SHADOW_COLOR,
-                                               regularKey -> {
-                                                   if( this.colors.containsKey(DISABLED_COLOR) ) {
-                                                       this.colors.computeIfAbsent(DEFAULT_DISABLED_SHADOW_COLOR, key -> this.getShadowColor(DISABLED_COLOR));
-                                                       return DEFAULT_DISABLED_SHADOW_COLOR;
-                                                   }
-                                                   return regularKey;
-                                               }, regularKey -> {
-                    if( this.colors.containsKey(HOVER_COLOR) ) {
-                        this.colors.computeIfAbsent(DEFAULT_HOVER_SHADOW_COLOR, key -> this.getShadowColor(HOVER_COLOR));
-                        return DEFAULT_HOVER_SHADOW_COLOR;
-                    }
-                    return regularKey;
-                });
-
-        if( this.colors.containsKey(colorKey) ) {
-            this.setColor(colorKey, false);
-        } else {
-            this.colors.computeIfAbsent(DEFAULT_SHADOW_COLOR, key -> this.getShadowColor(DEFAULT_COLOR));
-            this.setColor(DEFAULT_SHADOW_COLOR, false);
-        }
-
-        this.renderLine(line, x + 1, y + 1, pose, bufferSource, lastLine);
-        this.resetColor();
+    protected void renderLineShadow(FormattedText line, int x, int y, Matrix4f pose, MultiBufferSource bufferSource, boolean lastLine, int color) {
+        this.renderLine(line, x + 1, y + 1, pose, bufferSource, lastLine, color);
     }
 
-    protected void renderLineJustified(FormattedText s, int x, int y, Matrix4f pose, MultiBufferSource bufferSource) {
+    protected void renderLineJustified(FormattedText s, int x, int y, Matrix4f pose, MultiBufferSource bufferSource, int color) {
         final MutableInt mx = new MutableInt(x);
         s.visit((style, str) -> {
             String[] words      = str.split("\\s");
-            int    spaceDist  = this.wrapWidth;
+            int      spaceDist  = this.wrapWidth;
             int[]    wordWidths = new int[words.length];
-            int lastId = words.length - 1;
+            int      lastId     = words.length - 1;
 
             for( int i = 0; i <= lastId; i++ ) {
                 wordWidths[i] = this.font.width(words[i]) - (this.shadow ? 0 : 1);
@@ -323,9 +251,10 @@ public class Text
             int lastDistAdd = totalSpace - (spaceDist * lastId);
 
             for( int i = 0; i <= lastId; i++ ) {
-                this.font.drawInBatch(Component.literal(words[i]).withStyle(MiscUtils.apply(globalFontID, style::withFont, style)), mx.getValue(), y, this.currColor, false, pose, bufferSource,
+                this.font.drawInBatch(Component.literal(words[i]).withStyle(MiscUtils.apply(globalFontID, style::withFont, style)), mx.getValue(), y,
+                                      color, false, pose, bufferSource,
                                       Font.DisplayMode.NORMAL, 0, 0xF000F0);
-                mx.add(wordWidths[i] + spaceDist + (i == (lastId-1) ? lastDistAdd : 0));
+                mx.add(wordWidths[i] + spaceDist + (i == (lastId - 1) ? lastDistAdd : 0));
             }
 
             return Optional.empty();
@@ -336,6 +265,9 @@ public class Text
     public static class Builder<T extends Text>
             extends GuiElement.Builder<T>
     {
+        private boolean customShadowColor = false;
+        private boolean customBorderColor = false;
+
         protected Builder(T elem) {super(elem);}
 
         public Builder<T> withText(Component text) {
@@ -348,46 +280,24 @@ public class Text
             return this.withText(Component.translatable(key));
         }
 
-        public Builder<T> withColor(String key, int color) {
-            this.elem.colors.put(key, color);
+        public Builder<T> withTextColor(ColorData.StatedColor color) {
+            this.elem.color = new ColorData(color);
 
             return this;
         }
 
-        public Builder<T> withTextColor(int color) {
-            return this.withColor(DEFAULT_COLOR, color);
+        public Builder<T> withShadowColor(ColorData.StatedColor color) {
+            this.elem.shadowColor = new ColorData(color);
+            this.customShadowColor = true;
+
+            return this;
         }
 
-        public Builder<T> withShadowColor(int color) {
-            return this.withColor(SHADOW_COLOR, color);
-        }
+        public Builder<T> withBorderColor(ColorData.StatedColor color) {
+            this.elem.borderColor = new ColorData(color);
+            this.customBorderColor = true;
 
-        public Builder<T> withBorderColor(int color) {
-            return this.withColor(BORDER_COLOR, color);
-        }
-
-        public Builder<T> withHoverColor(int color) {
-            return this.withColor(HOVER_COLOR, color);
-        }
-
-        public Builder<T> withHoverShadowColor(int color) {
-            return this.withColor(HOVER_SHADOW_COLOR, color);
-        }
-
-        public Builder<T> withHoverBorderColor(int color) {
-            return this.withColor(HOVER_BORDER_COLOR, color);
-        }
-
-        public Builder<T> withDisabledColor(int color) {
-            return this.withColor(DISABLED_COLOR, color);
-        }
-
-        public Builder<T> withDisabledShadowColor(int color) {
-            return this.withColor(DISABLED_SHADOW_COLOR, color);
-        }
-
-        public Builder<T> withDisabledBorderColor(int color) {
-            return this.withColor(DISABLED_BORDER_COLOR, color);
+            return this;
         }
 
         public Builder<T> withShadow() {
@@ -442,6 +352,18 @@ public class Text
             this.elem.justifyLastLine = false;
 
             return this;
+        }
+
+        @Override
+        public T get() {
+            if( !this.customShadowColor ) {
+                this.elem.shadowColor = new ColorData(ColorData.StatedColor.getShadowColor(this.elem.color.color()));
+            }
+            if( !this.customBorderColor ) {
+                this.elem.shadowColor = new ColorData(ColorData.StatedColor.getBorderColor(this.elem.color.color()));
+            }
+
+            return super.get();
         }
 
         public static Builder<Text> createText() {
