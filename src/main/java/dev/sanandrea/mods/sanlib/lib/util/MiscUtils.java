@@ -185,7 +185,7 @@ public final class MiscUtils
         return getTimeFromTicks(ticks, 2);
     }
 
-    public static int hexToInt(String hex) {
+    public static Integer hexToInt(String hex) {
         if( hex.startsWith("0x") ) {
             hex = hex.substring(2);
         } else if( hex.startsWith("#") ) {
@@ -193,11 +193,19 @@ public final class MiscUtils
         }
 
         try {
-            return (int) Long.parseLong(hex, 16);
+            return (int) Long.parseLong(hex, 16); // prevent overflow on negative integers
         } catch( NumberFormatException ex ) {
-            SanLib.LOG.log(Level.ERROR, String.format("cannot parse hexadecimal number string %s", hex), ex);
-            return 0;
+            return null;
         }
+    }
+
+    public static String toHexString(int val) {
+        return toHexString(val, "0x", 8);
+    }
+
+    public static String toHexString(int val, String prefix, int padLength) {
+        String spec = padLength < 1 ? "%s%x" : String.format("%%s%%0%dx", padLength);
+        return String.format(spec, prefix, val);
     }
 
     public static String getTimeFromTicks(int ticks, int secondsPrecision) {

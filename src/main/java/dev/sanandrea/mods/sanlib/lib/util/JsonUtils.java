@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
 
-@SuppressWarnings({ "unused", "WeakerAccess" })
+@SuppressWarnings({ "unused", "WeakerAccess", "UnusedReturnValue" })
 public final class JsonUtils
 {
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
@@ -61,6 +61,10 @@ public final class JsonUtils
     }
 
     public static float getFloatVal(JsonElement json, float defVal) {
+        return getFloatValObj(json, defVal);
+    }
+
+    public static Float getFloatValObj(JsonElement json, Float defVal) {
         if( json == null || !json.isJsonPrimitive() ) {
             return defVal;
         }
@@ -81,6 +85,10 @@ public final class JsonUtils
     }
 
     public static double getDoubleVal(JsonElement json, double defVal) {
+        return getDoubleValObj(json, defVal);
+    }
+
+    public static Double getDoubleValObj(JsonElement json, Double defVal) {
         if( json == null || !json.isJsonPrimitive() ) {
             return defVal;
         }
@@ -127,6 +135,10 @@ public final class JsonUtils
     }
 
     public static int getIntVal(JsonElement json, int defVal) {
+        return getIntValObj(json, defVal);
+    }
+
+    public static Integer getIntValObj(JsonElement json, Integer defVal) {
         if( json == null || !json.isJsonPrimitive() ) {
             return defVal;
         }
@@ -147,6 +159,10 @@ public final class JsonUtils
     }
 
     public static boolean getBoolVal(JsonElement json, boolean defVal) {
+        return getBoolValObj(json, defVal);
+    }
+
+    public static Boolean getBoolValObj(JsonElement json, Boolean defVal) {
         if( json == null || !json.isJsonPrimitive() ) {
             return defVal;
         }
@@ -623,6 +639,12 @@ public final class JsonUtils
         public ObjectBuilder valueIf(String key, Number value, boolean overwrite, BooleanSupplier test) {
             return valueIf(b -> b.value(key, value, overwrite), test);
         }
+        public <T extends Number> ObjectBuilder valueIf(String key, T value, Predicate<T> test) {
+            return valueIf(b -> b.value(key, value), () -> test.test(value));
+        }
+        public <T extends Number> ObjectBuilder valueIf(String key, T value, boolean overwrite, Predicate<T> test) {
+            return valueIf(b -> b.value(key, value, overwrite), () -> test.test(value));
+        }
 
         public ObjectBuilder value(String key, Boolean value) {
             return value(key, value, true);
@@ -642,6 +664,12 @@ public final class JsonUtils
         public ObjectBuilder valueIf(String key, Boolean value, boolean overwrite, BooleanSupplier test) {
             return valueIf(b -> b.value(key, value, overwrite), test);
         }
+        public ObjectBuilder valueIf(String key, Boolean value, Predicate<Boolean> test) {
+            return valueIf(b -> b.value(key, value), () -> test.test(value));
+        }
+        public ObjectBuilder valueIf(String key, Boolean value, boolean overwrite, Predicate<Boolean> test) {
+            return valueIf(b -> b.value(key, value, overwrite), () -> test.test(value));
+        }
 
         public ObjectBuilder value(String key, ResourceLocation value) {
             return value(key, value, true);
@@ -654,6 +682,12 @@ public final class JsonUtils
         }
         public ObjectBuilder valueIf(String key, ResourceLocation value, boolean overwrite, BooleanSupplier test) {
             return valueIf(b -> b.value(key, value, overwrite), test);
+        }
+        public ObjectBuilder valueIf(String key, ResourceLocation value, Predicate<ResourceLocation> test) {
+            return valueIf(b -> b.value(key, value), () -> test.test(value));
+        }
+        public ObjectBuilder valueIf(String key, ResourceLocation value, boolean overwrite, Predicate<ResourceLocation> test) {
+            return valueIf(b -> b.value(key, value, overwrite), () -> test.test(value));
         }
 
         public ObjectBuilder value(String key, String value) {
@@ -674,6 +708,12 @@ public final class JsonUtils
         public ObjectBuilder valueIf(String key, String value, boolean overwrite, BooleanSupplier test) {
             return valueIf(b -> b.value(key, value, overwrite), test);
         }
+        public ObjectBuilder valueIf(String key, String value, Predicate<String> test) {
+            return valueIf(b -> b.value(key, value), () -> test.test(value));
+        }
+        public ObjectBuilder valueIf(String key, String value, boolean overwrite, Predicate<String> test) {
+            return valueIf(b -> b.value(key, value, overwrite), () -> test.test(value));
+        }
 
         public ObjectBuilder value(String key, Character value) {
             return value(key, value, true);
@@ -693,6 +733,12 @@ public final class JsonUtils
         public ObjectBuilder valueIf(String key, Character value, boolean overwrite, BooleanSupplier test) {
             return valueIf(b -> b.value(key, value, overwrite), test);
         }
+        public ObjectBuilder valueIf(String key, Character value, Predicate<Character> test) {
+            return valueIf(b -> b.value(key, value), () -> test.test(value));
+        }
+        public ObjectBuilder valueIf(String key, Character value, boolean overwrite, Predicate<Character> test) {
+            return valueIf(b -> b.value(key, value, overwrite), () -> test.test(value));
+        }
 
         public ObjectBuilder value(String key, JsonElement value) {
             return value(key, value, true);
@@ -711,6 +757,12 @@ public final class JsonUtils
         }
         public ObjectBuilder valueIf(String key, JsonElement value, boolean overwrite, BooleanSupplier test) {
             return valueIf(b -> b.value(key, value, overwrite), test);
+        }
+        public <T extends JsonElement> ObjectBuilder valueIf(String key, T value, Predicate<T> test) {
+            return valueIf(b -> b.value(key, value), () -> test.test(value));
+        }
+        public <T extends JsonElement> ObjectBuilder valueIf(String key, T value, boolean overwrite, Predicate<T> test) {
+            return valueIf(b -> b.value(key, value, overwrite), () -> test.test(value));
         }
 
         private ObjectBuilder valueIf(UnaryOperator<ObjectBuilder> setter, BooleanSupplier test) {

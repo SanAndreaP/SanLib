@@ -3,8 +3,24 @@
  * Full license text can be found within the LICENSE.md file */
 package dev.sanandrea.mods.sanlib.lib.util;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
+import dev.sanandrea.mods.sanlib.SanLib;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.registries.VanillaRegistries;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -14,17 +30,20 @@ import net.minecraft.world.level.block.Block;
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * An utility class for ItemStacks
  */
-@SuppressWarnings({"unused", "SameParameterValue", "WeakerAccess", "ObjectEquality"})
+@SuppressWarnings({ "unused", "SameParameterValue", "WeakerAccess", "ObjectEquality" })
 public final class ItemStackUtils
 {
     private static final String NBT_STACK_TAG = "StackNBT";
-    private static final String NBT_SLOT = "Slot";
+    private static final String NBT_SLOT      = "Slot";
 
-    private ItemStackUtils() { }
+    private ItemStackUtils() {}
 
     /**
      * Checks if an ItemStack is a valid stack.
@@ -36,7 +55,9 @@ public final class ItemStackUtils
      *     <li>the stack size is &gt; 0</li>
      * </ul>
      * </p>
+     *
      * @param stack The ItemStack to be checked.
+     *
      * @return {@code true}, if the stack is valid, {@code false} otherwise
      */
     public static boolean isValid(@Nonnull ItemStack stack) {
@@ -50,9 +71,12 @@ public final class ItemStackUtils
 
     /**
      * Checks if an ItemStack is valid and contains a specific item.
+     *
      * @param stack The ItemStack to be checked.
-     * @param item The item that should be held in the ItemStack
+     * @param item  The item that should be held in the ItemStack
+     *
      * @return {@code true}, if the stack is valid and contains the specified item, {@code false} otherwise
+     *
      * @see #isValid(ItemStack)
      */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -62,13 +86,112 @@ public final class ItemStackUtils
 
     /**
      * Checks if an ItemStack is valid and contains a specific block.
+     *
      * @param stack The ItemStack to be checked.
      * @param block The block that should be held in the ItemStack
+     *
      * @return {@code true}, if the stack is valid and contains the specified block, {@code false} otherwise
+     *
      * @see #isValid(ItemStack)
      */
     public static boolean isBlock(@Nonnull ItemStack stack, Block block) {
         return isValid(stack) && Block.byItem(stack.getItem()) == block;
+    }
+
+    public static JsonElement toJson(@Nonnull ItemStack stack) {
+        if( !isValid(stack) ) {
+            return JsonNull.INSTANCE;
+        }
+
+        JsonUtils.ObjectBuilder stackBuilder = JsonUtils.ObjectBuilder.create();
+        stackBuilder.value("id", BuiltInRegistries.ITEM.getKey(stack.getItem()));
+        stackBuilder.value("count", stack.getCount());
+
+        if( !stack.isComponentsPatchEmpty() ) {
+            DataComponentPatch      components        = stack.getComponentsPatch();
+            JsonUtils.ObjectBuilder componentsBuilder = JsonUtils.ObjectBuilder.create();
+            for( var component : components.entrySet() ) {
+                ResourceLocation key = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(component.getKey());
+                if( key != null ) {
+                    componentsBuilder.valueIf(key.toString(), encode(component), Objects::nonNull);
+                }
+            }
+
+            stackBuilder.valueIf("components", componentsBuilder.get(), v -> !v.isEmpty());
+        }
+
+        return stackBuilder.get();
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static JsonElement encode(Map.Entry<DataComponentType<?>, Optional<?>> entry) {
+        DataComponentType type = entry.getKey();
+        Optional          val  = entry.getValue();
+        if( val.isPresent() && type.codec() instanceof Codec codec ) {
+            RegistryOps<JsonElement> context = VanillaRegistries.createLookup().createSerializationContext(JsonOps.INSTANCE);
+            DataResult<JsonElement>  result  = codec.encodeStart(context, val.get());
+            if( result.isSuccess() ) {
+                return result.getOrThrow();
+            } else {
+                return JsonNull.INSTANCE;
+            }
+        }
+
+        return null;
+    }
+
+    public static ItemStack fromJson(JsonElement json) {
+        if( json == null || json.isJsonNull() ) {
+            return ItemStack.EMPTY;
+        } else if( json.isJsonArray() ) {
+            throw new JsonSyntaxException("Cannot load array for a single item");
+        }
+
+        final ResourceLocation   key;
+        final int                count;
+        final DataComponentPatch components;
+
+        if( json instanceof JsonObject jObj ) {
+            key = JsonUtils.getLocation(jObj.get("id"), BuiltInRegistries.ITEM.getDefaultKey());
+            count = JsonUtils.getIntVal(jObj.get("count"), 1);
+            components = decode(jObj.get("components"));
+        } else if( json.isJsonPrimitive() ) {
+            key = JsonUtils.getLocation(json, BuiltInRegistries.ITEM.getDefaultKey());
+            count = 1;
+            components = DataComponentPatch.EMPTY;
+        } else {
+            throw new JsonParseException("Unknown JSON element type");
+        }
+
+        Optional<Holder.Reference<Item>> item = BuiltInRegistries.ITEM.getHolder(key);
+        return item.map(itemReference -> new ItemStack(itemReference, count, components))
+                   .orElse(ItemStack.EMPTY);
+
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static DataComponentPatch decode(JsonElement data) {
+        if( data instanceof JsonObject jObj ) {
+            DataComponentPatch.Builder patchBuilder = DataComponentPatch.builder();
+
+            RegistryOps<JsonElement> context = VanillaRegistries.createLookup().createSerializationContext(JsonOps.INSTANCE);
+            for( var entry : jObj.entrySet() ) {
+                ResourceLocation               dcKey = ResourceLocation.parse(entry.getKey());
+                Optional<DataComponentType<?>> type  = BuiltInRegistries.DATA_COMPONENT_TYPE.getOptional(dcKey);
+                if( type.isPresent() && type.get().codec() instanceof Codec<?> codec ) {
+                    var val = codec.parse(context, entry.getValue());
+                    if( val.isSuccess() ) {
+                        patchBuilder.set((DataComponentType) type.get(), val.getOrThrow());
+                    } else {
+                        val.ifError(e -> SanLib.LOG.warn(e.message()));
+                    }
+                }
+            }
+
+            return patchBuilder.build();
+        }
+
+        return DataComponentPatch.EMPTY;
     }
 
 //    /**
@@ -149,8 +272,10 @@ public final class ItemStackUtils
 
     /**
      * Checks wether or not the given ItemStack can be found in the provided ItemStack array.
-     * @param stack The ItemStack it should search for.
+     *
+     * @param stack  The ItemStack it should search for.
      * @param stacks The ItemStack array which should be checked.
+     *
      * @return true, if the ItemStack can be found, false otherwise.
      */
     public static boolean isStackInArray(@Nonnull final ItemStack stack, ItemStack... stacks) {
@@ -163,8 +288,8 @@ public final class ItemStackUtils
 
     public static boolean canStack(@Nonnull ItemStack stack1, @Nonnull ItemStack stack2, boolean consumeAll) {
         return !isValid(stack1) || !isValid(stack2)
-                || (stack1.isStackable() && ItemStack.isSameItemSameComponents(stack1, stack2)
-                    && (!consumeAll || stack1.getCount() + stack2.getCount() <= stack1.getMaxStackSize()));
+               || (stack1.isStackable() && ItemStack.isSameItemSameComponents(stack1, stack2)
+                   && (!consumeAll || stack1.getCount() + stack2.getCount() <= stack1.getMaxStackSize()));
     }
 
 //    public static ListNBT writeItemStacksToTag(ItemStack[] items, int maxQuantity) {

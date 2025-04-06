@@ -3,7 +3,9 @@
  * Full license text can be found within the LICENSE.md file */
 package dev.sanandrea.mods.sanlib.lib.util;
 
+import com.mojang.serialization.DataResult;
 import dev.sanandrea.mods.sanlib.lib.ColorObj;
+import net.minecraft.network.chat.TextColor;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -24,6 +26,8 @@ public final class ColorUtils
                                                                    Pattern.CASE_INSENSITIVE);
     private static final Pattern REGEX_RGBA_FUNC = Pattern.compile("^rgba\\(" + RGB_REGEX + "," + RGB_REGEX + "," + RGB_REGEX + "," + A_REGEX + "\\)$",
                                                                    Pattern.CASE_INSENSITIVE);
+
+    private ColorUtils() { }
 
     /**
      * Gets the average color from an image. The alpha value of each pixel is used for the color weightness, thus the more transparent the pixel is,
@@ -64,10 +68,8 @@ public final class ColorUtils
             for( int y = 0; y < bi.getHeight(); y++ ) {
                 ColorObj color = ColorObj.fromARGB(bi.getRGB(x, y));
 
-                if( maskClr != null ) {
-                    if( color.equals(maskClr) ) {
-                        continue;
-                    }
+                if( color.equals(maskClr) ) {
+                    continue;
                 }
 
                 red += color.red() * color.fAlpha();              // add RGB from the pixel to the RGB storage variables, increase pixel counter
@@ -77,11 +79,15 @@ public final class ColorUtils
             }
         }
 
-        int avgRed   = (int) (red / count);       // calculating the average of each channel
-        int avgGreen = (int) (green / count);
-        int avgBlue  = (int) (blue / count);
+        if( count > 0.0D ) {
+            int avgRed   = (int) (red / count);       // calculating the average of each channel
+            int avgGreen = (int) (green / count);
+            int avgBlue  = (int) (blue / count);
 
-        return ColorObj.fromRGBA(avgRed, avgGreen, avgBlue, 255); // return combined RGB channels
+            return ColorObj.fromRGBA(avgRed, avgGreen, avgBlue, 255); // return combined RGB channels
+        } else {
+            return ColorObj.BLACK;
+        }
     }
 
     public static ColorObj getColorFromRgba(String rgbaText) {
@@ -89,7 +95,7 @@ public final class ColorUtils
         if( !rgbaMatcher.matches() ) {
             rgbaMatcher = REGEX_RGB_FUNC.matcher(rgbaText);
             if( !rgbaMatcher.matches() ) {
-                throw new MatchException(String.format("color value is invalid: %s", rgbaText), null);
+                return null;
             }
         }
 
@@ -113,5 +119,24 @@ public final class ColorUtils
 
     public static int getBorderColor(int baseColor) {
         return getBorderColor(ColorObj.fromARGB(baseColor)).getColorInt();
+    }
+
+    public static Integer parseColorString(String colorStr, Integer defaultColor) {
+        if( MiscUtils.isEmpty(colorStr) ) {
+            return defaultColor;
+        }
+
+        if( colorStr.startsWith("#") || colorStr.startsWith("0x") ) {
+            return MiscUtils.hexToInt(colorStr);
+        } else {
+            DataResult<TextColor> tf = TextColor.parseColor(colorStr);
+            if( tf.isSuccess() ) {
+                return tf.getOrThrow().getValue();
+            } else if( Pattern.matches("-?\\d+", colorStr) ) {
+                return Integer.parseInt(colorStr);
+            } else {
+                return MiscUtils.apply(ColorUtils.getColorFromRgba(colorStr), ColorObj::getColorInt);
+            }
+        }
     }
 }
