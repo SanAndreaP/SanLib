@@ -9,7 +9,6 @@ import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.util.Mth;
 import net.neoforged.bus.api.EventPriority;
 import org.apache.commons.lang3.tuple.MutableTriple;
 import org.joml.Matrix4f;

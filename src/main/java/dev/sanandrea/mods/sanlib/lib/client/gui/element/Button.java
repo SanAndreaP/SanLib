@@ -6,6 +6,8 @@ import com.google.gson.JsonSyntaxException;
 import dev.sanandrea.mods.sanlib.lib.client.gui.GuiDefinition;
 import dev.sanandrea.mods.sanlib.lib.client.gui.GuiElement;
 import dev.sanandrea.mods.sanlib.lib.client.gui.IGui;
+import dev.sanandrea.mods.sanlib.lib.client.gui.element.data.ColorData;
+import dev.sanandrea.mods.sanlib.lib.client.gui.element.data.TextureData;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import dev.sanandrea.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.Minecraft;
@@ -32,7 +34,7 @@ public class Button
     protected final String backgroundId = String.format("%s_background", this.id);
     protected final String labelId      = String.format("%s_labelId", this.id);
 
-    protected static final ColorData DEFAULT_LABEL_COLOR = new ColorData(new ColorData.StatedColor(0xFFFFFFFF, 0xFFFFFFFF, 0xFFA0A0A0));
+    protected static final ColorData DEFAULT_LABEL_COLOR = new ColorData(0xFFFFFFFF, 0xFFFFFFFF, 0xFFA0A0A0);
 
     protected GuiElement background;
     protected GuiElement label;
@@ -227,7 +229,7 @@ public class Button
         protected Builder<T> withLabel(Consumer<Text.Builder<Text>> lblTxtSetter) {
             Text.Builder<Text> b = Text.Builder.createText(this.elem.labelId);
             lblTxtSetter.accept(b);
-            Text txt = b.withTextColor(DEFAULT_LABEL_COLOR.color())
+            Text txt = b.withTextColor(DEFAULT_LABEL_COLOR)
                         .withShadow()
                         .withAlignment(Alignment.CENTER, Alignment.CENTER)
                         .get();

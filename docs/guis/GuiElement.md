@@ -14,15 +14,15 @@ The base type of all elements. The following types are available:
 | Texture      | `texture`      |
 
 ### ![Parameters][param]
-| Name          | Type               | Required      | Default | Description                                                               |
-|---------------|--------------------|---------------|---------|---------------------------------------------------------------------------|
-| `type`        | `ResourceLocation` | ![yes][check] |         | ID for the type of this element being loaded                              |
-| `posX` [^1]   | `int`              | ![no][cross]  | `0`     | Horizontal position in pixels<br/>relative from its parent; left to right |
-| `posY` [^1]   | `int`              | ![no][cross]  | `0`     | Vertical position in pixels<br/>relative from its parent; top to bottom   |
-| `hAlignment`  | `Alignment`        | ![no][cross]  | `LEFT`  | horizontal alignment relative to its parent                               |
-| `vAlignment`  | `Alignment`        | ![no][cross]  | `TOP`   | vertical alignment relative to its parent                                 |
-| `width` [^2]  | `int`              | ![no][cross]  | `0`     | width of the element in pixels                                            |
-| `height` [^2] | `int`              | ![no][cross]  | `0`     | height of the element in pixels                                           |
+| Name          | Type               |      Required      | Default | Description                                                               |
+|---------------|--------------------|:------------------:|---------|---------------------------------------------------------------------------|
+| `type`        | `ResourceLocation` | ![][check]<br/>yes |         | ID for the type of this element being loaded                              |
+| `posX` [^1]   | `int`              | ![][cross]<br/>no  | `0`     | Horizontal position in pixels<br/>relative from its parent; left to right |
+| `posY` [^1]   | `int`              | ![][cross]<br/>no  | `0`     | Vertical position in pixels<br/>relative from its parent; top to bottom   |
+| `hAlignment`  | `Alignment`        | ![][cross]<br/>no  | `LEFT`  | horizontal alignment relative to its parent                               |
+| `vAlignment`  | `Alignment`        | ![][cross]<br/>no  | `TOP`   | vertical alignment relative to its parent                                 |
+| `width` [^2]  | `int`              | ![][cross]<br/>no  | `0`     | width of the element in pixels                                            |
+| `height` [^2] | `int`              | ![][cross]<br/>no  | `0`     | height of the element in pixels                                           |
 
 ### ![Examples][example]
 **simple 15x15 red rectangle at (5, 15)**
@@ -54,5 +54,5 @@ The base type of all elements. The following types are available:
 [desc]: ../img/desc.svg "Description"
 [param]: ../img/parameters.svg "Parameters"
 [example]: ../img/example.svg "Example"
-[check]: ../img/yes.svg "yes"
-[cross]: ../img/no.svg "no"
+[check]: ../img/yes.svg ""
+[cross]: ../img/no.svg ""

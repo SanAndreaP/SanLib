@@ -1,4 +1,4 @@
-package dev.sanandrea.mods.sanlib.lib.client.gui.element;
+package dev.sanandrea.mods.sanlib.lib.client.gui.element.data;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -7,80 +7,60 @@ import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import dev.sanandrea.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.resources.ResourceLocation;
 
-public record TextureData(TextureDef regular, TextureDef hover, TextureDef disabled, int textureWidth, int textureHeight)
+public class TextureData
+        extends StatedData<TextureData.TextureDef>
 {
-    public static final String JSON_LOCATION       = "location";
-    public static final String JSON_REGULAR        = "regular";
-    public static final String JSON_HOVER          = "hover";
-    public static final String JSON_DISABLED       = "disabled";
-    public static final String JSON_U              = "u";
-    public static final String JSON_V              = "v";
     public static final String JSON_TEXTURE_WIDTH  = "textureWidth";
     public static final String JSON_TEXTURE_HEIGHT = "textureHeight";
 
+    public final int textureWidth;
+    public final int textureHeight;
+
     public TextureData(TextureDef texture) {
-        this(texture, texture, texture, 256, 256);
+        this(texture, null, null, 256, 256);
     }
 
     public TextureData(TextureDef texture, int textureWidth, int textureHeight) {
-        this(texture, texture, texture, textureWidth, textureHeight);
+        this(texture, null, null, textureWidth, textureHeight);
     }
 
     public TextureData(TextureDef regular, TextureDef hover, TextureDef disabled) {
         this(regular, hover, disabled, 256, 256);
     }
 
+    public TextureData(TextureDef regular, TextureDef hover, TextureDef disabled, int textureWidth, int textureHeight) {
+        super(regular, hover, disabled, TextureDef::toJson);
+
+        this.textureWidth = textureWidth;
+        this.textureHeight = textureHeight;
+    }
+
     public static TextureData fromJson(GuiDefinition guiDef, JsonElement data) {
-        if( data == null || data.isJsonPrimitive() ) {
-            return new TextureData(TextureDef.fromJson(guiDef, data));
+        final int txWidth;
+        final int txHeight;
+        if( data instanceof JsonObject dataObj ) {
+            txWidth = JsonUtils.getIntVal(dataObj.get(JSON_TEXTURE_WIDTH), 256);
+            txHeight = JsonUtils.getIntVal(dataObj.get(JSON_TEXTURE_HEIGHT), 256);
         } else {
-            JsonObject dataObj = data.getAsJsonObject();
-
-            TextureDef regular;
-            if( dataObj.has(JSON_REGULAR) ) {
-                regular = TextureDef.fromJson(guiDef, dataObj.get(JSON_REGULAR));
-            } else {
-                regular = TextureDef.fromJson(guiDef, data);
-            }
-
-            TextureDef hover;
-            if( dataObj.has(JSON_HOVER) ) {
-                hover = TextureDef.fromJson(guiDef, dataObj.get(JSON_HOVER), regular);
-            } else {
-                hover = regular;
-            }
-
-            TextureDef disabled;
-            if( dataObj.has(JSON_DISABLED) ) {
-                disabled = TextureDef.fromJson(guiDef, dataObj.get(JSON_DISABLED), regular);
-            } else {
-                disabled = regular;
-            }
-
-            return new TextureData(regular, hover, disabled,
-                                   JsonUtils.getIntVal(dataObj.get(JSON_TEXTURE_WIDTH), 256),
-                                   JsonUtils.getIntVal(dataObj.get(JSON_TEXTURE_HEIGHT), 256));
+            txWidth = 256;
+            txHeight = 256;
         }
+
+        return StatedData.fromJson(guiDef, data, (r, h, d) -> new TextureData(MiscUtils.get(r, () -> new TextureDef(guiDef.getTexture())), h, d, txWidth, txHeight),
+                                   TextureDef::fromJson);
     }
 
-    public JsonObject toJson() {
-        return JsonUtils.ObjectBuilder.create()
-                                      .value(JSON_REGULAR, this.regular.toJson())
-                                      .value(JSON_HOVER, this.hover.toJson())
-                                      .value(JSON_DISABLED, this.disabled.toJson())
-                                      .value(JSON_TEXTURE_WIDTH, this.textureWidth)
-                                      .value(JSON_TEXTURE_HEIGHT, this.textureHeight)
-                                      .get();
-    }
-
-    public TextureDef getTexture(boolean isDisabled, boolean isHovering) {
-        TextureDef data = isHovering ? this.hover : this.regular;
-
-        return isDisabled ? this.disabled : data;
+    public void buildJson(JsonUtils.ObjectBuilder builder) {
+        builder.value(JSON_TEXTURE_WIDTH, this.textureWidth)
+               .value(JSON_TEXTURE_HEIGHT, this.textureHeight);
     }
 
     public record TextureDef(ResourceLocation location, int posU, int posV)
     {
+        public static final String JSON_LOCATION = "location";
+        public static final String JSON_U        = "u";
+        public static final String JSON_V        = "v";
+
         public TextureDef(ResourceLocation location) {
             this(location, 0, 0);
         }

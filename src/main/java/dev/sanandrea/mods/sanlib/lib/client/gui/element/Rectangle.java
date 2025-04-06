@@ -2,10 +2,10 @@ package dev.sanandrea.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.sanandrea.mods.sanlib.lib.ColorObj;
 import dev.sanandrea.mods.sanlib.lib.client.gui.GuiDefinition;
 import dev.sanandrea.mods.sanlib.lib.client.gui.GuiElement;
 import dev.sanandrea.mods.sanlib.lib.client.gui.IGui;
+import dev.sanandrea.mods.sanlib.lib.client.gui.element.data.ColorData;
 import dev.sanandrea.mods.sanlib.lib.client.util.GuiUtils;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.client.gui.GuiGraphics;
@@ -82,13 +82,13 @@ public class Rectangle
                         float fw = this.orientation == Orientation.VERTICAL ? size : this.getWidth();
                         float fh = this.orientation == Orientation.HORIZONTAL ? size : this.getHeight();
 
-                        int currColor = curr.color.getColor(disabled, hovering);
-                        int nextColor = next.color.getColor(disabled, hovering);
+                        int currColor = curr.color.get(hovering, disabled);
+                        int nextColor = next.color.get(hovering, disabled);
                         GuiUtils.drawGradient(graphics, x + fx, y + fy, fw, fh, currColor, nextColor, this.orientation == Orientation.HORIZONTAL);
                     }
                 }
             } else {
-                graphics.fill(x, y, x + this.getWidth(), y + getHeight(), this.colors.getFirst().getColor(disabled, hovering));
+                graphics.fill(x, y, x + this.getWidth(), y + getHeight(), this.colors.getFirst().get(hovering, disabled));
             }
             RenderSystem.enableBlend();
         }
@@ -104,7 +104,7 @@ public class Rectangle
 
             for( int i = 0; i < colorsSize; i++ ) {
                 ColorData def  = this.colors.get(i);
-                float     stop = linearStop != null ? linearStop * i : def.stop() * maxSize;
+                float     stop = linearStop != null ? linearStop * i : def.stop * maxSize;
 
                 this.colorCache.add(new ColorEntry(stop, def));
             }
@@ -117,7 +117,7 @@ public class Rectangle
     public void fromJson(IGui gui, GuiDefinition guiDef, JsonObject data) {
         this.orientation = Orientation.fromString(JsonUtils.getStringVal(data.get("orientation"), Orientation.VERTICAL.toString()));
 
-        ColorData.loadColors(data, this.colors, ColorData.WHITE.color());
+        ColorData.loadColors(guiDef, data, this.colors);
         this.buildColorCache();
     }
 
@@ -199,11 +199,11 @@ public class Rectangle
         }
 
         public Builder<T> withColor(int color, int hoverColor, int disabledColor) {
-            return this.withColors(new ColorData(new ColorData.StatedColor(color, hoverColor, disabledColor)));
+            return this.withColors(new ColorData(color, hoverColor, disabledColor));
         }
 
         public Builder<T> withColor(float stop, int color, int hoverColor, int disabledColor) {
-            return this.withColors(new ColorData(stop, new ColorData.StatedColor(color, hoverColor, disabledColor)));
+            return this.withColors(new ColorData(stop, color, hoverColor, disabledColor));
         }
 
         public Builder<T> withColors(@Nonnull ColorData... color) {

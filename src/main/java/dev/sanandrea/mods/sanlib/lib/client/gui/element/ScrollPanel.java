@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import dev.sanandrea.mods.sanlib.lib.client.gui.GuiDefinition;
 import dev.sanandrea.mods.sanlib.lib.client.gui.GuiElement;
 import dev.sanandrea.mods.sanlib.lib.client.gui.IGui;
-import dev.sanandrea.mods.sanlib.lib.client.gui.Spacing;
+import dev.sanandrea.mods.sanlib.lib.client.gui.element.data.Spacing;
 import dev.sanandrea.mods.sanlib.lib.client.util.GuiUtils;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import dev.sanandrea.mods.sanlib.lib.util.MiscUtils;
@@ -166,7 +166,7 @@ public class ScrollPanel
                 GuiDefinition.renderElement(gui, graphics, x, y + childEntry.getValue() - child.getPosY(), mouseX, mouseY, partialTicks, child, false, null, overwriteHover);
             }
         }
-        graphics.disableScissor();
+        GuiUtils.disableScissor(graphics);
 
         int scrollBtnX = this.scrollBtn.getPosX();
         int scrollBtnY = this.scrollBtn.getPosY() + this.scrollButtonOffsetY;
@@ -194,7 +194,7 @@ public class ScrollPanel
 
     @Override
     public void fromJson(IGui gui, GuiDefinition guiDef, JsonObject data) {
-        this.padding = Spacing.loadSpacing(data.get("padding"), false);
+        this.padding = Spacing.fromJson(data.get("padding"), false, null);
         this.areaWidth = JsonUtils.getIntVal(data.get("areaWidth"));
         this.areaHeight = JsonUtils.getIntVal(data.get("areaHeight"));
         this.scrollHeight = JsonUtils.getIntVal(data.get("scrollHeight"), this.areaHeight);

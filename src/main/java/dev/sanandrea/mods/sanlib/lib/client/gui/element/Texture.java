@@ -6,6 +6,8 @@ import dev.sanandrea.mods.sanlib.lib.ColorObj;
 import dev.sanandrea.mods.sanlib.lib.client.gui.GuiDefinition;
 import dev.sanandrea.mods.sanlib.lib.client.gui.GuiElement;
 import dev.sanandrea.mods.sanlib.lib.client.gui.IGui;
+import dev.sanandrea.mods.sanlib.lib.client.gui.element.data.ColorData;
+import dev.sanandrea.mods.sanlib.lib.client.gui.element.data.TextureData;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
@@ -41,8 +43,8 @@ public class Texture
         boolean isDisabled = !this.isEnabled();
         boolean isHovering = this.isHovering();
 
-        ColorObj               colorObj = ColorObj.fromARGB(this.color.getColor(isDisabled, isHovering));
-        TextureData.TextureDef texture  = this.data.getTexture(isDisabled, isHovering);
+        ColorObj               colorObj = ColorObj.fromARGB(this.color.get(isHovering, isDisabled));
+        TextureData.TextureDef texture  = this.data.get(isHovering, isDisabled);
 
         RenderSystem.setShaderColor(colorObj.fRed(), colorObj.fGreen(), colorObj.fBlue(), colorObj.fAlpha());
         drawRect(gui, graphics, x, y, texture);
@@ -55,7 +57,7 @@ public class Texture
         this.asSprite = JsonUtils.getBoolVal(data.get(JSON_IS_SPRITE), false);
         this.scaleX = JsonUtils.getFloatVal(data.get(JSON_SCALE_X), 1.0F);
         this.scaleY = JsonUtils.getFloatVal(data.get(JSON_SCALE_Y), 1.0F);
-        this.color = ColorData.loadColor(data.get(JSON_COLOR), false, ColorData.WHITE.color());
+        this.color = ColorData.fromJson(guiDef, data.get(JSON_COLOR), ColorData.WHITE.regular);
     }
 
     @SuppressWarnings("unused")
@@ -64,7 +66,7 @@ public class Texture
             graphics.blitSprite(texture.location(), x, y, this.getWidth(), this.getHeight());
         } else {
             graphics.blit(texture.location(), x, y, texture.posU(), texture.posV(), this.getWidth(), this.getHeight(),
-                          this.data.textureWidth(), this.data.textureHeight());
+                          this.data.textureWidth, this.data.textureHeight);
         }
     }
 

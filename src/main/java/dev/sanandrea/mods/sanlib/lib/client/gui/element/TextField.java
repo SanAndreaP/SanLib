@@ -4,7 +4,8 @@ import com.google.gson.JsonObject;
 import dev.sanandrea.mods.sanlib.lib.client.gui.GuiDefinition;
 import dev.sanandrea.mods.sanlib.lib.client.gui.GuiElement;
 import dev.sanandrea.mods.sanlib.lib.client.gui.IGui;
-import dev.sanandrea.mods.sanlib.lib.client.gui.Spacing;
+import dev.sanandrea.mods.sanlib.lib.client.gui.element.data.Spacing;
+import dev.sanandrea.mods.sanlib.lib.client.gui.element.data.ColorData;
 import dev.sanandrea.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -32,8 +33,8 @@ public class TextField
 {
     public static final ResourceLocation ID = ResourceLocation.withDefaultNamespace("textfield");
 
-    protected Text text = Text.Builder.createText().withTextColor(new ColorData.StatedColor(0xFFFF80D0)).get();
-    protected Text suggestedText = Text.Builder.createText().withTextColor(new ColorData.StatedColor(0xFFA0A0A0)).get();
+    protected Text text = Text.Builder.createText().withTextColor(new ColorData(0xFFFF80D0)).get();
+    protected Text suggestedText = Text.Builder.createText().withTextColor(new ColorData(0xFFA0A0A0)).get();
 
     protected int                  maxLength    = 32;
     protected boolean              canLoseFocus = true;
@@ -112,7 +113,7 @@ public class TextField
 
     @Override
     public void fromJson(IGui gui, GuiDefinition guiDef, JsonObject data) {
-        this.padding = Spacing.loadSpacing(data.get("padding"), false);
+        this.padding = Spacing.fromJson(data.get("padding"), false, null);
     }
 
     @Override
@@ -381,7 +382,7 @@ public class TextField
         {
             Font font = this.text.getFont();
             int cx = font.width(visible.substring(0, Mth.clamp(localCursorIndex, 0, visibleLength)));
-            int textColor = this.text.getColor().getColor(isDisabled, isHovering);
+            int textColor = this.text.getColor().get(isHovering, isDisabled);
 
             if( this.cursorIndex < this.value.length() ) {
                 graphics.fill(x + cx, y - 1, x + cx + 1, y + font.lineHeight, textColor);

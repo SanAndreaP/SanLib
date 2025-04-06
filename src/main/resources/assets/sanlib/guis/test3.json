@@ -60,16 +60,16 @@
               "height": 10,
               "orientation": "horizontal",
               "colors": [
-                { "color": "#FF5BCEFA", "stop": 0 },
-                { "color": "#FF5BCEFA", "stop": 0.2 },
-                { "color": "#FFF5A9B8", "stop": 0.2 },
-                { "color": "#FFF5A9B8", "stop": 0.4 },
-                { "color": "#FFFFFFFF", "stop": 0.4 },
-                { "color": "#FFFFFFFF", "stop": 0.6 },
-                { "color": "#FFF5A9B8", "stop": 0.6 },
-                { "color": "#FFF5A9B8", "stop": 0.8 },
-                { "color": "#FF5BCEFA", "stop": 0.8 },
-                { "color": "#FF5BCEFA", "stop": 1.0 }
+                { "color": "#FF5BCEFA", "hover":  "#FFD60270", "stop": 0 },
+                { "color": "#FF5BCEFA", "hover":  "#FFD60270", "stop": 0.2 },
+                { "color": "#FFF5A9B8", "hover":  "#FFD60270", "stop": 0.2 },
+                { "color": "#FFF5A9B8", "hover":  "#FFD60270", "stop": 0.4 },
+                { "color": "#FFFFFFFF", "hover":  "#FF9B4F96", "stop": 0.4 },
+                { "color": "#FFFFFFFF", "hover":  "#FF9B4F96", "stop": 0.6 },
+                { "color": "#FFF5A9B8", "hover":  "#FF0038A8", "stop": 0.6 },
+                { "color": "#FFF5A9B8", "hover":  "#FF0038A8", "stop": 0.8 },
+                { "color": "#FF5BCEFA", "hover":  "#FF0038A8", "stop": 0.8 },
+                { "color": "#FF5BCEFA", "hover":  "#FF0038A8", "stop": 1.0 }
               ]
             }
           }
@@ -183,6 +183,125 @@
           "shadow": false,
           "bordered": true,
           "color": "#FFFFFF00"
+        },
+        "text_hover": {
+          "type": "text",
+          "y": 2,
+          "text": "This is a text with hovered color.",
+          "shadow": false,
+          "color": {
+            "regular": "#FFFFA0A0",
+            "hover": "#FFA060FF"
+          }
+        },
+        "stack_panel_items": {
+          "type": "stack_panel",
+          "y": 2,
+          "orientation": "horizontal",
+          "children": {
+            "item_primitive": {
+              "type": "item",
+              "item": "stick"
+            },
+            "item_count": {
+              "type": "item",
+              "item": {
+                "id": "clay_ball",
+                "count": 4
+              }
+            },
+            "item_block": {
+              "type": "item",
+              "item": "crafting_table"
+            },
+            "item_hover": {
+              "type": "item",
+              "item": {
+                "regular": "diamond_helmet",
+                "hover": {
+                  "id": "netherite_helmet",
+                  "components": {
+                    "trim": {
+                      "pattern": "silence",
+                      "material": "diamond"
+                    }
+                  }
+                }
+              }
+            },
+            "item_simple_component": {
+              "type": "item",
+              "item": {
+                "id": "wooden_sword",
+                "components": {
+                  "damage": 30
+                }
+              }
+            },
+            "item_complex_component": {
+              "type": "item",
+              "item": {
+                "id": "red_banner",
+                "components": {
+                  "banner_patterns": [
+                    {
+                      "pattern": "cross",
+                      "color":"black"
+                    },
+                    {
+                      "pattern": "stripe_bottom",
+                      "color":"black"
+                    },
+                    {
+                      "pattern": "straight_cross",
+                      "color":"brown"
+                    },
+                    {
+                      "pattern": "stripe_middle",
+                      "color":"red"
+                    },
+                    {
+                      "pattern": "half_horizontal",
+                      "color":"black"
+                    },
+                    {
+                      "pattern": "border",
+                      "color":"black"
+                    },
+                    {
+                      "pattern": "triangles_top",
+                      "color":"light_gray"
+                    }
+                  ]
+                }
+              }
+            },
+            "item_highlight": {
+              "type": "item",
+              "item": {
+                "id": "redstone",
+                "count": 2
+              },
+              "withHighlight": true
+            },
+            "item_highlight_colored": {
+              "type": "item",
+              "item": {
+                "id": "glowstone",
+                "count": 2
+              },
+              "withHighlight": true,
+              "highlightColor": "0x80FF0000"
+            }
+          }
+        },
+        "item_big": {
+          "type": "item",
+          "item": {
+            "id": "diamond",
+            "count": 2
+          },
+          "scale": 2.0
         }
       }
     }

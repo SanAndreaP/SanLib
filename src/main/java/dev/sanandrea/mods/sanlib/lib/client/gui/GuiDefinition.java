@@ -10,6 +10,7 @@ import dev.sanandrea.mods.sanlib.SanLib;
 import dev.sanandrea.mods.sanlib.lib.client.gui.element.Button;
 import dev.sanandrea.mods.sanlib.lib.client.gui.element.Empty;
 import dev.sanandrea.mods.sanlib.lib.client.gui.element.IElementContainer;
+import dev.sanandrea.mods.sanlib.lib.client.gui.element.Item;
 import dev.sanandrea.mods.sanlib.lib.client.gui.element.Rectangle;
 import dev.sanandrea.mods.sanlib.lib.client.gui.element.ScrollPanel;
 import dev.sanandrea.mods.sanlib.lib.client.gui.element.StackPanel;
@@ -69,6 +70,7 @@ public class GuiDefinition
         TYPES.put(ScrollPanel.ID, ScrollPanel::new);
         TYPES.put(Button.ID, Button::new);
         TYPES.put(TextField.ID, TextField::new);
+        TYPES.put(Item.ID, Item::new);
     }
 
     static final Deque<org.apache.commons.lang3.tuple.Triple<Integer, String, Integer>> debugList = new ArrayDeque<>();
@@ -239,6 +241,10 @@ public class GuiDefinition
         }
 
         return element;
+    }
+
+    public ResourceLocation getTexture() {
+        return this.texture;
     }
 
     public ResourceLocation getTexture(JsonElement texture) {

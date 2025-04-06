@@ -1,10 +1,11 @@
 package dev.sanandrea.mods.sanlib.lib.client.gui.element;
 
 import com.google.gson.JsonObject;
-import dev.sanandrea.mods.sanlib.lib.ColorObj;
 import dev.sanandrea.mods.sanlib.lib.client.gui.GuiDefinition;
 import dev.sanandrea.mods.sanlib.lib.client.gui.GuiElement;
 import dev.sanandrea.mods.sanlib.lib.client.gui.IGui;
+import dev.sanandrea.mods.sanlib.lib.client.gui.element.data.ColorData;
+import dev.sanandrea.mods.sanlib.lib.util.ColorUtils;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import dev.sanandrea.mods.sanlib.lib.util.MiscUtils;
 import net.minecraft.client.Minecraft;
@@ -49,8 +50,8 @@ public class Text
     @Nonnull
     protected Component bakedText   = Component.empty();
     protected ColorData color       = ColorData.BLACK;
-    protected ColorData shadowColor = new ColorData(ColorData.StatedColor.getShadowColor(color.color()));
-    protected ColorData borderColor = new ColorData(ColorData.StatedColor.getBorderColor(color.color()));
+    protected ColorData shadowColor = new ColorData(ColorUtils.getShadowColor(color.regular));
+    protected ColorData borderColor = new ColorData(ColorUtils.getBorderColor(color.regular));
     protected boolean   shadow      = true;
     protected int              wrapWidth       = 0;
     protected int              lineHeight      = 10;
@@ -89,9 +90,9 @@ public class Text
         Matrix4f                       pose         = graphics.pose().last().pose();
         MultiBufferSource.BufferSource bufferSource = graphics.bufferSource();
 
-        int colorInt       = this.color.getColor(disabled, hovering);
-        int shadowColorInt = this.shadow ? this.shadowColor.getColor(disabled, hovering) : 0;
-        int borderColorInt = this.bordered ? this.borderColor.getColor(disabled, hovering) : 0;
+        int colorInt       = this.color.get(hovering, disabled);
+        int shadowColorInt = this.shadow ? this.shadowColor.get(hovering, disabled) : 0;
+        int borderColorInt = this.bordered ? this.borderColor.get(hovering, disabled) : 0;
         while( lines.hasNext() ) {
             FormattedText line     = lines.next();
             boolean       lastLine = !lines.hasNext();
@@ -116,9 +117,9 @@ public class Text
     @SuppressWarnings("java:S1192")
     public void fromJson(IGui gui, GuiDefinition guiDef, JsonObject data) {
         this.bakedText = data.has(JSON_TEXT) ? Component.translatable(JsonUtils.getStringVal(data.get(JSON_TEXT))) : Component.empty();
-        this.color = ColorData.loadColor(data.get(JSON_COLOR), false, ColorData.BLACK.color());
-        this.shadowColor = ColorData.loadColor(data.get(JSON_SHADOW_COLOR), false, ColorData.StatedColor.getShadowColor(this.color.color()));
-        this.borderColor = ColorData.loadColor(data.get(JSON_BORDER_COLOR), false, ColorData.StatedColor.getBorderColor(this.color.color()));
+        this.color = ColorData.fromJson(guiDef, data.get(JSON_COLOR), ColorData.BLACK.regular);
+        this.shadowColor = ColorData.fromJson(guiDef, data.get(JSON_SHADOW_COLOR), ColorUtils.getShadowColor(this.color.regular));
+        this.borderColor = ColorData.fromJson(guiDef, data.get(JSON_BORDER_COLOR), ColorUtils.getBorderColor(this.color.regular));
         this.shadow = JsonUtils.getBoolVal(data.get(JSON_SHADOW), true);
         this.bordered = JsonUtils.getBoolVal(data.get(JSON_BORDERED), false);
         this.justifyLastLine = JsonUtils.getBoolVal(data.get(JSON_JUSTIFY_LAST_LINE), false);
@@ -280,21 +281,21 @@ public class Text
             return this.withText(Component.translatable(key));
         }
 
-        public Builder<T> withTextColor(ColorData.StatedColor color) {
-            this.elem.color = new ColorData(color);
+        public Builder<T> withTextColor(ColorData color) {
+            this.elem.color = color;
 
             return this;
         }
 
-        public Builder<T> withShadowColor(ColorData.StatedColor color) {
-            this.elem.shadowColor = new ColorData(color);
+        public Builder<T> withShadowColor(ColorData color) {
+            this.elem.shadowColor = color;
             this.customShadowColor = true;
 
             return this;
         }
 
-        public Builder<T> withBorderColor(ColorData.StatedColor color) {
-            this.elem.borderColor = new ColorData(color);
+        public Builder<T> withBorderColor(ColorData color) {
+            this.elem.borderColor = color;
             this.customBorderColor = true;
 
             return this;
@@ -357,10 +358,10 @@ public class Text
         @Override
         public T get() {
             if( !this.customShadowColor ) {
-                this.elem.shadowColor = new ColorData(ColorData.StatedColor.getShadowColor(this.elem.color.color()));
+                this.elem.shadowColor = new ColorData(ColorUtils.getShadowColor(this.elem.color.regular));
             }
             if( !this.customBorderColor ) {
-                this.elem.shadowColor = new ColorData(ColorData.StatedColor.getBorderColor(this.elem.color.color()));
+                this.elem.shadowColor = new ColorData(ColorUtils.getBorderColor(this.elem.color.regular));
             }
 
             return super.get();

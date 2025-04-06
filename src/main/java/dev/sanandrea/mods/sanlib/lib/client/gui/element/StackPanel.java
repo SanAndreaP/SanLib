@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import dev.sanandrea.mods.sanlib.lib.client.gui.GuiDefinition;
 import dev.sanandrea.mods.sanlib.lib.client.gui.GuiElement;
 import dev.sanandrea.mods.sanlib.lib.client.gui.IGui;
-import dev.sanandrea.mods.sanlib.lib.client.gui.Spacing;
+import dev.sanandrea.mods.sanlib.lib.client.gui.element.data.Spacing;
 import dev.sanandrea.mods.sanlib.lib.util.JsonUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
@@ -110,7 +110,7 @@ public class StackPanel
     @Override
     public void fromJson(IGui gui, GuiDefinition guiDef, JsonObject data) {
         this.orientation = Orientation.fromString(JsonUtils.getStringVal(data.get("orientation"), Orientation.VERTICAL.toString()));
-        this.padding = Spacing.loadSpacing(data.get("padding"), false);
+        this.padding = Spacing.fromJson(data.get("padding"), false, null);
 
         this.loadChildren(guiDef, data.get("children"));
     }

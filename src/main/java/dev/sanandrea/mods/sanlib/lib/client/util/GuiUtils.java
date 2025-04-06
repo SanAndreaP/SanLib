@@ -39,8 +39,8 @@ public final class GuiUtils
         graphics.enableScissor(x, y, x + width, y + height);
     }
 
-    public static void disableScissor() {
-        RenderSystem.disableScissor();
+    public static void disableScissor(GuiGraphics graphics) {
+        graphics.disableScissor();
     }
 
 //    /**
